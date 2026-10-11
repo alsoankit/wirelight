@@ -5,13 +5,14 @@ import { MeshBasicNodeMaterial } from "three/webgpu";
 import { ruin } from "./ruin";
 
 // Fireflies drifting through the air (region-1 brief, 0051): one instanced draw call, all motion on
-// the GPU. Each wanders slowly around its own home and blinks on its own rhythm, every 2.5–6 s:
+// the GPU. Each wanders slowly around its own home and blinks on its own rhythm, every 4–9 s:
 // a soft rise over about half a second and a slower fade, never a fast flicker (0050).
-// A third of them show in ruin; nearly all once the room is restored.
+// They are background atmosphere, never a focus (owner, 2026-10-12): few, small and dim.
+// About 6 show in ruin; about 13 once the room is restored.
 
 type Bounds = { min: [number, number, number]; max: [number, number, number] };
 
-const COUNT = 60;
+const COUNT = 16;
 const GLOW = "#D9F28A"; // warm yellow-green: never cyan, which means "alive" (messages)
 
 export function Fireflies({ bounds }: { bounds: Bounds }) {
@@ -38,13 +39,13 @@ export function Fireflies({ bounds }: { bounds: Bounds }) {
       sin(time.mul(h3.mul(0.25).add(0.1)).add(h4.mul(6.28))).mul(0.6),
     );
     // The blink: within each firefly's period, rise over the first ~12%, fade by ~42%, then rest.
-    const period = h5.mul(3.5).add(2.5);
+    const period = h5.mul(5).add(4);
     const phase = time.div(period).add(h4).fract();
     const blink = smoothstep(0.0, 0.12, phase).mul(float(1).sub(smoothstep(0.18, 0.42, phase)));
-    // Which ones are out: a third in ruin, nearly all restored.
-    const share = mix(float(0.95), float(0.33), ruin);
+    // Which ones are out: a few in ruin, more restored.
+    const share = mix(float(0.8), float(0.38), ruin);
     const shown = float(1).sub(step(share, hash(i.add(5.5))));
-    const glow = shown.mul(blink.mul(2.2).add(0.08));
+    const glow = shown.mul(blink.mul(1.1).add(0.03));
     m.positionNode = positionLocal.mul(blink.mul(0.6).add(0.4)).add(home).add(wander);
     m.colorNode = color(GLOW).mul(glow);
     return m;
@@ -52,7 +53,7 @@ export function Fireflies({ bounds }: { bounds: Bounds }) {
 
   return (
     <instancedMesh args={[undefined, undefined, COUNT]} material={material} frustumCulled={false}>
-      <icosahedronGeometry args={[0.035, 1]} />
+      <icosahedronGeometry args={[0.025, 1]} />
     </instancedMesh>
   );
 }
