@@ -1,6 +1,12 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Component, type ReactNode, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { type BackendChoice, backendFromUrl, describeRenderer, nodeRendererFactory, usesNodeRenderer } from "./backend";
+import {
+  type BackendChoice,
+  backendFromUrl,
+  describeRenderer,
+  nodeRendererFactory,
+  usesNodeRenderer,
+} from "../../render/backend";
 import { CHECKS, type Check } from "./checks";
 import { entriesFor, installConsoleCapture, type LogEntry, setCurrentCheck } from "./log";
 
