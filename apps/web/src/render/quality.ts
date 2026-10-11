@@ -10,7 +10,6 @@ export const TIERS: Tier[] = ["high", "medium", "low", "simple"];
 
 export type QualitySettings = {
   dpr: number; // resolution scale relative to the screen's own pixels (1 = native), capped at 2× CSS pixels
-  shadowMapSize: number; // 0 = no shadows
   bloom: boolean;
   moonbeams: boolean;
   fireflies: boolean;
@@ -18,10 +17,10 @@ export type QualitySettings = {
 };
 
 export const QUALITY: Record<Tier, QualitySettings> = {
-  high: { dpr: 1, shadowMapSize: 2048, bloom: true, moonbeams: true, fireflies: true, dust: true },
-  medium: { dpr: 1, shadowMapSize: 1024, bloom: true, moonbeams: true, fireflies: true, dust: true },
-  low: { dpr: 0.75, shadowMapSize: 0, bloom: false, moonbeams: true, fireflies: true, dust: false },
-  simple: { dpr: 0.75, shadowMapSize: 0, bloom: false, moonbeams: false, fireflies: false, dust: false },
+  high: { dpr: 1, bloom: true, moonbeams: true, fireflies: true, dust: true },
+  medium: { dpr: 1, bloom: true, moonbeams: true, fireflies: true, dust: true },
+  low: { dpr: 0.75, bloom: false, moonbeams: true, fireflies: true, dust: false },
+  simple: { dpr: 0.75, bloom: false, moonbeams: false, fireflies: false, dust: false },
 };
 
 export function tierFromUrl(): Tier | undefined {

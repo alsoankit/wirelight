@@ -1,5 +1,6 @@
 import { type Color, type Material, Mesh, type Object3D } from "three";
 import {
+  attribute,
   color,
   float,
   mix,
@@ -13,6 +14,7 @@ import {
   vec3,
 } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
+import { MOON_RESTORED, MOON_RUINED, MOON_STRENGTH_RESTORED, MOON_STRENGTH_RUINED } from "../moon";
 import { ruinHere as ruin } from "../ruin";
 import { BREEZE, gust, windDirection } from "../wind";
 
@@ -40,6 +42,7 @@ const PATINA_RUINED = "#43564f";
 const PATINA_RESTORED = "#5a7d68";
 
 const REGION_1: Record<string, Swatch> = {
+  Floor: { ruined: "#666d78", restored: "#988168", roughness: 0.95, aged: true },
   Main: { ruined: "#6b7380", restored: "#a28a6c", roughness: 0.95, aged: true },
   Main2: { ruined: "#666d78", restored: "#957e62", roughness: 0.95, aged: true },
   Stone: { ruined: "#6d7480", restored: "#a8916f", roughness: 0.95, aged: true },
@@ -50,6 +53,8 @@ const REGION_1: Record<string, Swatch> = {
   Green: { ruined: "#4a554b", restored: "#6FA85A", roughness: 1, sway: 0.14 },
   Bark: { ruined: "#3d3833", restored: "#5c4330", roughness: 1 },
   Dirt: { ruined: "#2f2c29", restored: "#4a3a2a", roughness: 1 },
+  Earth: { ruined: "#2a2926", restored: "#3a3024", roughness: 1, aged: true },
+  Cloth: { ruined: "#2b2f38", restored: "#3a332e", roughness: 1 },
   Metal: { ruined: "#5c4a3d", restored: "#C8743E", roughness: 0.45, metalness: 0.7 },
   Metal_Light: { ruined: "#6b5a4c", restored: "#d99560", roughness: 0.45, metalness: 0.7 },
   DarkMetal: { ruined: "#2f2a26", restored: "#5a3f28", roughness: 0.5, metalness: 0.6 },
@@ -62,18 +67,26 @@ const REGION_1: Record<string, Swatch> = {
   Pot_Detail: { ruined: "#403c39", restored: "#5e432e", roughness: 0.9 },
   Flag: { ruined: "#41454f", restored: "#7a342e", roughness: 0.9 },
   Candle: { ruined: "#97938a", restored: "#c9bea6", roughness: 0.7 },
+  Parchment: { ruined: "#8d887b", restored: "#cbbd9c", roughness: 0.95 },
   // Flames are kept modest so restored rooms glow warmly without glare (0051).
   Light: { ruined: "#3a3530", restored: "#FFC46B", glow: 2.2 },
   Fire: { ruined: "#3a3028", restored: "#FFB35A", glow: 2.6 },
 };
 
 const cache = new Map<string, Material>();
+const bakedCache = new Map<string, Material>();
 
-function nodeMaterial(swatch: Swatch): Material {
+// `baked`: the geometry carries an `ageing` attribute (bake.ts), so stone reads it instead of
+// computing noise per pixel. Used for merged static rooms; standalone meshes use the live version.
+function nodeMaterial(swatch: Swatch, baked = false): Material {
   const m = new MeshStandardNodeMaterial();
   const restoredness = float(1).sub(ruin);
   let tint = mix(color(swatch.restored), color(swatch.ruined), ruin);
-  if (swatch.aged) {
+  if (swatch.aged && baked) {
+    const ageing = attribute("ageing", "vec2");
+    tint = tint.mul(ageing.x);
+    tint = mix(tint, mix(color(MOSS_RESTORED), color(MOSS_RUINED), ruin), ageing.y);
+  } else if (swatch.aged) {
     // Large blotches and fine speckle break up the flat colour.
     const blotch = mx_noise_float(positionWorld.mul(0.9));
     const speckle = mx_noise_float(positionWorld.mul(7.0));
@@ -107,6 +120,11 @@ function nodeMaterial(swatch: Swatch): Material {
   if (swatch.glow) {
     // A low ember in ruin, a bright flame when restored.
     m.emissiveNode = color(swatch.restored).mul(restoredness.mul(swatch.glow).add(0.15));
+  } else if (baked) {
+    // Baked moonlight (bake.ts): cold and strong in ruin, softer when restored. Added as light.
+    const moonColour = mix(color(MOON_RESTORED), color(MOON_RUINED), ruin);
+    const strength = mix(float(MOON_STRENGTH_RESTORED), float(MOON_STRENGTH_RUINED), ruin);
+    m.emissiveNode = tint.mul(moonColour).mul(attribute("moon", "float")).mul(strength);
   }
   return m;
 }
@@ -128,12 +146,23 @@ export function regionMaterial(name: string): Material {
   return shared;
 }
 
+// The same, for a merged static room whose geometry carries the baked `ageing` attribute.
+export function bakedRegionMaterial(name: string): Material | undefined {
+  const swatch = REGION_1[name];
+  if (!swatch) return undefined;
+  let shared = bakedCache.get(name);
+  if (!shared) {
+    shared = nodeMaterial(swatch, true);
+    shared.name = name;
+    bakedCache.set(name, shared);
+  }
+  return shared;
+}
+
 export function restyle(root: Object3D): Object3D {
   root.traverse((child) => {
     if (!(child instanceof Mesh)) return;
     child.material = Array.isArray(child.material) ? child.material.map(materialFor) : materialFor(child.material);
-    child.castShadow = true;
-    child.receiveShadow = true;
   });
   return root;
 }

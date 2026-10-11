@@ -63,10 +63,10 @@ export function ScryingGlass({ position }: { position: [number, number, number] 
   return (
     <group position={position}>
       {/* the stone basin with its brass rim */}
-      <mesh position={[0, 0.42, 0]} material={regionMaterial("Main")} castShadow receiveShadow>
+      <mesh position={[0, 0.42, 0]} material={regionMaterial("Main")}>
         <cylinderGeometry args={[0.55, 0.38, 0.84, 20]} />
       </mesh>
-      <mesh position={[0, 0.85, 0]} rotation={[Math.PI / 2, 0, 0]} material={regionMaterial("Brass")} castShadow>
+      <mesh position={[0, 0.85, 0]} rotation={[Math.PI / 2, 0, 0]} material={regionMaterial("Brass")}>
         <torusGeometry args={[0.53, 0.045, 8, 32]} />
       </mesh>
       <mesh position={[0, 1.2, 0]} material={cone}>

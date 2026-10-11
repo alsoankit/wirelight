@@ -37,7 +37,14 @@ export function B0Room() {
 
   return (
     <QualityContext.Provider value={quality}>
-      <Canvas key={backend} gl={nodeRendererFactory(backend)} shadows="percentage">
+      <Canvas
+        key={backend}
+        gl={nodeRendererFactory(backend)}
+        // Dev aid: the renderer, for reading draw calls and triangles from scripts.
+        onCreated={(state) => {
+          (window as unknown as { __renderer?: unknown }).__renderer = state.gl;
+        }}
+      >
         <Resolution scale={quality.dpr} />
         {/* Step down when frames stay under 45 per second; never step up on its own. */}
         <PerformanceMonitor

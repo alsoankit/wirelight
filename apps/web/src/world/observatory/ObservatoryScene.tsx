@@ -7,20 +7,25 @@ import { Bloom } from "../../render/Bloom";
 import { useQuality } from "../../render/quality";
 import { Dust } from "../Dust";
 import { Fireflies } from "../Fireflies";
-import { Piece } from "../kit/Piece";
+import { makeEarth, makeFlagstones } from "../kit/floor";
+import { type Extra, StaticRoom } from "../kit/StaticRoom";
+import { MOON_POSITION, MOON_TARGET } from "../moon";
 import { Plate } from "../Plate";
 import { RoomCamera } from "../RoomCamera";
 import { RuinDial } from "../RuinDial";
 import { WindDriver } from "../WindDriver";
 import { Keeper } from "./Keeper";
-import { CORRIDOR_END_Z, DOORWAY, FLAMES, KEEPER, OBSERVATORY } from "./layout";
+import { KnightLetter } from "./KnightLetter";
+import { CORRIDOR_END_Z, DOORWAY, KEEPER, LETTER, OBSERVATORY } from "./layout";
 import { type KeeperCue, MockTraffic } from "./MockTraffic";
 import { Moonbeams } from "./Moonbeams";
-import { MOON_POSITION, MOON_TARGET, RoomLights } from "./RoomLights";
+import { RoomLights } from "./RoomLights";
+import { RUNE_GLOWS, Runes } from "./Runes";
 import { ScryingGlass } from "./ScryingGlass";
 
 // B0 step 2: the Observatory, the first room of the Overgrown Halls, with mock data. An old
 // fantasy ruin explored with modern tools (0051): only the Glass (a hologram) is modern here.
+// A left world (0052): structure, the machine, the Glass, two traces of the Knight; runes for light.
 // Press R to restore it (and again to let it fall back into ruin): one dial drives materials, light and fog,
 // and the change spreads as a wave from the doorway (standing in for the object the player fixed).
 
@@ -55,6 +60,15 @@ function Cable({ lit }: { lit: boolean }) {
   );
 }
 
+// The floor: separate irregular flagstones made in code (not tiles), dark earth in the gaps.
+const FLOOR: Extra[] = [
+  {
+    name: "Floor",
+    geometry: makeFlagstones({ size: 8.4, stones: 8, seed: 1103 }),
+  },
+  { name: "Earth", geometry: makeEarth(8.4) },
+];
+
 // Where restoration spreads from in B0: the doorway, as if the link had just been fixed.
 const FIX_ORIGIN: [number, number, number] = [DOORWAY.x, 1, DOORWAY.z];
 
@@ -85,21 +99,13 @@ export function ObservatoryScene() {
       <RoomCamera {...cameraFromUrl()} />
       <color attach="background" args={["#0b0d12"]} />
       <RuinDial origin={FIX_ORIGIN} />
-      <RoomLights flames={FLAMES} />
+      <RoomLights glows={RUNE_GLOWS} />
 
       <Suspense fallback={null}>
-        {OBSERVATORY.map((p, i) => (
-          <Piece
-            // Placements are a fixed list; their order never changes.
-            // biome-ignore lint/suspicious/noArrayIndexKey: static layout
-            key={i}
-            name={p.piece}
-            position={p.position}
-            rotation={[0, p.rotationY ?? 0, 0]}
-            scale={p.scale ?? 1}
-          />
-        ))}
+        <StaticRoom placements={OBSERVATORY} extras={FLOOR} />
       </Suspense>
+      <Runes />
+      <KnightLetter position={LETTER} />
 
       {quality.moonbeams && (
         <Moonbeams
@@ -120,7 +126,7 @@ export function ObservatoryScene() {
       <MockTraffic
         corridorEnd={[DOORWAY.x, 0.35, CORRIDOR_END_Z]}
         doorway={[DOORWAY.x, 0.9, DOORWAY.z]}
-        keeper={[KEEPER.position[0], 1.25, KEEPER.position[2] - 0.95]}
+        keeper={[KEEPER.position[0] - 0.62, 1.2, KEEPER.position[2] - 0.3]}
         inbound={inbound}
         cue={cue}
         onRoundTrip={() => setLit(true)}

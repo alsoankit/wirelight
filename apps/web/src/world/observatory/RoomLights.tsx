@@ -1,22 +1,19 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
-import { type AmbientLight, Color, type DirectionalLight, Fog, type HemisphereLight, type PointLight } from "three";
-import { useQuality } from "../../render/quality";
+import { type AmbientLight, Color, Fog, type HemisphereLight, type PointLight } from "three";
 import { blend } from "../kit/regionMaterials";
 import { ruin, ruinAtPoint } from "../ruin";
-import { gust } from "../wind";
 
-// Region 1 light on the ruin dial (region-1 brief, 0021):
-// - Ruin: a cold moon pouring through the broken walls (it casts the room's only shadows), deep
-//   blue-grey fog, and candles burning low. Eerie and haunting, never frightening.
-// - Restored: the candles and torch burn warm and steady; the moon is still there, softer.
-// Candle flicker is slow and gentle: a drift over seconds, never a fast strobe.
-// Balanced for the eyes (0051): a sky/ground fill keeps ruined shadows blue rather than black, and
-// restored lamps stay modest. The two states differ in colour more than in brightness; check with
+// Region 1 light on the ruin dial (region-1 brief, 0021, 0052):
+// - Ruin: cold moonlight through the broken walls, deep blue-grey fog, the runes dark. Eerie and
+//   haunting, never frightening.
+// - Restored: the carved runes glow warm and steady; the moon is still there, softer.
+// The moonlight itself is baked into the static room (bake.ts) and added by its materials: no
+// directional light and no shadow maps at runtime. Here: a soft sky/ground fill, ambient light,
+// fog, and the rune lights (the keeper carries its own lantern light).
+// Balanced for the eyes (0051): the two states differ in colour more than in brightness; check with
 // the brightness line from tools/shots/b0.mjs.
 
-const MOON_RUINED = new Color("#8FA8E0");
-const MOON_RESTORED = new Color("#C7C9D8");
 const AMBIENT_RUINED = new Color("#4A5878");
 const AMBIENT_RESTORED = new Color("#8A7058");
 const SKY_RUINED = new Color("#7f93c8");
@@ -26,28 +23,14 @@ const GROUND_RESTORED = new Color("#3a3028");
 const FOG_RUINED = new Color("#1E2433");
 const FOG_RESTORED = new Color("#3a2d22");
 
-type Flame = { position: [number, number, number]; colour: string; strength: number };
+type Glow = { position: [number, number, number]; colour: string; strength: number };
 
-export const MOON_POSITION: [number, number, number] = [-9, 13, -8];
-export const MOON_TARGET: [number, number, number] = [1.5, 0, 1.5];
-
-// Two slow sines, a few seconds each: the candle drifts rather than flickers.
-function drift(t: number, seed: number): number {
-  return Math.sin(t * 0.9 + seed) * 0.6 + Math.sin(t * 2.1 + seed * 2.3) * 0.4;
-}
-
-export function RoomLights({ flames }: { flames: Flame[] }) {
-  const { scene, gl } = useThree();
-  const { shadowMapSize } = useQuality();
+export function RoomLights({ glows }: { glows: Glow[] }) {
+  const { scene } = useThree();
   const ambient = useRef<AmbientLight>(null);
   const fill = useRef<HemisphereLight>(null);
-  const moon = useRef<DirectionalLight>(null);
   const points = useRef<(PointLight | null)[]>([]);
   const fog = useMemo(() => new Fog(FOG_RUINED.clone(), 20, 40), []);
-
-  useEffect(() => {
-    gl.shadowMap.enabled = shadowMapSize > 0;
-  }, [gl, shadowMapSize]);
 
   useEffect(() => {
     scene.fog = fog;
@@ -56,10 +39,9 @@ export function RoomLights({ flames }: { flames: Flame[] }) {
     };
   }, [scene, fog]);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const r = ruin.value;
     const warm = 1 - r;
-    const t = clock.elapsedTime;
     if (ambient.current) {
       blend(ambient.current.color, AMBIENT_RUINED, AMBIENT_RESTORED, r);
       ambient.current.intensity = 1.4 - warm * 0.6;
@@ -69,22 +51,15 @@ export function RoomLights({ flames }: { flames: Flame[] }) {
       blend(fill.current.groundColor, GROUND_RUINED, GROUND_RESTORED, r);
       fill.current.intensity = 2.4 - warm * 1.5;
     }
-    if (moon.current) {
-      blend(moon.current.color, MOON_RUINED, MOON_RESTORED, r);
-      moon.current.intensity = 1.4 + r * 3.6;
-    }
     blend(fog.color, FOG_RUINED, FOG_RESTORED, r);
     fog.near = 20 + warm * 8;
     fog.far = 40 + warm * 16;
-    flames.forEach((flame, i) => {
+    glows.forEach((glow, i) => {
       const light = points.current[i];
       if (!light) return;
-      // Each flame catches when the restoration wave reaches it (CORE-39).
-      const here = ruinAtPoint(...flame.position);
-      const wobble = 1 + drift(t, i * 1.7) * (0.02 + here * 0.06);
-      // A gust bends the flames: a slow dip, never a flicker.
-      const bend = 1 - gust.value * 0.18;
-      light.intensity = flame.strength * (0.3 + (1 - here) * 0.3) * wobble * bend;
+      // Each rune group relights when the restoration wave reaches it (CORE-39); steady, no flicker.
+      const here = ruinAtPoint(...glow.position);
+      light.intensity = glow.strength * (0.02 + (1 - here) * 0.98);
     });
   });
 
@@ -92,38 +67,15 @@ export function RoomLights({ flames }: { flames: Flame[] }) {
     <>
       <ambientLight ref={ambient} />
       <hemisphereLight ref={fill} />
-      <directionalLight
-        // Remount when the shadow size changes: the shadow map is allocated once per light.
-        key={shadowMapSize}
-        ref={(light) => {
-          moon.current = light;
-          // The moon's aim is fixed; its target needn't join the scene if its matrix is set once.
-          if (light) {
-            light.target.position.set(...MOON_TARGET);
-            light.target.updateMatrixWorld();
-          }
-        }}
-        position={MOON_POSITION}
-        castShadow={shadowMapSize > 0}
-        shadow-mapSize={[shadowMapSize || 1, shadowMapSize || 1]}
-        shadow-camera-left={-9}
-        shadow-camera-right={9}
-        shadow-camera-top={9}
-        shadow-camera-bottom={-9}
-        shadow-camera-near={1}
-        shadow-camera-far={45}
-        shadow-bias={-0.0004}
-        shadow-normalBias={0.03}
-      />
-      {flames.map((flame, i) => (
+      {glows.map((glow, i) => (
         <pointLight
           // biome-ignore lint/suspicious/noArrayIndexKey: a fixed list of lights
           key={i}
           ref={(light) => {
             points.current[i] = light;
           }}
-          color={flame.colour}
-          position={flame.position}
+          color={glow.colour}
+          position={glow.position}
           distance={7}
           decay={2}
         />
