@@ -9,7 +9,7 @@ import { RenderPipeline, type WebGPURenderer } from "three/webgpu";
 
 type Props = { strength?: number; radius?: number; threshold?: number };
 
-export function Bloom({ strength = 0.7, radius = 0.45, threshold = 0.85 }: Props) {
+export function Bloom({ strength = 0.5, radius = 0.45, threshold = 0.9 }: Props) {
   const { gl, scene, camera } = useThree();
   const pipeline = useMemo(() => {
     const p = new RenderPipeline(gl as unknown as WebGPURenderer);

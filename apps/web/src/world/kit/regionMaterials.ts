@@ -1,5 +1,5 @@
 import { type Color, type Material, Mesh, type Object3D } from "three";
-import { color, float, mix, mx_noise_float, normalWorld, positionWorld, sin, smoothstep, time } from "three/tsl";
+import { color, float, mix, mx_noise_float, normalWorld, positionWorld, smoothstep } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
 import { ruin } from "../ruin";
 
@@ -17,16 +17,19 @@ type Swatch = {
   metalness?: number;
   glow?: number; // flames: emissive strength when restored (they gutter in ruin)
   aged?: boolean; // stone: weathering, grime and creeping moss
+  verdigris?: boolean; // old brass: green-grey patina in patches
 };
 
-const MOSS_RUINED = "#3f4a40";
+const MOSS_RUINED = "#4b584c";
 const MOSS_RESTORED = "#4f7a3c";
+const PATINA_RUINED = "#43564f";
+const PATINA_RESTORED = "#5a7d68";
 
 const REGION_1: Record<string, Swatch> = {
-  Main: { ruined: "#58606b", restored: "#a28a6c", roughness: 0.95, aged: true },
-  Main2: { ruined: "#535a64", restored: "#957e62", roughness: 0.95, aged: true },
-  Stone: { ruined: "#5b626c", restored: "#a8916f", roughness: 0.95, aged: true },
-  Highlights: { ruined: "#626a75", restored: "#ae9473", roughness: 0.95, aged: true },
+  Main: { ruined: "#6b7380", restored: "#a28a6c", roughness: 0.95, aged: true },
+  Main2: { ruined: "#666d78", restored: "#957e62", roughness: 0.95, aged: true },
+  Stone: { ruined: "#6d7480", restored: "#a8916f", roughness: 0.95, aged: true },
+  Highlights: { ruined: "#747c88", restored: "#ae9473", roughness: 0.95, aged: true },
   Black: { ruined: "#16181d", restored: "#221a14", roughness: 1 },
   Leaf_Texture: { ruined: "#46524a", restored: "#5d8f48", roughness: 1 },
   Texture_Leaves: { ruined: "#3f4a42", restored: "#3E6B3A", roughness: 1 },
@@ -38,14 +41,16 @@ const REGION_1: Record<string, Swatch> = {
   DarkMetal: { ruined: "#2f2a26", restored: "#5a3f28", roughness: 0.5, metalness: 0.6 },
   Brass: { ruined: "#5e5038", restored: "#C99B4A", roughness: 0.4, metalness: 0.8 },
   Iron: { ruined: "#24272c", restored: "#2e2b29", roughness: 0.55, metalness: 0.75 },
+  AgedBrass: { ruined: "#6a5a3e", restored: "#a8823f", roughness: 0.55, metalness: 0.7, verdigris: true },
   Wood: { ruined: "#4a4540", restored: "#6e4a2f", roughness: 0.85 },
   DarkWood: { ruined: "#33302d", restored: "#46301f", roughness: 0.85 },
   Pot_Main: { ruined: "#524d48", restored: "#94583a", roughness: 0.9 },
   Pot_Detail: { ruined: "#403c39", restored: "#5e432e", roughness: 0.9 },
   Flag: { ruined: "#41454f", restored: "#7a342e", roughness: 0.9 },
-  Candle: { ruined: "#97938a", restored: "#e6dbc3", roughness: 0.7 },
-  Light: { ruined: "#3a3530", restored: "#FFC46B", glow: 4 },
-  Fire: { ruined: "#3a3028", restored: "#FFB35A", glow: 5 },
+  Candle: { ruined: "#97938a", restored: "#c9bea6", roughness: 0.7 },
+  // Flames are kept modest so restored rooms glow warmly without glare (0051).
+  Light: { ruined: "#3a3530", restored: "#FFC46B", glow: 2.2 },
+  Fire: { ruined: "#3a3028", restored: "#FFB35A", glow: 2.6 },
 };
 
 const cache = new Map<string, Material>();
@@ -60,13 +65,18 @@ function nodeMaterial(swatch: Swatch): Material {
     const speckle = mx_noise_float(positionWorld.mul(7.0));
     tint = tint.mul(blotch.mul(0.18).add(speckle.mul(0.06)).add(0.92));
     // Grime gathers in the bottom metre of every wall.
-    tint = tint.mul(mix(float(0.55), float(1), smoothstep(0.0, 1.3, positionWorld.y)));
+    tint = tint.mul(mix(float(0.7), float(1), smoothstep(0.0, 1.3, positionWorld.y)));
     // Moss creeps over faces that look up, and up from the floor, in patches.
     const patches = smoothstep(0.1, 0.45, mx_noise_float(positionWorld.mul(0.55).add(3.1)));
     const upward = smoothstep(0.55, 0.9, normalWorld.y);
     const low = float(1).sub(smoothstep(0.2, 1.4, positionWorld.y));
     const moss = patches.mul(upward.add(low).clamp(0, 1)).mul(0.85);
     tint = mix(tint, mix(color(MOSS_RESTORED), color(MOSS_RUINED), ruin), moss);
+  }
+  if (swatch.verdigris) {
+    // Centuries of damp: patina gathers in patches across old brass.
+    const patina = smoothstep(0.05, 0.4, mx_noise_float(positionWorld.mul(2.6).add(7.3))).mul(0.7);
+    tint = mix(tint, mix(color(PATINA_RESTORED), color(PATINA_RUINED), ruin), patina);
   }
   m.colorNode = tint;
   m.roughness = swatch.roughness ?? 0.9;
@@ -93,29 +103,6 @@ export function regionMaterial(name: string): Material {
     cache.set(name, shared);
   }
   return shared;
-}
-
-// The modern layer (decision 0050): machinery the Forgetting left dormant. Its neon is never
-// cyan (alive), amber (usable) or violet (lab tools). In ruin it barely breathes, slowly;
-// restored, it glows steady.
-export const TECH_GLOW = "#FF4F9A";
-
-const techCache = new Map<number, Material>();
-
-export function techMaterial(phase = 0): Material {
-  const key = Math.round(phase * 100);
-  let m = techCache.get(key);
-  if (!m) {
-    const tm = new MeshStandardNodeMaterial({ roughness: 0.4, metalness: 0.2 });
-    const breathe = sin(time.mul(0.6).add(phase)).mul(0.5).add(0.5); // about one slow breath in 10 s
-    const dormant = breathe.mul(0.25).add(0.08);
-    const level = mix(float(1.6), dormant, ruin);
-    tm.colorNode = color("#1a1216");
-    tm.emissiveNode = color(TECH_GLOW).mul(level);
-    m = tm;
-    techCache.set(key, m);
-  }
-  return m;
 }
 
 export function restyle(root: Object3D): Object3D {

@@ -1,6 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
-import { type AmbientLight, Color, type DirectionalLight, Fog, type PointLight } from "three";
+import { type AmbientLight, Color, type DirectionalLight, Fog, type HemisphereLight, type PointLight } from "three";
 import { blend } from "../kit/regionMaterials";
 import { ruin } from "../ruin";
 
@@ -9,11 +9,18 @@ import { ruin } from "../ruin";
 //   blue-grey fog, and candles burning low. Eerie and haunting, never frightening.
 // - Restored: the candles and torch burn warm and steady; the moon is still there, softer.
 // Candle flicker is slow and gentle: a drift over seconds, never a fast strobe.
+// Balanced for the eyes (0051): a sky/ground fill keeps ruined shadows blue rather than black, and
+// restored lamps stay modest. The two states differ in colour more than in brightness; check with
+// the brightness line from tools/shots/b0.mjs.
 
 const MOON_RUINED = new Color("#8FA8E0");
 const MOON_RESTORED = new Color("#C7C9D8");
 const AMBIENT_RUINED = new Color("#4A5878");
 const AMBIENT_RESTORED = new Color("#8A7058");
+const SKY_RUINED = new Color("#7f93c8");
+const SKY_RESTORED = new Color("#a08a70");
+const GROUND_RUINED = new Color("#30343c");
+const GROUND_RESTORED = new Color("#3a3028");
 const FOG_RUINED = new Color("#1E2433");
 const FOG_RESTORED = new Color("#3a2d22");
 
@@ -30,6 +37,7 @@ function drift(t: number, seed: number): number {
 export function RoomLights({ flames }: { flames: Flame[] }) {
   const { scene } = useThree();
   const ambient = useRef<AmbientLight>(null);
+  const fill = useRef<HemisphereLight>(null);
   const moon = useRef<DirectionalLight>(null);
   const points = useRef<(PointLight | null)[]>([]);
   const fog = useMemo(() => new Fog(FOG_RUINED.clone(), 20, 40), []);
@@ -53,7 +61,12 @@ export function RoomLights({ flames }: { flames: Flame[] }) {
     const t = clock.elapsedTime;
     if (ambient.current) {
       blend(ambient.current.color, AMBIENT_RUINED, AMBIENT_RESTORED, r);
-      ambient.current.intensity = 0.9 + warm * 0.1;
+      ambient.current.intensity = 1.4 - warm * 0.6;
+    }
+    if (fill.current) {
+      blend(fill.current.color, SKY_RUINED, SKY_RESTORED, r);
+      blend(fill.current.groundColor, GROUND_RUINED, GROUND_RESTORED, r);
+      fill.current.intensity = 2.4 - warm * 1.5;
     }
     if (moon.current) {
       blend(moon.current.color, MOON_RUINED, MOON_RESTORED, r);
@@ -66,13 +79,14 @@ export function RoomLights({ flames }: { flames: Flame[] }) {
       const light = points.current[i];
       if (!light) return;
       const wobble = 1 + drift(t, i * 1.7) * (0.02 + r * 0.06);
-      light.intensity = flame.strength * (0.3 + warm * 0.7) * wobble;
+      light.intensity = flame.strength * (0.3 + warm * 0.3) * wobble;
     });
   });
 
   return (
     <>
       <ambientLight ref={ambient} />
+      <hemisphereLight ref={fill} />
       <directionalLight
         ref={moon}
         position={MOON_POSITION}

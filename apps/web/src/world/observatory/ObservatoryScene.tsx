@@ -4,6 +4,7 @@ import type { Mesh } from "three";
 import { positionLocal, smoothstep, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { Bloom } from "../../render/Bloom";
+import { Fireflies } from "../Fireflies";
 import { Piece } from "../kit/Piece";
 import { Plate } from "../Plate";
 import { RoomCamera } from "../RoomCamera";
@@ -14,10 +15,9 @@ import { MockTraffic } from "./MockTraffic";
 import { Moonbeams } from "./Moonbeams";
 import { MOON_POSITION, MOON_TARGET, RoomLights } from "./RoomLights";
 import { ScryingGlass } from "./ScryingGlass";
-import { TechLayer } from "./TechLayer";
 
-// B0 step 2: the Observatory, the first room of the Overgrown Halls, with mock data. A ruin of the
-// first wire-weavers with a machine still inside it: dungeon stone threaded with dormant tech (0050).
+// B0 step 2: the Observatory, the first room of the Overgrown Halls, with mock data. An old
+// fantasy ruin explored with modern tools (0051): only the Glass (a hologram) is modern here.
 // Press R to restore it (and again to let it fall back into ruin): one dial drives materials, light and fog.
 
 // Where the moon gets in: the barred window, the gap above the crumbled left wall, and the
@@ -51,13 +51,29 @@ function Cable({ lit }: { lit: boolean }) {
   );
 }
 
+// The air of the room, where fireflies drift (inside the walls, above the floor).
+const FIREFLY_BOUNDS = {
+  min: [-3.4, 0.4, -3.4] as [number, number, number],
+  max: [3.4, 3.0, 3.4] as [number, number, number],
+};
+
+// B0 dev aid: ?distance=8&target=0,1.4,-0.6 frames something up close (screenshots, reviews).
+function cameraFromUrl(): { target: [number, number, number]; distance: number } {
+  const q = new URLSearchParams(window.location.search);
+  const t = q.get("target")?.split(",").map(Number);
+  const target: [number, number, number] =
+    t && t.length === 3 && t.every(Number.isFinite) ? [t[0] as number, t[1] as number, t[2] as number] : [0, 1.1, -0.6];
+  const d = Number(q.get("distance"));
+  return { target, distance: Number.isFinite(d) && d > 0 ? d : 19 };
+}
+
 export function ObservatoryScene() {
   const inbound = useRef<Mesh>(null);
   const [lit, setLit] = useState(false);
 
   return (
     <>
-      <RoomCamera target={[0, 1.1, -0.6]} distance={19} />
+      <RoomCamera {...cameraFromUrl()} />
       <color attach="background" args={["#0b0d12"]} />
       <RuinDial />
       <RoomLights flames={FLAMES} />
@@ -76,7 +92,6 @@ export function ObservatoryScene() {
         ))}
       </Suspense>
 
-      <TechLayer />
       <Moonbeams
         beams={MOON_GAPS}
         direction={[
@@ -85,6 +100,7 @@ export function ObservatoryScene() {
           MOON_TARGET[2] - MOON_POSITION[2],
         ]}
       />
+      <Fireflies bounds={FIREFLY_BOUNDS} />
       <Cable lit={lit} />
       <Keeper position={KEEPER.position} rest={[DOORWAY.x, 1.4, DOORWAY.z]} watch={inbound} />
       <ScryingGlass position={[2.4, 0, 1.6]} />
