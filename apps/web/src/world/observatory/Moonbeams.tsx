@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { AdditiveBlending, Quaternion, Vector3 } from "three";
 import { abs, color, float, mix, positionLocal, smoothstep } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
-import { ruin } from "../ruin";
+import { ruinHere } from "../ruin";
 
 // Shafts of moonlight where the room is broken open: the eerie, haunting light of a ruin (0021).
 // Each shaft is a soft additive box aligned with the moon, fading at its edges and toward the floor.
@@ -27,7 +27,7 @@ export function Moonbeams({ beams, direction }: { beams: Beam[]; direction: [num
     const fadeIn = float(1).sub(smoothstep(0.42, 0.5, positionLocal.y));
     const across = edgeX.mul(edgeZ);
     const along = fadeOut.mul(fadeIn);
-    const strength = mix(float(0.07), float(0.3), ruin);
+    const strength = mix(float(0.07), float(0.3), ruinHere);
     m.colorNode = color("#9AB4E8").mul(across.mul(along).mul(strength));
     return m;
   }, []);

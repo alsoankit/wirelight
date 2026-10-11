@@ -1,9 +1,21 @@
 import { useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { type RefObject, useEffect, useMemo, useRef } from "react";
-import { type Group, Mesh, type Object3D, Vector3 } from "three";
+import {
+  AdditiveBlending,
+  type AnimationAction,
+  DoubleSide,
+  type Group,
+  LoopOnce,
+  Mesh,
+  type Object3D,
+  Vector3,
+} from "three";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
+import { color, positionLocal, smoothstep, uniform } from "three/tsl";
+import { MeshBasicNodeMaterial } from "three/webgpu";
 import { regionMaterial } from "../kit/regionMaterials";
+import type { KeeperCue } from "./MockTraffic";
 
 // The keeper (world/lore.md, region-1 brief, 0051): an ancient machine, never a robot. A brass-and-stone
 // automaton with a lantern head and one glowing eye, moss on its shoulders, standing at its desk facing
@@ -21,7 +33,11 @@ type Props = {
   position: [number, number, number];
   rest: [number, number, number]; // where it looks when nothing is moving (the doorway)
   watch: RefObject<Object3D | null>;
+  cue: RefObject<KeeperCue>; // when to nod (a message arrived) and when to point (an answer left)
 };
+
+const NOD_SECONDS = 0.7;
+const BEAM_SECONDS = 1.1;
 
 // The rig's head is a group of meshes called "Head", "Head_1"… (not to be confused with the Head bone).
 function isHeadMesh(o: Object3D): boolean {
@@ -138,7 +154,33 @@ function Desk() {
 // (three.js drops the dots from glTF node names: "Shoulder.L" is loaded as "ShoulderL".)
 const MOSS_ON = ["ShoulderL", "ShoulderR"];
 
-export function Keeper({ position, rest, watch }: Props) {
+// The keeper's decision (CORE-24): a soft beam of lantern light from its eye toward the door it chose,
+// brightest at the eye, fading along its length and away over about a second. Warm, never cyan.
+// One keeper per room, so one beam level.
+const beamLevel = uniform(0);
+
+function Beam() {
+  const material = useMemo(() => {
+    const m = new MeshBasicNodeMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending: AdditiveBlending,
+      toneMapped: false,
+      side: DoubleSide,
+    });
+    // positionLocal.y: +0.5 at the eye, −0.5 at the door.
+    const along = smoothstep(-0.5, 0.35, positionLocal.y);
+    m.colorNode = color("#FFD9A0").mul(along.mul(beamLevel).mul(0.33));
+    return m;
+  }, []);
+  return (
+    <mesh material={material}>
+      <cylinderGeometry args={[0.03, 0.32, 1, 20, 1, true]} />
+    </mesh>
+  );
+}
+
+export function Keeper({ position, rest, watch, cue }: Props) {
   const { scene, animations } = useGLTF(BODY_URL);
   const rig = useRef<Group>(null);
   const lantern = useRef<Group>(null);
@@ -158,14 +200,28 @@ export function Keeper({ position, rest, watch }: Props) {
     };
   }, [scene]);
 
-  const { actions } = useAnimations(animations, rig);
+  const { actions, mixer } = useAnimations(animations, rig);
   useEffect(() => {
     const idle = actions.Idle;
+    const yes = actions.Yes;
     idle?.reset().fadeIn(0.4).play();
+    yes?.setLoop(LoopOnce, 1);
+    // When a gesture finishes, ease back into the idle.
+    const back = (e: { action: AnimationAction }) => {
+      if (e.action === yes && idle) yes.crossFadeTo(idle.reset().play(), 0.35, false);
+    };
+    mixer.addEventListener("finished", back);
     return () => {
+      mixer.removeEventListener("finished", back);
       idle?.fadeOut(0.3);
     };
-  }, [actions]);
+  }, [actions, mixer]);
+
+  const beamRef = useRef<Group>(null);
+  const seen = useRef<KeeperCue>({ arrived: -1, departed: -1 });
+  const eye = useMemo(() => new Vector3(), []);
+  const door = useMemo(() => new Vector3(...rest), [rest]);
+  const DOWN = useMemo(() => new Vector3(0, -1, 0), []);
 
   const restPoint = useMemo(() => new Vector3(...rest), [rest]);
   const look = useMemo(() => new Vector3(), []);
@@ -173,7 +229,16 @@ export function Keeper({ position, rest, watch }: Props) {
   const at = useMemo(() => new Vector3(), []);
 
   // Runs after the animation mixer (registered later), so the lantern follows this frame's pose.
-  useFrame((_, delta) => {
+  useFrame(({ clock }, delta) => {
+    const now = clock.elapsedTime;
+    const c = cue.current;
+    // A message reached the desk: the rig's own "yes" gesture, once.
+    if (c.arrived !== seen.current.arrived) {
+      seen.current.arrived = c.arrived;
+      const idle = actions.Idle;
+      const yes = actions.Yes;
+      if (idle && yes) idle.crossFadeTo(yes.reset().play(), 0.25, false);
+    }
     const root = rig.current?.parent;
     const head = lantern.current;
     if (!root || !head || !headBone) return;
@@ -191,6 +256,29 @@ export function Keeper({ position, rest, watch }: Props) {
     else look.copy(restPoint);
     aim.lerp(look, 1 - Math.exp(-delta * 5)); // the eye turns smoothly, never snaps
     head.lookAt(aim);
+    // …and the lantern dips in a nod as it reads the message.
+    const sinceArrival = now - c.arrived;
+    if (sinceArrival >= 0 && sinceArrival < NOD_SECONDS)
+      head.rotateX(Math.sin((Math.PI * sinceArrival) / NOD_SECONDS) * 0.3);
+
+    // An answer left: the beam toward the doorway, rising fast and fading over about a second.
+    const sinceDeparture = now - c.departed;
+    const beam = beamRef.current;
+    if (beam) {
+      const on = sinceDeparture >= 0 && sinceDeparture < BEAM_SECONDS;
+      beam.visible = on;
+      if (on) {
+        const x = sinceDeparture / BEAM_SECONDS;
+        beamLevel.value = Math.min(x / 0.12, 1) * (1 - Math.max(0, (x - 0.12) / 0.88)) ** 1.5;
+        head.localToWorld(eye.set(0, 0.19, 0.16));
+        const from = root.worldToLocal(eye.clone());
+        const to = root.worldToLocal(door.clone());
+        const dir = to.clone().sub(from);
+        beam.position.copy(from).add(to).multiplyScalar(0.5);
+        beam.quaternion.setFromUnitVectors(DOWN, dir.clone().normalize());
+        beam.scale.set(1, dir.length(), 1);
+      }
+    }
   });
 
   return (
@@ -204,6 +292,9 @@ export function Keeper({ position, rest, watch }: Props) {
         <group position={[0, -0.05, 0]}>
           <LanternHead />
         </group>
+      </group>
+      <group ref={beamRef} visible={false}>
+        <Beam />
       </group>
       {MOSS_ON.map((name, i) => (
         <mesh

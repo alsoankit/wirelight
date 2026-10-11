@@ -12,11 +12,16 @@ const PAUSE = 0.4; // the keeper reads it
 
 const MESSAGE_COLOUR: [number, number, number] = [0.55, 2.6, 2.8];
 
+// What the keeper reacts to: when (in seconds of the clock) a message last reached it, and when
+// its answer last left. (In B1 these come from the trace's keeper decisions instead.)
+export type KeeperCue = { arrived: number; departed: number };
+
 type Props = {
   corridorEnd: [number, number, number];
   doorway: [number, number, number];
   keeper: [number, number, number];
   inbound: RefObject<Mesh | null>;
+  cue: RefObject<KeeperCue>;
   onRoundTrip?: () => void;
 };
 
@@ -40,7 +45,7 @@ function along(points: Vector3[], t: number, out: Vector3): Vector3 {
   return out;
 }
 
-export function MockTraffic({ corridorEnd, doorway, keeper, inbound, onRoundTrip }: Props) {
+export function MockTraffic({ corridorEnd, doorway, keeper, inbound, cue, onRoundTrip }: Props) {
   const outbound = useRef<Mesh>(null);
   const path = useMemo(
     () => [new Vector3(...corridorEnd), new Vector3(...doorway), new Vector3(...keeper)],
@@ -48,6 +53,8 @@ export function MockTraffic({ corridorEnd, doorway, keeper, inbound, onRoundTrip
   );
   const back = useMemo(() => [...path].reverse(), [path]);
   const lastCycle = useRef(-1);
+  const lastArrival = useRef(-1);
+  const lastDeparture = useRef(-1);
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime % PERIOD;
@@ -62,6 +69,16 @@ export function MockTraffic({ corridorEnd, doorway, keeper, inbound, onRoundTrip
     const r = t - TRAVEL - PAUSE;
     outMesh.visible = r >= 0 && r < TRAVEL;
     if (outMesh.visible) along(back, r / TRAVEL, outMesh.position);
+
+    // Tell the keeper: the message has reached its desk; its answer is leaving.
+    if (t >= TRAVEL && lastArrival.current !== cycle) {
+      lastArrival.current = cycle;
+      cue.current.arrived = clock.elapsedTime;
+    }
+    if (r >= 0 && lastDeparture.current !== cycle) {
+      lastDeparture.current = cycle;
+      cue.current.departed = clock.elapsedTime;
+    }
 
     // A message and its answer have both crossed: the corridor lights (CORE-12).
     if (r >= TRAVEL && lastCycle.current !== cycle) {

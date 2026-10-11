@@ -4,21 +4,25 @@ import type { Mesh } from "three";
 import { positionLocal, smoothstep, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { Bloom } from "../../render/Bloom";
+import { useQuality } from "../../render/quality";
+import { Dust } from "../Dust";
 import { Fireflies } from "../Fireflies";
 import { Piece } from "../kit/Piece";
 import { Plate } from "../Plate";
 import { RoomCamera } from "../RoomCamera";
 import { RuinDial } from "../RuinDial";
+import { WindDriver } from "../WindDriver";
 import { Keeper } from "./Keeper";
 import { CORRIDOR_END_Z, DOORWAY, FLAMES, KEEPER, OBSERVATORY } from "./layout";
-import { MockTraffic } from "./MockTraffic";
+import { type KeeperCue, MockTraffic } from "./MockTraffic";
 import { Moonbeams } from "./Moonbeams";
 import { MOON_POSITION, MOON_TARGET, RoomLights } from "./RoomLights";
 import { ScryingGlass } from "./ScryingGlass";
 
 // B0 step 2: the Observatory, the first room of the Overgrown Halls, with mock data. An old
 // fantasy ruin explored with modern tools (0051): only the Glass (a hologram) is modern here.
-// Press R to restore it (and again to let it fall back into ruin): one dial drives materials, light and fog.
+// Press R to restore it (and again to let it fall back into ruin): one dial drives materials, light and fog,
+// and the change spreads as a wave from the doorway (standing in for the object the player fixed).
 
 // Where the moon gets in: the barred window, the gap above the crumbled left wall, and the
 // collapsed top of the back wall's right end.
@@ -51,6 +55,9 @@ function Cable({ lit }: { lit: boolean }) {
   );
 }
 
+// Where restoration spreads from in B0: the doorway, as if the link had just been fixed.
+const FIX_ORIGIN: [number, number, number] = [DOORWAY.x, 1, DOORWAY.z];
+
 // The air of the room, where fireflies drift (inside the walls, above the floor).
 const FIREFLY_BOUNDS = {
   min: [-3.4, 0.4, -3.4] as [number, number, number],
@@ -69,13 +76,15 @@ function cameraFromUrl(): { target: [number, number, number]; distance: number }
 
 export function ObservatoryScene() {
   const inbound = useRef<Mesh>(null);
+  const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
+  const quality = useQuality();
   const [lit, setLit] = useState(false);
 
   return (
     <>
       <RoomCamera {...cameraFromUrl()} />
       <color attach="background" args={["#0b0d12"]} />
-      <RuinDial />
+      <RuinDial origin={FIX_ORIGIN} />
       <RoomLights flames={FLAMES} />
 
       <Suspense fallback={null}>
@@ -92,28 +101,33 @@ export function ObservatoryScene() {
         ))}
       </Suspense>
 
-      <Moonbeams
-        beams={MOON_GAPS}
-        direction={[
-          MOON_TARGET[0] - MOON_POSITION[0],
-          MOON_TARGET[1] - MOON_POSITION[1],
-          MOON_TARGET[2] - MOON_POSITION[2],
-        ]}
-      />
-      <Fireflies bounds={FIREFLY_BOUNDS} />
+      {quality.moonbeams && (
+        <Moonbeams
+          beams={MOON_GAPS}
+          direction={[
+            MOON_TARGET[0] - MOON_POSITION[0],
+            MOON_TARGET[1] - MOON_POSITION[1],
+            MOON_TARGET[2] - MOON_POSITION[2],
+          ]}
+        />
+      )}
+      <WindDriver />
+      {quality.fireflies && <Fireflies bounds={FIREFLY_BOUNDS} />}
+      {quality.dust && <Dust bounds={FIREFLY_BOUNDS} />}
       <Cable lit={lit} />
-      <Keeper position={KEEPER.position} rest={[DOORWAY.x, 1.4, DOORWAY.z]} watch={inbound} />
+      <Keeper position={KEEPER.position} rest={[DOORWAY.x, 1.4, DOORWAY.z]} watch={inbound} cue={cue} />
       <ScryingGlass position={[2.4, 0, 1.6]} />
       <MockTraffic
         corridorEnd={[DOORWAY.x, 0.35, CORRIDOR_END_Z]}
         doorway={[DOORWAY.x, 0.9, DOORWAY.z]}
         keeper={[KEEPER.position[0], 1.25, KEEPER.position[2] - 0.95]}
         inbound={inbound}
+        cue={cue}
         onRoundTrip={() => setLit(true)}
       />
       <Plate position={[1.6, 2.35, DOORWAY.z + 0.15]} name="eth0" mac="02:00:00:00:00:05" linkUp />
 
-      <Bloom />
+      {quality.bloom && <Bloom />}
     </>
   );
 }

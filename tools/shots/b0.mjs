@@ -1,9 +1,18 @@
 // Screenshots of the B0 room in headless Chrome (animation frames always run, unlike a covered window).
-// Usage: node tools/shots/b0.mjs <url> <out.png> [waitMs] [width] [height]
+// Usage: node tools/shots/b0.mjs <url> <out.png> [waitMs] [width] [height] [--press KEY --then MS]
+// --press presses a key after waitMs (e.g. R starts the restoration wave) and shoots MS later.
 import { chromium } from "playwright-core";
 
-const [url = "http://127.0.0.1:5173/", out = "b0.png", waitMs = "5000", width = "1600", height = "900"] =
-  process.argv.slice(2);
+const argv = process.argv.slice(2);
+const flag = (name) => {
+  const i = argv.indexOf(name);
+  if (i < 0) return undefined;
+  const [, value] = argv.splice(i, 2);
+  return value;
+};
+const pressKey = flag("--press");
+const thenMs = Number(flag("--then") ?? "1000");
+const [url = "http://127.0.0.1:5173/", out = "b0.png", waitMs = "5000", width = "1600", height = "900"] = argv;
 
 const browser = await chromium.launch({
   executablePath: "/usr/bin/google-chrome",
@@ -22,6 +31,10 @@ page.on("console", (m) => {
 try {
   await page.goto(url);
   await page.waitForTimeout(Number(waitMs));
+  if (pressKey) {
+    await page.keyboard.press(pressKey);
+    await page.waitForTimeout(thenMs);
+  }
   const gpu = await page.evaluate(async () => {
     if (!navigator.gpu) return "no navigator.gpu";
     const adapter = await navigator.gpu.requestAdapter();

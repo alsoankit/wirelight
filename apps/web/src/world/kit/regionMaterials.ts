@@ -1,7 +1,20 @@
 import { type Color, type Material, Mesh, type Object3D } from "three";
-import { color, float, mix, mx_noise_float, normalWorld, positionWorld, smoothstep } from "three/tsl";
+import {
+  color,
+  float,
+  mix,
+  mx_noise_float,
+  normalWorld,
+  positionLocal,
+  positionWorld,
+  sin,
+  smoothstep,
+  time,
+  vec3,
+} from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
-import { ruin } from "../ruin";
+import { ruinHere as ruin } from "../ruin";
+import { BREEZE, gust, windDirection } from "../wind";
 
 // Restyles a kit piece in its region's palette (world/art-briefs/region-1-overgrown-halls.md).
 // Every kit material with the same name shares one node material, whose colour blends from the
@@ -18,6 +31,7 @@ type Swatch = {
   glow?: number; // flames: emissive strength when restored (they gutter in ruin)
   aged?: boolean; // stone: weathering, grime and creeping moss
   verdigris?: boolean; // old brass: green-grey patina in patches
+  sway?: number; // plants: how far the top bends in a full gust, in metres per metre of height
 };
 
 const MOSS_RUINED = "#4b584c";
@@ -32,8 +46,8 @@ const REGION_1: Record<string, Swatch> = {
   Highlights: { ruined: "#747c88", restored: "#ae9473", roughness: 0.95, aged: true },
   Black: { ruined: "#16181d", restored: "#221a14", roughness: 1 },
   Leaf_Texture: { ruined: "#46524a", restored: "#5d8f48", roughness: 1 },
-  Texture_Leaves: { ruined: "#3f4a42", restored: "#3E6B3A", roughness: 1 },
-  Green: { ruined: "#4a554b", restored: "#6FA85A", roughness: 1 },
+  Texture_Leaves: { ruined: "#3f4a42", restored: "#3E6B3A", roughness: 1, sway: 0.06 },
+  Green: { ruined: "#4a554b", restored: "#6FA85A", roughness: 1, sway: 0.14 },
   Bark: { ruined: "#3d3833", restored: "#5c4330", roughness: 1 },
   Dirt: { ruined: "#2f2c29", restored: "#4a3a2a", roughness: 1 },
   Metal: { ruined: "#5c4a3d", restored: "#C8743E", roughness: 0.45, metalness: 0.7 },
@@ -77,6 +91,15 @@ function nodeMaterial(swatch: Swatch): Material {
     // Centuries of damp: patina gathers in patches across old brass.
     const patina = smoothstep(0.05, 0.4, mx_noise_float(positionWorld.mul(2.6).add(7.3))).mul(0.7);
     tint = mix(tint, mix(color(PATINA_RESTORED), color(PATINA_RUINED), ruin), patina);
+  }
+  if (swatch.sway) {
+    // Plants lean with the wind, more toward their tops, with a slow ripple of their own.
+    const height = positionLocal.y.clamp(0, 2);
+    const ripple = sin(time.mul(2.1).add(positionLocal.x.mul(3)).add(positionLocal.z.mul(2)))
+      .mul(0.4)
+      .add(0.6);
+    const lean = gust.add(BREEZE).mul(swatch.sway).mul(height).mul(ripple);
+    m.positionNode = positionLocal.add(vec3(windDirection.x, 0, windDirection.z).mul(lean));
   }
   m.colorNode = tint;
   m.roughness = swatch.roughness ?? 0.9;

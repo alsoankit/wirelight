@@ -1,8 +1,10 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { type AmbientLight, Color, type DirectionalLight, Fog, type HemisphereLight, type PointLight } from "three";
+import { useQuality } from "../../render/quality";
 import { blend } from "../kit/regionMaterials";
-import { ruin } from "../ruin";
+import { ruin, ruinAtPoint } from "../ruin";
+import { gust } from "../wind";
 
 // Region 1 light on the ruin dial (region-1 brief, 0021):
 // - Ruin: a cold moon pouring through the broken walls (it casts the room's only shadows), deep
@@ -35,7 +37,8 @@ function drift(t: number, seed: number): number {
 }
 
 export function RoomLights({ flames }: { flames: Flame[] }) {
-  const { scene } = useThree();
+  const { scene, gl } = useThree();
+  const { shadowMapSize } = useQuality();
   const ambient = useRef<AmbientLight>(null);
   const fill = useRef<HemisphereLight>(null);
   const moon = useRef<DirectionalLight>(null);
@@ -43,15 +46,13 @@ export function RoomLights({ flames }: { flames: Flame[] }) {
   const fog = useMemo(() => new Fog(FOG_RUINED.clone(), 20, 40), []);
 
   useEffect(() => {
+    gl.shadowMap.enabled = shadowMapSize > 0;
+  }, [gl, shadowMapSize]);
+
+  useEffect(() => {
     scene.fog = fog;
-    const m = moon.current;
-    if (m) {
-      m.target.position.set(...MOON_TARGET);
-      scene.add(m.target);
-    }
     return () => {
       scene.fog = null;
-      if (m) scene.remove(m.target);
     };
   }, [scene, fog]);
 
@@ -78,8 +79,12 @@ export function RoomLights({ flames }: { flames: Flame[] }) {
     flames.forEach((flame, i) => {
       const light = points.current[i];
       if (!light) return;
-      const wobble = 1 + drift(t, i * 1.7) * (0.02 + r * 0.06);
-      light.intensity = flame.strength * (0.3 + warm * 0.3) * wobble;
+      // Each flame catches when the restoration wave reaches it (CORE-39).
+      const here = ruinAtPoint(...flame.position);
+      const wobble = 1 + drift(t, i * 1.7) * (0.02 + here * 0.06);
+      // A gust bends the flames: a slow dip, never a flicker.
+      const bend = 1 - gust.value * 0.18;
+      light.intensity = flame.strength * (0.3 + (1 - here) * 0.3) * wobble * bend;
     });
   });
 
@@ -88,10 +93,19 @@ export function RoomLights({ flames }: { flames: Flame[] }) {
       <ambientLight ref={ambient} />
       <hemisphereLight ref={fill} />
       <directionalLight
-        ref={moon}
+        // Remount when the shadow size changes: the shadow map is allocated once per light.
+        key={shadowMapSize}
+        ref={(light) => {
+          moon.current = light;
+          // The moon's aim is fixed; its target needn't join the scene if its matrix is set once.
+          if (light) {
+            light.target.position.set(...MOON_TARGET);
+            light.target.updateMatrixWorld();
+          }
+        }}
         position={MOON_POSITION}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
+        castShadow={shadowMapSize > 0}
+        shadow-mapSize={[shadowMapSize || 1, shadowMapSize || 1]}
         shadow-camera-left={-9}
         shadow-camera-right={9}
         shadow-camera-top={9}
