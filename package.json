@@ -1,0 +1,24 @@
+{
+  "name": "wirelight",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.10.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @wirelight/web dev",
+    "build": "pnpm --filter @wirelight/web build",
+    "test": "vitest run",
+    "check": "biome check . && pnpm -r typecheck",
+    "rooms:validate": "vitest run --project rooms",
+    "e2e": "pnpm --filter @wirelight/web e2e"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@types/node": "^26.6.4",
+    "playwright-core": "^1.64.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}

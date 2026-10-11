@@ -1,0 +1,5 @@
+# obs=never lantern=up
+$ ip link show dev eth0
+2: eth0@if2: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether 02:00:00:00:00:05 brd ff:ff:ff:ff:ff:ff link-netns lan
+[exit 0]

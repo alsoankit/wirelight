@@ -1,0 +1,3 @@
+# obs=up lantern=up
+$ ip link set dev eth0 down
+[exit 0]

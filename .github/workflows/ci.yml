@@ -1,0 +1,28 @@
+# CI: lint, typecheck, unit + golden tests, room validation. The web build and browser tests return in B1,
+# when apps/web is rebuilt for the 3D world.
+# Deploys are done by Cloudflare itself from the GitHub repo (wrangler.jsonc), not from here.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm rooms:validate
+      # B1: add back `pnpm build`, Playwright install and `pnpm e2e` once apps/web exists.

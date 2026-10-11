@@ -1,0 +1,4 @@
+# obs=up lantern=up
+$ ip link set
+Not enough information: "dev" argument is required.
+[exit 255]

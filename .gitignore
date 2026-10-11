@@ -1,0 +1,33 @@
+# Private: never commit
+CLAUDE.md
+.claude/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.vite/
+*.tsbuildinfo
+.wrangler/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# Raw asset downloads (license records stay committed)
+assets-src/_downloads/
+assets-src/voices/takes/
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db
