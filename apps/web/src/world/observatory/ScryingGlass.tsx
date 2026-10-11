@@ -6,9 +6,10 @@ import { LineBasicNodeMaterial, MeshBasicNodeMaterial } from "three/webgpu";
 import { regionMaterial } from "../kit/regionMaterials";
 import { ruin } from "../ruin";
 
-// Stand-in for the Scrying Glass (CORE-31), old and new (0050): an ancient stone basin with a brass
-// rim, and above it a hologram of the floor: two rooms and the cable between them, with a message
-// (cyan, alive) crossing. The hologram is pale, never cyan, so only messages are cyan.
+// Stand-in for the Scrying Glass (CORE-31), the player's modern tool (0051): an ancient stone basin
+// with a brass rim, and above it a hologram of the floor: two rooms and the cable between them, with
+// a message (cyan, alive) crossing. The hologram is pale, never cyan, so only messages are cyan. It
+// casts a soft cool light and a faint pool on the floor, so the eye finds it among the old stone.
 
 const HOLO = "#CFE3FF";
 
@@ -16,8 +17,8 @@ export function ScryingGlass({ position }: { position: [number, number, number] 
   const map = useRef<Group>(null);
   const dot = useRef<Mesh>(null);
 
-  const { lines, rooms, cone } = useMemo(() => {
-    const steady = mix(float(0.9), float(0.45), ruin);
+  const { lines, rooms, cone, pool } = useMemo(() => {
+    const steady = mix(float(1.0), float(0.6), ruin);
     // A slow shimmer in ruin (several seconds per pulse; never a fast flicker).
     const shimmer = sin(time.mul(0.9)).mul(0.12).mul(ruin).add(1);
     const lineMaterial = new LineBasicNodeMaterial({ transparent: true, depthWrite: false, toneMapped: false });
@@ -42,10 +43,23 @@ export function ScryingGlass({ position }: { position: [number, number, number] 
         .sub(smoothstep(-0.35, 0.35, positionLocal.y))
         .mul(steady.mul(0.12)),
     );
+    // A faint pool of its light on the floor round the basin, so the eye finds it (it's a tool).
+    const poolMaterial = new MeshBasicNodeMaterial({
+      transparent: true,
+      depthWrite: false,
+      blending: AdditiveBlending,
+      toneMapped: false,
+    });
+    poolMaterial.colorNode = color(HOLO).mul(
+      float(1)
+        .sub(smoothstep(0.25, 1.0, positionLocal.xy.length()))
+        .mul(0.09),
+    );
     return {
       lines: { geometry: new EdgesGeometry(new BoxGeometry(0.34, 0.2, 0.34)), material: lineMaterial },
       rooms: roomMaterial,
       cone: coneMaterial,
+      pool: poolMaterial,
     };
   }, []);
 
@@ -68,6 +82,11 @@ export function ScryingGlass({ position }: { position: [number, number, number] 
       </mesh>
       <mesh position={[0, 0.85, 0]} rotation={[Math.PI / 2, 0, 0]} material={regionMaterial("Brass")}>
         <torusGeometry args={[0.53, 0.045, 8, 32]} />
+      </mesh>
+      {/* its own soft, cool light: it catches the brass rim and the stone round it */}
+      <pointLight position={[0, 1.5, 0]} color={HOLO} intensity={1.6} distance={3.2} decay={2} />
+      <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} material={pool}>
+        <circleGeometry args={[1.0, 32]} />
       </mesh>
       <mesh position={[0, 1.2, 0]} material={cone}>
         <cylinderGeometry args={[0.5, 0.3, 0.7, 24, 1, true]} />

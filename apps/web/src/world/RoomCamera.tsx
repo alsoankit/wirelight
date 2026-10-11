@@ -8,7 +8,9 @@ import { type PerspectiveCamera as Camera, Vector3 } from "three";
 
 type Props = { target: [number, number, number]; distance?: number; fov?: number };
 
-const VIEW_DIRECTION = new Vector3(1, 0.9, 1).normalize();
+// From the room toward the camera. Fixed for every room (no orbit), so static geometry facing away
+// from it can be dropped (kit/StaticRoom.tsx).
+export const VIEW_DIRECTION = new Vector3(1, 0.9, 1).normalize();
 const PARALLAX = 0.5; // metres of camera drift at the screen edge
 
 export function RoomCamera({ target, distance = 24, fov = 28 }: Props) {

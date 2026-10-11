@@ -11,7 +11,7 @@ import { makeEarth, makeFlagstones } from "../kit/floor";
 import { type Extra, StaticRoom } from "../kit/StaticRoom";
 import { MOON_POSITION, MOON_TARGET } from "../moon";
 import { Plate } from "../Plate";
-import { RoomCamera } from "../RoomCamera";
+import { RoomCamera, VIEW_DIRECTION } from "../RoomCamera";
 import { RuinDial } from "../RuinDial";
 import { WindDriver } from "../WindDriver";
 import { Keeper } from "./Keeper";
@@ -60,11 +60,11 @@ function Cable({ lit }: { lit: boolean }) {
   );
 }
 
-// The floor: separate irregular flagstones made in code (not tiles), dark earth in the gaps.
+// The floor: rows of old flagstones made in code (not kit tiles), tight dark joints.
 const FLOOR: Extra[] = [
   {
     name: "Floor",
-    geometry: makeFlagstones({ size: 8.4, stones: 8, seed: 1103 }),
+    geometry: makeFlagstones({ size: 8.4, seed: 1103 }),
   },
   { name: "Earth", geometry: makeEarth(8.4) },
 ];
@@ -102,7 +102,7 @@ export function ObservatoryScene() {
       <RoomLights glows={RUNE_GLOWS} />
 
       <Suspense fallback={null}>
-        <StaticRoom placements={OBSERVATORY} extras={FLOOR} />
+        <StaticRoom placements={OBSERVATORY} extras={FLOOR} toCamera={VIEW_DIRECTION} />
       </Suspense>
       <Runes />
       <KnightLetter position={LETTER} />
@@ -126,7 +126,7 @@ export function ObservatoryScene() {
       <MockTraffic
         corridorEnd={[DOORWAY.x, 0.35, CORRIDOR_END_Z]}
         doorway={[DOORWAY.x, 0.9, DOORWAY.z]}
-        keeper={[KEEPER.position[0] - 0.62, 1.2, KEEPER.position[2] - 0.3]}
+        keeper={[KEEPER.position[0], 0.85, KEEPER.position[2] - 0.36]}
         inbound={inbound}
         cue={cue}
         onRoundTrip={() => setLit(true)}

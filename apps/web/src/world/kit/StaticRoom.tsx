@@ -44,7 +44,46 @@ function floatCopy(source: BufferGeometry): BufferGeometry {
 // Geometry made in code (the floor), already in world space, with the region material to use.
 export type Extra = { name: string; geometry: BufferGeometry };
 
-export function StaticRoom({ placements, extras = [] }: { placements: Placement[]; extras?: Extra[] }) {
+// Triangles facing away from the fixed camera are never seen (the backs of walls, statues, columns):
+// drop them from what is drawn. A little slack keeps faces at grazing angles, for the parallax.
+const BACKFACE_SLACK = -0.12;
+
+function facingCamera(source: BufferGeometry, toCamera: Vector3): BufferGeometry {
+  const position = source.getAttribute("position");
+  const keep: number[] = [];
+  const a = new Vector3();
+  const b = new Vector3();
+  const c = new Vector3();
+  for (let t = 0; t < position.count / 3; t++) {
+    a.fromBufferAttribute(position, t * 3);
+    b.fromBufferAttribute(position, t * 3 + 1);
+    c.fromBufferAttribute(position, t * 3 + 2);
+    const n = b.sub(a).cross(c.sub(a)).normalize();
+    if (n.dot(toCamera) >= BACKFACE_SLACK) keep.push(t);
+  }
+  const out = new BufferGeometry();
+  for (const [name, attribute] of Object.entries(source.attributes)) {
+    const size = attribute.itemSize;
+    const values = new Float32Array(keep.length * 3 * size);
+    keep.forEach((t, k) => {
+      for (let v = 0; v < 3; v++) {
+        for (let i = 0; i < size; i++) values[(k * 3 + v) * size + i] = attribute.getComponent(t * 3 + v, i);
+      }
+    });
+    out.setAttribute(name, new BufferAttribute(values, size));
+  }
+  return out;
+}
+
+export function StaticRoom({
+  placements,
+  extras = [],
+  toCamera,
+}: {
+  placements: Placement[];
+  extras?: Extra[];
+  toCamera: Vector3; // from the room toward the fixed camera
+}) {
   const names = useMemo(() => [...new Set(placements.map((p) => p.piece))], [placements]);
   const gltfs = useGLTF(names.map(pieceUrl));
   // drei hands back a new array each render; the scenes inside are cached, so key the work on them
@@ -97,14 +136,19 @@ export function StaticRoom({ placements, extras = [] }: { placements: Placement[
         return g;
       }),
     );
+    // Draw (and bake light into) only what faces the camera; the full room still blocks the moon.
+    const visible = result.map((m) => {
+      const flat = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry;
+      return { ...m, geometry: facingCamera(flat, toCamera) };
+    });
     if (occluder)
       bakeMoonlight(
-        result.map((m) => m.geometry),
+        visible.map((m) => m.geometry),
         occluder,
         TO_MOON,
       );
-    return result;
-  }, [scenesKey, names, placements, extras]);
+    return visible;
+  }, [scenesKey, names, placements, extras, toCamera]);
 
   useEffect(() => {
     return () => {
