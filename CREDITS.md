@@ -1,7 +1,7 @@
 # Credits
 
 ## Art
-(Added as 3D assets are chosen.)
+- **Ultimate Modular Ruins Pack** (Aug 2021) — by [Quaternius](https://quaternius.com/packs/ultimatemodularruins.html). The pack's own `License.txt` says CC0 1.0 Universal; Quaternius now also publishes the [Quaternius Asset License v1.0](https://quaternius.com/license.html). Records in `assets-src/licenses/`. Used for the Overgrown Halls (Region 1), restyled.
 
 ## Music and voices
 (Added as tracks and voice models are plugged in.)
