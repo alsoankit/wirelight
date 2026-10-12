@@ -1,13 +1,26 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { B0Room } from "./B0Room";
+import { EngineCheck } from "./dev/engine-check/EngineCheck";
 import { RendererCheck } from "./dev/renderer-check/RendererCheck";
+// Fonts are bundled (Fontsource, OFL), never fetched from a font server: the game must work offline.
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/cinzel";
 import "./styles.css";
 
-// B0: the room prototype, plus the renderer check at /dev/renderer-check. The game itself arrives in B1.
+// B0: the room prototype, plus dev checks at /dev/renderer-check and /dev/engine-check. The game
+// itself arrives in B1.
 const root = document.getElementById("root");
 if (!root) throw new Error("#root is missing from index.html");
 
-const page = window.location.pathname.startsWith("/dev/renderer-check") ? <RendererCheck /> : <B0Room />;
+const path = window.location.pathname;
+const page = path.startsWith("/dev/renderer-check") ? (
+  <RendererCheck />
+) : path.startsWith("/dev/engine-check") ? (
+  <EngineCheck />
+) : (
+  <B0Room />
+);
 
 createRoot(root).render(<StrictMode>{page}</StrictMode>);

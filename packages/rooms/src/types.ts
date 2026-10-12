@@ -1,7 +1,8 @@
-/** The room definition format (SRS §15). */
+/** The room definition format (tech/room-format.md). Logic only: all text is in packages/content. */
+
+import type { CardId } from "@wirelight/content";
 import type { ToolId } from "@wirelight/shell";
 import type { DeviceId, Fault, IfaceName, SimEvent, Topology, WorldView } from "@wirelight/sim";
-import type { CardId } from "./content/cards";
 
 /** What a predicate can see: the trace since the room (re)started, and the world as it is now. */
 export interface Facts {
@@ -23,25 +24,14 @@ export interface HealthCheck {
   check: Predicate;
 }
 
+/** A detector for a misunderstanding. Its note and "What you tried" line are content, by this id. */
 export interface Misconception {
   id: string;
   detect: Predicate;
-  /** The Knight's note when it fires: addresses the misunderstanding, never gives the answer. */
-  note: string;
-  /** One line for the debrief's "What you tried". */
-  tried: string;
 }
 
-export type Access =
-  | { state: "enterable" }
-  | { state: "off-limits"; reason: string }
-  | { state: "locked-for-now"; text: string };
-
-export interface Hint {
-  text: string;
-  /** Hint 3 (the idea) links to a Codex entry. */
-  codex?: CardId;
-}
+/** Why a machine can't be entered is content (`access` in the room's text). */
+export type Access = { state: "enterable" } | { state: "off-limits" } | { state: "locked-for-now" };
 
 export interface HintTiming {
   /** First hint after this much time... */
@@ -62,8 +52,10 @@ export interface RoomDef {
   floor: number;
   order: number;
   kind: "prologue" | "learn" | "break" | "boss" | "secret";
-  title: string;
-  mission: string;
+  /** The room's text in packages/content (title, mission, notes, hints, detector notes, debrief). */
+  content: string;
+  /** Values for the text's `{name}` placeholders (addresses and the like). */
+  vars?: Record<string, string>;
   seed: number;
 
   topology: Topology;
@@ -93,12 +85,9 @@ export interface RoomDef {
   healthChecks: HealthCheck[];
 
   cards: CardId[];
-  notes: string[];
-  hints: [Hint, Hint, Hint, Hint, Hint];
   /** Overrides for FR-HINT-07 defaults (bosses: reveal no earlier than 12 min). */
   hintTiming?: HintTiming;
   misconceptions: Misconception[];
-  debrief: { happened: string; terms: { term: string; meaning: string }[] };
   solution: SolutionStep[];
   /** Scripts that trigger each misconception, so CI can prove every detector works (ROOM-03c). */
   detectorTests: { misconception: string; steps: SolutionStep[] }[];

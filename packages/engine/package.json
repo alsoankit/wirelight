@@ -1,0 +1,19 @@
+{
+  "name": "@wirelight/engine",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./worker": "./src/worker.ts"
+  },
+  "dependencies": {
+    "@wirelight/content": "workspace:*",
+    "@wirelight/rooms": "workspace:*",
+    "@wirelight/shell": "workspace:*",
+    "@wirelight/sim": "workspace:*",
+    "comlink": "4.4.2"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

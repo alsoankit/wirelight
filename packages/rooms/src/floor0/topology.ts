@@ -1,3 +1,4 @@
+import { lanternAnnouncement, messengerMessage } from "@wirelight/content";
 import type { Topology } from "@wirelight/sim";
 
 export const OBSERVATORY_MAC = "02:00:00:00:00:05";
@@ -18,7 +19,7 @@ export function twoMachines(
         kind: "host",
         interfaces: [{ name: "eth0", mac: OBSERVATORY_MAC }],
         // The Knight's automatic messenger, reading the address card on the desk.
-        ...(opts.messenger ? { messenger: { to: LANTERN_MAC, msg: "hello from the observatory" } } : {}),
+        ...(opts.messenger ? { messenger: { to: LANTERN_MAC, msg: messengerMessage } } : {}),
       },
       {
         id: "lantern",
@@ -28,7 +29,7 @@ export function twoMachines(
         lab: { mode: "responder", reply: lanternReply, answersBroadcast: true },
         // A background announcement: a real IPv4/UDP packet, shown sealed on Floor 0.
         ...(opts.announcements
-          ? { announcer: { ip: "10.0.0.7", port: 40000, text: "lantern is here", intervalMs: 9000 } }
+          ? { announcer: { ip: "10.0.0.7", port: 40000, text: lanternAnnouncement, intervalMs: 9000 } }
           : {}),
       },
     ],

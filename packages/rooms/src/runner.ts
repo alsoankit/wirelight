@@ -1,6 +1,6 @@
 /** Runs a room headless: load it, type commands, let network time pass. Used by CI and tests. */
+import { shellContent } from "@wirelight/content";
 import { SimBackend } from "@wirelight/shell";
-import { shellContent } from "./content/shell";
 import { facts } from "./predicates";
 import { toolsIn } from "./tools";
 import type { Facts, RoomDef, SolutionStep } from "./types";

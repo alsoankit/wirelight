@@ -1,5 +1,6 @@
 /* B0 styles. Interface look (art-direction.md): dark, warm, translucent glass; Inter to read,
-   JetBrains Mono for machine text; reserved colours never reused for decoration. */
+   JetBrains Mono for machine text, Cinzel for floor and room titles only; reserved colours never
+   reused for decoration. */
 
 :root {
   --cyan: #5ee0e8; /* alive: messages, working links */
@@ -9,8 +10,9 @@
   --glass-border: rgba(255, 220, 170, 0.18);
   --text: #f3e9dc;
   --text-dim: #b9ad9c;
-  --mono: "JetBrains Mono", ui-monospace, monospace;
-  --sans: Inter, system-ui, sans-serif;
+  --mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --sans: "Inter Variable", system-ui, sans-serif;
+  --display: "Cinzel Variable", Georgia, serif; /* floor and room titles only */
 }
 
 html,

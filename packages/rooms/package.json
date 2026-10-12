@@ -6,6 +6,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@wirelight/content": "workspace:*",
     "@wirelight/shell": "workspace:*",
     "@wirelight/sim": "workspace:*"
   },
