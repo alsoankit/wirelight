@@ -3,7 +3,16 @@
 // Everything it reports comes from the simulator's one trace: the main thread receives new events in
 // batches and derives every view from them; the session adds only what the room's rules say about
 // them (won, health checks, detectors fired).
-import { facts, loadRoom, type RoomDef, roomById, rooms, toolsIn } from "@wirelight/rooms";
+import {
+  type CorridorState,
+  corridorState,
+  facts,
+  loadRoom,
+  type RoomDef,
+  roomById,
+  rooms,
+  toolsIn,
+} from "@wirelight/rooms";
 import type { SimBackend } from "@wirelight/shell";
 import type { CmdSource, DeviceId, SimEvent, WorldState } from "@wirelight/sim";
 
@@ -16,6 +25,10 @@ export type RoomStatus = {
   health: Record<string, boolean>;
   /** Detectors that have fired since the room (re)started, in the order they fired. */
   detectors: string[];
+  /** Every corridor (cable) by link id: dark, lit or broken (CORE-12). */
+  corridors: Record<string, CorridorState>;
+  /** Every door by "device:iface": its address and whether it's up (for plates and link lights). */
+  doors: Record<string, { mac: string; up: boolean }>;
 };
 
 /** What the main thread gets after each call: the trace events it hasn't seen yet, and the status. */
@@ -53,10 +66,33 @@ export class Session {
   /**
    * Lets network time run up to `t` (the main thread's presentation clock decides how fast). Never
    * goes backwards; asking for the past just returns what's new.
+   *
+   * With `until: "cable"`, time stops early at the moment a message enters a cable, so the clock can
+   * slow down to show the crossing (a crossing is a fraction of a millisecond of network time,
+   * shorter than one screen frame at real speed; CORE-14, CORE-42).
    */
-  advanceTo(t: number): Batch {
+  advanceTo(t: number, until?: "cable"): Batch {
     const b = this.live();
-    if (t > b.now()) b.advance(t);
+    if (until !== "cable") {
+      if (t > b.now()) b.advance(t);
+      return this.batch();
+    }
+    const from = b.trace().length;
+    for (let guard = 0; guard < 10_000 && b.now() < t; guard++) {
+      const next = b.nextEventTime();
+      if (next === null || next > t) {
+        b.advance(t);
+        break;
+      }
+      b.advance(Math.max(next, b.now()));
+      if (
+        b
+          .trace()
+          .slice(from)
+          .some((e) => e.kind === "link.enter")
+      )
+        break;
+    }
     return this.batch();
   }
 
@@ -87,6 +123,14 @@ export class Session {
       won: room.winCondition(f),
       health: Object.fromEntries(room.healthChecks.map((h) => [h.id, h.check(f)])),
       detectors: [...this.fired],
+      corridors: Object.fromEntries(f.world.links().map((l) => [l.id, corridorState(f, l.id, b.now())])),
+      doors: Object.fromEntries(
+        f.world
+          .devices()
+          .flatMap((d) =>
+            d.ifaces.map((i) => [`${d.id}:${i.name}`, { mac: i.mac, up: f.world.oper(d.id, i.name).up }]),
+          ),
+      ),
     };
   }
 

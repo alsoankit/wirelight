@@ -46,4 +46,6 @@ export const voice = {
     next: "Continue",
   },
   send: "Send",
+  /** UI-06: before the gift of the voice, a click shows the command it ran under this caption. */
+  heard: "the machine heard:",
 };

@@ -2,8 +2,8 @@ import { Vector3 } from "three";
 import { distance, float, mix, positionWorld, smoothstep, uniform } from "three/tsl";
 
 // The one dial (art-direction.md, 0021): 1 = deep ruin, 0 = fully restored. It drives materials,
-// light, fog, particles and wind together. In the game it is derived from the room's failing health
-// checks (CORE-38); in B0 a key press moves it.
+// light, fog, particles and wind together. It is derived from the room's failing health checks
+// (CORE-38; RuinDial).
 //
 // Restoration spreads (CORE-39): when the dial changes, a wave front grows from the object that was
 // fixed. Everything the front has passed is at the new level; everything beyond is still at the old
@@ -38,8 +38,10 @@ export function ruinAtPoint(x: number, y: number, z: number): number {
   return ruinFrom.value + (ruinTo.value - ruinFrom.value) * reached;
 }
 
-export function startingRuin(): number {
+// Dev aid: ?ruin=0|1 pins the dial for screenshots; null when not pinned.
+export function pinnedRuin(): number | null {
   const value = new URLSearchParams(window.location.search).get("ruin");
-  const n = value === null ? 1 : Number(value);
-  return Number.isFinite(n) ? Math.min(Math.max(n, 0), 1) : 1;
+  if (value === null) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.min(Math.max(n, 0), 1) : null;
 }

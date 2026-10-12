@@ -17,7 +17,7 @@ import { noise3 } from "../kit/bake";
 import { regionMaterial } from "../kit/regionMaterials";
 import { ruinHere } from "../ruin";
 import { BREEZE, gust, windDirection } from "../wind";
-import type { KeeperCue } from "./MockTraffic";
+import type { KeeperCue } from "./Messages";
 
 // The keeper (world/lore.md, CORE-24, 0051, 0052, proposed 0054): a mysterious figure, not a robot
 // and not a doll. One loose robe of dark, weathered cloth that rises over its head into a hood; the

@@ -7,6 +7,7 @@ export default defineConfig({
       { test: { name: "shell", include: ["packages/shell/test/**/*.test.ts"] } },
       { test: { name: "rooms", include: ["packages/rooms/test/**/*.test.ts"] } },
       { test: { name: "engine", include: ["packages/engine/test/**/*.test.ts"] } },
+      { test: { name: "web", include: ["apps/web/test/**/*.test.ts"] } },
     ],
   },
 });

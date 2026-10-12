@@ -81,3 +81,32 @@ describe("the game session", () => {
     expect(() => new Session().loadRoom("f0.r2-wrong-name", s.snapshot())).toThrow();
   });
 });
+
+describe("what the room shows", () => {
+  it("reports doors and corridors: down and broken, then up and lit", () => {
+    const s = new Session();
+    const start = s.loadRoom("f0.r3-lights-out").status;
+    expect(start.doors["observatory:eth0"]).toEqual({ mac: "02:00:00:00:00:05", up: false });
+    expect(start.corridors).toEqual({ wire: "broken" });
+    s.exec("observatory", "ip link set eth0 up", "typed");
+    s.exec("observatory", `lab send-frame --to ${LANTERN}`, "typed");
+    const end = s.advanceTo(10_000).status;
+    expect(end.doors["observatory:eth0"]?.up).toBe(true);
+    expect(end.corridors).toEqual({ wire: "lit" });
+  });
+
+  it("can stop time the moment a message enters a cable, so the crossing can be shown", () => {
+    const s = new Session();
+    s.loadRoom("prologue.first-message");
+    s.exec("observatory", `lab send-frame --to ${LANTERN} --msg "hello"`, "click");
+    // The command put the message on the cable at once; step until lantern's answer goes on.
+    const out = s.advanceTo(10_000, "cable");
+    const enter = out.events.find((e) => e.kind === "link.enter");
+    expect(enter).toBeDefined();
+    expect(out.status.now).toBe(enter?.t); // stopped right there, not at 10 s
+    expect(out.status.now).toBeLessThan(1);
+    const end = s.advanceTo(10_000, "cable");
+    expect(end.status.now).toBe(10_000); // nothing more goes on a cable: runs to the end
+    expect(end.status.won).toBe(true);
+  });
+});

@@ -1,13 +1,18 @@
 import { PerformanceMonitor } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect, useState } from "react";
+import { EngineDriver } from "./engine/EngineDriver";
+import { useSession } from "./engine/store";
+import { RoomHud } from "./play/RoomHud";
 import { backendFromUrl, nodeRendererFactory } from "./render/backend";
 import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "./render/quality";
 import { ObservatoryScene } from "./world/observatory/ObservatoryScene";
 
-// B0 · Look and feel: one Region 1 room with mock data (production/roadmap.md).
+// B1 walking skeleton: the Prologue, played in the Observatory, driven by the engine in a worker.
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
-// ?ruin=0 starts restored; R toggles (a wave from the doorway). ?tier=high|medium|low|simple; T cycles.
+// Dev aids: ?ruin=0|1 pins the dial; ?tier=high|medium|low|simple, T cycles.
+
+const ROOM = "prologue.first-message";
 
 // Resolution follows the tier, capped at twice the CSS pixels.
 function Resolution({ scale }: { scale: number }) {
@@ -24,6 +29,11 @@ export function B0Room() {
   const [tier, setTier] = useState<Tier>(forced ?? (backend === "webgpu" ? "high" : "medium"));
   const [auto, setAuto] = useState(!forced);
   const quality = QUALITY[tier];
+  const load = useSession((s) => s.load);
+
+  useEffect(() => {
+    void load(ROOM);
+  }, [load]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -54,12 +64,14 @@ export function B0Room() {
             if (auto) setTier((t) => lower(t));
           }}
         />
+        <EngineDriver />
         <ObservatoryScene />
       </Canvas>
       <div className="dev-badge">
         Quality: {tier}
-        {auto ? " (auto)" : ""} · T to change · R to restore
+        {auto ? " (auto)" : ""} · T to change
       </div>
+      <RoomHud />
     </QualityContext.Provider>
   );
 }

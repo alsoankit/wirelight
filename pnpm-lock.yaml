@@ -199,9 +199,18 @@ importers:
       '@react-three/fiber':
         specifier: ^9.8.1
         version: 9.8.1(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(three@0.186.1)
+      '@wirelight/content':
+        specifier: workspace:*
+        version: link:../../packages/content
       '@wirelight/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@wirelight/rooms':
+        specifier: workspace:*
+        version: link:../../packages/rooms
+      '@wirelight/sim':
+        specifier: workspace:*
+        version: link:../../packages/sim
       comlink:
         specifier: 4.4.2
         version: 4.4.2
@@ -217,6 +226,9 @@ importers:
       three-mesh-bvh:
         specifier: ^0.9.16
         version: 0.9.16(three@0.186.1)
+      zustand:
+        specifier: 5.0.15
+        version: 5.0.15(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
     devDependencies:
       '@types/react':
         specifier: ^19.3.0

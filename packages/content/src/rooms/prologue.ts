@@ -12,13 +12,13 @@ export const firstMessage: RoomText = {
     { text: "The big button is the only thing you need here." },
     { text: "Press Send, then watch the corridor." },
     { text: "A message goes out along the cable. Wait and see if anything comes back.", codex: "message" },
-    { text: "Press Send once and keep your eyes on the Glass until the light returns." },
+    { text: "Press Send once and keep your eyes on the Glass until a light returns." },
     { text: "Press Send. Your message travels to lantern, lantern answers, and the answer lights the corridor." },
   ],
   detectors: {},
   debrief: {
     happened:
-      "That's a network: machines, a cable between them, and messages going back and forth. The light came on when the answer came back. Remember that. Sending isn't the same as being heard.",
+      "That's a network: machines, a cable between them, and messages going back and forth. The corridor lit up when the answer came back. Remember that: sending isn't the same as being heard.",
     terms: [],
   },
 };
