@@ -1,16 +1,57 @@
 /**
- * The way in (DESIGN_NOTES D20): the title screen, the short tour, and the Seer's gift.
+ * The way in (gameplay/onboarding.md): the landing page, the short tour, and the gift of sight.
  * Plain modern voice (D2). The tour explains the game, never a networking idea (P-9).
  */
 
-export const title = {
+/** The landing page (ONB-01..04, 0010, 0044). It says plainly that Wirelight teaches networking. */
+export const landing = {
   name: "Wirelight",
-  tagline: "A network fell silent. Bring it back.",
+  headline: "Learn how computer networks really work, by bringing one back to life.",
+  facts: ["Real Linux commands", "No experience needed", "Free, in your browser"],
   explore: "Explore the dungeon",
-  /** Returning players: `Continue: <room title>`. */
+  /** Returning players: `Continue: <room title>` (0044). */
   continuePrefix: "Continue",
+  /** A link to a room: `Play <room title>` (0044). */
+  playPrefix: "Play",
   skip: "Skip intro",
-  hint: "to begin",
+  enter: "Enter",
+  enterHint: "to begin",
+  more: "How it works",
+  how: {
+    title: "How it works",
+    steps: [
+      {
+        title: "A network in ruins",
+        body: "Under the gate lies a dungeon that is really a computer network. Rooms are machines, doors are where cables plug in, and corridors are the cables.",
+      },
+      {
+        title: "Watch the messages",
+        body: "You can see every message as a small light moving through the rooms. Catch one and open it to read what's inside.",
+      },
+      {
+        title: "Fix it for real",
+        body: "Each room is broken in a way real networks break. You fix it with the same commands people use on real Linux machines, and the room comes back to life.",
+      },
+    ],
+  },
+  learn: {
+    title: "What you'll learn",
+    intro: "Each part of the dungeon teaches one part of how networks work, from the very beginning.",
+    regions: [
+      {
+        name: "The Overgrown Halls",
+        body: "Machines, cables and messages. How a message finds the right machine on a wire.",
+      },
+      { name: "The Sorting Works", body: "Switches: how many machines share one network, and what goes wrong." },
+      { name: "The Lantern Town", body: "IP addresses, ping, and how machines get their addresses." },
+      { name: "The Cathedral of Crossings", body: "Routers: how messages cross from one network to another." },
+      {
+        name: "And deeper",
+        body: "Ports, connections, names and the web, and the edges of the network. More floors are on the way.",
+      },
+    ],
+  },
+  closing: "No score, no timer and no way to lose. Trying things is how you learn here.",
 };
 
 /** What a tour card spotlights on the real screen. */

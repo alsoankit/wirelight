@@ -1,12 +1,12 @@
 import { PerformanceMonitor } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import { useEffect, useState } from "react";
-import { EngineDriver } from "./engine/EngineDriver";
-import { useSession } from "./engine/store";
-import { RoomHud } from "./play/RoomHud";
-import { backendFromUrl, nodeRendererFactory } from "./render/backend";
-import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "./render/quality";
-import { ObservatoryScene } from "./world/observatory/ObservatoryScene";
+import { EngineDriver } from "../engine/EngineDriver";
+import { useSession } from "../engine/store";
+import { backendFromUrl, nodeRendererFactory } from "../render/backend";
+import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
+import { ObservatoryScene } from "../world/observatory/ObservatoryScene";
+import { RoomHud } from "./RoomHud";
 
 // B1 walking skeleton: the Prologue, played in the Observatory, driven by the engine in a worker.
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
@@ -23,7 +23,7 @@ function Resolution({ scale }: { scale: number }) {
   return null;
 }
 
-export function B0Room() {
+export function PlayPage() {
   const backend = backendFromUrl() === "webgl2" ? "webgl2" : "webgpu";
   const forced = tierFromUrl();
   const [tier, setTier] = useState<Tier>(forced ?? (backend === "webgpu" ? "high" : "medium"));

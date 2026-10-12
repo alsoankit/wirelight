@@ -204,3 +204,206 @@ body,
   margin: 0 0 6px;
   color: var(--text-dim);
 }
+
+/* The landing page (ONB-01..03). The 3D scene stays fixed behind the page; the hero is transparent
+   over it with a soft dark wash on the left for the text; the sections below are solid. */
+html:has(.landing),
+html:has(.landing) body,
+html:has(.landing) #root {
+  height: auto;
+  min-height: 100%;
+}
+
+html:has(.landing) {
+  scroll-behavior: smooth;
+}
+
+.landing-scene {
+  position: fixed;
+  inset: 0;
+}
+
+.landing-hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(16px, 7vw, 120px);
+  background: linear-gradient(90deg, rgba(8, 10, 16, 0.82) 0%, rgba(8, 10, 16, 0.55) 34%, rgba(8, 10, 16, 0) 62%);
+  box-sizing: border-box;
+}
+
+.landing-intro {
+  max-width: 520px;
+}
+
+.landing-name {
+  margin: 0;
+  font: 600 clamp(44px, 7vw, 84px) / 1 var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e9dcc5;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+}
+
+.landing-headline {
+  margin: 18px 0 0;
+  font: 400 clamp(18px, 2.1vw, 23px) / 1.4 var(--sans);
+  color: var(--text);
+}
+
+.landing-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-dim);
+  font: 500 14px / 1.3 var(--sans);
+}
+
+.landing-facts li::before {
+  content: "◆";
+  margin-right: 8px;
+  color: var(--cyan);
+  font-size: 9px;
+  vertical-align: 2px;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.landing-main {
+  padding: 14px 32px;
+  border: 1px solid var(--amber);
+  border-radius: 10px;
+  background: rgba(242, 165, 74, 0.18);
+  color: var(--text);
+  font: 600 18px / 1 var(--sans);
+  cursor: pointer;
+}
+
+.landing-main:hover,
+.landing-main:focus-visible {
+  background: rgba(242, 165, 74, 0.3);
+  box-shadow: 0 0 24px rgba(242, 165, 74, 0.35);
+}
+
+.landing-skip {
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font: 500 15px / 1 var(--sans);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.landing-skip:hover,
+.landing-skip:focus-visible {
+  color: var(--text);
+}
+
+.landing-enter {
+  margin: 16px 0 0;
+  color: var(--text-dim);
+  font: 13px / 1 var(--sans);
+}
+
+.landing-enter kbd {
+  padding: 2px 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  font: 12px / 1 var(--mono);
+}
+
+.landing-more {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-dim);
+  font: 500 14px / 1 var(--sans);
+  text-decoration: none;
+}
+
+.landing-more:hover {
+  color: var(--text);
+}
+
+.landing-section {
+  position: relative;
+  padding: 72px clamp(16px, 7vw, 120px) 96px;
+  background: #0b0d12;
+  border-top: 1px solid var(--glass-border);
+}
+
+.landing-section > * {
+  max-width: 960px;
+}
+
+.landing-section h2 {
+  margin: 0 0 20px;
+  font: 600 30px / 1.2 var(--display);
+  color: #e9dcc5;
+}
+
+.landing-section h2:not(:first-child) {
+  margin-top: 64px;
+}
+
+.landing-steps,
+.landing-regions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-steps li,
+.landing-regions li {
+  padding: 18px 20px;
+  background: rgba(255, 240, 220, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+}
+
+.landing-steps h3,
+.landing-regions h3 {
+  margin: 0 0 8px;
+  font: 600 17px / 1.3 var(--sans);
+}
+
+.landing-steps p,
+.landing-regions p,
+.landing-lead,
+.landing-closing {
+  margin: 0;
+  color: var(--text-dim);
+  font: 15px / 1.55 var(--sans);
+}
+
+.landing-lead {
+  margin-bottom: 18px;
+}
+
+.landing-closing {
+  margin: 40px 0 24px;
+  color: var(--text);
+}
+
+/* No keyboard on touch screens: the Enter hint means nothing there. */
+@media (pointer: coarse) {
+  .landing-enter {
+    display: none;
+  }
+}

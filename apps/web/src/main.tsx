@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { B0Room } from "./B0Room";
+import { App } from "./App";
 import { EngineCheck } from "./dev/engine-check/EngineCheck";
 import { RendererCheck } from "./dev/renderer-check/RendererCheck";
 // Fonts are bundled (Fontsource, OFL), never fetched from a font server: the game must work offline.
@@ -9,8 +9,7 @@ import "@fontsource-variable/jetbrains-mono";
 import "@fontsource-variable/cinzel";
 import "./styles.css";
 
-// B0: the room prototype, plus dev checks at /dev/renderer-check and /dev/engine-check. The game
-// itself arrives in B1.
+// The app (App.tsx: landing and game), plus dev checks at /dev/renderer-check and /dev/engine-check.
 const root = document.getElementById("root");
 if (!root) throw new Error("#root is missing from index.html");
 
@@ -20,7 +19,7 @@ const page = path.startsWith("/dev/renderer-check") ? (
 ) : path.startsWith("/dev/engine-check") ? (
   <EngineCheck />
 ) : (
-  <B0Room />
+  <App />
 );
 
 createRoot(root).render(<StrictMode>{page}</StrictMode>);

@@ -17,6 +17,7 @@ type FloorOptions = {
   gap?: number; // metres between slabs (the joint)
   missing?: number; // share of slabs that are gone
   cracked?: number; // share of slabs cracked across
+  keep?: (x: number, z: number) => boolean; // only slabs whose centre passes (a path instead of a floor)
 };
 
 // mulberry32, as in WindDriver: deterministic, never Math.random.
@@ -238,6 +239,7 @@ export function makeFlagstones({
   gap = 0.016,
   missing = 0.03,
   cracked = 0.2,
+  keep = () => true,
 }: FloorOptions): BufferGeometry {
   const random = seeded(seed);
   const half = size / 2;
@@ -274,8 +276,8 @@ export function makeFlagstones({
         } else outline.push(c);
       });
       const convex = counterClockwise(outline);
-      if (random() >= missing) {
-        const [cx, cz] = centroid(convex);
+      const [cx, cz] = centroid(convex);
+      if (random() >= missing && keep(cx, cz)) {
         // Mostly level; now and then one has sunk or tilted.
         const sunk = random() < 0.12 ? -0.02 - random() * 0.02 : 0;
         const lift = 0.02 + (random() - 0.5) * 0.012 + sunk;

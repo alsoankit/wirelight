@@ -23,9 +23,11 @@ for obj in "$SRC"/*.obj; do
   # The animated character needs its FBX (OBJ has no animation); it isn't used in rooms.
   [ "$name" = "Character_Animated" ] && continue
   $OBJ2GLTF -i "$obj" -o "$TMP/$name.glb" >/dev/null
-  # Keep named materials (the restyling shader targets them), so no palette or joining across materials.
-  $GLTF_TRANSFORM optimize "$TMP/$name.glb" "$OUT/$name.glb" \
-    --compress meshopt --simplify false --palette false --instance false --texture-compress false >/dev/null
+  # Keep every named material (the restyling shader targets them). Not `optimize`: it always merges
+  # materials with identical settings, which in this pack folds the trees' Texture_Leaves into Bark.
+  # Weld (shared vertices), then meshopt compression (quantised, KHR_mesh_quantization).
+  $GLTF_TRANSFORM weld "$TMP/$name.glb" "$TMP/$name.welded.glb" >/dev/null
+  $GLTF_TRANSFORM meshopt "$TMP/$name.welded.glb" "$OUT/$name.glb" >/dev/null
   echo "$name"
 done
 

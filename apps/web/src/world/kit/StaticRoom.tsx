@@ -79,10 +79,12 @@ export function StaticRoom({
   placements,
   extras = [],
   toCamera,
+  toMoon = TO_MOON,
 }: {
   placements: Placement[];
   extras?: Extra[];
   toCamera: Vector3; // from the room toward the fixed camera
+  toMoon?: Vector3; // from the room toward the moon (Region 1 rooms by default)
 }) {
   const names = useMemo(() => [...new Set(placements.map((p) => p.piece))], [placements]);
   const gltfs = useGLTF(names.map(pieceUrl));
@@ -123,9 +125,12 @@ export function StaticRoom({
       bakeAgeing(geometry);
       result.push({ name, geometry, material: bakedRegionMaterial(name) ?? original });
     }
-    for (const extra of extras) {
-      const material = bakedRegionMaterial(extra.name);
-      if (material) result.push({ name: extra.name, geometry: extra.geometry, material });
+    // Extras sharing a material become one mesh (one draw call).
+    for (const name of new Set(extras.map((e) => e.name))) {
+      const material = bakedRegionMaterial(name);
+      const same = extras.filter((e) => e.name === name).map((e) => e.geometry);
+      const geometry = same.length === 1 ? same[0] : mergeGeometries(same);
+      if (material && geometry) result.push({ name: `extra:${name}`, geometry, material });
     }
     // Moonlight, baked once: everything static blocks it; nothing renders shadows at runtime.
     const occluder = mergeGeometries(
@@ -145,10 +150,10 @@ export function StaticRoom({
       bakeMoonlight(
         visible.map((m) => m.geometry),
         occluder,
-        TO_MOON,
+        toMoon,
       );
     return visible;
-  }, [scenesKey, names, placements, extras, toCamera]);
+  }, [scenesKey, names, placements, extras, toCamera, toMoon]);
 
   useEffect(() => {
     return () => {
