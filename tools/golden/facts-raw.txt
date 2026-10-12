@@ -1,0 +1,161 @@
+== Versions
+ip utility, iproute2-6.17.0, libbpf 1.6.3
+ping from iputils 20250605
+tcpdump version 4.99.6
+libpcap version 1.10.6 (64-bit time_t, with TPACKET_V3)
+7.1.13-200.fc44.x86_64
+
+== Defaults in a fresh namespace (after lib.sh's reset of host-inherited IPv4 conf)
+net.ipv4.ip_forward = 0
+net.ipv4.ip_default_ttl = 64
+net.ipv4.icmp_ratelimit = 1000
+net.ipv4.icmp_ratemask = 6168
+net.ipv4.icmp_msgs_per_sec = 10000
+net.ipv4.icmp_msgs_burst = 10000
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.conf.eth0.send_redirects = 1
+net.ipv4.conf.eth0.accept_redirects = 1
+net.ipv4.conf.eth0.arp_ignore = 0
+net.ipv4.conf.eth0.arp_announce = 0
+net.ipv4.conf.eth0.arp_notify = 0
+net.ipv4.ip_local_port_range = 32768	60999
+net.ipv4.ping_group_range = 65534	65534
+-- neighbour parameters on eth0
+net.ipv4.neigh.eth0.anycast_delay = 100
+net.ipv4.neigh.eth0.app_solicit = 0
+net.ipv4.neigh.eth0.base_reachable_time_ms = 30000
+net.ipv4.neigh.eth0.delay_first_probe_time = 5
+net.ipv4.neigh.eth0.gc_stale_time = 60
+net.ipv4.neigh.eth0.interval_probe_time_ms = 5000
+net.ipv4.neigh.eth0.locktime = 100
+net.ipv4.neigh.eth0.mcast_resolicit = 0
+net.ipv4.neigh.eth0.mcast_solicit = 3
+net.ipv4.neigh.eth0.proxy_delay = 80
+net.ipv4.neigh.eth0.proxy_qlen = 64
+net.ipv4.neigh.eth0.retrans_time_ms = 1000
+net.ipv4.neigh.eth0.ucast_solicit = 3
+net.ipv4.neigh.eth0.unres_qlen = 101
+net.ipv4.neigh.eth0.unres_qlen_bytes = 212992
+
+== Bridge defaults
+forward_delay 1500
+ageing_time 30000
+stp_state 0
+vlan_filtering 0
+mcast_snooping 1
+  sysfs ageing_time (centiseconds) = 30000
+-- br0 MAC follows the lowest port MAC:
+    link/ether 02:00:00:00:00:11 brd ff:ff:ff:ff:ff:ff
+
+== Bridge: IGMP reports from br0 after it comes up (tcpdump on hall eth1 from creation)
+  +0.000s  1791840015.398539 IP 0.0.0.0 > 224.0.0.22: igmp v3 report, 1 group record(s)
+  +0.471s  1791840015.869665 IP 0.0.0.0 > 224.0.0.22: igmp v3 report, 1 group record(s)
+
+== Unanswered ARP: retransmits and neighbour states (observatory pings 10.0.0.9 once)
+  state at +0.01s: INCOMPLETE
+  state at +3.12s: FAILED
+-- ARP requests on the wire:
+  +0.000s  1791840021.580638 ARP, Request who-has 10.0.0.9 tell 10.0.0.5, length 28
+  +1.034s  1791840022.614464 ARP, Request who-has 10.0.0.9 tell 10.0.0.5, length 28
+  +2.057s  1791840023.637483 ARP, Request who-has 10.0.0.9 tell 10.0.0.5, length 28
+
+== ping 10.0.0.9 -c 4: when the 'Destination Host Unreachable' lines appear
+  +0.000s  1791840029.374985563 PING 10.0.0.9 (10.0.0.9) 56(84) bytes of data.
+  +3.097s  1791840032.472140946 From 10.0.0.5 icmp_seq=1 Destination Host Unreachable
+  +3.099s  1791840032.474468759 From 10.0.0.5 icmp_seq=2 Destination Host Unreachable
+  +3.102s  1791840032.476572714 From 10.0.0.5 icmp_seq=3 Destination Host Unreachable
+  +6.170s  1791840035.544560854 From 10.0.0.5 icmp_seq=4 Destination Host Unreachable
+  +6.172s  1791840035.547075484 
+  +6.174s  1791840035.549389874 --- 10.0.0.9 ping statistics ---
+  +6.177s  1791840035.551602360 4 packets transmitted, 0 received, +4 errors, 100% packet loss, time 3096ms
+  +6.179s  1791840035.553666387 pipe 3
+
+== ping default interval and IP IDs (ping -c 5 10.0.0.7, captured on lantern)
+  +0.000s  1791840036.409166 IP (tos 0x0, ttl 64, id 58749, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32556, seq 1, length 64
+  +0.000s  1791840036.409182 IP (tos 0x0, ttl 64, id 38685, offset 0, flags [none], proto ICMP (1), length 84)
+                10.0.0.7 > 10.0.0.5: ICMP echo reply, id 32556, seq 1, length 64
+  +1.052s  1791840037.461451 IP (tos 0x0, ttl 64, id 59051, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32556, seq 2, length 64
+  +1.052s  1791840037.461466 IP (tos 0x0, ttl 64, id 38810, offset 0, flags [none], proto ICMP (1), length 84)
+                10.0.0.7 > 10.0.0.5: ICMP echo reply, id 32556, seq 2, length 64
+  +2.076s  1791840038.485623 IP (tos 0x0, ttl 64, id 59200, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32556, seq 3, length 64
+  +2.076s  1791840038.485665 IP (tos 0x0, ttl 64, id 38903, offset 0, flags [none], proto ICMP (1), length 84)
+                10.0.0.7 > 10.0.0.5: ICMP echo reply, id 32556, seq 3, length 64
+  +3.100s  1791840039.509618 IP (tos 0x0, ttl 64, id 59573, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32556, seq 4, length 64
+  +3.100s  1791840039.509660 IP (tos 0x0, ttl 64, id 39210, offset 0, flags [none], proto ICMP (1), length 84)
+                10.0.0.7 > 10.0.0.5: ICMP echo reply, id 32556, seq 4, length 64
+  +4.125s  1791840040.533692 IP (tos 0x0, ttl 64, id 59604, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32556, seq 5, length 64
+  +4.125s  1791840040.533727 IP (tos 0x0, ttl 64, id 39925, offset 0, flags [none], proto ICMP (1), length 84)
+                10.0.0.7 > 10.0.0.5: ICMP echo reply, id 32556, seq 5, length 64
+
+== ping -i 0.2 -c 5 IP IDs (to see whether the ID is a counter)
+  +0.000s  1791840043.599819 IP (tos 0x0, ttl 64, id 4289, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32596, seq 1, length 64
+  +0.206s  1791840043.805617 IP (tos 0x0, ttl 64, id 4329, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32596, seq 2, length 64
+  +0.414s  1791840044.013647 IP (tos 0x0, ttl 64, id 4484, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32596, seq 3, length 64
+  +0.622s  1791840044.221633 IP (tos 0x0, ttl 64, id 4625, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32596, seq 4, length 64
+  +0.830s  1791840044.429664 IP (tos 0x0, ttl 64, id 4785, offset 0, flags [DF], proto ICMP (1), length 84)
+                10.0.0.5 > 10.0.0.7: ICMP echo request, id 32596, seq 5, length 64
+
+== Neighbour after a successful ping, seen from both sides, with timestamps of ARP traffic
+  +0.2s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | lantern: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 DELAY 
+  +4.8s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | lantern: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 DELAY 
+  +5.6s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | lantern: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 REACHABLE 
+  +7.0s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | lantern: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 REACHABLE 
+-- ARP on the wire:
+  +0.000s  1791840047.774139 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+  +0.000s  1791840047.774172 ARP, Reply 10.0.0.7 is-at 02:00:00:00:00:07, length 28
+  +5.431s  1791840053.205542 ARP, Request who-has 10.0.0.5 tell 10.0.0.7, length 28
+  +5.431s  1791840053.205594 ARP, Reply 10.0.0.5 is-at 02:00:00:00:00:05, length 28
+
+== REACHABLE lifetime with base_reachable_time_ms=1000 (5 runs; expected 0.5-1.5 s)
+  run 1: left REACHABLE after 1.39s -> STALE
+  run 2: left REACHABLE after 1.23s -> STALE
+  run 3: left REACHABLE after 0.87s -> STALE
+  run 4: left REACHABLE after 0.85s -> STALE
+  run 5: left REACHABLE after 0.92s -> STALE
+
+== Neighbour state timeline with base_reachable_time_ms=1000 and default delay_first_probe_time=5
+  state at +0.02s: REACHABLE
+  state at +0.62s: DELAY
+  state at +6.06s: REACHABLE
+  state at +6.64s: DELAY
+-- ARP on the wire:
+  +0.000s  1791840063.050991 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+  +0.000s  1791840063.051007 ARP, Reply 10.0.0.7 is-at 02:00:00:00:00:07, length 28
+  +5.003s  1791840068.053519 ARP, Request who-has 10.0.0.5 tell 10.0.0.7, length 28
+  +5.003s  1791840068.053560 ARP, Reply 10.0.0.5 is-at 02:00:00:00:00:05, length 28
+  +6.027s  1791840069.077605 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+  +6.027s  1791840069.077625 ARP, Reply 10.0.0.7 is-at 02:00:00:00:00:07, length 28
+  +11.659s  1791840074.709560 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+  +11.659s  1791840074.709581 ARP, Reply 10.0.0.7 is-at 02:00:00:00:00:07, length 28
+
+== ICMP rate limit: 20 pings with TTL 1 at 10 ms through bridgehead (count time-exceeded)
+  time exceeded received: 6
+-- and 20 pings to a missing network (net unreachable), twice
+  net unreachable received: 2
+  net unreachable received: 2
+
+== Router host unreachable: time from first echo to ICMP error (right has no address)
+  +0.000s  1791840115.105691 IP 10.0.1.10 > 10.0.2.20: ICMP echo request, id 35579, seq 1, length 64
+  +3.060s  1791840118.165616 IP 10.0.1.1 > 10.0.1.10: ICMP host 10.0.2.20 unreachable, length 92
+
+== Neighbour probe that goes unanswered: DELAY -> PROBE -> FAILED (lantern loses its address)
+  before: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 STALE 
+  state at +1.02s: DELAY
+  state at +5.26s: PROBE
+  state at +8.31s: FAILED
+-- ARP on the wire (unicast probes, then nothing):
+  +0.000s  1791840130.517493 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+  +1.024s  1791840131.541523 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+  +2.048s  1791840132.565506 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+
+== Bridge ageing with ageing_time 200 (2 s): when does a's learned entry vanish?
+  gone after 2.07s

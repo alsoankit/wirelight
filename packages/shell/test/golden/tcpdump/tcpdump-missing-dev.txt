@@ -1,0 +1,5 @@
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: none | runs on: lantern
+$ tcpdump -i eth9
+tcpdump: eth9: No such device exists
+(No such device exists)
+[exit 1]

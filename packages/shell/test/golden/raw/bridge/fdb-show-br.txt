@@ -1,0 +1,16 @@
+# switch: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off | setup: none | runs on: hall
+$ bridge fdb show br br0
+02:00:00:00:00:11 dev eth1 master br0 permanent
+33:33:00:00:00:01 dev eth1 self permanent
+01:00:5e:00:00:01 dev eth1 self permanent
+02:00:00:00:00:12 dev eth2 master br0 permanent
+33:33:00:00:00:01 dev eth2 self permanent
+01:00:5e:00:00:01 dev eth2 self permanent
+02:00:00:00:00:13 dev eth3 master br0 permanent
+33:33:00:00:00:01 dev eth3 self permanent
+01:00:5e:00:00:01 dev eth3 self permanent
+33:33:00:00:00:01 dev br0 self permanent
+01:00:5e:00:00:6a dev br0 self permanent
+33:33:00:00:00:6a dev br0 self permanent
+01:00:5e:00:00:01 dev br0 self permanent
+[exit 0]

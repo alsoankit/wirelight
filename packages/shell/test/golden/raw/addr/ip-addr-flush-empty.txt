@@ -1,0 +1,3 @@
+# lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off | setup: none | runs on: observatory
+$ ip addr flush dev eth0
+[exit 0]

@@ -1,0 +1,33 @@
+# routed-fwd-off: left eth0 02:00:00:00:00:21 10.0.1.10/24 <-> bridgehead eth0 02:00:00:00:00:31 10.0.1.1/24; bridgehead eth1 02:00:00:00:00:32 10.0.2.1/24 <-> right eth0 02:00:00:00:00:41 10.0.2.20/24; all up; bridgehead ip_forward=0; left default via 10.0.1.1, right default via 10.0.2.1; IPv6 off | setup: none | runs on: bridgehead
+$ sysctl -a | grep neigh.eth0
+net.ipv4.neigh.eth0.anycast_delay = 100
+net.ipv4.neigh.eth0.app_solicit = 0
+net.ipv4.neigh.eth0.base_reachable_time_ms = 30000
+net.ipv4.neigh.eth0.delay_first_probe_time = 5
+net.ipv4.neigh.eth0.gc_stale_time = 60
+net.ipv4.neigh.eth0.interval_probe_time_ms = 5000
+net.ipv4.neigh.eth0.locktime = 100
+net.ipv4.neigh.eth0.mcast_resolicit = 0
+net.ipv4.neigh.eth0.mcast_solicit = 3
+net.ipv4.neigh.eth0.proxy_delay = 80
+net.ipv4.neigh.eth0.proxy_qlen = 64
+net.ipv4.neigh.eth0.retrans_time_ms = 1000
+net.ipv4.neigh.eth0.ucast_solicit = 3
+net.ipv4.neigh.eth0.unres_qlen = 101
+net.ipv4.neigh.eth0.unres_qlen_bytes = 212992
+net.ipv6.neigh.eth0.anycast_delay = 100
+net.ipv6.neigh.eth0.app_solicit = 0
+net.ipv6.neigh.eth0.base_reachable_time_ms = 30000
+net.ipv6.neigh.eth0.delay_first_probe_time = 5
+net.ipv6.neigh.eth0.gc_stale_time = 60
+net.ipv6.neigh.eth0.interval_probe_time_ms = 5000
+net.ipv6.neigh.eth0.locktime = 0
+net.ipv6.neigh.eth0.mcast_resolicit = 0
+net.ipv6.neigh.eth0.mcast_solicit = 3
+net.ipv6.neigh.eth0.proxy_delay = 80
+net.ipv6.neigh.eth0.proxy_qlen = 64
+net.ipv6.neigh.eth0.retrans_time_ms = 1000
+net.ipv6.neigh.eth0.ucast_solicit = 3
+net.ipv6.neigh.eth0.unres_qlen = 101
+net.ipv6.neigh.eth0.unres_qlen_bytes = 212992
+[exit 0]

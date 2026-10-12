@@ -1,0 +1,10 @@
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: during capture, observatory: ping -c 1 10.0.0.7 | runs on: lantern
+$ timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -c 2 -i eth0 arp
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+02:38:19.647740 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+02:38:19.647758 ARP, Reply 10.0.0.7 is-at 02:00:00:00:00:07, length 28
+2 packets captured
+2 packets received by filter
+0 packets dropped by kernel
+[exit 0]

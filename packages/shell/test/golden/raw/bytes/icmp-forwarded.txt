@@ -1,0 +1,24 @@
+# routed-fwd-on: left eth0 02:00:00:00:00:21 10.0.1.10/24 <-> bridgehead eth0 02:00:00:00:00:31 10.0.1.1/24; bridgehead eth1 02:00:00:00:00:32 10.0.2.1/24 <-> right eth0 02:00:00:00:00:41 10.0.2.20/24; all up; bridgehead ip_forward=1; left default via 10.0.1.1, right default via 10.0.2.1; IPv6 off | setup: during capture, left: ping -c 1 10.0.2.20 | runs on: bridgehead
+$ timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -e -xx -c 2 -i eth1 icmp
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+02:39:33.085738 02:00:00:00:00:32 > 02:00:00:00:00:41, ethertype IPv4 (0x0800), length 98: 10.0.1.10 > 10.0.2.20: ICMP echo request, id 19103, seq 1, length 64
+	0x0000:  0200 0000 0041 0200 0000 0032 0800 4500
+	0x0010:  0054 ee07 4000 3f01 3684 0a00 010a 0a00
+	0x0020:  0214 0800 fe86 4a9f 0001 8d4c cd6a 0000
+	0x0030:  0000 944e 0100 0000 0000 1011 1213 1415
+	0x0040:  1617 1819 1a1b 1c1d 1e1f 2021 2223 2425
+	0x0050:  2627 2829 2a2b 2c2d 2e2f 3031 3233 3435
+	0x0060:  3637
+02:39:33.085753 02:00:00:00:00:41 > 02:00:00:00:00:32, ethertype IPv4 (0x0800), length 98: 10.0.2.20 > 10.0.1.10: ICMP echo reply, id 19103, seq 1, length 64
+	0x0000:  0200 0000 0032 0200 0000 0041 0800 4500
+	0x0010:  0054 0c21 0000 4001 576b 0a00 0214 0a00
+	0x0020:  010a 0000 0687 4a9f 0001 8d4c cd6a 0000
+	0x0030:  0000 944e 0100 0000 0000 1011 1213 1415
+	0x0040:  1617 1819 1a1b 1c1d 1e1f 2021 2223 2425
+	0x0050:  2627 2829 2a2b 2c2d 2e2f 3031 3233 3435
+	0x0060:  3637
+2 packets captured
+2 packets received by filter
+0 packets dropped by kernel
+[exit 0]

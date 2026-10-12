@@ -1,0 +1,4 @@
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: none | runs on: lantern
+$ timeout -s INT 3 stdbuf -oL tcpdump -Z root -i eth0 frobnicate
+tcpdump: can't parse filter expression: syntax error
+[exit 1]

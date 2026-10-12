@@ -9,10 +9,11 @@
   "scripts": {
     "dev": "pnpm --filter @wirelight/web dev",
     "build": "pnpm --filter @wirelight/web build",
-    "test": "vitest run",
+    "test": "vitest run --project sim --project shell --project rooms --project engine --project web",
     "check": "biome check . && pnpm -r typecheck",
     "rooms:validate": "vitest run --project rooms",
-    "e2e": "pnpm --filter @wirelight/web e2e"
+    "e2e": "pnpm --filter @wirelight/web e2e",
+    "difftest": "vitest run --project difftest"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

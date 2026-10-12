@@ -1,0 +1,24 @@
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: during capture, observatory: ping -c 1 10.0.0.7 | runs on: lantern
+$ timeout -s INT 12 stdbuf -oL tcpdump -Z root -n -e -xx -c 4 -i eth0 arp
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+02:39:21.031523 02:00:00:00:00:05 > Broadcast, ethertype ARP (0x0806), length 42: Request who-has 10.0.0.7 tell 10.0.0.5, length 28
+	0x0000:  ffff ffff ffff 0200 0000 0005 0806 0001
+	0x0010:  0800 0604 0001 0200 0000 0005 0a00 0005
+	0x0020:  0000 0000 0000 0a00 0007
+02:39:21.031533 02:00:00:00:00:07 > 02:00:00:00:00:05, ethertype ARP (0x0806), length 42: Reply 10.0.0.7 is-at 02:00:00:00:00:07, length 28
+	0x0000:  0200 0000 0005 0200 0000 0007 0806 0001
+	0x0010:  0800 0604 0002 0200 0000 0007 0a00 0007
+	0x0020:  0200 0000 0005 0a00 0005
+02:39:26.102457 02:00:00:00:00:07 > 02:00:00:00:00:05, ethertype ARP (0x0806), length 42: Request who-has 10.0.0.5 tell 10.0.0.7, length 28
+	0x0000:  0200 0000 0005 0200 0000 0007 0806 0001
+	0x0010:  0800 0604 0001 0200 0000 0007 0a00 0007
+	0x0020:  0000 0000 0000 0a00 0005
+02:39:26.102488 02:00:00:00:00:05 > 02:00:00:00:00:07, ethertype ARP (0x0806), length 42: Reply 10.0.0.5 is-at 02:00:00:00:00:05, length 28
+	0x0000:  0200 0000 0007 0200 0000 0005 0806 0001
+	0x0010:  0800 0604 0002 0200 0000 0005 0a00 0005
+	0x0020:  0200 0000 0007 0a00 0007
+4 packets captured
+4 packets received by filter
+0 packets dropped by kernel
+[exit 0]

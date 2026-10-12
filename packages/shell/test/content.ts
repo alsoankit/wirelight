@@ -4,6 +4,7 @@ import type { ShellContent } from "../src";
 export const testContent: ShellContent = {
   help: (tools) => [`tools: ${tools.join(", ")}`],
   man: (cmd) => (cmd === "ip" ? ["ip - show and change network settings"] : undefined),
+  lab: (key, vars) => (vars ? `${key} ${Object.values(vars).join(" ")}` : key),
   subtitle: (line) => (line.startsWith("Cannot find device") ? "There's no door with that name here." : undefined),
   notes: {
     lab: "lab tools exist only in Wirelight",

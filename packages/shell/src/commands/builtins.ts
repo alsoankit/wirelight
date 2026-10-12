@@ -53,3 +53,9 @@ export function exit(ctx: CommandContext): number {
   ctx.control("exit");
   return 0;
 }
+
+/** `hostname`: the machine's name. */
+export function hostname(ctx: CommandContext): number {
+  ctx.out(ctx.sim.device(ctx.device)?.hostname ?? ctx.device);
+  return 0;
+}

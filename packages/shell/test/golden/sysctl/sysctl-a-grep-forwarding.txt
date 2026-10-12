@@ -1,0 +1,33 @@
+# routed-fwd-on: left eth0 02:00:00:00:00:21 10.0.1.10/24 <-> bridgehead eth0 02:00:00:00:00:31 10.0.1.1/24; bridgehead eth1 02:00:00:00:00:32 10.0.2.1/24 <-> right eth0 02:00:00:00:00:41 10.0.2.20/24; all up; bridgehead ip_forward=1; left default via 10.0.1.1, right default via 10.0.2.1; IPv6 off | setup: none | runs on: bridgehead
+$ sysctl -a | grep forwarding
+net.ipv4.conf.all.bc_forwarding = 0
+net.ipv4.conf.all.forwarding = 1
+net.ipv4.conf.all.mc_forwarding = 0
+net.ipv4.conf.default.bc_forwarding = 0
+net.ipv4.conf.default.forwarding = 1
+net.ipv4.conf.default.mc_forwarding = 0
+net.ipv4.conf.eth0.bc_forwarding = 0
+net.ipv4.conf.eth0.forwarding = 1
+net.ipv4.conf.eth0.mc_forwarding = 0
+net.ipv4.conf.eth1.bc_forwarding = 0
+net.ipv4.conf.eth1.forwarding = 1
+net.ipv4.conf.eth1.mc_forwarding = 0
+net.ipv4.conf.lo.bc_forwarding = 0
+net.ipv4.conf.lo.forwarding = 1
+net.ipv4.conf.lo.mc_forwarding = 0
+net.ipv6.conf.all.force_forwarding = 0
+net.ipv6.conf.all.forwarding = 0
+net.ipv6.conf.all.mc_forwarding = 0
+net.ipv6.conf.default.force_forwarding = 0
+net.ipv6.conf.default.forwarding = 0
+net.ipv6.conf.default.mc_forwarding = 0
+net.ipv6.conf.eth0.force_forwarding = 0
+net.ipv6.conf.eth0.forwarding = 0
+net.ipv6.conf.eth0.mc_forwarding = 0
+net.ipv6.conf.eth1.force_forwarding = 0
+net.ipv6.conf.eth1.forwarding = 0
+net.ipv6.conf.eth1.mc_forwarding = 0
+net.ipv6.conf.lo.force_forwarding = 0
+net.ipv6.conf.lo.forwarding = 0
+net.ipv6.conf.lo.mc_forwarding = 0
+[exit 0]

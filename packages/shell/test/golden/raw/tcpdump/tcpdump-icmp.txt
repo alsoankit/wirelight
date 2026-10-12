@@ -1,0 +1,13 @@
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: during capture, observatory: ping -c 2 10.0.0.7 | runs on: lantern
+$ timeout -s INT 4 stdbuf -oL tcpdump -Z root -n -i eth0 icmp
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+02:38:06.688000 IP 10.0.0.5 > 10.0.0.7: ICMP echo request, id 16401, seq 1, length 64
+02:38:06.688008 IP 10.0.0.7 > 10.0.0.5: ICMP echo reply, id 16401, seq 1, length 64
+02:38:07.701568 IP 10.0.0.5 > 10.0.0.7: ICMP echo request, id 16401, seq 2, length 64
+02:38:07.701626 IP 10.0.0.7 > 10.0.0.5: ICMP echo reply, id 16401, seq 2, length 64
+
+4 packets captured
+4 packets received by filter
+0 packets dropped by kernel
+[exit 0]

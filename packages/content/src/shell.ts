@@ -4,6 +4,8 @@ import type { ShellContent, ToolId } from "@wirelight/shell";
 const TOOL_LINES: Partial<Record<ToolId, string>> = {
   "ip link": "  ip link                  list this machine's doors and whether they're working",
   "lab send-frame": "  lab send-frame --to MAC  send a frame by hand (lab tool)",
+  "lab cable": "  lab cable plug|unplug D  plug a cable into door D, or pull it out (lab tool)",
+  "lab keeper": "  lab keeper ...           do a keeper's job by hand (lab tool)",
 };
 
 const MAN: Record<string, string[]> = {
@@ -53,7 +55,39 @@ const SUBTITLES: [RegExp, string][] = [
   [/is not a MAC address/, "A MAC address is six pairs of characters separated by colons."],
 ];
 
+/** What the game-only lab tools say (lab keeper, lab cable). Plain voice; {name} are filled in. */
+const LAB: Record<string, string> = {
+  "keeper.usage":
+    "usage: lab keeper { show | learn <mac> <door> | send <door>|flood | arp-ask <ip> | wrap <mac> | forward <mac> }",
+  "keeper.desk": "waiting at the desk:",
+  "keeper.desk-frame": "  {n}. a frame from {from} to {to}, in at {door}",
+  "keeper.desk-packet": "  {n}. a packet from {from} to {to}",
+  "keeper.desk-empty": "nothing is waiting at the desk",
+  "keeper.learned": "the board now says: {mac} is behind {door}",
+  "keeper.sent": "the frame went out of {door}",
+  "keeper.flooded": "the frame went out of every other door",
+  "keeper.asked": "asked everyone on {door}: who has {ip}?",
+  "keeper.wrapped": "wrapped the packet in a frame to {mac} and sent it",
+  "keeper.forwarded": "took one off the packet's countdown, wrapped it in a new frame to {mac} and sent it",
+  "keeper.not-asleep": "the keeper is awake: it does this itself now",
+  "keeper.wrong-desk": "this keeper doesn't do that job",
+  "keeper.empty": "nothing is waiting at the desk",
+  "keeper.bad-mac": "A frame needs a door name, like 02:00:00:00:00:07.",
+  "keeper.bad-ip": "that isn't a house address, like 10.0.1.7",
+  "keeper.no-door": "there's no door called {door} on this switch",
+  "keeper.no-route": "the board has no line for {ip}",
+  "cable.usage": "usage: lab cable plug|unplug <door>",
+  "cable.plugged": "the cable is plugged into {door}",
+  "cable.unplugged": "the cable is out of {door}",
+  "cable.no-door": "there's no door called {door} here",
+  "cable.no-cable": "no cable runs to {door}",
+};
+
 export const shellContent: ShellContent = {
+  lab(key, vars = {}) {
+    const text = LAB[key] ?? key;
+    return text.replace(/\{(\w+)\}/g, (whole, name: string) => vars[name] ?? whole);
+  },
   help(tools) {
     const lines = ["Tools you have found:"];
     for (const t of tools) {

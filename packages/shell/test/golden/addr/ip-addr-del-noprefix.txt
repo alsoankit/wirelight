@@ -1,0 +1,7 @@
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: none | runs on: observatory
+$ ip addr del 10.0.0.5 dev eth0
+Warning: Executing wildcard deletion to stay compatible with old scripts.
+         Explicitly specify the prefix length (10.0.0.5/32) to avoid this warning.
+         This special behaviour is likely to disappear in further releases,
+         fix your scripts!
+[exit 0]

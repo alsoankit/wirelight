@@ -6,6 +6,7 @@ export type ToolId =
   | "lab send-frame"
   | "lab card"
   | "lab cable"
+  | "lab keeper"
   | "workbench"
   | "bridge fdb"
   | "ip addr"
@@ -16,7 +17,7 @@ export type ToolId =
   | "tcpdump"
   | "sysctl";
 
-/** Player-facing text the shell needs. It lives in packages/rooms (NFR-13); the shell only asks for it. */
+/** Player-facing text the shell needs. It lives in packages/content; the shell only asks for it. */
 export interface ShellContent {
   /** Lines for `help`, given the tools the player has. */
   help(tools: readonly ToolId[]): string[];
@@ -24,6 +25,8 @@ export interface ShellContent {
   man(command: string): string[] | undefined;
   /** Plain meaning of a real error line (FR-CON-17), never how to fix it. */
   subtitle(errorLine: string): string | undefined;
+  /** What a game-only lab tool says (`keeper.sent`, `cable.plugged`…), with its {placeholders} filled. */
+  lab(key: string, vars?: Record<string, string>): string;
   notes: {
     /** FR-CON-07: printed dim on the first `lab` use. */
     lab: string;
@@ -44,6 +47,8 @@ export interface Out {
 export interface CommandContext extends Out {
   sim: Simulator;
   device: DeviceId;
+  /** This run's id: a streaming command's later output and exit carry it. */
+  execId: number;
   tools: ReadonlySet<ToolId>;
   content: ShellContent;
   history: readonly string[];
@@ -51,5 +56,8 @@ export interface CommandContext extends Out {
   flags: { labNoteShown: boolean; sudoNoteShown: boolean };
 }
 
-/** Runs a command; returns its exit code. */
-export type CommandFn = (ctx: CommandContext, args: string[]) => number;
+/**
+ * Runs a command; returns its exit code, or null if it keeps running (ping): its later output comes
+ * through the trace as `proc.output`, and its end as `proc.exit` (SH-03).
+ */
+export type CommandFn = (ctx: CommandContext, args: string[]) => number | null;

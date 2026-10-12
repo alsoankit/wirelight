@@ -1,9 +1,12 @@
 import { bytesToMac, type Mac, macToBytes } from "../mac";
 import { decodeIPv4, decodeUDP, IPPROTO } from "./ipv4";
 
-/** Ethernet II without FCS, padded to the 60-byte minimum (SIM-10). */
+/**
+ * Ethernet II without FCS, at the length Linux builds it (an ARP frame is 42 bytes). The 60-byte
+ * minimum is padding a network card adds in hardware; the game shows frames as tcpdump does on the
+ * sending machine (0057, docs/sim-deviations.md).
+ */
 export const ETH_HEADER = 14;
-export const ETH_MIN = 60;
 
 export const ETHERTYPE = { ipv4: 0x0800, arp: 0x0806, lab: 0x88b5 } as const;
 
@@ -15,7 +18,7 @@ export interface EthFrame {
 }
 
 export function encodeEth(f: EthFrame): Uint8Array {
-  const len = Math.max(ETH_MIN, ETH_HEADER + f.payload.length);
+  const len = ETH_HEADER + f.payload.length;
   const out = new Uint8Array(len);
   out.set(macToBytes(f.dst), 0);
   out.set(macToBytes(f.src), 6);

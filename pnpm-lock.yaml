@@ -296,6 +296,18 @@ importers:
 
   packages/sim: {}
 
+  tools/difftest:
+    dependencies:
+      '@wirelight/content':
+        specifier: workspace:*
+        version: link:../../packages/content
+      '@wirelight/shell':
+        specifier: workspace:*
+        version: link:../../packages/shell
+      '@wirelight/sim':
+        specifier: workspace:*
+        version: link:../../packages/sim
+
 packages:
 
   '@babel/runtime@7.29.10':

@@ -1,0 +1,32 @@
+# routed-fwd-off: left eth0 02:00:00:00:00:21 10.0.1.10/24 <-> bridgehead eth0 02:00:00:00:00:31 10.0.1.1/24; bridgehead eth1 02:00:00:00:00:32 10.0.2.1/24 <-> right eth0 02:00:00:00:00:41 10.0.2.20/24; all up; bridgehead ip_forward=0; left default via 10.0.1.1, right default via 10.0.2.1; IPv6 off | setup: none | runs on: bridgehead
+$ sysctl
+
+Usage:
+ sysctl [options] [variable[=value] ...]
+
+Options:
+  -a, --all            display all variables
+  -A                   alias of -a
+  -X                   alias of -a
+      --deprecated     include deprecated parameters to listing
+      --dry-run        Print the key and values but do not write
+  -b, --binary         print value without new line
+  -e, --ignore         ignore unknown variables errors
+  -N, --names          print variable names without values
+  -n, --values         print only values of the given variable(s)
+  -p, --load[=<file>]  read values from file
+  -f                   alias of -p
+      --system         read values from all system directories
+  -r, --pattern <expression>
+                       select setting that match expression
+  -q, --quiet          do not echo variable set
+  -w, --write          enable writing a value to variable
+  -o                   does nothing
+  -x                   does nothing
+  -d                   alias of -h
+
+ -h, --help     display this help and exit
+ -V, --version  output version information and exit
+
+For more details see sysctl(8).
+[exit 1]

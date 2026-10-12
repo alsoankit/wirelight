@@ -1,14 +1,45 @@
 /**
  * The discrete-event network simulator (SIM-01..05). Pure TypeScript, deterministic:
- * same topology + faults + seed + inputs ⇒ same trace. Linux is the reference for behavior.
+ * same topology + faults + seed + inputs ⇒ same trace. Linux is the reference for behaviour.
+ *
+ * This file is the core: time, the event queue, cables, the trace, snapshots and Reset, and the
+ * actions commands call. The packet path lives in its layers, in Linux's order: a door's MAC check
+ * (here), bridges (bridge.ts), ARP and neighbours (neigh.ts), IPv4 and ICMP (inet.ts), ping (ping.ts),
+ * and the game's lab protocol (here).
  */
 
 import type { WorldView } from "./backend";
+import { bridgeInput, bridgeXmit, DEFAULT_AGEING_MS, type FdbResult, fdbAdd, fdbAge, fdbDel, isGroup } from "./bridge";
+import {
+  type AddrResult,
+  addrAdd,
+  addrDel,
+  addrFlush,
+  inetInput,
+  onCarrierDown,
+  onIfaceDown,
+  onIfaceUp,
+  queuedFailed,
+  type RouteGet,
+  type RouteResult,
+  routeAdd,
+  routeDel,
+  routeGet,
+  SYSCTL_DEFAULTS,
+  sendIp,
+} from "./inet";
+import { type KeeperResult, keeperAsk, keeperForward, keeperLearn, keeperSend, keeperWrap, wakeKeeper } from "./keeper";
+import type { Kernel, Unscheduled } from "./kernel";
 import { BROADCAST, type Mac, parseMac } from "./mac";
+import { NEIGH_DEFAULTS, neighAddPermanent, neighDelete, neighFlush, neighTimer } from "./neigh";
+import { interruptPing, type PingStart, pingHears, pingTimer, startPing } from "./ping";
 import { nextFloat, seedPrng } from "./prng";
 import { decodeEth, ETHERTYPE, encodeEth, fromHex, summarizeEth, toHex } from "./proto/ethernet";
 import { encodeIPv4, encodeUDP, IPPROTO } from "./proto/ipv4";
 import { decodeLab, encodeLab } from "./proto/lab";
+import { heapPop, heapPush } from "./queue";
+import { type SysctlWrite, sysctlList, sysctlRead, sysctlWrite } from "./sysctl";
+import { interruptTcpdump, startTcpdump, type TcpdumpStart, tcpdumpHears } from "./tcpdump";
 import type {
   DeviceId,
   DeviceState,
@@ -17,6 +48,7 @@ import type {
   FrameOrigin,
   IfaceName,
   IfaceState,
+  Ip,
   LinkState,
   Scheduled,
   SimEvent,
@@ -24,8 +56,7 @@ import type {
   Unsubscribe,
   WorldState,
 } from "./types";
-
-type Unscheduled = Scheduled extends infer S ? (S extends Scheduled ? Omit<S, "seq"> : never) : never;
+import { kernelTimer } from "./wheel";
 
 const DEFAULT_DELAY_MS = 0.05;
 const DEFAULT_BW = 1_000_000_000;
@@ -36,7 +67,7 @@ const LAB_REPLY_MS = 0.02;
 export interface OperState {
   adminUp: boolean;
   carrier: boolean;
-  /** Both ends up and the cable plugged in. */
+  /** Both ends up and the cable plugged in (for a bridge: up, with at least one live port). */
   up: boolean;
 }
 
@@ -53,12 +84,36 @@ export class Simulator implements WorldView {
   readonly correct: WorldState;
   /** The world after faults: what Reset restores. */
   readonly initial: WorldState;
+  /** The layers' view of this simulator. */
+  private readonly k: Kernel;
 
   constructor(topology: Topology, faults: Fault[] = [], seed = 1) {
     this.s = build(topology, seed);
+    this.k = this.kernel();
     this.correct = clone(this.s);
-    for (const f of faults) applyFault(this.s, f);
+    // Faults go through the same actions as commands, but quietly (no trace before the room starts).
+    this.muted = true;
+    for (const f of faults) this.applyFault(f);
+    this.muted = false;
     this.initial = clone(this.s);
+  }
+
+  private muted = false;
+
+  private kernel(): Kernel {
+    const sim = this;
+    return {
+      get s() {
+        return sim.s;
+      },
+      emit: (e) => this.emit(e),
+      schedule: (item) => this.schedule(item),
+      random: () => nextFloat(this.s.prng),
+      oper: (device, iface) => this.oper(device, iface),
+      wire: (device, iface, bytes, origin, parent) => this.wire(device, iface, bytes, origin, parent),
+      send: (device, iface, bytes, origin, parent) => this.sendFrame(device, iface, bytes, origin, parent),
+      hostReceive: (device, iface, frameId, bytes) => this.hostReceive(device, iface, frameId, bytes, true),
+    };
   }
 
   // ── Time ──────────────────────────────────────────────────────────────────────────────
@@ -84,7 +139,7 @@ export class Simulator implements WorldView {
     while (n < maxEvents) {
       const next = this.s.queue[0];
       if (!next || next.t > to) break;
-      this.s.queue.shift();
+      heapPop(this.s.queue);
       this.s.t = next.t;
       this.run(next);
       n++;
@@ -102,6 +157,7 @@ export class Simulator implements WorldView {
 
   /** Append an event. Public so the shell can record commands and their output (SIM-35). */
   emit(e: SimEvent): void {
+    if (this.muted) return;
     this.trace.push(e);
     for (const fn of this.listeners) fn(e);
   }
@@ -120,10 +176,20 @@ export class Simulator implements WorldView {
   reset(): void {
     const t = this.s.t;
     this.s = clone(this.initial);
-    // The starting world's clock began at 0; move its timers and cables to now.
+    // The starting world's clock began at 0; move its timers, cables and table times to now. A
+    // uniform shift keeps the queue a valid heap.
     this.s.t = t;
     for (const q of this.s.queue) q.t += t;
     for (const l of Object.values(this.s.links)) l.busyUntil = [l.busyUntil[0] + t, l.busyUntil[1] + t];
+    for (const d of Object.values(this.s.devices)) {
+      for (const br of Object.values(d.bridges)) for (const e of br.fdb) e.updated += t;
+      for (const n of d.neigh) {
+        n.updated += t;
+        n.confirmed += t;
+      }
+      for (const b of Object.values(d.icmpTokens)) b.at += t;
+    }
+    for (const q of this.s.queue) if (q.kind === "fdb-age") q.updated += t;
     this.emit({ kind: "world.reset", t });
   }
 
@@ -156,6 +222,13 @@ export class Simulator implements WorldView {
   oper(device: DeviceId, name: IfaceName): OperState {
     const i = this.iface(device, name);
     if (!i) return { adminUp: false, carrier: false, up: false };
+    if (i.kind === "loopback") return { adminUp: i.adminUp, carrier: i.adminUp, up: i.adminUp };
+    if (i.kind === "bridge") {
+      // A bridge has carrier while at least one of its ports does (Linux br_port_carrier_check).
+      const d = this.s.devices[device];
+      const carrier = i.adminUp && !!d?.ifaces.some((p) => p.master === name && this.oper(device, p.name).up);
+      return { adminUp: i.adminUp, carrier, up: carrier };
+    }
     const l = i.link ? this.s.links[i.link] : undefined;
     const p = this.peer(device, name);
     const peerUp = p ? (this.iface(p.device, p.iface)?.adminUp ?? false) : false;
@@ -171,9 +244,13 @@ export class Simulator implements WorldView {
     if (!i) return false;
     if (i.adminUp === up) return true;
     const before = i.adminUp;
+    const carriers = this.carrierSnapshot();
     i.adminUp = up;
     if (up) i.everUp = true;
     this.emit({ kind: "table.change", t: this.s.t, device, table: "link", op: "set", key: name, before, after: up });
+    if (up) onIfaceUp(this.k, device, name);
+    else onIfaceDown(this.k, device, name);
+    this.carrierChanges(carriers, { device, iface: name });
     return true;
   }
 
@@ -181,6 +258,7 @@ export class Simulator implements WorldView {
     const l = this.s.links[linkId];
     if (!l) return false;
     if (l.plugged === plugged) return true;
+    const carriers = this.carrierSnapshot();
     l.plugged = plugged;
     for (const end of [l.a, l.b]) {
       this.emit({
@@ -194,20 +272,40 @@ export class Simulator implements WorldView {
         after: plugged,
       });
     }
+    this.carrierChanges(carriers);
     return true;
+  }
+
+  /** Every door's carrier now, to see which ones a change took down. */
+  private carrierSnapshot(): Map<string, boolean> {
+    const m = new Map<string, boolean>();
+    for (const d of Object.values(this.s.devices))
+      for (const i of d.ifaces) m.set(`${d.id}\u0000${i.name}`, this.oper(d.id, i.name).carrier);
+    return m;
+  }
+
+  /** Doors that lost carrier forget their neighbours (Linux neigh_carrier_down). */
+  private carrierChanges(before: Map<string, boolean>, skip?: EndRef): void {
+    for (const d of Object.values(this.s.devices))
+      for (const i of d.ifaces) {
+        if (skip && skip.device === d.id && skip.iface === i.name) continue;
+        if (before.get(`${d.id}\u0000${i.name}`) && !this.oper(d.id, i.name).carrier)
+          onCarrierDown(this.k, d.id, i.name);
+      }
   }
 
   /** `lab send-frame` (SIM-09). */
   sendLabFrame(device: DeviceId, opts: { to: string; from?: string; dev?: IfaceName; msg: string }): SendResult {
     const d = this.s.devices[device];
     if (!d) return { ok: false, error: "no-device" };
-    const iface = opts.dev ? d.ifaces.find((i) => i.name === opts.dev) : d.ifaces[0];
+    const iface = opts.dev ? d.ifaces.find((i) => i.name === opts.dev) : firstDoor(d);
     if (!iface) return { ok: false, error: "no-iface" };
     const to = parseMac(opts.to);
     const from = opts.from === undefined ? iface.mac : parseMac(opts.from);
     if (!to || !from) return { ok: false, error: "bad-mac" };
     const bytes = encodeEth({ dst: to, src: from, type: ETHERTYPE.lab, payload: encodeLab(opts.msg) });
-    const frameId = this.transmit(device, iface.name, bytes, "command");
+    const frameId = this.s.nextFrameId;
+    this.sendFrame(device, iface.name, bytes, "command");
     return { ok: true, frameId, length: bytes.length };
   }
 
@@ -232,6 +330,140 @@ export class Simulator implements WorldView {
     return true;
   }
 
+  addrAdd(device: DeviceId, cidr: string, dev: IfaceName): AddrResult {
+    return addrAdd(this.k, device, cidr, dev);
+  }
+
+  addrDel(device: DeviceId, cidr: string, dev: IfaceName): AddrResult {
+    return addrDel(this.k, device, cidr, dev);
+  }
+
+  /** A bridge's ageing time (`ip link set br0 type bridge ageing_time <cs>`). */
+  setBridgeAgeing(device: DeviceId, bridge: IfaceName, ms: number): boolean {
+    const br = this.s.devices[device]?.bridges[bridge];
+    if (!br) return false;
+    br.ageingMs = ms;
+    // Entries learned before the change age by the new time (the kernel checks on its next pass).
+    for (const e of br.fdb)
+      if (!e.local && !e.static)
+        this.schedule({ t: e.updated + ms, kind: "fdb-age", device, bridge, mac: e.mac, updated: e.updated });
+    return true;
+  }
+
+  /** A program sends one UDP datagram (bash's `echo … > /dev/udp/<ip>/<port>`). */
+  sendUdp(device: DeviceId, dst: Ip, port: number, text: string): boolean {
+    const d = this.s.devices[device];
+    if (!d) return false;
+    // An ephemeral source port, from Linux's range (32768–60999), seeded.
+    const srcPort = 32768 + Math.floor(nextFloat(this.s.prng) * (60999 - 32768));
+    const src = routeGet(d, dst);
+    if (src.kind === "unreachable") return false;
+    const from = src.kind === "local" ? dst : src.src;
+    const payload = encodeUDP(from, dst, srcPort, port, encodeLab(text));
+    return sendIp(this.k, device, { dst, proto: IPPROTO.udp, payload, df: true }, "command").ok;
+  }
+
+  addrFlush(device: DeviceId, dev: IfaceName): void {
+    addrFlush(this.k, device, dev);
+  }
+
+  routeGet(device: DeviceId, dst: Ip): RouteGet {
+    const d = this.s.devices[device];
+    return d ? routeGet(d, dst) : { kind: "unreachable" };
+  }
+
+  routeAdd(device: DeviceId, spec: { dst: string; via?: Ip; dev?: IfaceName }, replace = false): RouteResult {
+    return routeAdd(this.k, device, spec, replace);
+  }
+
+  routeDel(device: DeviceId, spec: { dst: string; via?: Ip; dev?: IfaceName }): RouteResult {
+    return routeDel(this.k, device, spec);
+  }
+
+  neighDel(device: DeviceId, ip: Ip, dev: IfaceName): boolean {
+    return neighDelete(this.k, device, ip, dev);
+  }
+
+  neighFlush(device: DeviceId, dev: IfaceName): void {
+    neighFlush(this.k, device, dev);
+  }
+
+  neighAdd(device: DeviceId, ip: Ip, mac: Mac, dev: IfaceName, replace = false): "ok" | "exists" {
+    return neighAddPermanent(this.k, device, ip, mac, dev, replace);
+  }
+
+  fdbAdd(device: DeviceId, mac: Mac, port: IfaceName, opts: { static: boolean; sticky: boolean }): FdbResult {
+    return fdbAdd(this.k, device, mac, port, opts);
+  }
+
+  fdbDel(device: DeviceId, mac: Mac, port: IfaceName): FdbResult {
+    return fdbDel(this.k, device, mac, port);
+  }
+
+  /** `sysctl -w key=value`. */
+  setSysctl(device: DeviceId, key: string, value: string): SysctlWrite {
+    return sysctlWrite(this.k, device, key, value);
+  }
+
+  sysctlRead(device: DeviceId, key: string): string | undefined {
+    const d = this.s.devices[device];
+    return d ? sysctlRead(d, key) : undefined;
+  }
+
+  sysctlList(device: DeviceId): [string, string][] {
+    const d = this.s.devices[device];
+    return d ? sysctlList(d) : [];
+  }
+
+  startPing(device: DeviceId, execId: number, opts: Parameters<typeof startPing>[3]): PingStart {
+    return startPing(this.k, device, execId, opts);
+  }
+
+  // ── Hand mode (0042) ──
+
+  keeperLearn(device: DeviceId, mac: string, door: IfaceName): KeeperResult {
+    return keeperLearn(this.k, device, mac, door);
+  }
+
+  keeperSend(device: DeviceId, where: string): KeeperResult {
+    return keeperSend(this.k, device, where);
+  }
+
+  keeperAsk(device: DeviceId, ip: Ip): KeeperResult {
+    return keeperAsk(this.k, device, ip);
+  }
+
+  keeperWrap(device: DeviceId, mac: string): KeeperResult {
+    return keeperWrap(this.k, device, mac);
+  }
+
+  keeperForward(device: DeviceId, mac: string): KeeperResult {
+    return keeperForward(this.k, device, mac);
+  }
+
+  /** The room decides the keeper remembers (switch, house); the router wakes with forwarding. */
+  wakeKeeper(device: DeviceId): boolean {
+    return wakeKeeper(this.k, device);
+  }
+
+  /** `lab cable plug|unplug <door>`: the cable at this door. */
+  plugCable(device: DeviceId, door: IfaceName, plugged: boolean): "ok" | "no-door" | "no-cable" {
+    const i = this.iface(device, door);
+    if (!i || i.kind !== "ether") return "no-door";
+    if (!i.link) return "no-cable";
+    this.setPlugged(i.link, plugged);
+    return "ok";
+  }
+
+  /** Ctrl+C on a running command. */
+  interrupt(device: DeviceId, execId: number): boolean {
+    return interruptPing(this.k, device, execId) || interruptTcpdump(this.k, device, execId);
+  }
+
+  startTcpdump(device: DeviceId, execId: number, opts: Parameters<typeof startTcpdump>[3]): TcpdumpStart {
+    return startTcpdump(this.k, device, execId, opts);
+  }
+
   private messengerTick(device: DeviceId): void {
     const d = this.s.devices[device];
     const m = d?.messenger;
@@ -241,7 +473,7 @@ export class Simulator implements WorldView {
     // Like any program on a door that's switched off, the messenger's send fails (ENETDOWN): nothing leaves.
     if (!iface?.adminUp) return;
     const bytes = encodeEth({ dst: m.to, src: iface.mac, type: ETHERTYPE.lab, payload: encodeLab(m.msg) });
-    this.transmit(device, iface.name, bytes, "messenger");
+    this.sendFrame(device, iface.name, bytes, "messenger");
   }
 
   private announcerTick(device: DeviceId): void {
@@ -263,24 +495,106 @@ export class Simulator implements WorldView {
     });
     a.nextId = (a.nextId + 1) & 0xffff;
     const bytes = encodeEth({ dst: BROADCAST, src: iface.mac, type: ETHERTYPE.ipv4, payload: ip });
-    this.transmit(device, iface.name, bytes, "announcer");
+    this.sendFrame(device, iface.name, bytes, "announcer");
+  }
+
+  // ── Faults: declarative, applied on top of the correct network ────────────────────────
+
+  private applyFault(f: Fault): void {
+    const s = this.s;
+    switch (f.kind) {
+      case "iface-down": {
+        const i = s.devices[f.device]?.ifaces.find((x) => x.name === f.iface);
+        if (!i) throw new Error(`fault: no interface ${f.device}/${f.iface}`);
+        this.setAdmin(f.device, f.iface, false);
+        // A machine whose door was never opened shows the `noop` qdisc.
+        i.everUp = false;
+        return;
+      }
+      case "unplug": {
+        if (!s.links[f.link]) throw new Error(`fault: no link ${f.link}`);
+        this.setPlugged(f.link, false);
+        return;
+      }
+      case "lab": {
+        const d = s.devices[f.device];
+        if (!d) throw new Error(`fault: no device ${f.device}`);
+        d.lab = { ...f.lab };
+        return;
+      }
+      case "card": {
+        const m = s.devices[f.device]?.messenger;
+        if (!m) throw new Error(`fault: ${f.device} has no messenger`);
+        m.to = f.to;
+        return;
+      }
+      case "fdb-static": {
+        const r = this.fdbAdd(f.device, f.mac, f.port, { static: true, sticky: !!f.sticky });
+        if (!r.ok) throw new Error(`fault: fdb-static ${f.device} ${f.mac} ${f.port}: ${r.error}`);
+        return;
+      }
+      case "addr-remove": {
+        const r = this.addrDel(f.device, f.cidr, f.dev);
+        if (!r.ok) throw new Error(`fault: addr-remove ${f.device} ${f.cidr}: ${r.error}`);
+        return;
+      }
+      case "addr-set": {
+        const r = this.addrAdd(f.device, f.cidr, f.dev);
+        if (!r.ok) throw new Error(`fault: addr-set ${f.device} ${f.cidr}: ${r.error}`);
+        return;
+      }
+      case "route-remove": {
+        const r = this.routeDel(f.device, { dst: f.dst });
+        if (!r.ok) throw new Error(`fault: route-remove ${f.device} ${f.dst}: ${r.error}`);
+        return;
+      }
+      case "route-set": {
+        const r = this.routeAdd(f.device, { dst: f.route.dst, via: f.route.via, dev: f.route.dev }, true);
+        if (!r.ok) throw new Error(`fault: route-set ${f.device} ${f.route.dst}: ${r.error}`);
+        return;
+      }
+      case "keeper-asleep": {
+        const d = s.devices[f.device];
+        if (!d) throw new Error(`fault: no device ${f.device}`);
+        d.keeper.asleep = f.desk;
+        return;
+      }
+      case "sysctl": {
+        if (this.setSysctl(f.device, f.key, f.value) !== "ok") throw new Error(`fault: sysctl ${f.key}`);
+        return;
+      }
+    }
   }
 
   // ── Internals ─────────────────────────────────────────────────────────────────────────
 
   private schedule(item: Unscheduled): void {
-    const full = { ...item, seq: this.s.seq++ } as Scheduled;
-    const q = this.s.queue;
-    let i = q.length;
-    while (i > 0) {
-      const prev = q[i - 1];
-      if (!prev || prev.t < full.t || (prev.t === full.t && prev.seq < full.seq)) break;
-      i--;
-    }
-    q.splice(i, 0, full);
+    heapPush(this.s.queue, { ...item, seq: this.s.seq++ } as Scheduled);
   }
 
-  private transmit(device: DeviceId, name: IfaceName, bytes: Uint8Array, origin: FrameOrigin): number {
+  /** Out of a door as the machine sends: a bridge decides its port; anything else goes on the wire. */
+  private sendFrame(device: DeviceId, name: IfaceName, bytes: Uint8Array, origin: FrameOrigin, parent?: number): void {
+    const i = this.iface(device, name);
+    if (i?.kind === "bridge") {
+      if (!i.adminUp) {
+        this.emit({
+          kind: "frame.drop",
+          t: this.s.t,
+          device,
+          iface: name,
+          frameId: this.s.nextFrameId++,
+          reason: "link-down",
+        });
+        return;
+      }
+      bridgeXmit(this.k, device, name, bytes, origin, parent);
+      return;
+    }
+    this.wire(device, name, bytes, origin, parent);
+  }
+
+  /** Puts bytes on the cable plugged into a physical door. */
+  private wire(device: DeviceId, name: IfaceName, bytes: Uint8Array, origin: FrameOrigin, parent?: number): number {
     const frameId = this.s.nextFrameId++;
     const t = this.s.t;
     const summary = summarizeEth(bytes);
@@ -289,7 +603,18 @@ export class Simulator implements WorldView {
       this.emit({ kind: "frame.drop", t, device, iface: name, frameId, reason: "link-down" });
       return frameId;
     }
-    this.emit({ kind: "frame.tx", t, device, iface: name, frameId, bytes, summary, origin });
+    this.emit({
+      kind: "frame.tx",
+      t,
+      device,
+      iface: name,
+      frameId,
+      bytes,
+      summary,
+      origin,
+      ...(parent !== undefined ? { parent } : {}),
+    });
+    tcpdumpHears(this.k, device, name, bytes);
     const i = this.iface(device, name);
     const l = i?.link ? this.s.links[i.link] : undefined;
     if (!l) return frameId;
@@ -311,21 +636,41 @@ export class Simulator implements WorldView {
   }
 
   private run(ev: Scheduled): void {
-    if (ev.kind === "arrive") {
-      this.arrive(ev);
-      return;
-    }
-    if (ev.kind === "lab-reply") {
-      const d = this.s.devices[ev.device];
-      const iface = d?.ifaces.find((i) => i.name === ev.iface);
-      if (!d || !iface) return;
-      const bytes = encodeEth({ dst: ev.to, src: iface.mac, type: ETHERTYPE.lab, payload: encodeLab(ev.text) });
-      this.transmit(d.id, iface.name, bytes, "responder");
-      return;
-    }
-    if (ev.kind === "timer") {
-      if (ev.service === "messenger") this.messengerTick(ev.device);
-      else this.announcerTick(ev.device);
+    switch (ev.kind) {
+      case "arrive":
+        this.arrive(ev);
+        return;
+      case "lab-reply": {
+        const d = this.s.devices[ev.device];
+        const iface = d?.ifaces.find((i) => i.name === ev.iface);
+        if (!d || !iface) return;
+        const bytes = encodeEth({ dst: ev.to, src: iface.mac, type: ETHERTYPE.lab, payload: encodeLab(ev.text) });
+        this.sendFrame(d.id, iface.name, bytes, "responder");
+        return;
+      }
+      case "timer":
+        if (ev.service === "messenger") this.messengerTick(ev.device);
+        else this.announcerTick(ev.device);
+        return;
+      case "fdb-age":
+        fdbAge(this.k, ev.device, ev.bridge, ev.mac, ev.updated);
+        return;
+      case "neigh":
+        neighTimer(this.k, ev.device, ev.dev, ev.ip, ev.stamp, (device, q) => queuedFailed(this.k, device, q));
+        return;
+      case "ping":
+        pingTimer(this.k, ev.device, ev.execId, ev.what);
+        return;
+      case "ping-error":
+        pingHears(this.k, ev.device, {
+          kind: "error",
+          from: ev.from,
+          id: ev.id,
+          seq: ev.icmpSeq,
+          type: ev.type,
+          code: ev.code,
+        });
+        return;
     }
   }
 
@@ -357,38 +702,64 @@ export class Simulator implements WorldView {
       bytes,
       summary: summarizeEth(bytes),
     });
-    this.receive(to.device, to.iface, ev.frameId, bytes);
+    tcpdumpHears(this.k, to.device, to.iface, bytes);
+    const port = this.iface(to.device, to.iface);
+    if (port?.master) {
+      const br = this.iface(to.device, port.master);
+      if (!br?.adminUp) {
+        // A bridge that's switched off has disabled its ports: nothing gets through.
+        this.emit({
+          kind: "frame.drop",
+          t,
+          device: to.device,
+          iface: to.iface,
+          frameId: ev.frameId,
+          reason: "link-down",
+        });
+        return;
+      }
+      bridgeInput(this.k, to.device, to.iface, ev.frameId, bytes);
+      return;
+    }
+    this.hostReceive(to.device, to.iface, ev.frameId, bytes, false);
   }
 
-  /** A host NIC accepts frames for its own address or broadcast; everything else is ignored (SIM-11). */
-  private receive(device: DeviceId, name: IfaceName, frameId: number, bytes: Uint8Array): void {
+  /**
+   * A frame reached this machine's stack on `name`. A door takes in frames for its own address,
+   * broadcast and multicast; everything else is ignored (SIM-11). Then by EtherType. When a bridge
+   * passed it up, the bridge already made (and recorded) that decision.
+   */
+  private hostReceive(device: DeviceId, name: IfaceName, frameId: number, bytes: Uint8Array, viaBridge: boolean): void {
     const d = this.s.devices[device];
     const iface = d?.ifaces.find((i) => i.name === name);
     if (!d || !iface) return;
     const t = this.s.t;
     const f = decodeEth(bytes);
-    const forMe = f.dst === iface.mac || f.dst === BROADCAST;
-    this.emit({
-      kind: "fwd.decision",
-      t,
-      device,
-      frameId,
-      layer: "l2",
-      decision: forMe ? "deliver" : "drop",
-      egress: [],
-      tableRef: { dst: f.dst, own: iface.mac },
-    });
-    if (!forMe) {
-      this.emit({ kind: "frame.drop", t, device, iface: name, frameId, reason: "not-for-me" });
+    if (!viaBridge) {
+      const forMe = f.dst === iface.mac || f.dst === BROADCAST || isGroup(f.dst);
+      this.emit({
+        kind: "fwd.decision",
+        t,
+        device,
+        frameId,
+        layer: "l2",
+        decision: forMe ? "deliver" : "drop",
+        egress: [],
+        tableRef: { dst: f.dst, own: iface.mac },
+      });
+      if (!forMe) {
+        this.emit({ kind: "frame.drop", t, device, iface: name, frameId, reason: "not-for-me" });
+        return;
+      }
+    }
+    if (f.type === ETHERTYPE.lab) {
+      const text = decodeLab(f.payload);
+      this.emit({ kind: "app.deliver", t, device, iface: name, proto: "lab", frameId, from: f.src, to: f.dst, text });
+      this.labRespond(d, iface, f.src, f.dst === BROADCAST);
       return;
     }
-    if (f.type !== ETHERTYPE.lab) {
-      this.emit({ kind: "frame.drop", t, device, iface: name, frameId, reason: "no-listener" });
-      return;
-    }
-    const text = decodeLab(f.payload);
-    this.emit({ kind: "app.deliver", t, device, iface: name, proto: "lab", frameId, from: f.src, to: f.dst, text });
-    this.labRespond(d, iface, f.src, f.dst === BROADCAST);
+    if (inetInput(this.k, device, name, frameId, bytes)) return;
+    this.emit({ kind: "frame.drop", t, device, iface: name, frameId, reason: "no-listener" });
   }
 
   private labRespond(d: DeviceState, iface: IfaceState, sender: Mac, wasBroadcast: boolean): void {
@@ -413,23 +784,84 @@ export class Simulator implements WorldView {
   }
 }
 
+/** The first door that isn't the loopback: where lab tools send by default. */
+function firstDoor(d: DeviceState): IfaceState | undefined {
+  return d.ifaces.find((i) => i.kind !== "loopback");
+}
+
 function build(topology: Topology, seed: number): WorldState {
   const devices: Record<DeviceId, DeviceState> = {};
   for (const spec of topology.devices) {
+    // ifindex 1 is the loopback every Linux machine has; doors follow in order, then bridges.
+    const ifaces: IfaceState[] = [
+      {
+        name: "lo",
+        ifindex: 1,
+        kind: "loopback",
+        mac: "00:00:00:00:00:00",
+        mtu: 65536,
+        adminUp: true,
+        everUp: true,
+        link: null,
+        master: null,
+      },
+      ...spec.interfaces.map(
+        (i, n): IfaceState => ({
+          name: i.name,
+          ifindex: n + 2,
+          kind: "ether",
+          mac: i.mac,
+          mtu: 1500,
+          adminUp: i.adminUp ?? true,
+          everUp: i.adminUp ?? true,
+          link: null,
+          master: null,
+        }),
+      ),
+    ];
+    const bridges: DeviceState["bridges"] = {};
+    for (const b of spec.bridges ?? []) {
+      const ports = b.ports.map((p) => {
+        const port = ifaces.find((i) => i.name === p);
+        if (!port) throw new Error(`bridge ${spec.id}/${b.name}: no port ${p}`);
+        port.master = b.name;
+        return port;
+      });
+      // Linux gives a bridge the lowest of its ports' addresses unless one is set.
+      const mac = b.mac ?? ports.map((p) => p.mac).sort()[0] ?? "02:00:00:00:00:00";
+      ifaces.push({
+        name: b.name,
+        ifindex: ifaces.length + 1,
+        kind: "bridge",
+        mac,
+        mtu: 1500,
+        adminUp: b.adminUp ?? true,
+        everUp: true,
+        link: null,
+        master: null,
+      });
+      bridges[b.name] = {
+        name: b.name,
+        ageingMs: b.ageingMs ?? DEFAULT_AGEING_MS,
+        // Each port's own address is a permanent local entry.
+        fdb: ports.map((p) => ({ mac: p.mac, port: p.name, local: true, static: true, sticky: false, updated: 0 })),
+      };
+    }
     devices[spec.id] = {
       id: spec.id,
       hostname: spec.hostname,
       kind: spec.kind,
-      // ifindex 1 is the loopback device every Linux machine has; doors start at 2.
-      ifaces: spec.interfaces.map((i, n) => ({
-        name: i.name,
-        ifindex: n + 2,
-        mac: i.mac,
-        mtu: 1500,
-        adminUp: i.adminUp ?? true,
-        everUp: i.adminUp ?? true,
-        link: null,
-      })),
+      ifaces,
+      bridges,
+      addrs: [{ dev: "lo", ip: "127.0.0.1", prefix: 8, broadcast: null, scope: "host", secondary: false }],
+      routes: [],
+      neigh: [],
+      neighParms: {},
+      sysctl: { ...(spec.sysctl ?? {}) },
+      ipId: 0,
+      icmpTokens: {},
+      procs: [],
+      keeper: { asleep: null, desk: [] },
       lab: spec.lab ? { ...spec.lab } : null,
       messenger: spec.messenger
         ? {
@@ -466,56 +898,64 @@ function build(topology: Topology, seed: number): WorldState {
     };
   }
   const prng = seedPrng(seed);
-  const queue: Scheduled[] = [];
-  let seq = 0;
+  const s: WorldState = { t: 0, seq: 0, nextFrameId: 1, prng, devices, links, queue: [] };
   for (const d of Object.values(devices)) {
     // First messages come early so the player sees the service working; then at its interval.
     if (d.messenger)
-      queue.push({
+      heapPush(s.queue, {
         t: Math.min(1500, d.messenger.intervalMs),
-        seq: seq++,
+        seq: s.seq++,
         kind: "timer",
         device: d.id,
         service: "messenger",
       });
     if (d.announcer) {
       d.announcer.nextId = Math.floor(nextFloat(prng) * 0xffff);
-      queue.push({ t: d.announcer.intervalMs * 0.6, seq: seq++, kind: "timer", device: d.id, service: "announcer" });
+      heapPush(s.queue, {
+        t: d.announcer.intervalMs * 0.6,
+        seq: s.seq++,
+        kind: "timer",
+        device: d.id,
+        service: "announcer",
+      });
+    }
+    // The machine's IP ID counter starts somewhere seeded, as Linux's does (randomised per boot).
+    d.ipId = Math.floor(nextFloat(prng) * 0xffff);
+    // Each door's neighbour settings, with its own randomised reachable time.
+    for (const name of ["default", ...d.ifaces.map((i) => i.name)]) {
+      d.neighParms[name] = {
+        ...NEIGH_DEFAULTS,
+        reachableMs: Math.floor(NEIGH_DEFAULTS.baseReachableMs * (0.5 + nextFloat(prng))),
+      };
     }
   }
-  queue.sort((a, b) => a.t - b.t || a.seq - b.seq);
-  return { t: 0, seq, nextFrameId: 1, prng, devices, links, queue };
+  // Addresses, routes and settings the room gives each machine, applied as a person would.
+  const k = staticKernel(s);
+  for (const spec of topology.devices) {
+    for (const a of spec.addrs ?? []) {
+      const r = addrAdd(k, spec.id, a.cidr, a.dev);
+      if (!r.ok) throw new Error(`device ${spec.id}: address ${a.cidr} on ${a.dev}: ${r.error}`);
+    }
+    for (const r of spec.routes ?? []) {
+      const res = routeAdd(k, spec.id, { dst: r.dst, via: r.via, dev: r.dev });
+      if (!res.ok) throw new Error(`device ${spec.id}: route ${r.dst}: ${res.error}`);
+    }
+  }
+  return s;
 }
 
-function applyFault(s: WorldState, f: Fault): void {
-  switch (f.kind) {
-    case "iface-down": {
-      const i = s.devices[f.device]?.ifaces.find((x) => x.name === f.iface);
-      if (!i) throw new Error(`fault: no interface ${f.device}/${f.iface}`);
-      i.adminUp = false;
-      // A machine whose door was never opened shows the `noop` qdisc.
-      i.everUp = false;
-      return;
-    }
-    case "unplug": {
-      const l = s.links[f.link];
-      if (!l) throw new Error(`fault: no link ${f.link}`);
-      l.plugged = false;
-      return;
-    }
-    case "lab": {
-      const d = s.devices[f.device];
-      if (!d) throw new Error(`fault: no device ${f.device}`);
-      d.lab = { ...f.lab };
-      return;
-    }
-    case "card": {
-      const m = s.devices[f.device]?.messenger;
-      if (!m) throw new Error(`fault: ${f.device} has no messenger`);
-      m.to = f.to;
-      return;
-    }
-  }
+/** A kernel for building the starting world: no trace, no cables used. */
+function staticKernel(s: WorldState): Kernel {
+  return {
+    s,
+    emit: () => {},
+    schedule: (item) => heapPush(s.queue, { ...item, seq: s.seq++ } as Scheduled),
+    random: () => nextFloat(s.prng),
+    oper: () => ({ adminUp: true, carrier: true, up: true }),
+    wire: () => 0,
+    send: () => {},
+    hostReceive: () => {},
+  };
 }
 
 /** World state is plain JSON by design, so a JSON round-trip is a faithful deep copy. */

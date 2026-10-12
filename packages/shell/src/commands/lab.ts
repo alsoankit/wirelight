@@ -2,13 +2,14 @@
  * `lab` — game-only tools (FR-CON-07). Not real Linux; shown in the lab color, and the first use
  * says so. Syntax per SRS SIM-09.
  */
-import { parseMac } from "@wirelight/sim";
+import { type DeviceState, decodeEth, decodeIPv4, fromHex, ipToInt, lookupRoute, parseMac } from "@wirelight/sim";
 import type { CommandContext, ToolId } from "../types";
 
 const SUB: { name: string; tool: ToolId }[] = [
   { name: "send-frame", tool: "lab send-frame" },
   { name: "card", tool: "lab card" },
   { name: "cable", tool: "lab cable" },
+  { name: "keeper", tool: "lab keeper" },
 ];
 
 export function lab(ctx: CommandContext, args: string[]): number {
@@ -30,8 +31,107 @@ export function lab(ctx: CommandContext, args: string[]): number {
   }
   if (found.name === "send-frame") return sendFrame(ctx, rest);
   if (found.name === "card") return card(ctx, rest);
-  ctx.note(ctx.content.notes.locked);
-  return 127;
+  if (found.name === "cable") return cable(ctx, rest);
+  return keeper(ctx, rest);
+}
+
+/** `lab cable plug|unplug <door>`: the cable end at one of this machine's doors (Floor 1). */
+function cable(ctx: CommandContext, args: string[]): number {
+  const [action, door, ...extra] = args;
+  if ((action !== "plug" && action !== "unplug") || door === undefined || extra.length > 0) {
+    ctx.err(ctx.content.lab("cable.usage"));
+    return 2;
+  }
+  const r = ctx.sim.plugCable(ctx.device, door, action === "plug");
+  if (r !== "ok") {
+    ctx.err(ctx.content.lab(`cable.${r}`, { door }));
+    return 1;
+  }
+  ctx.out(ctx.content.lab(action === "plug" ? "cable.plugged" : "cable.unplugged", { door }));
+  return 0;
+}
+
+/** `lab keeper …`: a keeper's job by hand, while it has forgotten it (0042). */
+function keeper(ctx: CommandContext, args: string[]): number {
+  const [action, a, b, ...extra] = args;
+  const say = (key: string, vars?: Record<string, string>) => ctx.out(ctx.content.lab(key, vars));
+  const usage = () => {
+    ctx.err(ctx.content.lab("keeper.usage"));
+    return 2;
+  };
+  if (extra.length > 0) return usage();
+  const done = (
+    r: { ok: true } | { ok: false; error: string },
+    ok: () => void,
+    vars: Record<string, string> = {},
+  ): number => {
+    if (r.ok) {
+      ok();
+      return 0;
+    }
+    ctx.err(ctx.content.lab(`keeper.${r.error}`, vars));
+    return 1;
+  };
+  switch (action) {
+    case "show": {
+      const d = ctx.sim.device(ctx.device);
+      const waiting = d?.keeper.desk ?? [];
+      if (waiting.length === 0) {
+        say("keeper.desk-empty");
+        return 0;
+      }
+      say("keeper.desk");
+      waiting.forEach((item, i) => {
+        const bytes = fromHex(item.hex);
+        if (item.kind === "frame") {
+          const f = decodeEth(bytes);
+          say("keeper.desk-frame", { n: String(i + 1), from: f.src, to: f.dst, door: item.port ?? "" });
+        } else {
+          const ip = decodeIPv4(bytes);
+          say("keeper.desk-packet", { n: String(i + 1), from: ip.src, to: ip.dst });
+        }
+      });
+      return 0;
+    }
+    case "learn":
+      if (a === undefined || b === undefined) return usage();
+      return done(
+        ctx.sim.keeperLearn(ctx.device, a, b),
+        () => say("keeper.learned", { mac: parseMac(a) ?? a, door: b }),
+        { door: b },
+      );
+    case "send":
+      if (a === undefined || b !== undefined) return usage();
+      return done(
+        ctx.sim.keeperSend(ctx.device, a),
+        () => say(a === "flood" ? "keeper.flooded" : "keeper.sent", { door: a }),
+        { door: a },
+      );
+    case "arp-ask": {
+      if (a === undefined || b !== undefined) return usage();
+      if (ipToInt(a) === null) {
+        ctx.err(ctx.content.lab("keeper.bad-ip", { ip: a }));
+        return 1;
+      }
+      const d = ctx.sim.device(ctx.device);
+      const route = d ? lookupRoute(d as DeviceState, a) : null;
+      return done(ctx.sim.keeperAsk(ctx.device, a), () => say("keeper.asked", { ip: a, door: route?.dev ?? "" }), {
+        ip: a,
+      });
+    }
+    case "wrap":
+      if (a === undefined || b !== undefined) return usage();
+      return done(ctx.sim.keeperWrap(ctx.device, a), () => say("keeper.wrapped", { mac: parseMac(a) ?? a }), {
+        mac: a,
+      });
+    case "forward":
+      if (a === undefined || b !== undefined) return usage();
+      return done(ctx.sim.keeperForward(ctx.device, a), () => say("keeper.forwarded", { mac: parseMac(a) ?? a }), {
+        mac: a,
+      });
+    default:
+      return usage();
+  }
 }
 
 const USAGE = 'usage: lab send-frame --to <mac> [--from <mac>] [--dev <iface>] [--msg "<text>"]';
@@ -67,7 +167,7 @@ function sendFrame(ctx: CommandContext, args: string[]): number {
     }
   }
   const d = ctx.sim.device(ctx.device);
-  const iface = opts.dev ? d?.ifaces.find((i) => i.name === opts.dev) : d?.ifaces[0];
+  const iface = opts.dev ? d?.ifaces.find((i) => i.name === opts.dev) : d?.ifaces.find((i) => i.kind !== "loopback");
   if (!iface) {
     ctx.err(`lab send-frame: ${opts.dev}: No such device`);
     return 1;

@@ -1,0 +1,21 @@
+# routed-fwd-on: left eth0 02:00:00:00:00:21 10.0.1.10/24 <-> bridgehead eth0 02:00:00:00:00:31 10.0.1.1/24; bridgehead eth1 02:00:00:00:00:32 10.0.2.1/24 <-> right eth0 02:00:00:00:00:41 10.0.2.20/24; all up; bridgehead ip_forward=1; left default via 10.0.1.1, right default via 10.0.2.1; IPv6 off | setup: right: ip addr flush dev eth0; during capture, left: ping -c 1 -W 4 10.0.2.20 | runs on: bridgehead
+$ tcpdump -n -e -xx -i eth1 arp
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+<time> 02:00:00:00:00:32 > Broadcast, ethertype ARP (0x0806), length 42: Request who-has 10.0.2.20 tell 10.0.2.1, length 28
+	0x0000:  ffff ffff ffff 0200 0000 0032 0806 0001
+	0x0010:  0800 0604 0001 0200 0000 0032 0a00 0201
+	0x0020:  0000 0000 0000 0a00 0214
+<time> 02:00:00:00:00:32 > Broadcast, ethertype ARP (0x0806), length 42: Request who-has 10.0.2.20 tell 10.0.2.1, length 28
+	0x0000:  ffff ffff ffff 0200 0000 0032 0806 0001
+	0x0010:  0800 0604 0001 0200 0000 0032 0a00 0201
+	0x0020:  0000 0000 0000 0a00 0214
+<time> 02:00:00:00:00:32 > Broadcast, ethertype ARP (0x0806), length 42: Request who-has 10.0.2.20 tell 10.0.2.1, length 28
+	0x0000:  ffff ffff ffff 0200 0000 0032 0806 0001
+	0x0010:  0800 0604 0001 0200 0000 0032 0a00 0201
+	0x0020:  0000 0000 0000 0a00 0214
+
+3 packets captured
+3 packets received by filter
+0 packets dropped by kernel
+[exit 0]

@@ -209,7 +209,7 @@ export const guide: GuideTopic[] = [
       lines: [
         { text: 'lab send-frame --to 02:00:00:00:00:07 --msg "hello"', tone: "echo" },
         { text: "lab tools exist only in Wirelight — real Linux doesn't have this command.", tone: "note" },
-        { text: "sent 1 frame (to 02:00:00:00:00:07, 60 bytes)", tone: "lab" },
+        { text: "sent 1 frame (to 02:00:00:00:00:07, 19 bytes)", tone: "lab" },
         { text: "", tone: "prompt" },
       ],
     },

@@ -42,10 +42,10 @@ describe("lab send-frame", () => {
     const { run } = setup();
     expect(run('lab send-frame --to 02:00:00:00:00:07 --msg "hello there"')).toEqual({
       code: 0,
-      out: ["note: lab tools exist only in Wirelight", "stdout: sent 1 frame (to 02:00:00:00:00:07, 60 bytes)"],
+      out: ["note: lab tools exist only in Wirelight", "stdout: sent 1 frame (to 02:00:00:00:00:07, 25 bytes)"],
     });
     expect(run("lab send-frame --to 02:00:00:00:00:07").out).toEqual([
-      "stdout: sent 1 frame (to 02:00:00:00:00:07, 60 bytes)",
+      "stdout: sent 1 frame (to 02:00:00:00:00:07, 19 bytes)",
     ]);
   });
 
@@ -61,7 +61,7 @@ describe("lab send-frame", () => {
     const { run } = setup();
     run("lab send-frame --to 02:00:00:00:00:07");
     expect(run("lab send-frame --to 02:00:00:00:00:AB").out).toEqual([
-      "stdout: sent 1 frame (to 02:00:00:00:00:ab, 60 bytes)",
+      "stdout: sent 1 frame (to 02:00:00:00:00:ab, 19 bytes)",
     ]);
     expect(run("lab send-frame --to lantern")).toMatchObject({
       code: 2,

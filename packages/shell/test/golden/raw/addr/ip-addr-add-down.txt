@@ -1,0 +1,7 @@
+# lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off | setup: observatory: ip link set eth0 down; observatory: ip addr add 10.0.0.5/24 dev eth0 | runs on: observatory
+$ ip addr show dev eth0
+2: eth0@if2: <BROADCAST,MULTICAST> mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether 02:00:00:00:00:05 brd ff:ff:ff:ff:ff:ff link-netns lantern
+    inet 10.0.0.5/24 scope global eth0
+       valid_lft forever preferred_lft forever
+[exit 0]

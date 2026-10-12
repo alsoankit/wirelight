@@ -28,6 +28,8 @@ export interface IPv4Packet {
   id: number;
   /** Don't Fragment. */
   df: boolean;
+  /** Type of service byte (Linux sends ICMP errors with 0xc0). Default 0. */
+  tos?: number;
   payload: Uint8Array;
 }
 
@@ -38,7 +40,7 @@ export function encodeIPv4(p: IPv4Packet): Uint8Array {
   const total = 20 + p.payload.length;
   const out = new Uint8Array(total);
   out[0] = 0x45; // version 4, IHL 5
-  out[1] = 0; // DSCP/ECN
+  out[1] = p.tos ?? 0; // DSCP/ECN
   out[2] = total >> 8;
   out[3] = total & 0xff;
   out[4] = (p.id >> 8) & 0xff;

@@ -21,7 +21,7 @@ describe("lab protocol over one cable", () => {
   it("a direct message is delivered and answered", () => {
     const sim = new Simulator(topo());
     const r = sim.sendLabFrame("observatory", { to: "02:00:00:00:00:07", msg: "hello" });
-    expect(r).toEqual({ ok: true, frameId: 1, length: 60 });
+    expect(r).toEqual({ ok: true, frameId: 1, length: 14 + 5 });
     run(sim);
     const delivered = sim.trace.filter((e) => e.kind === "app.deliver");
     expect(delivered.map((e) => [e.device, e.text])).toEqual([
@@ -44,16 +44,16 @@ describe("lab protocol over one cable", () => {
     ]);
   });
 
-  it("frames are real bytes: Ethernet II, EtherType 0x88b5, padded to 60", () => {
+  it("frames are real bytes: Ethernet II, EtherType 0x88b5, at their built length (no padding)", () => {
     const sim = new Simulator(topo());
     sim.sendLabFrame("observatory", { to: "02:00:00:00:00:07", msg: "hi" });
     const tx = sim.trace.find((e) => e.kind === "frame.tx");
     if (tx?.kind !== "frame.tx") throw new Error("no tx");
-    expect(tx.bytes.length).toBe(60);
+    expect(tx.bytes.length).toBe(14 + 2);
     const f = decodeEth(tx.bytes);
     expect(f).toMatchObject({ dst: "02:00:00:00:00:07", src: "02:00:00:00:00:05", type: 0x88b5 });
     expect(decodeLab(f.payload)).toBe("hi");
-    expect(tx.summary).toBe("02:00:00:00:00:05 > 02:00:00:00:00:07, ethertype Unknown (0x88b5), length 60");
+    expect(tx.summary).toBe("02:00:00:00:00:05 > 02:00:00:00:00:07, ethertype Unknown (0x88b5), length 16");
   });
 
   it("a frame for someone else reaches the door and is ignored", () => {
@@ -112,9 +112,9 @@ describe("links", () => {
     const sim = new Simulator(topo());
     sim.sendLabFrame("observatory", { to: "02:00:00:00:00:07", msg: "hello" });
     const enter = sim.trace.find((e) => e.kind === "link.enter");
-    expect(enter?.kind === "link.enter" && enter.arriveAt).toBeCloseTo(0.05 + ((60 * 8) / 1e9) * 1000, 9);
+    expect(enter?.kind === "link.enter" && enter.arriveAt).toBeCloseTo(0.05 + ((19 * 8) / 1e9) * 1000, 9);
     expect(sim.inFlight()).toBe(1);
-    expect(sim.nextEventTime()).toBeCloseTo(0.05048, 9);
+    expect(sim.nextEventTime()).toBeCloseTo(0.050152, 9);
     sim.advance(0.01);
     expect(sim.inFlight()).toBe(1);
     sim.advance(1);

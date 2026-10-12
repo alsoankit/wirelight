@@ -1,0 +1,18 @@
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: during capture, observatory: echo hello > /dev/udp/10.0.0.7/9 | runs on: lantern
+$ tcpdump -n -e -xx -c 2 -i eth0 udp or icmp
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+<time> 02:00:00:00:00:05 > 02:00:00:00:00:07, ethertype IPv4 (0x0800), length 48: 10.0.0.5.<port> > 10.0.0.7.discard: UDP, length 6
+	0x0000:  0200 0000 0007 0200 0000 0005 0800 4500
+	0x0010:  0022 e44a 4000 4011 4275 0a00 0005 0a00
+	0x0020:  0007 89d5 0009 000e 142b 6865 6c6c 6f0a
+<time> 02:00:00:00:00:07 > 02:00:00:00:00:05, ethertype IPv4 (0x0800), length 76: 10.0.0.7 > 10.0.0.5: ICMP 10.0.0.7 udp port discard unreachable, length 42
+	0x0000:  0200 0000 0005 0200 0000 0007 0800 45c0
+	0x0010:  003e d5ed 0000 4001 9006 0a00 0007 0a00
+	0x0020:  0005 0303 1b09 0000 0000 4500 0022 e44a
+	0x0030:  4000 4011 4275 0a00 0005 0a00 0007 89d5
+	0x0040:  0009 000e 142b 6865 6c6c 6f0a
+2 packets captured
+2 packets received by filter
+0 packets dropped by kernel
+[exit 0]

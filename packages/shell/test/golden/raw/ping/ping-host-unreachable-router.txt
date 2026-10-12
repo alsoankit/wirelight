@@ -1,0 +1,12 @@
+# routed-fwd-on: left eth0 02:00:00:00:00:21 10.0.1.10/24 <-> bridgehead eth0 02:00:00:00:00:31 10.0.1.1/24; bridgehead eth1 02:00:00:00:00:32 10.0.2.1/24 <-> right eth0 02:00:00:00:00:41 10.0.2.20/24; all up; bridgehead ip_forward=1; left default via 10.0.1.1, right default via 10.0.2.1; IPv6 off | setup: right: ip addr flush dev eth0 | runs on: left
+$ ping -c 4 10.0.2.20
+PING 10.0.2.20 (10.0.2.20) 56(84) bytes of data.
+From 10.0.1.1 icmp_seq=1 Destination Host Unreachable
+From 10.0.1.1 icmp_seq=2 Destination Host Unreachable
+From 10.0.1.1 icmp_seq=3 Destination Host Unreachable
+From 10.0.1.1 icmp_seq=4 Destination Host Unreachable
+
+--- 10.0.2.20 ping statistics ---
+4 packets transmitted, 0 received, +4 errors, 100% packet loss, time 3051ms
+pipe 4
+[exit 1]

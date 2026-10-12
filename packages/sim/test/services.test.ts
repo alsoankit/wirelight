@@ -90,7 +90,7 @@ describe("announcements: a real IPv4/UDP packet inside a frame", () => {
     const pseudo = [...(parseIp("10.0.0.7") ?? []), ...(parseIp("255.255.255.255") ?? []), 0, 17, 0, udp.length];
     expect(checksum(new Uint8Array([...pseudo, ...ip.payload]))).toBe(0);
     expect(a.summary).toBe(
-      "02:00:00:00:00:07 > ff:ff:ff:ff:ff:ff, ethertype IPv4 (0x0800), length 60: 10.0.0.7.40000 > 255.255.255.255.40000: UDP, length 15",
+      "02:00:00:00:00:07 > ff:ff:ff:ff:ff:ff, ethertype IPv4 (0x0800), length 57: 10.0.0.7.40000 > 255.255.255.255.40000: UDP, length 15",
     );
   });
 

@@ -11,7 +11,10 @@ export const fields = {
     },
     from: { name: "Source", meaning: "Who sent it: the address of the door it left through." },
     type: { name: "EtherType", meaning: "What kind of thing is inside. 0x88b5 means a Wirelight lab message." },
-    length: { name: "Length", meaning: "How many bytes the whole frame is. Short frames are padded out to 60." },
+    length: {
+      name: "Length",
+      meaning: "How many bytes the whole frame is: the addresses, the type and what's inside.",
+    },
   },
   lab: {
     title: "Message",

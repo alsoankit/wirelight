@@ -1,0 +1,4 @@
+# routed-fwd-off-nogw: left eth0 02:00:00:00:00:21 10.0.1.10/24 <-> bridgehead eth0 02:00:00:00:00:31 10.0.1.1/24; bridgehead eth1 02:00:00:00:00:32 10.0.2.1/24 <-> right eth0 02:00:00:00:00:41 10.0.2.20/24; all up; bridgehead ip_forward=0; no default routes; IPv6 off | setup: none | runs on: left
+$ ip route del 10.0.2.0/24
+RTNETLINK answers: No such process
+[exit 2]

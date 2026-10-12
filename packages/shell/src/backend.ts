@@ -57,7 +57,8 @@ export class SimBackend implements NetworkBackend {
 
   exec(deviceId: DeviceId, line: string, source: CmdSource): ExecHandle {
     const r = this.shell.exec(this.world, deviceId, line, source, this.options(deviceId));
-    return { execId: r.execId, exitCode: r.exitCode, interrupt() {} };
+    const sim = this.world;
+    return { execId: r.execId, exitCode: r.exitCode, interrupt: () => sim.interrupt(deviceId, r.execId) };
   }
 
   advance(to: number): void {

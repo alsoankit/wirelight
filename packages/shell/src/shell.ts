@@ -4,29 +4,20 @@
  * which is where the console reads them from (SIM-38).
  */
 import type { CmdSource, DeviceId, Simulator } from "@wirelight/sim";
-import { clear, exit, help, history, man } from "./commands/builtins";
+import { bridge } from "./commands/bridge";
+import { clear, exit, help, history, hostname, man } from "./commands/builtins";
 import { ip } from "./commands/ip";
 import { lab } from "./commands/lab";
+import { ping } from "./commands/ping";
+import { sysctl } from "./commands/sysctl";
+import { tcpdump } from "./commands/tcpdump";
 import { tokenize } from "./tokenize";
 import type { CommandContext, CommandFn, ShellContent, ToolId } from "./types";
 
-const BUILTINS: Record<string, CommandFn> = { help, man, history, clear, exit };
-const PROGRAMS: Record<string, CommandFn> = { ip, lab };
+const BUILTINS: Record<string, CommandFn> = { help, man, history, clear, exit, hostname };
+const PROGRAMS: Record<string, CommandFn> = { ip, lab, bridge, ping, sysctl, tcpdump };
 /** Real Linux programs the player meets later; until unlocked they answer FR-CON-11. */
-const LATER = new Set([
-  "bridge",
-  "ping",
-  "tcpdump",
-  "sysctl",
-  "dhclient",
-  "traceroute",
-  "ssh",
-  "ss",
-  "nc",
-  "dig",
-  "curl",
-  "iptables",
-]);
+const LATER = new Set(["tcpdump", "sysctl", "dhclient", "traceroute", "ssh", "ss", "nc", "dig", "curl", "iptables"]);
 
 export interface ExecOptions {
   tools: ReadonlySet<ToolId>;
@@ -52,7 +43,7 @@ export class Shell {
     line: string,
     source: CmdSource,
     opts: ExecOptions,
-  ): { execId: number; exitCode: number } {
+  ): { execId: number; exitCode: number | null } {
     const execId = this.nextExecId++;
     const trimmed = line.trim();
     if (source === "typed" || source === "click") {
@@ -62,7 +53,7 @@ export class Shell {
     }
 
     const chunks: Chunk[] = [];
-    const exitCode = this.run(sim, device, trimmed, opts, chunks);
+    const exitCode = this.run(sim, device, trimmed, opts, chunks, execId);
 
     sim.emit({ kind: "cmd.exec", t: sim.now, device, execId, line: trimmed, source, exitCode });
     for (const c of chunks) {
@@ -71,7 +62,14 @@ export class Shell {
     return { execId, exitCode };
   }
 
-  private run(sim: Simulator, device: DeviceId, line: string, opts: ExecOptions, chunks: Chunk[]): number {
+  private run(
+    sim: Simulator,
+    device: DeviceId,
+    line: string,
+    opts: ExecOptions,
+    chunks: Chunk[],
+    execId: number,
+  ): number | null {
     const tok = tokenize(line);
     if (!tok.ok) {
       chunks.push({ stream: "stderr", text: tok.error });
@@ -98,6 +96,7 @@ export class Shell {
     const ctx: CommandContext = {
       sim,
       device,
+      execId,
       tools: opts.tools,
       content: this.content,
       history: this.history(device),
@@ -114,7 +113,7 @@ export class Shell {
 
     const [name = "", ...args] = words;
     const fn = BUILTINS[name] ?? PROGRAMS[name];
-    let code: number;
+    let code: number | null;
     if (fn) code = fn(ctx, args);
     else if (LATER.has(name)) {
       ctx.note(this.content.notes.locked);
@@ -124,7 +123,8 @@ export class Shell {
       code = 127;
     }
 
-    for (const stage of pipes) {
+    // A command that keeps running streams through the trace; only finished output can be piped.
+    for (const stage of code === null ? [] : pipes) {
       const [cmd, ...gargs] = stage;
       const stdout = buf.filter((c) => c.stream === "stdout").map((c) => c.text);
       const rest = buf.filter((c) => c.stream !== "stdout");

@@ -1,0 +1,13 @@
+{
+  "name": "@wirelight/difftest",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@wirelight/content": "workspace:*",
+    "@wirelight/shell": "workspace:*",
+    "@wirelight/sim": "workspace:*"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

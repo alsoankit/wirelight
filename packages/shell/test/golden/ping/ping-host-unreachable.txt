@@ -1,0 +1,12 @@
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: none | runs on: observatory
+$ ping -c 4 10.0.0.9
+PING 10.0.0.9 (10.0.0.9) 56(84) bytes of data.
+From 10.0.0.5 icmp_seq=1 Destination Host Unreachable
+From 10.0.0.5 icmp_seq=2 Destination Host Unreachable
+From 10.0.0.5 icmp_seq=3 Destination Host Unreachable
+From 10.0.0.5 icmp_seq=4 Destination Host Unreachable
+
+--- 10.0.0.9 ping statistics ---
+4 packets transmitted, 0 received, +4 errors, 100% packet loss, time <time>ms
+pipe 4
+[exit 1]

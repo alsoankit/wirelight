@@ -1,0 +1,12 @@
+# switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24 | setup: during capture, a: ping -c 1 10.0.0.2 | runs on: hall
+$ tcpdump -n -e -c 4 -i eth1
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+<time> 02:00:00:00:00:0a > Broadcast, ethertype ARP (0x0806), length 42: Request who-has 10.0.0.2 tell 10.0.0.1, length 28
+<time> 02:00:00:00:00:0b > 02:00:00:00:00:0a, ethertype ARP (0x0806), length 42: Reply 10.0.0.2 is-at 02:00:00:00:00:0b, length 28
+<time> 02:00:00:00:00:0a > 02:00:00:00:00:0b, ethertype IPv4 (0x0800), length 98: 10.0.0.1 > 10.0.0.2: ICMP echo request, id <id>, seq 1, length 64
+<time> 02:00:00:00:00:0b > 02:00:00:00:00:0a, ethertype IPv4 (0x0800), length 98: 10.0.0.2 > 10.0.0.1: ICMP echo reply, id <id>, seq 1, length 64
+4 packets captured
+4 packets received by filter
+0 packets dropped by kernel
+[exit 0]
