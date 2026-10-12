@@ -1,9 +1,9 @@
 import { Canvas } from "@react-three/fiber";
 import { landing } from "@wirelight/content";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
 import { QUALITY, QualityContext } from "../render/quality";
-import { GateScene } from "./GateScene";
+import { type Descent, GateScene } from "./GateScene";
 
 // The landing page (ONB-01..04, 0010, 0044): every visit starts here. The 3D gate scene fills the
 // screen; over it, on the left, the name, what Wirelight is, and the way in. Below the fold, how it
@@ -13,23 +13,43 @@ type Props = {
   /** The main button: "Explore the dungeon", or "Play <room>" for a link to a room (0044). */
   main: string;
   onStart: (skipIntro: boolean) => void;
+  /** Set once the player has gone in: the descent plays (quickly after Skip intro), then `onArrived`. */
+  descending: { quick: boolean } | null;
+  onArrived: () => void;
+  /** Reduced motion: no camera move, the page just fades out. */
+  fading?: boolean;
 };
 
-export function LandingPage({ main, onStart }: Props) {
+export function LandingPage({ main, onStart, descending, onArrived, fading = false }: Props) {
+  // ONB-06: a click or key during the descent speeds it up.
+  const hurried = useRef(false);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !(e.target instanceof HTMLButtonElement)) onStart(false);
+      if (descending) hurried.current = true;
+      else if (e.key === "Enter" && !(e.target instanceof HTMLButtonElement)) onStart(false);
+    };
+    const onClick = () => {
+      if (descending) hurried.current = true;
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onStart]);
+    window.addEventListener("pointerdown", onClick);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onClick);
+    };
+  }, [onStart, descending]);
+
+  const descent = useMemo<Descent | null>(
+    () => (descending ? { quick: descending.quick, faster: () => hurried.current, onDone: onArrived } : null),
+    [descending, onArrived],
+  );
 
   return (
-    <div className="landing">
+    <div className="landing" data-descending={descending ? "yes" : "no"} data-fading={fading ? "yes" : "no"}>
       <div className="landing-scene" aria-hidden="true">
         <QualityContext.Provider value={QUALITY.high}>
           <Canvas gl={nodeRendererFactory(backendFromUrl() === "webgl2" ? "webgl2" : "webgpu")}>
-            <GateScene />
+            <GateScene descent={descent} />
           </Canvas>
         </QualityContext.Provider>
       </div>

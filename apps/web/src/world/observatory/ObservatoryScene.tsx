@@ -95,7 +95,7 @@ function cameraFromUrl(): { target: [number, number, number]; distance: number }
   return { target, distance: Number.isFinite(d) && d > 0 ? d : 19 };
 }
 
-export function ObservatoryScene() {
+export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
   const watch = useRef<Object3D>(null);
   const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
   const quality = useQuality();
@@ -109,7 +109,7 @@ export function ObservatoryScene() {
 
   return (
     <>
-      <RoomCamera {...cameraFromUrl()} />
+      <RoomCamera {...cameraFromUrl()} settleFrom={arriving ? 9 : 0} />
       <color attach="background" args={["#0b0d12"]} />
       <RuinDial level={ruinLevel} origin={FIX_ORIGIN} />
       <RoomLights glows={RUNE_GLOWS} />

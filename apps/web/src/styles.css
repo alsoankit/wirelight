@@ -407,3 +407,45 @@ html:has(.landing) {
     display: none;
   }
 }
+
+/* The descent (ONB-05): the page's text steps aside, and the scene takes the whole screen. */
+.landing[data-descending="yes"] .landing-hero,
+.landing[data-fading="yes"] .landing-hero {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  background: none;
+}
+
+.landing[data-descending="yes"] .landing-section,
+.landing[data-fading="yes"] .landing-section {
+  display: none;
+}
+
+/* Reduced motion: a short fade to dark instead of the camera move. */
+.landing[data-fading="yes"] .landing-scene {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Arriving in the room: dark at first (the shaft's end), then the room brightens as it settles. */
+.arrival-veil {
+  position: fixed;
+  inset: 0;
+  background: #06070a;
+  pointer-events: none;
+  animation: arrival 0.9s ease 0.15s both;
+}
+
+@keyframes arrival {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrival-veil {
+    animation-duration: 0.3s;
+    animation-delay: 0.2s;
+  }
+}

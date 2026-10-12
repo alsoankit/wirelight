@@ -6,14 +6,20 @@ import { type PerspectiveCamera as Camera, Vector3 } from "three";
 // The fixed three-quarter view (0006, art-direction.md): a narrow lens, no orbit,
 // and a gentle parallax that follows the pointer.
 
-type Props = { target: [number, number, number]; distance?: number; fov?: number };
+type Props = {
+  target: [number, number, number];
+  distance?: number;
+  fov?: number;
+  /** Start this many metres further out and settle in (arriving from the descent, ONB-05). */
+  settleFrom?: number;
+};
 
 // From the room toward the camera. Fixed for every room (no orbit), so static geometry facing away
 // from it can be dropped (kit/StaticRoom.tsx).
 export const VIEW_DIRECTION = new Vector3(1, 0.9, 1).normalize();
 const PARALLAX = 0.5; // metres of camera drift at the screen edge
 
-export function RoomCamera({ target, distance = 24, fov = 28 }: Props) {
+export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0 }: Props) {
   const ref = useRef<Camera>(null);
   const lookAt = useMemo(() => new Vector3(...target), [target]);
   const home = useMemo(() => lookAt.clone().addScaledVector(VIEW_DIRECTION, distance), [lookAt, distance]);
@@ -31,5 +37,14 @@ export function RoomCamera({ target, distance = 24, fov = 28 }: Props) {
     camera.lookAt(lookAt);
   });
 
-  return <PerspectiveCamera ref={ref} makeDefault fov={fov} position={home.toArray()} near={0.5} far={120} />;
+  // The camera eases toward `home` every frame, so starting further out makes it settle in.
+  const start = useMemo(
+    () =>
+      home
+        .clone()
+        .addScaledVector(VIEW_DIRECTION, settleFrom)
+        .add({ x: 0, y: settleFrom * 0.4, z: 0 }),
+    [home, settleFrom],
+  );
+  return <PerspectiveCamera ref={ref} makeDefault fov={fov} position={start.toArray()} near={0.5} far={120} />;
 }

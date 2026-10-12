@@ -80,7 +80,13 @@ const SAMPLES: [number, number][] = [
   [-0.7, -0.7],
 ];
 
-export function bakeMoonlight(receivers: BufferGeometry[], occluder: BufferGeometry, toMoon: Vector3): void {
+/** `shadowsWithin`: beyond this distance from the origin, skip the shadow test (fog hides it). */
+export function bakeMoonlight(
+  receivers: BufferGeometry[],
+  occluder: BufferGeometry,
+  toMoon: Vector3,
+  shadowsWithin = Number.POSITIVE_INFINITY,
+): void {
   const started = performance.now();
   const bvh = new MeshBVH(occluder);
   const ray = new Ray();
@@ -104,6 +110,10 @@ export function bakeMoonlight(receivers: BufferGeometry[], occluder: BufferGeome
       n.set(normal.getX(i), normal.getY(i), normal.getZ(i)).normalize();
       const facing = n.dot(toMoon);
       if (facing <= 0) continue;
+      if (Math.hypot(position.getX(i), position.getZ(i)) > shadowsWithin) {
+        out[i] = facing;
+        continue;
+      }
       // Start just off the surface so the rays don't hit the face they start on.
       origin
         .set(position.getX(i), position.getY(i), position.getZ(i))

@@ -80,11 +80,13 @@ export function StaticRoom({
   extras = [],
   toCamera,
   toMoon = TO_MOON,
+  shadowsWithin,
 }: {
   placements: Placement[];
   extras?: Extra[];
   toCamera: Vector3; // from the room toward the fixed camera
   toMoon?: Vector3; // from the room toward the moon (Region 1 rooms by default)
+  shadowsWithin?: number; // metres from the origin; further out, no shadow rays (fog hides them)
 }) {
   const names = useMemo(() => [...new Set(placements.map((p) => p.piece))], [placements]);
   const gltfs = useGLTF(names.map(pieceUrl));
@@ -151,9 +153,10 @@ export function StaticRoom({
         visible.map((m) => m.geometry),
         occluder,
         toMoon,
+        shadowsWithin,
       );
     return visible;
-  }, [scenesKey, names, placements, extras, toCamera, toMoon]);
+  }, [scenesKey, names, placements, extras, toCamera, toMoon, shadowsWithin]);
 
   useEffect(() => {
     return () => {

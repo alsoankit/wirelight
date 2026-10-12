@@ -8,7 +8,11 @@ import { LandingPage } from "./landing/LandingPage";
 // Dev only: opening /play directly goes straight into the game (screenshot tools, quick checks).
 // The game's code (renderer scene, engine worker) loads only when the player goes in.
 
-const PlayPage = lazy(() => import("./play/PlayPage").then((m) => ({ default: m.PlayPage })));
+const loadPlay = () => import("./play/PlayPage");
+const PlayPage = lazy(() => loadPlay().then((m) => ({ default: m.PlayPage })));
+
+// ONB-06: with reduced motion the descent is a short fade instead.
+const REDUCED_FADE_MS = 350;
 
 function linkedRoom(): string | undefined {
   const match = window.location.pathname.match(/^\/play\/(.+)$/);
@@ -17,21 +21,49 @@ function linkedRoom(): string | undefined {
 }
 
 export function App() {
-  const [inGame, setInGame] = useState(() => import.meta.env.DEV && window.location.pathname.startsWith("/play"));
+  const [stage, setStage] = useState<"landing" | "descending" | "fading" | "game">(() =>
+    import.meta.env.DEV && window.location.pathname.startsWith("/play") ? "game" : "landing",
+  );
+  const [quick, setQuick] = useState(false);
   const room = linkedRoom();
   const title = room ? roomTexts[roomById(room)?.content ?? ""]?.title : undefined;
   const main = title ? `${landing.playPrefix} ${title}` : landing.explore;
 
-  const start = useCallback(() => {
-    // The descent (ONB-05) and the tour come in later steps; for now, straight in.
+  const arrive = useCallback(() => {
     if (!window.location.pathname.startsWith("/play")) window.history.pushState(null, "", "/play");
-    setInGame(true);
+    setStage("game");
   }, []);
 
-  if (!inGame) return <LandingPage main={main} onStart={start} />;
+  // Going in: the descent plays (ONB-05; quick after Skip intro, ONB-07) while the game's code loads.
+  // With reduced motion, a short fade instead (ONB-06). (The tour, which Skip intro also skips, comes
+  // in a later step.)
+  const start = useCallback(
+    (skipIntro: boolean) => {
+      void loadPlay().then((m) => m.preloadRoom());
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setStage("fading");
+        setTimeout(arrive, REDUCED_FADE_MS);
+        return;
+      }
+      setQuick(skipIntro);
+      setStage("descending");
+    },
+    [arrive],
+  );
+
+  if (stage !== "game")
+    return (
+      <LandingPage
+        main={main}
+        onStart={start}
+        descending={stage === "descending" ? { quick } : null}
+        fading={stage === "fading"}
+        onArrived={arrive}
+      />
+    );
   return (
     <Suspense fallback={null}>
-      <PlayPage />
+      <PlayPage arriving />
     </Suspense>
   );
 }

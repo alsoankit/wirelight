@@ -22,6 +22,9 @@ export function onMound(x: number, z: number): number {
   return MOUND.centre[1] + Math.sqrt(1 - t * t) * (1 - 0.25 * t) * MOUND.height * 0.9;
 }
 
+// The earth the descent falls past (EarthSlice.tsx): a cut slice under the gate, facing the camera.
+export const SLICE = { z: -1.0, width: 16, depth: 15 };
+
 // Low and close, looking slightly up at the gate: it stands tall against the sky.
 export const CAMERA = { position: new Vector3(-3.4, 1.5, 12.5), target: new Vector3(-1.5, 2.7, 0), fov: 40 };
 export const TO_CAMERA = CAMERA.position.clone().sub(CAMERA.target).normalize();

@@ -1,15 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
-import {
-  AdditiveBlending,
-  DoubleSide,
-  FogExp2,
-  type PerspectiveCamera,
-  type PointLight,
-  Shape,
-  ShapeGeometry,
-  Vector3,
-} from "three";
+import { FogExp2, type PerspectiveCamera, type PointLight, Shape, ShapeGeometry, Vector3 } from "three";
 import { color, float, mix, positionLocal, sin, smoothstep, time } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { CinematicPost } from "../render/CinematicPost";
@@ -19,6 +10,8 @@ import { makeFlagstones } from "../world/kit/floor";
 import { type Extra, StaticRoom } from "../world/kit/StaticRoom";
 import { WindDriver } from "../world/WindDriver";
 import { Bird } from "./Bird";
+import { DESCENT_SECONDS, descentPose } from "./descent";
+import { EarthSlice } from "./EarthSlice";
 import { makeGround, makeMound } from "./ground";
 import { CAMERA, GATE_OPENING, LANDING, LIGHT_DIRECTION, MOON_DIRECTION, MOUND, PATH_START, TO_CAMERA } from "./layout";
 import { Mist } from "./Mist";
@@ -76,7 +69,10 @@ function onPath(x: number, z: number): number {
 }
 
 const EXTRAS: Extra[] = [
-  { name: "Earth", geometry: makeGround(44, 88, onPath) },
+  {
+    name: "Earth",
+    geometry: makeGround(44, 56, onPath),
+  },
   { name: "Earth", geometry: makeMound(MOUND.centre, MOUND.radius, MOUND.height) },
   {
     name: "Floor",
@@ -93,9 +89,15 @@ const EXTRAS: Extra[] = [
 
 const FIREFLIES = { min: [-7, 0.4, -3] as [number, number, number], max: [7, 2.8, 6] as [number, number, number] };
 
-function LandingCamera() {
+/** The descent, once it has started: how fast it plays, and what to call when it's done. */
+export type Descent = { quick: boolean; faster: () => boolean; onDone: () => void };
+
+function LandingCamera({ descent }: { descent: Descent | null }) {
   const camera = useThree((s) => s.camera as PerspectiveCamera);
   const wanted = useMemo(() => new Vector3(), []);
+  const target = useMemo(() => new Vector3(), []);
+  const progress = useRef(0);
+  const done = useRef(false);
   useEffect(() => {
     camera.fov = CAMERA.fov;
     camera.near = 0.3;
@@ -106,6 +108,18 @@ function LandingCamera() {
   }, [camera]);
   // A slow breathing drift (about 20 s), plus a gentle one with the pointer (as in the rooms).
   useFrame(({ pointer, clock }, delta) => {
+    if (descent) {
+      // The descent owns the camera: along its path, at its pace (faster after a click or key).
+      const seconds = descent.quick ? DESCENT_SECONDS.quick : DESCENT_SECONDS.full;
+      progress.current += (Math.min(delta, 0.05) / seconds) * (descent.faster() ? DESCENT_SECONDS.faster : 1);
+      descentPose(progress.current, camera.position, target);
+      camera.lookAt(target);
+      if (progress.current >= 1 && !done.current) {
+        done.current = true;
+        descent.onDone();
+      }
+      return;
+    }
     const t = clock.elapsedTime;
     wanted
       .copy(CAMERA.position)
@@ -140,17 +154,24 @@ function NightLight() {
   );
 }
 
-export function GateScene() {
+export function GateScene({ descent }: { descent: Descent | null }) {
   const quality = useQuality();
   return (
     <>
-      <LandingCamera />
+      <LandingCamera descent={descent} />
       <color attach="background" args={[HORIZON]} />
       <NightLight />
       <Sky moon={MOON_DIRECTION} />
       <Suspense fallback={null}>
-        <StaticRoom placements={LANDING} extras={EXTRAS} toCamera={TO_CAMERA} toMoon={LIGHT_DIRECTION} />
+        <StaticRoom
+          placements={LANDING}
+          extras={EXTRAS}
+          toCamera={TO_CAMERA}
+          toMoon={LIGHT_DIRECTION}
+          shadowsWithin={11}
+        />
       </Suspense>
+      <EarthSlice />
       <Opening />
       <ThresholdLight />
       <RuneLine from={PATH_START} to={GATE_OPENING} />
