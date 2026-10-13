@@ -194,12 +194,98 @@ function Keys() {
   );
 }
 
+function Choice<T extends string | number>({
+  title,
+  value,
+  options,
+  onPick,
+}: {
+  title: string;
+  value: T;
+  options: [T, string][];
+  onPick: (v: T) => void;
+}) {
+  return (
+    <fieldset className="choice">
+      <legend>{title}</legend>
+      {options.map(([v, label]) => (
+        <label key={String(v)} className="radio">
+          <input type="radio" checked={value === v} onChange={() => onPick(v)} />
+          <span>{label}</span>
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
 function Settings() {
   const path = useProgress((s) => s.path ?? "new");
   const choosePath = useProgress((s) => s.choosePath);
   const replayIntro = useProgress((s) => s.replayIntro);
+  const settings = useProgress((s) => s.settings);
+  const set = useProgress((s) => s.setSettings);
+  const m = voice.menu;
   return (
     <div>
+      <h3>{m.sound}</h3>
+      {(["master", "music", "effects", "voices"] as const).map((k) => (
+        <label key={k} className="slider">
+          <span>{m.volume[k]}</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={settings.volumes[k]}
+            onChange={(e) => set({ volumes: { ...settings.volumes, [k]: Number(e.target.value) } })}
+          />
+        </label>
+      ))}
+      <Choice
+        title={m.voices.title}
+        value={settings.voices}
+        options={[
+          ["on", m.voices.on],
+          ["text", m.voices.text],
+        ]}
+        onPick={(voices) => set({ voices })}
+      />
+      <Choice
+        title={m.subtitles.title}
+        value={settings.subtitles}
+        options={[
+          ["auto", m.subtitles.auto],
+          ["on", m.subtitles.on],
+          ["off", m.subtitles.off],
+        ]}
+        onPick={(subtitles) => set({ subtitles })}
+      />
+      <Choice
+        title={m.textSize}
+        value={settings.textSize}
+        options={[
+          [1, "100%"],
+          [1.25, "125%"],
+          [1.5, "150%"],
+        ]}
+        onPick={(textSize) => set({ textSize })}
+      />
+      <Choice
+        title={m.motion.title}
+        value={settings.motion}
+        options={[
+          ["system", m.motion.system],
+          ["reduced", m.motion.reduced],
+          ["full", m.motion.full],
+        ]}
+        onPick={(motion) => set({ motion })}
+      />
+      <Choice
+        title={m.quality.title}
+        value={settings.quality}
+        options={(["auto", "high", "medium", "low", "simple"] as const).map((q) => [q, m.quality[q]])}
+        onPick={(quality) => set({ quality })}
+      />
       <h3>{voice.menu.path}</h3>
       {pathChoice.options.map((o) => (
         <label key={o.id} className="radio">

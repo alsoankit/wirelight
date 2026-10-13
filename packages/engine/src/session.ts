@@ -63,6 +63,7 @@ export class Session {
   /** How much of the trace the main thread has already been sent. */
   private sent = 0;
   private fired: string[] = [];
+  private subtitles: boolean | null = null;
 
   /** Loads a room from its fresh, faulted start, or from a save of it. */
   loadRoom(roomId: string, save?: RoomSave): Batch {
@@ -71,6 +72,11 @@ export class Session {
     if (save && save.roomId !== roomId) throw new Error(`save is for "${save.roomId}", not "${roomId}"`);
     this.room = room;
     this.backend = loadRoom(room, rooms);
+    const own = this.backend.options;
+    this.backend.options = (device) => {
+      const o = own(device);
+      return { ...o, subtitles: this.subtitles ?? o.subtitles };
+    };
     if (save) this.backend.restore(save.world);
     this.sent = 0;
     this.fired = [];
@@ -81,6 +87,11 @@ export class Session {
   exec(device: DeviceId, line: string, source: CmdSource): Batch & { execId: number; exitCode: number | null } {
     const { execId, exitCode } = this.live().exec(device, line, source);
     return { ...this.batch(), execId, exitCode };
+  }
+
+  /** Settings → Error subtitles (UI-08): always on, always off, or null for the room's own rule. */
+  setSubtitles(on: boolean | null): void {
+    this.subtitles = on;
   }
 
   /** Ctrl+C: stops a command that keeps running (ping, tcpdump) and reports its end. */

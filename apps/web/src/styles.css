@@ -1388,3 +1388,48 @@ button.link.inline {
   color: var(--text);
   font: 600 13px / 1 var(--sans);
 }
+
+/* Text size (UI-22): the interface layer scales; the 3D room doesn't. */
+.hud,
+.panel,
+.menu,
+.lines,
+.top-bar,
+.console,
+.glass,
+.mini-glass,
+.jar-button,
+.reaction,
+.discovery,
+.cmd-memory,
+.path-choice,
+.tour-card {
+  zoom: var(--ui-zoom, 1);
+}
+
+.choice {
+  margin: 10px 0;
+  padding: 6px 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+}
+
+.choice legend {
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.slider {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+/* Reduced motion chosen in Settings (UI-23), as well as from the system. */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before {
+  animation: none !important;
+  transition: none !important;
+}

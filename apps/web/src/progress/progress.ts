@@ -16,7 +16,33 @@ export type RoomRecord = {
   key: string;
 };
 
+/** Settings (UI-17), kept with progress so they come back with the player. */
+export type Settings = {
+  volumes: { master: number; music: number; effects: number; voices: number };
+  /** Voices: On, or Text only (0047). */
+  voices: "on" | "text";
+  /** Error subtitles (UI-08): by floor (on through Floor 7), or always on / off. */
+  subtitles: "auto" | "on" | "off";
+  /** Text size, 1 = 100% (UI-22: up to 150%). */
+  textSize: 1 | 1.25 | 1.5;
+  /** Reduced motion (UI-23): follow the system, or on / off. */
+  motion: "system" | "reduced" | "full";
+  /** Graphics quality (0020): automatic, or a tier chosen by hand. */
+  quality: "auto" | "high" | "medium" | "low" | "simple";
+};
+
+export const DEFAULT_SETTINGS: Settings = {
+  volumes: { master: 0.8, music: 0.6, effects: 0.7, voices: 0.9 },
+  voices: "on",
+  subtitles: "auto",
+  textSize: 1,
+  motion: "system",
+  quality: "auto",
+};
+
 type Progress = {
+  settings: Settings;
+  setSettings(patch: Partial<Settings>): void;
   sightGiven: boolean;
   path: Path | null;
   tourDone: boolean;
@@ -62,6 +88,8 @@ const add = <T>(list: T[], x: T): T[] => (list.includes(x) ? list : [...list, x]
 export const useProgress = create<Progress>()(
   persist(
     (setState) => ({
+      settings: DEFAULT_SETTINGS,
+      setSettings: (patch) => setState((s) => ({ settings: { ...s.settings, ...patch } })),
       sightGiven: false,
       path: null,
       tourDone: false,

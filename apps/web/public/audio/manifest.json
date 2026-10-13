@@ -1,0 +1,4 @@
+{
+  "$comment": "Audio slots (decision 0047): slot id → { src, volume?, loop?, credit? }. A missing slot plays nothing. `pnpm audio:check` lists the slots the game uses that have no file yet; `pnpm voices:export` writes every voiced line to lines.csv for recording.",
+  "slots": {}
+}

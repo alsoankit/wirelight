@@ -31,3 +31,4 @@ assets-src/voices/takes/
 *.log
 .DS_Store
 Thumbs.db
+tools/audio/lines.csv

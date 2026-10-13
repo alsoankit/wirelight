@@ -13,7 +13,9 @@
     "check": "biome check . && pnpm -r typecheck",
     "rooms:validate": "vitest run --project rooms",
     "e2e": "pnpm --filter @wirelight/web e2e",
-    "difftest": "vitest run --project difftest"
+    "difftest": "vitest run --project difftest",
+    "audio:check": "AUDIO_LIST=1 vitest run --project audio",
+    "voices:export": "VOICES_EXPORT=1 vitest run --project audio"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

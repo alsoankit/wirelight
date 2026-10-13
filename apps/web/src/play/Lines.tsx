@@ -1,5 +1,6 @@
 import { voice } from "@wirelight/content";
 import { useEffect, useState } from "react";
+import { speak, stopVoice } from "../audio/audio";
 
 // Spoken lines (the Guardian, the Knight): one at a time, always written out with the speaker
 // (UI-20), whatever the voice setting. Enter or a click goes on; the last one calls `onDone`. Audio
@@ -21,6 +22,12 @@ export function Lines({ lines, onDone }: { lines: Line[]; onDone: () => void }) 
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [i]);
+  // Each line plays from its audio slot (its ID), if there's a file and Voices is On (0047).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new line is a new index
+  useEffect(() => {
+    if (line) void speak(line.id);
+    return () => stopVoice();
   }, [i]);
   if (!line) return null;
   return (

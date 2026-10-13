@@ -104,6 +104,8 @@ export const ask = {
   history: (device: string) => engine.history(device),
   complete: (device: string, line: string) => engine.complete(device, line),
   tools: () => engine.tools(),
+  /** Settings → Error subtitles: always on, off, or the room's rule (null). */
+  setSubtitles: (on: boolean | null) => engine.setSubtitles(on),
 };
 
 /** A batch caught something (the Slate by command, 0043): the jar's list is fetched again. */

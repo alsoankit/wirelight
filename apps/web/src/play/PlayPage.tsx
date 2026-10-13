@@ -2,8 +2,9 @@ import { PerformanceMonitor, useGLTF } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import { roomById } from "@wirelight/rooms";
 import { useEffect, useState } from "react";
+import { AudioDriver } from "../audio/AudioDriver";
 import { EngineDriver } from "../engine/EngineDriver";
-import { useSession } from "../engine/store";
+import { ask, useSession } from "../engine/store";
 import { useHydrated, useProgress } from "../progress/progress";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
 import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
@@ -57,13 +58,32 @@ function Resolution({ scale }: { scale: number }) {
 }
 
 /** `arriving`: coming down from the landing; the room fades in from dark and the camera settles. */
+/** Settings that act outside React's tree: text size, motion, error subtitles (UI-17). */
+function SettingsApplied() {
+  const settings = useProgress((s) => s.settings);
+  useEffect(() => {
+    document.documentElement.style.setProperty("--ui-zoom", String(settings.textSize));
+    document.documentElement.dataset.motion = settings.motion;
+    void ask.setSubtitles(settings.subtitles === "auto" ? null : settings.subtitles === "on");
+  }, [settings]);
+  return null;
+}
+
 /** `skipIntro`: the player chose Skip intro on the landing (ONB-07: no tour). */
 export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: boolean; skipIntro?: boolean }) {
   const hydrated = useHydrated();
   const tourDone = useProgress((s) => s.tourDone);
   const backend = backendFromUrl() === "webgl2" ? "webgl2" : "webgpu";
-  const forced = tierFromUrl();
+  const chosen = useProgress((s) => s.settings.quality);
+  const forced = tierFromUrl() ?? (chosen === "auto" ? undefined : chosen);
   const [tier, setTier] = useState<Tier>(forced ?? (backend === "webgpu" ? "high" : "medium"));
+  // A quality chosen in Settings applies at once and sticks (0020).
+  useEffect(() => {
+    if (chosen !== "auto") {
+      setTier(chosen);
+      setAuto(false);
+    }
+  }, [chosen]);
   const [auto, setAuto] = useState(!forced);
   const quality = QUALITY[tier];
   const load = useSession((s) => s.load);
@@ -121,6 +141,8 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         Quality: {tier}
         {auto ? " (auto)" : ""} · T to change
       </div>
+      <AudioDriver />
+      <SettingsApplied />
       <RoomHud />
       <PlatePanel />
       <ToolPanels />
