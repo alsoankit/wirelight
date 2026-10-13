@@ -57,6 +57,7 @@ export function HallScene({ device }: { device: string }) {
       <DoorFrames count={count} />
       <Board device={device} kind="mac" at={[-2.3, 0, 2.6]} turn={0.7} />
       <Desk device={device} at={[0.4, 0, 1.3]} />
+      <Board device={device} kind="routes" at={[2.5, 0, 2.4]} turn={-0.6} />
     </MachineScene>
   );
 }

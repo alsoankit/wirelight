@@ -67,6 +67,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
       <ObservatoryTools />
       <Board device="observatory" kind="ledger" at={[-1.2, 0, -2.9]} turn={0.15} />
       <Desk device="observatory" at={[0.6, 0, 1.2]} />
+      <Board device="observatory" kind="routes" at={[-3.0, 0, -0.6]} turn={1.1} />
     </MachineScene>
   );
 }

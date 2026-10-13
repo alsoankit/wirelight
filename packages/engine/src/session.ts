@@ -43,6 +43,8 @@ export type RoomStatus = {
   doors: Record<string, { mac: string; adminUp: boolean; up: boolean; addrs: string[] }>;
   /** Every cable end by "device:iface": plugged into that door, or out (a loose end on the floor). */
   cableEnds: Record<string, "in" | "out">;
+  /** Each machine's routing board (CORE-27): its lines, as `ip route` would print them. */
+  routes: Record<string, { dst: string; via: string | null; dev: string }[]>;
   /** Each machine's messengers' cards, in order ("" is a blank card). */
   cards: Record<string, string[]>;
   /** Keepers that have forgotten their job (0042): which desk, and what waits on it, oldest first. */
@@ -209,6 +211,9 @@ export class Session {
               }),
             },
           ]),
+      ),
+      routes: Object.fromEntries(
+        f.world.devices().map((d) => [d.id, d.routes.map((r) => ({ dst: r.dst, via: r.via, dev: r.dev }))]),
       ),
       cards: Object.fromEntries(
         f.world

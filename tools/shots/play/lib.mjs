@@ -93,3 +93,11 @@ export async function plateSwitch(p, nth = 0) {
   await p.click(".panel-actions button:first-child");
   await p.waitForTimeout(700);
 }
+
+/** Slides the console down (a player does, to reach things it covers). */
+export async function closeConsole(p) {
+  if (await p.$('.console[data-open="yes"]')) {
+    await p.click(".console-bar");
+    await p.waitForTimeout(300);
+  }
+}

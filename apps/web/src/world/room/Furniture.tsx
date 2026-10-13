@@ -21,21 +21,36 @@ function Chip({ label, onClick, at }: { label: string; onClick: () => void; at: 
 }
 
 /** A board on a stand: the MAC board (`bridge fdb show`) or the neighbour ledger (`ip neigh show`). */
-export function Board({ device, kind, at, turn }: { device: string; kind: "mac" | "ledger"; at: Vec3; turn: number }) {
+export function Board({
+  device,
+  kind,
+  at,
+  turn,
+}: {
+  device: string;
+  kind: "mac" | "ledger" | "routes";
+  at: Vec3;
+  turn: number;
+}) {
   const roomId = useSession((s) => s.roomId);
   const exec = useSession((s) => s.exec);
   const openPanel = useSession((s) => s.openPanel);
   const controls = roomId ? roomById(roomId)?.controls : undefined;
-  const state = kind === "mac" ? controls?.macBoards?.[device] : controls?.ledgers?.[device];
+  const state =
+    kind === "mac"
+      ? controls?.macBoards?.[device]
+      : kind === "ledger"
+        ? controls?.ledgers?.[device]
+        : controls?.routingBoards?.[device];
   if (!state) return null;
-  const line = kind === "mac" ? "bridge fdb show" : "ip neigh show";
+  const line = kind === "mac" ? "bridge fdb show" : kind === "ledger" ? "ip neigh show" : "ip route show";
   const read = async () => {
     if (state === "works") {
       const { execId } = await exec(device, line, "click");
       openPanel({ kind: "board", device, board: kind, execId });
     } else openPanel({ kind: "board", device, board: kind });
   };
-  const label = kind === "mac" ? voice.board.name : voice.ledger.name;
+  const label = kind === "mac" ? voice.board.name : kind === "ledger" ? voice.ledger.name : voice.routes.name;
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); the chip is the keyboard way
     <group position={at} rotation={[0, turn, 0]} onClick={() => void read()}>

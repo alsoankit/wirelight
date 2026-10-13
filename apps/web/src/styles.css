@@ -1208,3 +1208,7 @@ button.link.inline {
   width: auto;
   padding: 0 4px;
 }
+
+.jar-button[data-raised="yes"] {
+  bottom: calc(38vh + 12px);
+}

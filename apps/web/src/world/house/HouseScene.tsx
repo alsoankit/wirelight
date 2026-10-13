@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useBarred } from "../observatory/ObservatoryScene";
+import { Board } from "../room/Furniture";
 import { MachineScene } from "../room/MachineScene";
 import { houseLayout } from "./layout";
 
@@ -11,5 +12,10 @@ const LAMP = [{ position: [-2.4, 1.9, -3.2] as [number, number, number], colour:
 export function HouseScene({ device }: { device: string }) {
   const barred = useBarred();
   const layout = useMemo(() => houseLayout(), []);
-  return <MachineScene device={device} layout={layout} barred={barred} glows={LAMP} />;
+  return (
+    <MachineScene device={device} layout={layout} barred={barred} glows={LAMP}>
+      <Board device={device} kind="routes" at={[2.5, 0, 2.2]} turn={-0.6} />
+      <Board device={device} kind="ledger" at={[-2.6, 0, 1.9]} turn={0.7} />
+    </MachineScene>
+  );
 }

@@ -198,7 +198,15 @@ function JarPanel({ open }: { open?: number }) {
 }
 
 /** The MAC board (CORE-27): what `bridge fdb show` printed when it was read, or clouded glass. */
-function BoardPanel({ device, board, execId }: { device: string; board: "mac" | "ledger"; execId?: number }) {
+function BoardPanel({
+  device,
+  board,
+  execId,
+}: {
+  device: string;
+  board: "mac" | "ledger" | "routes";
+  execId?: number;
+}) {
   const events = useSession((s) => s.events);
   // Filtered here, not in the selector: a selector must return the same value for the same state.
   const lines = useMemo(
@@ -225,6 +233,66 @@ function BoardPanel({ device, board, execId }: { device: string; board: "mac" | 
       <div className="panel-actions">
         <button type="button" className="quiet" onClick={close}>
           {voice.board.close}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * A routing board (CORE-27): read when it works (`ip route show`, its real output) and a line can be
+ * added (8.2: `ip route add default via <gateway>`); cracked from 8.3, it can still be read, but no
+ * command runs for it (0040), so its lines come from the machine's state.
+ */
+function RoutesPanel({ device, execId }: { device: string; execId?: number }) {
+  const events = useSession((s) => s.events);
+  const routes = useSession((s) => s.status?.routes[device] ?? NONE);
+  const exec = useSession((s) => s.exec);
+  const close = useSession((s) => s.closePanel);
+  const [via, setVia] = useState("");
+  const output = useMemo(
+    () =>
+      execId === undefined
+        ? NONE
+        : events
+            .filter((e) => e.kind === "proc.output" && e.execId === execId && e.stream === "stdout")
+            .map((e) => (e.kind === "proc.output" ? e.text : "")),
+    [events, execId],
+  );
+  const works = execId !== undefined;
+  return (
+    <section className="panel" aria-label={voice.routes.title}>
+      <h2>
+        {voice.routes.title} · {device}
+      </h2>
+      <p>{voice.routes.about}</p>
+      <pre className="cmd-output">
+        {works
+          ? output.join("\n")
+          : routes
+              .map((r) => `${r.dst}${r.via ? ` ${voice.routes.via} ${r.via}` : ""} · ${voice.routes.door} ${r.dev}`)
+              .join("\n")}
+      </pre>
+      {works ? (
+        <form
+          className="addr-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!via.trim()) return;
+            close();
+            void exec(device, `ip route add default via ${via.trim()}`, "click");
+          }}
+        >
+          <span className="panel-note">{voice.routes.addDefault}</span>
+          <input value={via} onChange={(e) => setVia(e.target.value)} placeholder="10.0.1.1" spellCheck={false} />
+          <button type="submit">{voice.routes.add}</button>
+        </form>
+      ) : (
+        <p className="panel-note">{voice.routes.cracked}</p>
+      )}
+      <div className="panel-actions">
+        <button type="button" className="quiet" onClick={close}>
+          {voice.jar.close}
         </button>
       </div>
     </section>
@@ -320,17 +388,30 @@ function DeskPanel({ device }: { device: string }) {
 export function JarButton() {
   const room = useRoom();
   const count = useSession((s) => s.jar.length);
+  // Never under the open console (UI-02): it rises above it.
+  const raised = useSession((s) => s.consoleOpen && s.voiceGiven);
   const openPanel = useSession((s) => s.openPanel);
   // From Floor 6 the Slate replaces the jar (0043).
   if (room?.controls.slate)
     return (
-      <button type="button" className="jar-button" data-tour="glass" onClick={() => openPanel({ kind: "slate" })}>
+      <button
+        type="button"
+        className="jar-button"
+        data-tour="glass"
+        data-raised={raised ? "yes" : "no"}
+        onClick={() => openPanel({ kind: "slate" })}
+      >
         {voice.slate.name} · {count}
       </button>
     );
   if (!room?.controls.catching) return null;
   return (
-    <button type="button" className="jar-button" onClick={() => openPanel({ kind: "jar" })}>
+    <button
+      type="button"
+      className="jar-button"
+      data-raised={raised ? "yes" : "no"}
+      onClick={() => openPanel({ kind: "jar" })}
+    >
       {voice.jar.name} · {count}
     </button>
   );
@@ -341,6 +422,8 @@ export function ToolPanels() {
   if (panel?.kind === "workbench") return <WorkbenchPanel />;
   if (panel?.kind === "card") return <CardPanel />;
   if (panel?.kind === "jar") return <JarPanel open={panel.open} />;
+  if (panel?.kind === "board" && panel.board === "routes")
+    return <RoutesPanel device={panel.device} execId={panel.execId} />;
   if (panel?.kind === "board") return <BoardPanel device={panel.device} board={panel.board} execId={panel.execId} />;
   if (panel?.kind === "desk") return <DeskPanel device={panel.device} />;
   if (panel?.kind === "slate") return <SlatePanel />;

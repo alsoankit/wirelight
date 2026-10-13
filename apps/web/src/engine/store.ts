@@ -16,7 +16,7 @@ export type Panel =
   | { kind: "workbench" }
   | { kind: "card" }
   | { kind: "jar"; open?: number }
-  | { kind: "board"; device: string; board: "mac" | "ledger"; execId?: number }
+  | { kind: "board"; device: string; board: "mac" | "ledger" | "routes"; execId?: number }
   | { kind: "desk"; device: string }
   | { kind: "slate" }
   | { kind: "notes" }

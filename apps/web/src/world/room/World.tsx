@@ -14,7 +14,9 @@ export function World({ arriving = false }: { arriving?: boolean }) {
   if (!room || !here) return null;
   if (here === room.playerDevice) return <ObservatoryScene key={`${roomId}:${here}`} arriving={arriving} />;
   const spec = room.topology.devices.find((d) => d.id === here);
-  // A machine with a bridge is a switch: its room is a sorting hall.
-  if (spec?.bridges?.length) return <HallScene key={`${roomId}:${here}`} device={here} />;
+  // A machine with a bridge (a switch) or several doors (a router) gets a hall: room for its doors,
+  // its boards and the keeper's desk or lectern. (Region-specific rooms come with each region's kit.)
+  if (spec?.bridges?.length || (spec?.interfaces.length ?? 0) > 1)
+    return <HallScene key={`${roomId}:${here}`} device={here} />;
   return <HouseScene key={`${roomId}:${here}`} device={here} />;
 }

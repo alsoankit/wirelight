@@ -61,6 +61,17 @@ export const voice = {
     title: "The neighbour ledger",
     about: "Each line: a house on this street, the door name that answered for it, and how sure the machine is.",
   },
+  /** A machine's routing board (CORE-27, 8.2): reading runs `ip route show`; adding a line, `ip route add`. */
+  routes: {
+    name: "Routing board",
+    title: "The routing board",
+    about: 'Each line: a street, and which way to send things for it. "default" is everywhere else.',
+    via: "via",
+    door: "door",
+    addDefault: "Add a line: everywhere else, via",
+    add: "Add",
+    cracked: "The board is cracked. You can read it, but it won't take anything new.",
+  },
   /** A keeper's desk in hand mode (0042): what waits, and the keeper's job, step by step. */
   desk: {
     name: "Keeper's desk",
