@@ -178,3 +178,14 @@ describe("determinism and snapshots", () => {
     expect(sim.correct.devices.observatory?.ifaces[0]?.adminUp).toBe(true);
   });
 });
+
+describe("lab text", () => {
+  it("decodes text, and never throws on bytes that aren't text (they become U+FFFD)", async () => {
+    const { decodeLab, encodeLab } = await import("../src");
+    expect(decodeLab(encodeLab("hello — key: amber-bell ✓"))).toBe("hello — key: amber-bell ✓");
+    const junk = Uint8Array.from([0x01, 0xff, 0xf8, 0xc0, 0x80, 0xe2, 0x28, 0xa1, 0xf4, 0x90, 0x80, 0x80, 0x41]);
+    expect(() => decodeLab(junk)).not.toThrow();
+    expect(decodeLab(junk)).toMatch(/�/);
+    expect(decodeLab(junk).endsWith("A")).toBe(true);
+  });
+});

@@ -30,19 +30,34 @@ function utf8Encode(text: string): Uint8Array {
   return Uint8Array.from(out);
 }
 
+/**
+ * Decodes UTF-8, replacing anything malformed with U+FFFD (as TextDecoder does): payloads that aren't
+ * text at all (a DHCP message read as a lab message) must never throw.
+ */
 function utf8Decode(b: Uint8Array): string {
   let s = "";
   let i = 0;
   while (i < b.length) {
     const x = b[i] ?? 0;
-    let c: number;
-    let n: number;
-    if (x < 0x80) [c, n] = [x, 1];
-    else if (x >= 0xf0) [c, n] = [x & 7, 4];
-    else if (x >= 0xe0) [c, n] = [x & 15, 3];
-    else if (x >= 0xc0) [c, n] = [x & 31, 2];
-    else [c, n] = [0xfffd, 1];
-    for (let k = 1; k < n; k++) c = (c << 6) | ((b[i + k] ?? 0) & 63);
+    const n = x < 0x80 ? 1 : x >= 0xc2 && x < 0xe0 ? 2 : x >= 0xe0 && x < 0xf0 ? 3 : x >= 0xf0 && x < 0xf5 ? 4 : 0;
+    if (n === 0) {
+      s += "\ufffd";
+      i += 1;
+      continue;
+    }
+    let c = n === 1 ? x : x & (0xff >> (n + 1));
+    let ok = i + n <= b.length;
+    for (let k = 1; ok && k < n; k++) {
+      const y = b[i + k] ?? 0;
+      if ((y & 0xc0) !== 0x80) ok = false;
+      else c = (c << 6) | (y & 63);
+    }
+    const min = [0, 0, 0x80, 0x800, 0x10000][n] ?? 0;
+    if (!ok || c < min || c > 0x10ffff || (c >= 0xd800 && c <= 0xdfff)) {
+      s += "\ufffd";
+      i += 1;
+      continue;
+    }
     s += String.fromCodePoint(c);
     i += n;
   }
