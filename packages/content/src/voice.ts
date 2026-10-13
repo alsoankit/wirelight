@@ -143,6 +143,10 @@ export const voice = {
     stop: "Stop",
     trace: "Trace my next packet",
     compare: "Compare",
+    /** For screen readers: the catch a layer button opens, and the two catches compared. */
+    openLayer: "Catch {n}: {layer}",
+    compareA: "First catch to compare",
+    compareB: "Second catch to compare",
     changed: "changed",
     same: "same",
     empty: "Nothing caught yet.",
@@ -153,6 +157,9 @@ export const voice = {
     title: "Capture jar",
     empty: "Nothing caught yet. Point at a moving message: time slows down. Click it to keep a copy.",
     catchHint: "Click to catch a copy",
+    /** Catching by keyboard: messages crossing this room's doors right now. */
+    moving: "Moving through this room now",
+    catchThis: "Catch a copy",
     open: "Open",
     frame: "Frame",
     to: "to",
@@ -178,6 +185,9 @@ export const voice = {
   /** A door's plate, opened (UI-03): its controls. {door} and {name} are filled in. */
   plate: {
     title: "Door {door}",
+    /** The plate's light, for screen readers (filled diamond, hollow diamond). */
+    lightUp: "link up",
+    lightDown: "link down",
     linkUp: "Link up: the cable behind this door is working.",
     linkDown: "Link down: nothing can cross this door.",
     switchOn: "Switch the door on",
@@ -192,10 +202,12 @@ export const voice = {
     close: "Close",
   },
   /** A loose cable end on the floor by a door. */
-  cableEnd: { label: "Cable end" },
+  cableEnd: { label: "Cable end", plug: "Plug the cable back into {door}" },
   /** Doorways (CORE-10): going through to the room at the other end. */
   doorway: {
     go: "Go through {door} to {name}'s room",
+    /** A doorway that can't be entered: the machine at the other end, and why. */
+    sealed: "{name}'s room is closed: {why}",
     back: "Back to {name}'s room",
   },
   /** Spoken lines (UI-20): always written out; Enter or a click goes on. */
@@ -230,6 +242,53 @@ export const voice = {
     again: "Again",
     close: "Close",
   },
+  /** Guardian memories in the Glass (0036, 0037): back in time, chaptered, voiced, always captioned. */
+  memory: {
+    floor: "{guardian} remembers",
+    building: "How they built it",
+    farewell: "Farewell",
+    chapter: "{n} of {total}",
+    back: "Back",
+    next: "Next",
+    done: "Close",
+    skip: "Skip",
+    map: "The floor as it was, long ago: every machine and every cable, whole and lit.",
+  },
+  /** A ride-along (0036): one message followed through the floor, its headers at every hop. */
+  ride: {
+    remembering: "Remembering…",
+    faint: "This memory is still too faint to ride.",
+    hop: "{from} → {to}",
+    step: "Hop {n} of {total}",
+    pause: "Pause",
+    play: "Play",
+    back: "Step back",
+    forward: "Step forward",
+    again: "Again",
+    /** The headers on the card. Floor 1 knows doors; Floor 2 frames; Floor 5 addresses; Floor 6 packets. */
+    message: "The message",
+    frame: "The frame",
+    addresses: "House addresses",
+    packet: "The packet",
+    from: "from",
+    to: "to",
+    countdown: "countdown",
+    ttl: "countdown (TTL)",
+    door: "{device}'s {door}",
+    everyone: "everyone",
+    changed: "new",
+    was: "was {value}",
+    change: {
+      crossing: "A crossing: a new envelope, the same letter, the countdown one less.",
+      passed: "Passed on just as it was.",
+      turn: "The answer sets off home.",
+    },
+    end: {
+      delivered: "It arrived. Now the answer.",
+      arrived: "It's home.",
+      lost: "It went no further.",
+    },
+  },
   /** The top bar (interface.md: top right). */
   bar: {
     pause: "Pause",
@@ -239,6 +298,10 @@ export const voice = {
     notes: "Knight's notes",
     ask: "Ask",
     menu: "Menu",
+    /** The top bar, for screen readers. */
+    label: "Room controls",
+    /** Said beside the notes button when a hint is ready (it also glows). */
+    hintReady: "a hint is ready",
   },
   /** The Knight's notes (HELP-08..10): his notes in the room, reactions, hints. */
   notes: {
@@ -268,6 +331,9 @@ export const voice = {
   /** The menu (M, UI-13). */
   menu: {
     title: "Menu",
+    sections: "Menu sections",
+    back: "Back to the topics",
+    here: "you are here",
     tabs: { dungeon: "The dungeon", codex: "Codex", guide: "Field Guide", keys: "Keyring", settings: "Settings" },
     status: {
       cleared: "cleared",
@@ -282,6 +348,10 @@ export const voice = {
     words: "Words you've learned",
     commands: "Command book",
     journal: "Journal pages",
+    /** Guardian memories seen (CORE-46), each replayable. */
+    guardianMemories: "Guardian memories",
+    floorMemory: "{guardian} remembers {floor}",
+    buildingMemory: "How they built it: {room}",
     noKeys: "No keys yet. Keys come back with answers.",
     path: "Your path",
     sound: "Sound",

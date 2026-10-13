@@ -2,9 +2,11 @@ import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { type PerspectiveCamera as Camera, Vector3 } from "three";
+import { useReducedMotion } from "../progress/motion";
 
 // The fixed three-quarter view (0006, art-direction.md): a narrow lens, no orbit,
-// and a gentle parallax that follows the pointer.
+// and a gentle parallax that follows the pointer. With reduced motion (UI-23) the camera holds still:
+// no parallax and no settling in (the arrival veil fades instead).
 
 type Props = {
   target: [number, number, number];
@@ -25,10 +27,16 @@ export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0 }: 
   const home = useMemo(() => lookAt.clone().addScaledVector(VIEW_DIRECTION, distance), [lookAt, distance]);
   const right = useMemo(() => new Vector3(1, 0, -1).normalize(), []);
   const wanted = useMemo(() => new Vector3(), []);
+  const still = useReducedMotion();
 
   useFrame(({ pointer }, delta) => {
     const camera = ref.current;
     if (!camera) return;
+    if (still) {
+      camera.position.copy(home);
+      camera.lookAt(lookAt);
+      return;
+    }
     wanted
       .copy(home)
       .addScaledVector(right, pointer.x * PARALLAX)
@@ -38,13 +46,14 @@ export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0 }: 
   });
 
   // The camera eases toward `home` every frame, so starting further out makes it settle in.
+  const settle = still ? 0 : settleFrom;
   const start = useMemo(
     () =>
       home
         .clone()
-        .addScaledVector(VIEW_DIRECTION, settleFrom)
-        .add({ x: 0, y: settleFrom * 0.4, z: 0 }),
-    [home, settleFrom],
+        .addScaledVector(VIEW_DIRECTION, settle)
+        .add({ x: 0, y: settle * 0.4, z: 0 }),
+    [home, settle],
   );
   return <PerspectiveCamera ref={ref} makeDefault fov={fov} position={start.toArray()} near={0.5} far={120} />;
 }

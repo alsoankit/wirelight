@@ -16,6 +16,8 @@ import { World } from "../world/room/World";
 import { Console } from "./Console";
 import { Gift } from "./Gift";
 import { Glass } from "./Glass";
+import { Keyboard } from "./Keyboard";
+import { isTyping, withModifier } from "./keys";
 import { Menu } from "./Menu";
 import { Onboarding } from "./Onboarding";
 import { PlatePanel } from "./PlatePanel";
@@ -64,6 +66,7 @@ function SettingsApplied() {
   useEffect(() => {
     document.documentElement.style.setProperty("--ui-zoom", String(settings.textSize));
     document.documentElement.dataset.motion = settings.motion;
+    document.documentElement.dataset.textSize = String(settings.textSize);
     void ask.setSubtitles(settings.subtitles === "auto" ? null : settings.subtitles === "on");
   }, [settings]);
   return null;
@@ -108,6 +111,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "t" && e.key !== "T") return;
+      if (isTyping(e) || withModifier(e)) return;
       setAuto(false); // a choice made by hand sticks
       setTier((t) => TIERS[(TIERS.indexOf(t) + 1) % TIERS.length] as Tier);
     };
@@ -119,6 +123,12 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
     <QualityContext.Provider value={quality}>
       <Canvas
         key={backend}
+        className="world"
+        // A click on the room outside anything that can be clicked steps back (UI-05). Only on the
+        // canvas itself: clicks on the room's HTML labels (plates, doorways) bubble through here too.
+        onPointerMissed={(e) => {
+          if (e.type === "click" && e.target instanceof HTMLCanvasElement) useSession.getState().closePanel();
+        }}
         gl={nodeRendererFactory(backend)}
         // Dev aid: the renderer, for reading draw calls and triangles from scripts.
         onCreated={(state) => {
@@ -137,10 +147,14 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <EngineDriver />
         <World arriving={arriving} />
       </Canvas>
-      <div className="dev-badge">
-        Quality: {tier}
-        {auto ? " (auto)" : ""} · T to change
-      </div>
+      {/* Dev aid only: which quality tier is showing (Settings has the player's choice). */}
+      {import.meta.env.DEV && (
+        <div className="dev-badge">
+          Quality: {tier}
+          {auto ? " (auto)" : ""} · T to change
+        </div>
+      )}
+      <Keyboard />
       <AudioDriver />
       <SettingsApplied />
       <RoomHud />

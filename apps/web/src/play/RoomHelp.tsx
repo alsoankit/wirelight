@@ -48,19 +48,28 @@ export function TopBar() {
   if (!room) return null;
   const glow = ready > opened || detectors > 0;
   return (
-    <nav className="top-bar" aria-label="Room controls">
-      <button type="button" onClick={() => setPaused(!paused)} aria-pressed={paused}>
-        {paused ? `▶ ${voice.bar.play}` : `❚❚ ${voice.bar.pause}`}
+    <nav className="top-bar" aria-label={voice.bar.label}>
+      {/* Icons always; words beside them unless the text is large (then the bar stays one line, UI-22). */}
+      <button
+        type="button"
+        onClick={() => setPaused(!paused)}
+        aria-pressed={paused}
+        aria-label={paused ? voice.bar.play : voice.bar.pause}
+        title={paused ? voice.bar.play : voice.bar.pause}
+      >
+        <span aria-hidden="true">{paused ? "▶" : "❚❚"}</span>{" "}
+        <span className="bar-word">{paused ? voice.bar.play : voice.bar.pause}</span>
       </button>
       <button
         type="button"
         onClick={() => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length] ?? 1)}
+        aria-label={`${voice.bar.speed} ${speed}×`}
         title={voice.bar.speed}
       >
         {speed}×
       </button>
-      <button type="button" onClick={() => void reset()}>
-        ↺ {voice.bar.reset}
+      <button type="button" onClick={() => void reset()} aria-label={voice.bar.reset} title={voice.bar.reset}>
+        <span aria-hidden="true">↺</span> <span className="bar-word">{voice.bar.reset}</span>
       </button>
       <button
         type="button"
@@ -68,13 +77,23 @@ export function TopBar() {
         data-glow={glow ? "yes" : "no"}
         onClick={() => openPanel({ kind: "notes" })}
       >
+        {/* A hint waiting shows by shape too, not only the glow (UI-21). */}
+        {glow && <span aria-hidden="true">✦ </span>}
         {voice.bar.notes} · {opened}/5
+        {ready > opened && <span className="sr-only">, {voice.bar.hintReady}</span>}
       </button>
       <button type="button" onClick={() => openPanel({ kind: "ask" })}>
         {voice.bar.ask}
       </button>
-      <button type="button" data-tour="menu" onClick={() => openPanel({ kind: "menu" })}>
-        ☰ {voice.bar.menu}
+      <button
+        type="button"
+        data-tour="menu"
+        onClick={() => openPanel({ kind: "menu" })}
+        aria-label={voice.bar.menu}
+        aria-keyshortcuts="M"
+        title={voice.bar.menu}
+      >
+        <span aria-hidden="true">☰</span> <span className="bar-word">{voice.bar.menu}</span>
       </button>
     </nav>
   );
@@ -173,7 +192,11 @@ export function AskPanel() {
           </li>
         ))}
       </ul>
-      {answer && <p className="note">{fill(answer, room.vars)}</p>}
+      {answer && (
+        <p className="note" aria-live="polite">
+          {fill(answer, room.vars)}
+        </p>
+      )}
       <div className="panel-actions">
         <button type="button" className="quiet" onClick={close}>
           {voice.ask.close}

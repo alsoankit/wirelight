@@ -1,7 +1,7 @@
 import { defineFloor, type FloorDef, type RoomDef } from "../types";
 import { placeToLive, quietStreet, rollCall, whereNotWho } from "./floor5";
 import { insideTheEnvelope, mixedUpLetters, twoOfMe, whoHasThisAddress } from "./floor6";
-import { askForAnAddress, census, sameStreet } from "./floor7";
+import { askForAnAddress, binaryBehind24, census, sameStreet } from "./floor7";
 
 /** Region 3's rooms in play order: Floors 5, 6 and 7 (the Lantern Town). */
 export const region3Rooms: RoomDef[] = [
@@ -16,9 +16,10 @@ export const region3Rooms: RoomDef[] = [
   sameStreet,
   askForAnAddress,
   census,
+  binaryBehind24,
 ];
 
-/** Region 3's floors (ROOM-09). Its secret room, *The Binary Behind /24*, comes with the polish pass. */
+/** Region 3's floors (ROOM-09). Its secret room, *The Binary Behind /24*, is found after the census. */
 export const region3Floors: FloorDef[] = [
   defineFloor({
     floor: 5,
@@ -46,5 +47,6 @@ export const region3Floors: FloorDef[] = [
     boss: "f7.boss-census",
     // Journal page 7 is in the registry's room in 7.2.
     journalRoom: "f7.ask-for-an-address",
+    secret: "f7.secret-binary",
   }),
 ];

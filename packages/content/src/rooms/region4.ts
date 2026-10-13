@@ -1,5 +1,6 @@
 import { acrossTheStreet, closedCrossing, directions, floor8, noWayBack, otherStreet, sleepingKeeper } from "./floor8";
 import { floor9, oneStepOnly, roundAndRound, showTheWay, theCrossing, twoEnvelopes } from "./floor9";
+import { insideYourHomeRouter } from "./secrets4";
 import type { FloorText, RoomText } from "./types";
 
 /** Region 4's room text, by room id, and its floors' text, by floor number. */
@@ -15,6 +16,7 @@ export const region4Texts: Record<string, RoomText> = {
   "f9.one-step-only": oneStepOnly,
   "f9.round-and-round": roundAndRound,
   "f9.boss-crossing": theCrossing,
+  "f9.secret-home-router": insideYourHomeRouter,
 };
 export const region4FloorTexts: Record<number, FloorText> = { 8: floor8, 9: floor9 };
 

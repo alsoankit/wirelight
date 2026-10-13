@@ -1,7 +1,9 @@
 import { pathChoice, roomTexts, tour } from "@wirelight/content";
 import type { Path } from "@wirelight/rooms";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useProgress } from "../progress/progress";
+import { useDialogFocus } from "./focus";
+import { isTyping } from "./keys";
 import { Lines } from "./Lines";
 
 // The first visit (gameplay/onboarding.md): the gift of sight (ONB-08..10), choosing a path
@@ -18,10 +20,14 @@ function SightGift() {
 function PathChoice() {
   const choosePath = useProgress((s) => s.choosePath);
   const ask = roomTexts["p.first-message"]?.voice?.find((v) => v.id === "P-PATH-01");
+  const ref = useRef<HTMLElement>(null);
+  useDialogFocus(ref, { trap: true });
   return (
-    <section className="path-choice" aria-label={ask?.text}>
+    <section ref={ref} className="path-choice" role="dialog" aria-modal="true" aria-labelledby="path-ask">
       <div className="lines-speaker">{ask?.speaker}</div>
-      <p className="lines-text">{ask?.text}</p>
+      <p className="lines-text" id="path-ask">
+        {ask?.text}
+      </p>
       <div className="path-options">
         {pathChoice.options.map((o) => (
           <button
@@ -29,8 +35,8 @@ function PathChoice() {
             type="button"
             data-suggested={o.id === "new" ? "yes" : "no"}
             onClick={() => choosePath(o.id as Path)}
-            // biome-ignore lint/a11y/noAutofocus: the one choice on screen; Enter picks the suggestion
-            autoFocus={o.id === "new"}
+            // The one choice on screen: Enter picks the suggestion.
+            data-autofocus={o.id === "new" ? "" : undefined}
           >
             <strong>{o.title}</strong>
             <span>{o.line}</span>
@@ -67,8 +73,13 @@ function Tour() {
   const card = tour.cards[i];
   const box = useTarget(card?.target);
   const last = i === tour.cards.length - 1;
+  const ref = useRef<HTMLElement>(null);
+  useDialogFocus(ref, { trap: true, step: i });
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTyping(e)) return;
+      // Enter on one of the card's buttons is that button's own click.
+      if (e.key === "Enter" && e.target instanceof HTMLElement && e.target.closest("button")) return;
       if (e.key === "ArrowRight" || e.key === "Enter") last ? finishTour() : setI(i + 1);
       if (e.key === "ArrowLeft" && i > 0) setI(i - 1);
       if (e.key === "Escape") finishTour();
@@ -81,15 +92,15 @@ function Tour() {
   const left = box ? Math.min(Math.max(16, box.left), window.innerWidth - 376) : window.innerWidth / 2 - 180;
   const top = box ? (box.bottom + 230 < window.innerHeight ? box.bottom + 18 : Math.max(16, box.top - 250)) : 160;
   return (
-    <div className="tour" role="dialog" aria-label={card.title}>
+    <div className="tour" role="dialog" aria-modal="true" aria-labelledby="tour-title">
       {box && (
         <div
           className="tour-ring"
           style={{ left: box.left - 8, top: box.top - 8, width: box.width + 16, height: box.height + 16 }}
         />
       )}
-      <section className="tour-card" style={{ left, top }}>
-        <h2>{card.title}</h2>
+      <section ref={ref} className="tour-card" style={{ left, top }}>
+        <h2 id="tour-title">{card.title}</h2>
         <p>{card.body.replace(/\[\[(.+?)\]\]/g, "$1")}</p>
         <div className="panel-actions">
           {i > 0 && (
@@ -97,7 +108,7 @@ function Tour() {
               {tour.back}
             </button>
           )}
-          <button type="button" onClick={() => (last ? finishTour() : setI(i + 1))}>
+          <button type="button" data-autofocus="" onClick={() => (last ? finishTour() : setI(i + 1))}>
             {last ? tour.enter : tour.next}
           </button>
           <button type="button" className="quiet" onClick={finishTour}>

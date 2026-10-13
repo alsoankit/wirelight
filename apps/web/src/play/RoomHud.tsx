@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { winningFrame } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
-import { type Line, Lines } from "./Lines";
+import { takeFocusPolitely } from "./focus";
+import { openMemory } from "./Memory";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
@@ -42,10 +43,8 @@ export function RoomHud() {
   const path = useProgress((s) => s.path ?? "new");
   const hintsOpened = useProgress((s) => (roomId ? (s.hints[roomId] ?? 0) : 0));
   const clear = useProgress((s) => s.clear);
-  const seeFloorMemory = useProgress((s) => s.seeFloorMemory);
   const findJournalPage = useProgress((s) => s.findJournalPage);
   const [showDebrief, setShowDebrief] = useState(false);
-  const [playing, setPlaying] = useState<Line[] | null>(null);
   const [page, setPage] = useState(false);
 
   const room = roomId ? roomById(roomId) : undefined;
@@ -80,15 +79,6 @@ export function RoomHud() {
   const tried = fired.map((id) => text.detectors[id]?.tried).filter((t): t is string => !!t);
   const capital = guardian.charAt(0).toUpperCase() + guardian.slice(1);
 
-  const playFloorMemory = () => {
-    if (!floorText) return;
-    seeFloorMemory(room.floor);
-    setPlaying([
-      ...floorText.memory.map((c) => ({ id: c.id, speaker: `${capital} · ${c.title}`, text: c.text })),
-      ...(floorText.farewell ? [{ ...floorText.farewell, speaker: capital }] : []),
-    ]);
-  };
-
   return (
     <div className="hud">
       <header className="mission-card">
@@ -115,9 +105,9 @@ export function RoomHud() {
         )}
       </footer>
 
-      {showDebrief && !playing && (
-        <section className="debrief" aria-live="polite">
-          <h2>{voice.debrief.title}</h2>
+      {showDebrief && (
+        <section ref={takeFocusPolitely} className="debrief" aria-live="polite" aria-labelledby="debrief-title">
+          <h2 id="debrief-title">{voice.debrief.title}</h2>
           <p>{say(text.debrief.happened)}</p>
           {text.debrief.terms.length > 0 && (
             <>
@@ -153,18 +143,12 @@ export function RoomHud() {
           )}
           <div className="panel-actions">
             {text.building && (
-              <button
-                type="button"
-                className="quiet"
-                onClick={() =>
-                  setPlaying([{ id: text.building?.id ?? "", speaker: capital, text: text.building?.text ?? "" }])
-                }
-              >
+              <button type="button" className="quiet" onClick={() => openMemory({ kind: "building", roomId: room.id })}>
                 {voice.after.building}
               </button>
             )}
             {isBoss && floorText && (
-              <button type="button" className="quiet" onClick={playFloorMemory}>
+              <button type="button" className="quiet" onClick={() => openMemory({ kind: "floor", floor: room.floor })}>
                 {fill(voice.after.floorMemory, { guardian: capital })}
               </button>
             )}
@@ -192,7 +176,7 @@ export function RoomHud() {
               {voice.replay.winning}
             </button>
             {next ? (
-              <button type="button" onClick={() => goToRoom(next.id)}>
+              <button type="button" data-autofocus="" onClick={() => goToRoom(next.id)}>
                 {fill(voice.after.nextRoom, { room: roomTexts[next.content]?.title ?? next.id })}
               </button>
             ) : (
@@ -201,7 +185,6 @@ export function RoomHud() {
           </div>
         </section>
       )}
-      {playing && <Lines lines={playing} onDone={() => setPlaying(null)} />}
     </div>
   );
 }

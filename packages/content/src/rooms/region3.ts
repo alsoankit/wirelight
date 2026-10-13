@@ -1,6 +1,7 @@
 import { floor5, placeToLive, quietStreet, rollCall, whereNotWho } from "./floor5";
 import { floor6, insideTheEnvelope, mixedUpLetters, twoOfMe, whoHasThisAddress } from "./floor6";
 import { askForAnAddress, census, floor7, sameStreet } from "./floor7";
+import { binaryBehind24 } from "./secrets3";
 import type { FloorText, RoomText } from "./types";
 
 export { REGION_3_ARRIVAL } from "./floor5";
@@ -18,5 +19,6 @@ export const region3Texts: Record<string, RoomText> = {
   "f7.same-street": sameStreet,
   "f7.ask-for-an-address": askForAnAddress,
   "f7.boss-census": census,
+  "f7.secret-binary": binaryBehind24,
 };
 export const region3FloorTexts: Record<number, FloorText> = { 5: floor5, 6: floor6, 7: floor7 };

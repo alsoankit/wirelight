@@ -98,6 +98,7 @@ function CardPanel() {
         <div key={i} className="field">
           <span>{cards.length > 1 ? fill(voice.card.numbered, { n: String(i + 1) }) : voice.card.name}</span>
           <input
+            aria-label={cards.length > 1 ? fill(voice.card.numbered, { n: String(i + 1) }) : voice.card.name}
             value={values[i] ?? ""}
             placeholder={c || voice.card.blank}
             onChange={(e) => setValues((v) => v.map((x, j) => (j === i ? e.target.value : x)))}
@@ -149,6 +150,32 @@ function Layer({ l, sealed }: { l: SlateLayer; sealed: boolean }) {
   return null;
 }
 
+/**
+ * Catching by keyboard (UI-18): the messages crossing this room's doors right now, each with a
+ * button that catches a copy, as clicking it in the room does. Pausing time (Space) holds them still.
+ */
+function Moving() {
+  const here = useSession((s) => s.here);
+  const onCables = useSession((s) => s.onCables);
+  const catchFrame = useSession((s) => s.catchFrame);
+  const moving = onCables.filter((c) => c.from === here || c.to === here);
+  if (moving.length === 0) return null;
+  return (
+    <>
+      <h3 className="panel-sub">{voice.jar.moving}</h3>
+      <ul className="catch-list">
+        {moving.map((c) => (
+          <li key={c.frameId}>
+            <button type="button" onClick={() => void catchFrame(c.frameId)}>
+              {voice.jar.catchThis}: {c.summary}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
 function JarPanel({ open }: { open?: number }) {
   const room = useRoom();
   const here = useSession((s) => s.here);
@@ -168,12 +195,14 @@ function JarPanel({ open }: { open?: number }) {
     <section className="panel" aria-label={voice.jar.title}>
       <h2>{voice.jar.title}</h2>
       {jar.length === 0 && <p>{voice.jar.empty}</p>}
+      {room.controls.catching && <Moving />}
       <ol className="catch-list">
         {jar.map((c) => (
           <li key={c.n}>
             <button
               type="button"
               data-open={c.n === open ? "yes" : "no"}
+              aria-pressed={c.n === open}
               onClick={() => openPanel({ kind: "jar", open: c.n })}
             >
               {c.n}. {(c.t / 1000).toFixed(1)} s · {c.device} {c.iface}
@@ -285,7 +314,13 @@ function RoutesPanel({ device, execId }: { device: string; execId?: number }) {
           }}
         >
           <span className="panel-note">{voice.routes.addDefault}</span>
-          <input value={via} onChange={(e) => setVia(e.target.value)} placeholder="10.0.1.1" spellCheck={false} />
+          <input
+            aria-label={voice.routes.addDefault}
+            value={via}
+            onChange={(e) => setVia(e.target.value)}
+            placeholder="10.0.1.1"
+            spellCheck={false}
+          />
           <button type="submit">{voice.routes.add}</button>
         </form>
       ) : (

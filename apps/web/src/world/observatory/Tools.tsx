@@ -2,6 +2,7 @@ import { Html } from "@react-three/drei";
 import { voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import { useSession } from "../../engine/store";
+import { TAB } from "../../play/keys";
 
 // The Knight's tools in the Observatory (CORE-34, CORE-35), shown only in rooms that have them:
 // - the workbench, a slab of old stone where he built frames by hand (Floors 2–4);
@@ -11,10 +12,20 @@ import { useSession } from "../../engine/store";
 const STONE = "#6d6a63";
 const BRASS = "#b08a4e";
 
-function Chip({ label, onClick, at }: { label: string; onClick: () => void; at: [number, number, number] }) {
+function Chip({
+  label,
+  onClick,
+  at,
+  tab,
+}: {
+  label: string;
+  onClick: () => void;
+  at: [number, number, number];
+  tab: number;
+}) {
   return (
     <Html center position={at} zIndexRange={[10, 0]}>
-      <button type="button" className="world-chip" onClick={onClick}>
+      <button type="button" className="world-chip" data-tab={tab} onClick={onClick}>
         {label}
       </button>
     </Html>
@@ -40,7 +51,7 @@ function Workbench({ onOpen }: { onOpen: () => void }) {
         <planeGeometry args={[0.42, 0.3]} />
         <meshStandardMaterial color="#d8cdb8" roughness={1} />
       </mesh>
-      <Chip label={voice.workbench.name} onClick={onOpen} at={[0, 1.25, 0]} />
+      <Chip label={voice.workbench.name} onClick={onOpen} at={[0, 1.25, 0]} tab={TAB.furniture + 4} />
     </group>
   );
 }
@@ -62,7 +73,7 @@ function Messenger({ onOpen }: { onOpen: () => void }) {
         <planeGeometry args={[0.24, 0.16]} />
         <meshStandardMaterial color="#e8dcc4" roughness={1} />
       </mesh>
-      <Chip label={voice.card.name} onClick={onOpen} at={[0, 1.2, 0]} />
+      <Chip label={voice.card.name} onClick={onOpen} at={[0, 1.2, 0]} tab={TAB.furniture + 5} />
     </group>
   );
 }

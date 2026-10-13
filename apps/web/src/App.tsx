@@ -2,6 +2,7 @@ import { landing, roomTexts } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import { lazy, Suspense, useCallback, useState } from "react";
 import { LandingPage } from "./landing/LandingPage";
+import { reducedMotion } from "./progress/motion";
 import { useProgress } from "./progress/progress";
 
 // Routes (tech/architecture.md): `/` the landing · `/play` the game · `/play/<room>` a link to a room.
@@ -12,7 +13,7 @@ import { useProgress } from "./progress/progress";
 const loadPlay = () => import("./play/PlayPage");
 const PlayPage = lazy(() => loadPlay().then((m) => ({ default: m.PlayPage })));
 
-// ONB-06: with reduced motion the descent is a short fade instead.
+// ONB-06: with reduced motion (Settings, or the system when Settings follows it) the descent is a short fade.
 const REDUCED_FADE_MS = 350;
 
 function linkedRoom(): string | undefined {
@@ -47,7 +48,7 @@ export function App() {
   const start = useCallback(
     (skipIntro: boolean) => {
       void loadPlay().then((m) => m.preloadRoom());
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (reducedMotion()) {
         setStage("fading");
         setTimeout(arrive, REDUCED_FADE_MS);
         return;

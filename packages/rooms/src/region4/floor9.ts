@@ -1,19 +1,20 @@
 /** floors/floor-9.md · The Journey (the first release's finale). Keys are marks on the winning answer. */
 import { keyFor } from "@wirelight/content";
-import { ran } from "../predicates";
+import { all, ran } from "../predicates";
 import { defineRoom, type Misconception, type Predicate } from "../types";
 import { click, crackedBoards, openRooms, typed } from "./floor8";
 import {
   compared,
   failedChangesWithoutLooking,
   hasRoute,
+  holdsLease,
   noteFrom,
   pingAnswered,
   pingWithTtl,
   sysctlIs,
   tracedHops,
 } from "./predicates";
-import { cathedral, IP, STREET } from "./topology";
+import { cathedral, HOME, homeBox, IP, STREET } from "./topology";
 
 const FORWARD = "net.ipv4.ip_forward";
 const ROUTE_CHANGE = /^ip route (?:add|del|delete|change|replace|append|flush)\b/;
@@ -345,6 +346,81 @@ export const theCrossing = defineRoom({
       typed("spire", `sysctl -w ${FORWARD}=1`),
       typed("halo", "ip route replace default via 10.0.4.1"),
       typed("observatory", "ping -c 3 10.0.4.7"),
+    ],
+  ],
+});
+
+// ── Secret · Inside Your Home Router ───────────────────────────────────────────────────────
+
+/**
+ * Region 4's secret room (floors/floor-9.md, "Secret room"): a small door at the foot of the spire.
+ * One box, `home`, is a switch (`br0` over its home doors), a registry on that street (DHCP on
+ * `br0`) and a router to the outside (`eth0`). The observatory is plugged in with no address; the
+ * lease brings directions out via home; home isn't allowed to pass packets on until forwarding is on.
+ */
+const homeId = "f9.secret-home-router";
+const homeTopo = homeBox();
+export const insideYourHomeRouter = defineRoom({
+  id: homeId,
+  region: 4,
+  floor: 9,
+  order: 50,
+  kind: "secret",
+  pathTag: "all",
+  content: homeId,
+  vars: { home: HOME.home, world: HOME.world, homeOutside: HOME.homeOutside },
+  seed: 950,
+  topology: homeTopo,
+  faults: [
+    // Removing the address takes the default route through it too, as in Linux.
+    { kind: "addr-remove", device: "observatory", cidr: `${HOME.observatory}/24`, dev: "eth0" },
+    { kind: "sysctl", device: "home", key: FORWARD, value: "0" },
+  ],
+  playerDevice: "observatory",
+  access: { observatory: { state: "enterable" }, home: { state: "enterable" }, world: { state: "off-limits" } },
+  controls: {
+    console: "typing",
+    addressSlots: { "observatory:eth0": "broken" },
+    routingBoards: { observatory: "broken", home: "broken" },
+    slate: { catch: true, capture: true, trace: true },
+  },
+  tools: {},
+  glow: "none",
+  winCondition: all(holdsLease("observatory", ...HOME.pool), pingAnswered("observatory", HOME.world)),
+  key: { word: keyFor(homeId), via: "mark" },
+  healthChecks: [
+    {
+      id: "holds-lease",
+      object: { kind: "slot", device: "observatory", iface: "eth0" },
+      check: holdsLease("observatory", ...HOME.pool),
+    },
+    { id: "home-forwards", object: { kind: "keeper", device: "home" }, check: sysctlIs("home", FORWARD, "1") },
+  ],
+  teaches: [],
+  uses: ["dhcp", "lease", "default-gateway", "router", "ip-forwarding", "return-path"],
+  cards: ["home-box"],
+  misconceptions: [
+    { id: "write-your-own", detect: ran("observatory", /^ip addr add /) },
+    { id: "forward-at-your-house", detect: ran("observatory", /^sysctl\s+-w\s+net\.ipv4\.ip_forward=1\b/) },
+    { id: "route-at-home", detect: ran("home", ROUTE_CHANGE) },
+  ],
+  detectorTests: [
+    { misconception: "write-your-own", steps: [typed("observatory", "ip addr add 192.168.1.120/24 dev eth0")] },
+    { misconception: "forward-at-your-house", steps: [typed("observatory", `sysctl -w ${FORWARD}=1`)] },
+    { misconception: "route-at-home", steps: [typed("home", "ip route add 10.0.9.0/24 via 10.0.9.2")] },
+  ],
+  solution: [
+    typed("observatory", "dhclient -v eth0", 10_000),
+    typed("observatory", `ping -c 2 ${HOME.world}`),
+    typed("home", `sysctl -w ${FORWARD}=1`),
+    typed("observatory", `ping -c 3 ${HOME.world}`),
+  ],
+  // Forwarding first, then the address: the same two fixes in the other order.
+  altSolutions: [
+    [
+      typed("home", `sysctl -w ${FORWARD}=1`),
+      typed("observatory", "dhclient -v eth0", 10_000),
+      typed("observatory", `ping -c 3 ${HOME.world}`),
     ],
   ],
 });

@@ -1,4 +1,4 @@
-import { voice } from "@wirelight/content";
+import { fill, voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import type { SlateLayer, SlateLayerName, SlateOpen } from "@wirelight/sim";
 import { useEffect, useMemo, useState } from "react";
@@ -117,6 +117,7 @@ export function SlatePanel() {
           }}
         >
           <input
+            aria-label={voice.slate.from}
             value={from}
             onChange={(e) => setFrom(e.target.value)}
             placeholder={voice.slate.from}
@@ -141,7 +142,13 @@ export function SlatePanel() {
               {c.traced ? " ◆" : ""}
             </span>{" "}
             {(["frame", "packet", "message"] as const).map((layer) => (
-              <button key={layer} type="button" className="link inline" onClick={() => void show(c.n, layer)}>
+              <button
+                key={layer}
+                type="button"
+                className="link inline"
+                aria-label={fill(voice.slate.openLayer, { n: String(c.n), layer: voice.slate.layers[layer] })}
+                onClick={() => void show(c.n, layer)}
+              >
                 {voice.slate.layers[layer]}
               </button>
             ))}
@@ -165,8 +172,22 @@ export function SlatePanel() {
             setCompared(r.execId);
           }}
         >
-          <input type="number" min={1} max={jar.length} value={a} onChange={(e) => setA(Number(e.target.value))} />
-          <input type="number" min={1} max={jar.length} value={b} onChange={(e) => setB(Number(e.target.value))} />
+          <input
+            type="number"
+            aria-label={voice.slate.compareA}
+            min={1}
+            max={jar.length}
+            value={a}
+            onChange={(e) => setA(Number(e.target.value))}
+          />
+          <input
+            type="number"
+            aria-label={voice.slate.compareB}
+            min={1}
+            max={jar.length}
+            value={b}
+            onChange={(e) => setB(Number(e.target.value))}
+          />
           <button type="submit">{voice.slate.compare}</button>
         </form>
       )}
@@ -175,7 +196,7 @@ export function SlatePanel() {
         <div className="field">
           <span>{voice.slate.capture}</span>
           <div className="addr-form">
-            <select value={door} onChange={(e) => setDoor(e.target.value)}>
+            <select aria-label={voice.slate.capture} value={door} onChange={(e) => setDoor(e.target.value)}>
               {doors.map((d) => (
                 <option key={d}>{d}</option>
               ))}

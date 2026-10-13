@@ -1,4 +1,5 @@
-import { roomTexts } from "@wirelight/content";
+import { Html } from "@react-three/drei";
+import { roomTexts, voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import { useCallback, useMemo } from "react";
 import { useSession } from "../../engine/store";
@@ -64,6 +65,17 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
         />
       )}
       <ScryingGlass position={[2.4, 0, 1.6]} />
+      {/* The Glass stands here too (CORE-31): its label opens it, like G. */}
+      <Html center position={[2.4, 1.75, 1.6]} zIndexRange={[10, 0]}>
+        <button
+          type="button"
+          className="world-chip"
+          data-guide="glass"
+          onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "g" }))}
+        >
+          {voice.glass.title}
+        </button>
+      </Html>
       <ObservatoryTools />
       <Board device="observatory" kind="ledger" at={[-1.2, 0, -2.9]} turn={0.15} />
       <Desk device="observatory" at={[0.6, 0, 1.2]} />

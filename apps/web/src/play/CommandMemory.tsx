@@ -1,5 +1,6 @@
 import { fill, type CommandMemory as Memory, voice } from "@wirelight/content";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useDialogFocus } from "./focus";
 
 // A command memory (0041): how a command is built word by word, its common forms, how to read its
 // output, then one action. Shown over the dimmed room; the Knight's voice later (0047).
@@ -62,6 +63,8 @@ function escapeRegExp(s: string): string {
 
 export function CommandMemory({ memory, onDone }: { memory: Memory; onDone: () => void }) {
   const [step, setStep] = useState(0);
+  const ref = useRef<HTMLElement>(null);
+  useDialogFocus(ref, { trap: true, step });
   const steps = [
     <div key="roles">
       <h3>{voice.commandMemory.roles}</h3>
@@ -97,7 +100,13 @@ export function CommandMemory({ memory, onDone }: { memory: Memory; onDone: () =
   ];
   const last = step === steps.length - 1;
   return (
-    <section className="cmd-memory" aria-label={fill(voice.commandMemory.title, { command: memory.command })}>
+    <section
+      ref={ref}
+      className="cmd-memory"
+      role="dialog"
+      aria-modal="true"
+      aria-label={fill(voice.commandMemory.title, { command: memory.command })}
+    >
       <h2>{fill(voice.commandMemory.title, { command: memory.command })}</h2>
       {steps[step]}
       <div className="panel-actions">

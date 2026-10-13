@@ -131,3 +131,29 @@ export function ranOn(devices: DeviceId[], pattern: RegExp): Predicate {
   return ({ trace }) =>
     trace.some((e): e is Exec => e.kind === "cmd.exec" && devices.includes(e.device) && pattern.test(e.line));
 }
+
+/**
+ * `device` got its address by asking (the secret room): a `dhclient` there finished binding (it goes
+ * to the background with exit 0) and it holds an address between `first` and `last` (same /24).
+ */
+export function holdsLease(device: DeviceId, first: string, last: string): Predicate {
+  const street = first.slice(0, first.lastIndexOf(".") + 1);
+  const lo = Number(first.split(".")[3]);
+  const hi = Number(last.split(".")[3]);
+  return ({ trace, world }) =>
+    trace.some(
+      (e) =>
+        e.kind === "cmd.exec" &&
+        e.device === device &&
+        /^dhclient\b/.test(e.line) &&
+        (e.exitCode === 0 ||
+          trace.some(
+            (x) => x.kind === "proc.exit" && x.device === device && x.execId === e.execId && x.exitCode === 0,
+          )),
+    ) &&
+    (world.device(device)?.addrs.some((a) => {
+      const n = Number(a.ip.split(".")[3]);
+      return a.ip.startsWith(street) && n >= lo && n <= hi;
+    }) ??
+      false);
+}

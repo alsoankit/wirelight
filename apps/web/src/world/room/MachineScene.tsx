@@ -4,6 +4,7 @@ import { type RoomDef, roomById } from "@wirelight/rooms";
 import { type ReactNode, Suspense, useMemo, useRef } from "react";
 import type { Object3D } from "three";
 import { useSession } from "../../engine/store";
+import { TAB } from "../../play/keys";
 import { Bloom } from "../../render/Bloom";
 import { useQuality } from "../../render/quality";
 import { Dust } from "../Dust";
@@ -95,14 +96,19 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
       <Keeper position={layout.keeper} rest={[origin[0], 1.4, origin[2]]} watch={watch} cue={cue} />
       {/* Ask the keeper why (CORE-25). */}
       <Html center position={[layout.keeper[0], 2.35, layout.keeper[2]]} zIndexRange={[10, 0]}>
-        <button type="button" className="world-chip" onClick={() => openPanel({ kind: "keeper", device })}>
+        <button
+          type="button"
+          className="world-chip"
+          data-tab={TAB.keeper}
+          onClick={() => openPanel({ kind: "keeper", device })}
+        >
           {voice.keeper.name}
         </button>
       </Html>
       {doors.map((info, i) => {
         const slot = layout.doorSlots[i];
         return slot ? (
-          <Doorway key={info.iface} info={info} slot={slot} keeper={layout.keeper} watch={watch} cue={cue} />
+          <Doorway key={info.iface} info={info} index={i} slot={slot} keeper={layout.keeper} watch={watch} cue={cue} />
         ) : null;
       })}
       {children}

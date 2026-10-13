@@ -1,12 +1,13 @@
 import { fill, floors, keeperSays, regions, voice } from "@wirelight/content";
 import { floorDefs, type RoomDef, roomById } from "@wirelight/rooms";
 import type { Topology } from "@wirelight/sim";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { progress } from "../engine/clock";
 import { journey } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { messageSummary } from "../world/messageKind";
+import { Memory } from "./Memory";
 
 // The Scrying Glass (CORE-31..33, 0064): a live map of the whole floor, view-only. Machines are
 // nodes, cables lines between doors; a corridor's state shows by shape and colour (dark: thin,
@@ -14,10 +15,14 @@ import { messageSummary } from "../world/messageKind";
 // clock as the room. G opens it full screen; the mini Glass sits in the corner. A second view is the
 // world map (0039): every region and floor, cleared floors glowing, the next one in mist.
 
-type Node = { id: string; x: number; y: number; kind: "you" | "switch" | "router" | "house" };
+export type Node = { id: string; x: number; y: number; kind: "you" | "switch" | "router" | "house" };
+
+/** The full map's size, in its own units (the SVG scales to fit). */
+export const MAP_W = 900;
+export const MAP_H = 520;
 
 /** Lays the floor out in columns by distance from the player's machine (a breadth-first walk). */
-function layout(t: Topology, start: string, w: number, h: number): Map<string, Node> {
+export function layout(t: Topology, start: string, w: number, h: number): Map<string, Node> {
   const next = new Map<string, string[]>();
   for (const l of t.links) {
     next.set(l.a.device, [...(next.get(l.a.device) ?? []), l.b.device]);
@@ -57,15 +62,32 @@ function layout(t: Topology, start: string, w: number, h: number): Map<string, N
 /** A replayed message's place on the map: the hop it's on, and how far along (CORE-23). */
 type Replaying = { from: string; to: string; t: number } | null;
 
-function FloorMap({ room, mini, replaying = null }: { room: RoomDef; mini: boolean; replaying?: Replaying }) {
+/**
+ * The floor's map. `memory`: the floor as it was (0036, 0037), every corridor whole and lit, no live
+ * messages, no "you are here"; `children` draw on top (a ride-along's message and its header card).
+ */
+export function FloorMap({
+  room,
+  mini,
+  replaying = null,
+  memory = false,
+  children,
+}: {
+  room: RoomDef;
+  mini: boolean;
+  replaying?: Replaying;
+  memory?: boolean;
+  children?: ReactNode;
+}) {
   const here = useSession((s) => s.here);
   const corridors = useSession((s) => s.status?.corridors);
-  const W = mini ? 240 : 900;
-  const H = mini ? 150 : 520;
+  const W = mini ? 240 : MAP_W;
+  const H = mini ? 150 : MAP_H;
   const nodes = useMemo(() => layout(room.topology, room.playerDevice, W, H), [room, W, H]);
   const dots = useRef<SVGGElement>(null);
   // Messages: drawn each frame from the session, without React (positions change every frame).
   useEffect(() => {
+    if (memory) return;
     let raf = 0;
     const draw = () => {
       const g = dots.current;
@@ -89,14 +111,19 @@ function FloorMap({ room, mini, replaying = null }: { room: RoomDef; mini: boole
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
-  }, [nodes, mini]);
+  }, [nodes, mini, memory]);
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="glass-map" role="img" aria-label={voice.glass.floorMap}>
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="glass-map"
+      role="img"
+      aria-label={memory ? voice.memory.map : voice.glass.floorMap}
+    >
       {room.topology.links.map((l) => {
         const a = nodes.get(l.a.device);
         const b = nodes.get(l.b.device);
         if (!a || !b) return null;
-        const state = corridors?.[l.id] ?? "dark";
+        const state = memory ? "lit" : (corridors?.[l.id] ?? "dark");
         return (
           <g key={l.id}>
             <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} className={`glass-link ${state}`} />
@@ -140,7 +167,7 @@ function FloorMap({ room, mini, replaying = null }: { room: RoomDef; mini: boole
         })()}
       {[...nodes.values()].map((n) => (
         <g key={n.id} transform={`translate(${n.x},${n.y})`} className={`glass-node ${n.kind}`}>
-          {n.id === here && <circle r={mini ? 9 : 22} className="glass-here" />}
+          {!memory && n.id === here && <circle r={mini ? 9 : 22} className="glass-here" />}
           {n.kind === "switch" ? (
             <rect x={mini ? -6 : -14} y={mini ? -4 : -9} width={mini ? 12 : 28} height={mini ? 8 : 18} rx={2} />
           ) : n.kind === "router" ? (
@@ -155,6 +182,7 @@ function FloorMap({ room, mini, replaying = null }: { room: RoomDef; mini: boole
           )}
         </g>
       ))}
+      {children}
     </svg>
   );
 }
@@ -273,9 +301,10 @@ export function Glass() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  if (!room) return null;
+  if (!room) return <Memory />;
   return (
     <>
+      <Memory />
       <button
         type="button"
         className="mini-glass"

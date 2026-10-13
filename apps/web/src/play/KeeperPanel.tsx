@@ -57,7 +57,12 @@ export function KeeperPanel({ device }: { device: string }) {
       <ol className="catch-list">
         {recent.map(({ d, bytes }) => (
           <li key={`${d.frameId}-${d.t}`}>
-            <button type="button" data-open={chosen?.d === d ? "yes" : "no"} onClick={() => setPicked(d.frameId)}>
+            <button
+              type="button"
+              data-open={chosen?.d === d ? "yes" : "no"}
+              aria-pressed={chosen?.d === d}
+              onClick={() => setPicked(d.frameId)}
+            >
               {fill(voice.keeper.item, {
                 time: (d.t / 1000).toFixed(1),
                 what: bytes ? messageSummary(bytes, floor) : d.tableRef.dst,
@@ -66,7 +71,11 @@ export function KeeperPanel({ device }: { device: string }) {
           </li>
         ))}
       </ol>
-      {chosen && <p className="note">{keeperSays(chosen.d, chosen.reason)}</p>}
+      {chosen && (
+        <p className="note" aria-live="polite">
+          {keeperSays(chosen.d, chosen.reason)}
+        </p>
+      )}
       <div className="panel-actions">
         {command && (
           <button type="button" onClick={() => void exec(device, command, "click")}>

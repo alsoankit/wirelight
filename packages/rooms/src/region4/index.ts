@@ -1,6 +1,6 @@
 import { defineFloor, type FloorDef, type RoomDef } from "../types";
 import { acrossTheStreet, closedCrossing, directions, noWayBack, otherStreet, sleepingKeeper } from "./floor8";
-import { oneStepOnly, roundAndRound, showTheWay, theCrossing, twoEnvelopes } from "./floor9";
+import { insideYourHomeRouter, oneStepOnly, roundAndRound, showTheWay, theCrossing, twoEnvelopes } from "./floor9";
 
 /** Region 4's rooms in play order: Floors 8 and 9 (the first release's last region, 0035). */
 export const region4Rooms: RoomDef[] = [
@@ -15,9 +15,10 @@ export const region4Rooms: RoomDef[] = [
   oneStepOnly,
   roundAndRound,
   theCrossing,
+  insideYourHomeRouter,
 ];
 
-/** Region 4's floors (ROOM-09). The secret room (*Inside Your Home Router*) waits for the polish pass. */
+/** Region 4's floors (ROOM-09). The secret room, *Inside Your Home Router*, is found after the finale. */
 export const region4Floors: FloorDef[] = [
   defineFloor({
     floor: 8,
@@ -43,5 +44,6 @@ export const region4Floors: FloorDef[] = [
     boss: "f9.boss-crossing",
     // Journal page 9 lies on arch's lectern (floor-9.md 9.3).
     journalRoom: "f9.one-step-only",
+    secret: "f9.secret-home-router",
   }),
 ];

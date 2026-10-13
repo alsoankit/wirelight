@@ -270,3 +270,77 @@ export const census = defineRoom({
     ],
   ],
 });
+
+// ── Secret · The Binary Behind /24 ─────────────────────────────────────────────────────────
+
+/**
+ * Region 3's secret room (floors/floor-7.md, "Secret room"): behind the street sign, after the census.
+ * The observatory's plate says `/25`: one bit more of street, so the square is cut in two halves
+ * (.0–.127 and .128–.255). Lantern (.7) still answers; bell, at .200 on the same square, is on the
+ * other half, so the observatory doesn't even try (`connect: Network is unreachable`). Giving the
+ * house its `/24` back makes the street whole. No `ip route` yet (Floor 8), so the only fix is the prefix.
+ */
+const secretBinaryId = "f7.secret-binary";
+const BELL_HOUSE = "10.0.1.200";
+export const binaryBehind24 = defineRoom({
+  id: secretBinaryId,
+  region: 3,
+  floor: 7,
+  order: 50,
+  kind: "secret",
+  pathTag: "all",
+  content: secretBinaryId,
+  vars: { bell: BELL_HOUSE, lantern: IP.lantern },
+  seed: 750,
+  topology: town({
+    houses: ["lantern", "bell"],
+    extra: { bell: { addrs: [{ dev: "eth0", cidr: `${BELL_HOUSE}/24` }] } },
+  }),
+  faults: [
+    { kind: "addr-remove", device: "observatory", cidr: OWN, dev: "eth0" },
+    { kind: "addr-set", device: "observatory", cidr: "10.0.1.5/25", dev: "eth0" },
+  ],
+  playerDevice: "observatory",
+  // Bell's door is open: moving bell instead is a detector.
+  access: access(["lantern", "bell"], ["bell"]),
+  controls: { console: "typing", slate: SLATE, addressSlots: { "observatory:eth0": "broken" } },
+  tools: {},
+  glow: "none",
+  winCondition: answeredBy("observatory", BELL_HOUSE, BELL),
+  key: { word: keyFor(secretBinaryId), via: "mark" },
+  healthChecks: [
+    {
+      id: "whole-street",
+      object: { kind: "slot", device: "observatory", iface: "eth0" },
+      check: hasAddr("observatory", OWN),
+    },
+  ],
+  teaches: [],
+  uses: ["ip-address", "subnet", "prefix-length", "ping"],
+  cards: ["thirty-two-bits"],
+  misconceptions: [
+    // A shorter prefix than the square's: bell answers, but the street is now far bigger than the square.
+    { id: "street-too-big", detect: ran("observatory", /^ip addr add 10\.0\.1\.\d+\/(1?\d|2[0-3]) /) },
+    // Moving house to bell's half: bell answers, lantern no longer does.
+    {
+      id: "other-half",
+      detect: ran("observatory", /^ip addr add 10\.0\.1\.(12[89]|1[3-9]\d|2[0-4]\d|25[0-5])\/25 /),
+    },
+    { id: "move-bell", detect: ran("bell", /^ip addr (add|del) /) },
+  ],
+  detectorTests: [
+    { misconception: "street-too-big", steps: [typed("observatory", "ip addr add 10.0.1.5/16 dev eth0")] },
+    { misconception: "other-half", steps: [typed("observatory", "ip addr add 10.0.1.130/25 dev eth0")] },
+    {
+      misconception: "move-bell",
+      steps: [typed("bell", "ip addr del 10.0.1.200/24 dev eth0"), typed("bell", "ip addr add 10.0.1.100/24 dev eth0")],
+    },
+  ],
+  solution: [
+    typed("observatory", "ip addr del 10.0.1.5/25 dev eth0"),
+    typed("observatory", `ip addr add ${OWN} dev eth0`),
+    typed("observatory", "ping -c 3 10.0.1.200"),
+  ],
+  // Keeping the half-street address and adding the whole street's beside it also works.
+  altSolutions: [[typed("observatory", `ip addr add ${OWN} dev eth0`), typed("observatory", "ping -c 3 10.0.1.200")]],
+});

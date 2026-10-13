@@ -199,6 +199,9 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "`") return;
+      // Typing in a field elsewhere: the key is just a character there.
+      const t = e.target instanceof HTMLElement ? e.target : null;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) && !t.closest(".console")) return;
       e.preventDefault();
       setOpen((o) => !o);
     };
@@ -220,7 +223,13 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
 
   return (
     <section className="console" data-open={open ? "yes" : "no"} aria-label={voice.console.title}>
-      <button type="button" className="console-bar" onClick={() => setOpen((o) => !o)}>
+      <button
+        type="button"
+        className="console-bar"
+        aria-expanded={open}
+        aria-keyshortcuts="`"
+        onClick={() => setOpen((o) => !o)}
+      >
         <span className="console-live" />
         <span className="console-title">{voice.console.title}</span>
         <span className="console-host">root@{device}</span>
@@ -228,7 +237,8 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
           <kbd>`</kbd> {open ? voice.console.hide : voice.console.open}
         </span>
       </button>
-      <div className="console-body">
+      {/* Slid down, the terminal is out of reach (Tab skips it, UI-18); ` or the bar brings it back. */}
+      <div className="console-body" inert={!open}>
         <div ref={host} className="console-term" />
       </div>
     </section>

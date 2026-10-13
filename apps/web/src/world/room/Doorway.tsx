@@ -3,9 +3,10 @@ import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
 import { type RefObject, useMemo } from "react";
 import { MeshBasicMaterial, type Object3D } from "three";
-import { positionLocal, smoothstep, uniform, vec3 } from "three/tsl";
+import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
+import { TAB } from "../../play/keys";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
@@ -37,18 +38,23 @@ export type DoorInfo = {
 };
 
 // The corridor's rune-line (CORE-12): dark until a message and its answer have crossed, then lit;
-// broken when the link is down (dim, slowly breathing: never a fast flicker).
+// broken when the link is down (dim, slowly breathing: never a fast flicker). Broken is also a
+// shape (UI-21, rendering.md): the line breaks into dashes, cracked rather than whole.
 function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broken" }) {
   const span = cableSpan(slot);
   const brightness = useMemo(() => uniform(0.18), []);
+  const cracked = useMemo(() => uniform(0), []);
   const material = useMemo(() => {
     const m = new MeshBasicNodeMaterial({ transparent: true, toneMapped: false });
     m.colorNode = vec3(0.21, 1, 1.05).mul(brightness);
-    // Fully visible at the doorway end, fading out into the corridor.
-    m.opacityNode = smoothstep(-span.length / 2, span.length / 2 - 0.3, positionLocal.z);
+    // Fully visible at the doorway end, fading out into the corridor; gaps every 40 cm when cracked.
+    const fade = smoothstep(-span.length / 2, span.length / 2 - 0.3, positionLocal.z);
+    const dashes = step(0.35, fract(positionLocal.z.mul(2.5)));
+    m.opacityNode = fade.mul(mix(float(1), dashes, cracked));
     return m;
-  }, [brightness, span.length]);
+  }, [brightness, cracked, span.length]);
   useFrame(({ clock }, delta) => {
+    cracked.value = state === "broken" ? 1 : 0;
     const target = state === "lit" ? 1.6 : state === "broken" ? 0.05 + 0.04 * Math.sin(clock.elapsedTime * 0.8) : 0.18;
     brightness.value += (target - brightness.value) * (1 - Math.exp(-delta * 2));
   });
@@ -83,7 +89,7 @@ function LostMark({ at, since, onReplay }: { at: Vec3; since: number; onReplay: 
 }
 
 // The cable's end, out of its door and lying on the floor (1.2): a short dark coil with a dim tip.
-function LooseEnd({ at, door, onPlug }: { at: Vec3; door: string; onPlug?: () => void }) {
+function LooseEnd({ at, door, onPlug, tab }: { at: Vec3; door: string; onPlug?: () => void; tab: number }) {
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); the HTML button below is the keyboard and screen-reader way
     <group position={at} onClick={onPlug}>
@@ -100,8 +106,9 @@ function LooseEnd({ at, door, onPlug }: { at: Vec3; door: string; onPlug?: () =>
           <button
             type="button"
             className="world-chip"
+            data-tab={tab}
             onClick={onPlug}
-            aria-label={`${voice.cableEnd.label} (${door})`}
+            aria-label={fill(voice.cableEnd.plug, { door })}
           >
             {voice.cableEnd.label}
           </button>
@@ -113,13 +120,15 @@ function LooseEnd({ at, door, onPlug }: { at: Vec3; door: string; onPlug?: () =>
 
 type Props = {
   info: DoorInfo;
+  /** Its place among the room's doors (eth0 = 0): its number key is one more (CORE-47). */
+  index: number;
   slot: DoorSlot;
   keeper: Vec3;
   watch: RefObject<Object3D | null>;
   cue: RefObject<KeeperCue>;
 };
 
-export function Doorway({ info, slot, keeper, watch, cue }: Props) {
+export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
   const g = doorGeometry(slot);
   const key = `${info.device}:${info.iface}`;
   const door = useSession((s) => s.status?.doors[key]);
@@ -142,6 +151,8 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
     void exec(info.device, `ip link show ${info.iface}`, "click");
   };
   const label = fill(voice.doorway.go, { door: info.iface, name: info.peer });
+  // Number keys 1–9 go through the doors in order (CORE-47).
+  const shortcut = index < 9 ? String(index + 1) : undefined;
 
   return (
     <>
@@ -166,6 +177,7 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
           streets={info.streets}
           linkUp={door.up}
           onOpen={readPlate}
+          tab={TAB.plate + index}
         />
       )}
       {lostAt > 0 && performance.now() - lostAt < MARK_MS && (
@@ -180,6 +192,7 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
         <LooseEnd
           at={g.looseEnd}
           door={info.iface}
+          tab={TAB.cableEnd + index}
           onPlug={
             info.cableControl === "works"
               ? () => void exec(info.device, `lab cable plug ${info.iface}`, "click")
@@ -194,13 +207,21 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
             type="button"
             className="world-chip"
             data-tour="door"
+            data-tab={TAB.door + index}
             onClick={() => goTo(info.peer)}
             aria-label={label}
+            aria-keyshortcuts={shortcut}
           >
-            → {info.peer}
+            {shortcut && <kbd className="chip-key">{shortcut}</kbd>}→ {info.peer}
           </button>
         ) : (
-          <span className="world-chip" data-tone="sealed" title={info.barred}>
+          <span
+            className="world-chip"
+            data-tone="sealed"
+            data-tab={TAB.door + index}
+            role="note"
+            aria-label={fill(voice.doorway.sealed, { name: info.peer, why: info.barred ?? "" })}
+          >
             {info.peer} · {info.barred}
           </span>
         )}

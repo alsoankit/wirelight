@@ -82,4 +82,10 @@ export const REGION_4_CARDS: Card[] = [
     title: "Routing loop",
     text: "Two routers each think the other knows the way. The packet goes back and forth until its countdown runs out.",
   },
+  {
+    id: "home-box",
+    floor: 9,
+    title: "Home box",
+    text: "The box on a shelf at home: a switch for your devices, a registry that hands out addresses, and a router to the outside, all in one.",
+  },
 ];

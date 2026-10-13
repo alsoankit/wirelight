@@ -55,4 +55,10 @@ export const REGION_3_CARDS: Card[] = [
   },
   { id: "registry", floor: 7, title: "Registry", text: "The machine that hands out addresses on this street." },
   { id: "lease", floor: 7, title: "Lease", text: "An address on loan, for a while. It's renewed before it runs out." },
+  {
+    id: "thirty-two-bits",
+    floor: 7,
+    title: "Thirty-two bits",
+    text: "An address is 32 bits: four numbers of 8. The `/` counts how many bits, from the left, are the street; the rest are the house.",
+  },
 ];

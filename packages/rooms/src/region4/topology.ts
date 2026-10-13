@@ -145,3 +145,50 @@ export function cathedral(o: CathedralOptions = {}): Topology {
   street("window", 0xd0, window);
   return { devices, links };
 }
+
+/**
+ * The secret room's home box (floors/floor-9.md, "Secret room"): one machine that is a switch (`br0`
+ * over its home doors eth1–eth3), a registry on that street (a DHCP server on `br0`, dnsmasq's
+ * defaults: it offers itself as the way out) and a router to the outside (`eth0`). Home's street is
+ * `192.168.1.0/24`, as on most real home boxes; outside, the world is `10.0.9.7` on `10.0.9.0/24`.
+ * The correct network: the observatory holds the first lease, and home forwards.
+ */
+export const HOME = {
+  street: "192.168.1.0/24",
+  home: "192.168.1.1",
+  outside: "10.0.9.0/24",
+  homeOutside: "10.0.9.2",
+  world: "10.0.9.7",
+  observatory: "192.168.1.100",
+  pool: ["192.168.1.100", "192.168.1.150"] as [string, string],
+} as const;
+
+export function homeBox(): Topology {
+  const doors = ["eth0", "eth1", "eth2", "eth3"];
+  const home: DeviceSpec = {
+    id: "home",
+    hostname: "home",
+    kind: "host",
+    interfaces: doors.map((name, i) => ({ name, mac: `02:00:00:00:00:${(0x51 + i).toString(16)}` })),
+    bridges: [{ name: "br0", ports: ["eth1", "eth2", "eth3"] }],
+    addrs: [
+      { dev: "eth0", cidr: `${HOME.homeOutside}/24` },
+      { dev: "br0", cidr: `${HOME.home}/24` },
+    ],
+    sysctl: { "net.ipv4.ip_forward": "1" },
+    dhcpServer: { dev: "br0", range: HOME.pool, sequential: true },
+  };
+  const observatory = house("observatory", MAC.observatory, HOME.observatory, HOME.home);
+  // The world was told the way back to home's street (real home boxes rewrite addresses instead: the Frontier).
+  const world: DeviceSpec = {
+    ...house("world", "02:00:00:00:00:57", HOME.world, null),
+    routes: [{ dst: HOME.street, via: HOME.homeOutside }],
+  };
+  return {
+    devices: [observatory, home, world],
+    links: [
+      { id: "home-observatory", a: { device: "observatory", iface: "eth0" }, b: { device: "home", iface: "eth1" } },
+      { id: "home-world", a: { device: "home", iface: "eth0" }, b: { device: "world", iface: "eth0" } },
+    ],
+  };
+}

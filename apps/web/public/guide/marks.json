@@ -1,0 +1,74 @@
+{
+  "room": {
+    "width": 880,
+    "height": 600,
+    "marks": [
+      {
+        "target": "door",
+        "x": 683,
+        "y": 107
+      },
+      {
+        "target": "plate",
+        "x": 771,
+        "y": 187
+      },
+      {
+        "target": "keeper",
+        "x": 500,
+        "y": 232
+      },
+      {
+        "target": "glass",
+        "x": 514,
+        "y": 435
+      },
+      {
+        "target": "workbench",
+        "x": 279,
+        "y": 280
+      }
+    ]
+  },
+  "controls": {
+    "width": 1280,
+    "height": 760,
+    "marks": [
+      {
+        "target": "pause",
+        "x": 651,
+        "y": -29
+      },
+      {
+        "target": "speed",
+        "x": 717,
+        "y": -29
+      },
+      {
+        "target": "glass",
+        "x": 514,
+        "y": 435
+      },
+      {
+        "target": "reset",
+        "x": 794,
+        "y": -29
+      }
+    ]
+  },
+  "ruins-before": {
+    "width": 880,
+    "height": 600,
+    "marks": []
+  },
+  "ruins-after": {
+    "width": 880,
+    "height": 600,
+    "marks": []
+  },
+  "glass": {
+    "width": 880,
+    "height": 600,
+    "marks": []
+  }
+}

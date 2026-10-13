@@ -80,6 +80,12 @@ const { engine } = startEngine();
 const MAX_EVENTS = 40_000;
 const KEEP_EVENTS = 30_000;
 
+/**
+ * Drops that aren't a message lost: a broadcast nobody listens for, and a switch rightly not sending a
+ * frame back the way it came. They leave no mark.
+ */
+const NOT_LOST = new Set(["no-listener", "fdb-filter"]);
+
 /** How long a lost message's mark stays (CORE-17), screen ms. */
 export const MARK_MS = 10_000;
 
@@ -146,7 +152,7 @@ function apply(state: Session, batch: Batch): Partial<Session> {
   const now = performance.now();
   let marks = state.marks.filter((m) => now - m.at < MARK_MS);
   for (const e of batch.events)
-    if (e.kind === "frame.drop" && e.iface)
+    if (e.kind === "frame.drop" && e.iface && !NOT_LOST.has(e.reason))
       marks = [...marks, { door: `${e.device}:${e.iface}`, at: now, frameId: e.frameId }];
   // Long sessions (a storm makes thousands of events a second) keep the most recent ones only.
   let events = [...state.events, ...batch.events];

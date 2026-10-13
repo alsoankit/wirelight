@@ -1,4 +1,5 @@
 import { Html } from "@react-three/drei";
+import { voice } from "@wirelight/content";
 
 // A door's plate (CORE-08): its name, its MAC address (from Floor 2) and the link light. Plates are
 // HTML so the text stays crisp at every quality tier (principle 11). Filled diamond = link up, hollow
@@ -14,6 +15,8 @@ type Props = {
   streets?: boolean;
   linkUp: boolean;
   onOpen?: () => void;
+  /** Its place in the room's Tab order (UI-18). */
+  tab?: number;
 };
 
 /** `10.0.1.7/24` with the street (the prefix's whole numbers) and the house number told apart. */
@@ -35,10 +38,10 @@ export function Address({ cidr, streets }: { cidr: string; streets: boolean }) {
   );
 }
 
-export function Plate({ position, name, mac, addrs, streets = false, linkUp, onOpen }: Props) {
+export function Plate({ position, name, mac, addrs, streets = false, linkUp, onOpen, tab }: Props) {
   const content = (
     <>
-      <span className="plate-light" role="img" aria-label={linkUp ? "link up" : "link down"}>
+      <span className="plate-light" role="img" aria-label={linkUp ? voice.plate.lightUp : voice.plate.lightDown}>
         {linkUp ? "◆" : "◇"}
       </span>
       <span className="plate-name">{name}</span>
@@ -51,11 +54,11 @@ export function Plate({ position, name, mac, addrs, streets = false, linkUp, onO
   return (
     <Html position={position} center zIndexRange={[10, 0]}>
       {onOpen ? (
-        <button type="button" className="plate" data-link={linkUp ? "up" : "down"} onClick={onOpen}>
+        <button type="button" className="plate" data-link={linkUp ? "up" : "down"} data-tab={tab} onClick={onOpen}>
           {content}
         </button>
       ) : (
-        <div className="plate" data-link={linkUp ? "up" : "down"}>
+        <div className="plate" data-link={linkUp ? "up" : "down"} data-tab={tab}>
           {content}
         </div>
       )}

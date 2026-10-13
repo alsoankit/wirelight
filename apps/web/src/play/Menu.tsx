@@ -15,6 +15,8 @@ import { useEffect, useState } from "react";
 import { type Panel, useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { CommandMemory } from "./CommandMemory";
+import { GuideVisual } from "./GuideVisual";
+import { MemoryList } from "./Memory";
 import { goToRoom } from "./RoomHud";
 
 // The menu (M, UI-13): the dungeon (every floor and room with its status), the Codex (objects, words,
@@ -67,8 +69,13 @@ function Dungeon() {
                       ? voice.menu.status.next
                       : voice.menu.status.locked;
                 return (
-                  <li key={r.id} data-here={r.id === roomId ? "yes" : "no"}>
+                  <li
+                    key={r.id}
+                    data-here={r.id === roomId ? "yes" : "no"}
+                    aria-current={r.id === roomId ? "location" : undefined}
+                  >
                     <span>{roomTexts[r.content]?.title}</span> <span className="panel-note">{state}</span>
+                    {r.id === roomId && <span className="panel-note"> · {voice.menu.here}</span>}
                     {opened.has(r.id) && r.id !== roomId && (
                       <button
                         type="button"
@@ -132,6 +139,7 @@ function Codex() {
           <code>{commandMemories[id]?.command}</code>
         </button>
       ))}
+      <MemoryList />
       <h3>{voice.menu.journal}</h3>
       {pages.length === 0 && <p className="panel-note">{voice.menu.empty}</p>}
       {Object.values(floorTexts)
@@ -146,6 +154,20 @@ function Codex() {
   );
 }
 
+/** A guide line with its `[[key]]` marks shown as key caps. */
+function WithKeys({ text }: { text: string }) {
+  const parts = text.split(/\[\[(.+?)\]\]/g);
+  // Split with a capture group: odd places are the keys.
+  return (
+    <>
+      {parts.map((part, i) =>
+        // biome-ignore lint/suspicious/noArrayIndexKey: pieces of one fixed line, in order
+        i % 2 ? <kbd key={i}>{part}</kbd> : part,
+      )}
+    </>
+  );
+}
+
 function Guide() {
   const opened = useOpened();
   const [topic, setTopic] = useState<string | null>(null);
@@ -156,12 +178,15 @@ function Guide() {
     <div>
       {shown ? (
         <>
-          <button type="button" className="link" onClick={() => setTopic(null)}>
+          <button type="button" className="link" onClick={() => setTopic(null)} aria-label={voice.menu.back}>
             ←
           </button>
           <h3>{shown.title}</h3>
+          {shown.visual && <GuideVisual visual={shown.visual} />}
           {shown.body.map((p) => (
-            <p key={p}>{p.replace(/\[\[(.+?)\]\]/g, "$1")}</p>
+            <p key={p}>
+              <WithKeys text={p} />
+            </p>
           ))}
         </>
       ) : (
@@ -324,7 +349,7 @@ export function Menu() {
   const tab = panel.tab ?? "dungeon";
   return (
     <aside className="menu" aria-label={voice.menu.title}>
-      <nav className="menu-tabs">
+      <nav className="menu-tabs" aria-label={voice.menu.sections}>
         {TABS.map((t) => (
           <button key={t} type="button" aria-pressed={t === tab} onClick={() => openPanel({ kind: "menu", tab: t })}>
             {voice.menu.tabs[t]}

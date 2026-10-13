@@ -1,12 +1,12 @@
 import { fill, voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "../engine/store";
 import { Address } from "../world/Plate";
 
 // A door's plate, opened (UI-03): its name, its MAC address (Floor 2 on), whether its link works, and
 // the controls the room gives it (0040): the door's switch, working or worn out, and pulling its cable.
-// Acting closes the panel so the player watches what happens (UI-04); Esc closes it (UI-05).
+// Acting closes the panel so the player watches what happens (UI-04); Esc closes it (UI-05, Keyboard.tsx).
 
 export function PlatePanel() {
   const panel = useSession((s) => s.panel);
@@ -21,12 +21,6 @@ export function PlatePanel() {
   const touch = useSession((s) => s.touch);
   const close = useSession((s) => s.closePanel);
   const [draft, setDraft] = useState("");
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [close]);
 
   const room = roomId ? roomById(roomId) : undefined;
   if (panel?.kind !== "plate" || !room || !door) return null;
@@ -43,7 +37,10 @@ export function PlatePanel() {
     <section className="panel" aria-label={fill(voice.plate.title, { door: panel.iface })}>
       <h2>{fill(voice.plate.title, { door: panel.iface })}</h2>
       <p className="panel-plate" data-link={door.up ? "up" : "down"}>
-        <span className="plate-light">{door.up ? "◆" : "◇"}</span> {panel.iface}
+        <span className="plate-light" role="img" aria-label={door.up ? voice.plate.lightUp : voice.plate.lightDown}>
+          {door.up ? "◆" : "◇"}
+        </span>{" "}
+        {panel.iface}
         {room.floor !== 1 && <span className="plate-mac"> {door.mac}</span>}
       </p>
       <p>{door.up ? voice.plate.linkUp : voice.plate.linkDown}</p>
@@ -74,6 +71,7 @@ export function PlatePanel() {
               }}
             >
               <input
+                aria-label={voice.plate.address}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder="10.0.1.5/24"
