@@ -44,7 +44,10 @@ type Session = {
   /** Messages on a cable now (link.enter not yet followed by link.exit). */
   onCables: Crossing[];
   /** Where messages died lately (CORE-17): a faded mark at that door for about ten seconds of screen time. */
-  marks: { door: string; at: number }[];
+  marks: { door: string; at: number; frameId: number }[];
+  /** A message whose journey is being replayed in the Glass (CORE-23), or null. */
+  replay: number | null;
+  setReplay(frameId: number | null): void;
   paused: boolean;
   speed: number;
   load(roomId: string): Promise<void>;
@@ -135,7 +138,8 @@ function apply(state: Session, batch: Batch): Partial<Session> {
   const now = performance.now();
   let marks = state.marks.filter((m) => now - m.at < MARK_MS);
   for (const e of batch.events)
-    if (e.kind === "frame.drop" && e.iface) marks = [...marks, { door: `${e.device}:${e.iface}`, at: now }];
+    if (e.kind === "frame.drop" && e.iface)
+      marks = [...marks, { door: `${e.device}:${e.iface}`, at: now, frameId: e.frameId }];
   return { events: [...state.events, ...batch.events], status: batch.status, onCables, marks };
 }
 
@@ -155,6 +159,8 @@ export const useSession = create<Session>((set, get) => ({
   status: null,
   onCables: [],
   marks: [],
+  replay: null,
+  setReplay: (replay) => set({ replay, panel: null }),
   paused: false,
   speed: 1,
 

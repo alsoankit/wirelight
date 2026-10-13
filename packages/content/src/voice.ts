@@ -219,6 +219,17 @@ export const voice = {
     close: "Close",
     states: { restored: "restored", here: "you are here", open: "open", mist: "in the mist", fog: "under fog" },
   },
+  /** Replay (CORE-23): a message's whole journey again, hop by hop, with each keeper's decision. */
+  replay: {
+    title: "Replay",
+    winning: "Replay the winning journey",
+    lost: "Replay this message",
+    hop: "{from} → {to}",
+    lostHere: "It went no further.",
+    arrived: "It arrived.",
+    again: "Again",
+    close: "Close",
+  },
   /** The top bar (interface.md: top right). */
   bar: {
     pause: "Pause",

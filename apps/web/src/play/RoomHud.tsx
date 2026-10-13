@@ -1,6 +1,7 @@
 import { fill, floors, floorTexts, regions, roomTexts, voice } from "@wirelight/content";
 import { floorDefs, nextOnPath, roomById, rooms } from "@wirelight/rooms";
 import { useEffect, useState } from "react";
+import { winningFrame } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { type Line, Lines } from "./Lines";
@@ -179,6 +180,17 @@ export function RoomHud() {
                 {voice.after.journal}
               </button>
             )}
+            <button
+              type="button"
+              className="quiet"
+              onClick={() => {
+                const s = useSession.getState();
+                const won = winningFrame(s.events, room.playerDevice);
+                if (won !== null) s.setReplay(won);
+              }}
+            >
+              {voice.replay.winning}
+            </button>
             {next ? (
               <button type="button" onClick={() => goToRoom(next.id)}>
                 {fill(voice.after.nextRoom, { room: roomTexts[next.content]?.title ?? next.id })}

@@ -1233,7 +1233,7 @@ button.link.inline {
   inset: 70px 16px 60px;
   display: flex;
   flex-direction: column;
-  background: rgba(8, 11, 16, 0.94);
+  background: rgba(8, 11, 16, 0.985);
   border: 1px solid var(--glass-border);
   border-radius: 14px;
   z-index: 52;
@@ -1353,4 +1353,38 @@ button.link.inline {
   font: 12px / 1.3 var(--mono);
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* A replay (CORE-23): the journey on the map, and each keeper's word. */
+.glass-replay {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 2;
+}
+
+.glass-replay-view {
+  flex: 1;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  min-height: 0;
+  padding: 0 16px 12px;
+  color: var(--text);
+  font: 14px / 1.45 var(--sans);
+}
+
+.replay-steps {
+  max-height: 34vh;
+  overflow: auto;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.replay-steps li {
+  margin: 4px 0;
+}
+
+.glass-label {
+  padding: 6px 10px;
+  color: var(--text);
+  font: 600 13px / 1 var(--sans);
 }

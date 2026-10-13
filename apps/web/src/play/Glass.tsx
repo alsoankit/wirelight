@@ -1,10 +1,12 @@
-import { floors, regions, voice } from "@wirelight/content";
+import { fill, floors, keeperSays, regions, voice } from "@wirelight/content";
 import { floorDefs, type RoomDef, roomById } from "@wirelight/rooms";
 import type { Topology } from "@wirelight/sim";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { progress } from "../engine/clock";
+import { journey } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
+import { messageSummary } from "../world/messageKind";
 
 // The Scrying Glass (CORE-31..33, 0064): a live map of the whole floor, view-only. Machines are
 // nodes, cables lines between doors; a corridor's state shows by shape and colour (dark: thin,
@@ -52,7 +54,10 @@ function layout(t: Topology, start: string, w: number, h: number): Map<string, N
   return out;
 }
 
-function FloorMap({ room, mini }: { room: RoomDef; mini: boolean }) {
+/** A replayed message's place on the map: the hop it's on, and how far along (CORE-23). */
+type Replaying = { from: string; to: string; t: number } | null;
+
+function FloorMap({ room, mini, replaying = null }: { room: RoomDef; mini: boolean; replaying?: Replaying }) {
   const here = useSession((s) => s.here);
   const corridors = useSession((s) => s.status?.corridors);
   const W = mini ? 240 : 900;
@@ -119,6 +124,20 @@ function FloorMap({ room, mini }: { room: RoomDef; mini: boolean }) {
         );
       })}
       <g ref={dots} />
+      {replaying &&
+        (() => {
+          const a = nodes.get(replaying.from);
+          const b = nodes.get(replaying.to);
+          if (!a || !b) return null;
+          const x = a.x + (b.x - a.x) * replaying.t;
+          const y = a.y + (b.y - a.y) * replaying.t;
+          return (
+            <g transform={`translate(${x},${y})`}>
+              <circle r={7} className="glass-msg" />
+              <circle r={12} className="glass-replay" />
+            </g>
+          );
+        })()}
       {[...nodes.values()].map((n) => (
         <g key={n.id} transform={`translate(${n.x},${n.y})`} className={`glass-node ${n.kind}`}>
           {n.id === here && <circle r={mini ? 9 : 22} className="glass-here" />}
@@ -182,11 +201,66 @@ function WorldMap() {
   );
 }
 
+const HOP_MS = 1400;
+
+/** The journey, hop by hop, on the map, with what each keeper decided (CORE-23). */
+function Replay({ room, frameId }: { room: RoomDef; frameId: number }) {
+  const events = useSession((s) => s.events);
+  const hops = useMemo(() => journey(events, frameId), [events, frameId]);
+  const [start, setStart] = useState(() => performance.now());
+  const [now, setNow] = useState(() => performance.now());
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      setNow(performance.now());
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  const at = Math.min((now - start) / HOP_MS, hops.length);
+  const step = Math.min(Math.floor(at), hops.length - 1);
+  const hop = hops[step];
+  const last = hops.at(-1);
+  return (
+    <div className="glass-replay-view">
+      <FloorMap
+        room={room}
+        mini={false}
+        replaying={hop ? { from: hop.from, to: hop.to, t: Math.min(at - step, 1) } : null}
+      />
+      <ol className="replay-steps">
+        {hops.slice(0, step + 1).map((h) => (
+          <li key={h.frameId}>
+            <strong>{fill(voice.replay.hop, { from: h.from, to: h.to })}</strong>{" "}
+            <span className="panel-note">{messageSummary(h.bytes, room.floor)}</span>
+            {h.decision && <p className="note">{keeperSays(h.decision, h.dropped)}</p>}
+          </li>
+        ))}
+      </ol>
+      {at >= hops.length && last && (
+        <p className="panel-note">{last.dropped ? voice.replay.lostHere : voice.replay.arrived}</p>
+      )}
+      <div className="panel-actions">
+        <button type="button" onClick={() => setStart(performance.now())}>
+          {voice.replay.again}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function Glass() {
   const roomId = useSession((s) => s.roomId);
   const room = roomId ? roomById(roomId) : undefined;
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"floor" | "world">("floor");
+  const replay = useSession((s) => s.replay);
+  const setReplay = useSession((s) => s.setReplay);
+  // A replay opens the Glass on it; closing the Glass ends it.
+  useEffect(() => {
+    if (replay !== null) setOpen(true);
+  }, [replay]);
   // Never under the open console (UI-02).
   const raised = useSession((s) => s.consoleOpen && s.voiceGiven);
   useEffect(() => {
@@ -212,7 +286,25 @@ export function Glass() {
       >
         <FloorMap room={room} mini />
       </button>
-      {open && (
+      {open && replay !== null && (
+        <section className="glass" aria-label={voice.replay.title}>
+          <nav className="menu-tabs">
+            <span className="glass-label">{voice.replay.title}</span>
+            <button
+              type="button"
+              className="quiet"
+              onClick={() => {
+                setReplay(null);
+                setOpen(false);
+              }}
+            >
+              {voice.replay.close}
+            </button>
+          </nav>
+          <Replay room={room} frameId={replay} />
+        </section>
+      )}
+      {open && replay === null && (
         <section className="glass" aria-label={voice.glass.title}>
           <nav className="menu-tabs">
             <button type="button" aria-pressed={view === "floor"} onClick={() => setView("floor")}>

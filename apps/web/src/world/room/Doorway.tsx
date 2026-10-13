@@ -63,14 +63,15 @@ function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broke
 
 // Where a message died at this door (CORE-17): a faded mark on the floor for about ten seconds. It
 // never says why: that's for the player to find out.
-function LostMark({ at, since }: { at: Vec3; since: number }) {
+function LostMark({ at, since, onReplay }: { at: Vec3; since: number; onReplay: () => void }) {
   const material = useMemo(() => new MeshBasicMaterial({ color: "#b9ad9c", transparent: true, opacity: 0.5 }), []);
   useFrame(() => {
     const age = performance.now() - since;
     material.opacity = Math.max(0, 0.5 * (1 - age / MARK_MS));
   });
   return (
-    <group position={[at[0], 0.04, at[2]]} rotation={[-Math.PI / 2, 0, Math.PI / 4]}>
+    // biome-ignore lint/a11y/noStaticElementInteractions: a 3D mark (raycast click); replays are also in the debrief
+    <group position={[at[0], 0.04, at[2]]} rotation={[-Math.PI / 2, 0, Math.PI / 4]} onClick={onReplay}>
       <mesh material={material}>
         <planeGeometry args={[0.5, 0.07]} />
       </mesh>
@@ -126,6 +127,11 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
   const end = useSession((s) => s.status?.cableEnds[key]);
   // The latest mark here, if any (a number, so the selector is stable).
   const lostAt = useSession((s) => s.marks.reduce((t, m) => (m.door === key ? Math.max(t, m.at) : t), 0));
+  const replayLost = () => {
+    const s = useSession.getState();
+    const mark = s.marks.filter((m) => m.door === key).at(-1);
+    if (mark) s.setReplay(mark.frameId);
+  };
   const exec = useSession((s) => s.exec);
   const goTo = useSession((s) => s.goTo);
   const openPanel = useSession((s) => s.openPanel);
@@ -167,6 +173,7 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
           key={lostAt}
           at={[(g.doorway[0] + g.looseEnd[0]) / 2, 0, (g.doorway[2] + g.looseEnd[2]) / 2]}
           since={lostAt}
+          onReplay={replayLost}
         />
       )}
       {end === "out" && (
