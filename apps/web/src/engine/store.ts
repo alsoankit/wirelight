@@ -2,6 +2,7 @@ import type { Batch, RoomStatus } from "@wirelight/engine";
 import { roomById, rooms } from "@wirelight/rooms";
 import type { CmdSource, SimEvent, SlateCatch, SlateLayerName, SlateOpen } from "@wirelight/sim";
 import { create } from "zustand";
+import { useProgress } from "../progress/progress";
 import { type Crossing, nextNetworkTime } from "./clock";
 import { startEngine } from "./connect";
 
@@ -14,13 +15,20 @@ export type Panel =
   | { kind: "plate"; device: string; iface: string }
   | { kind: "workbench" }
   | { kind: "card" }
-  | { kind: "jar"; open?: number };
+  | { kind: "jar"; open?: number }
+  | { kind: "notes" }
+  | { kind: "ask" }
+  | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "keys" | "settings" };
 
 type Session = {
   roomId: string | null;
   /** The machine whose room the player is standing in (CORE-10); commands run there (UI-11). */
   here: string | null;
   panel: Panel | null;
+  /** When the room was loaded or reset (screen time, ms): hints count from here (HELP-09). */
+  startedAt: number;
+  /** Back to the room's faulted start (HELP-03). */
+  reset(): Promise<void>;
   /** The gift of the voice has been given (0032): the console exists from then on. */
   voiceGiven: boolean;
   giveVoice(): void;
@@ -109,8 +117,12 @@ export const useSession = create<Session>((set, get) => ({
   roomId: null,
   here: null,
   panel: null,
+  startedAt: 0,
   voiceGiven: false,
-  giveVoice: () => set({ voiceGiven: true }),
+  giveVoice: () => {
+    useProgress.getState().giveVoice();
+    set({ voiceGiven: true });
+  },
   events: [],
   status: null,
   onCables: [],
@@ -120,8 +132,8 @@ export const useSession = create<Session>((set, get) => ({
   async load(roomId) {
     busy = true;
     const batch = await engine.loadRoom(roomId);
-    // Until saves (M3): rooms after the gift's room start with the voice already given.
-    const voiceGiven = get().voiceGiven || afterGift(roomId);
+    // The voice, once given, stays (saved); a room after the gift's room has it even if this browser never saw the gift.
+    const voiceGiven = useProgress.getState().voiceGiven || afterGift(roomId);
     set({
       roomId,
       here: roomById(roomId)?.playerDevice ?? null,
@@ -130,6 +142,7 @@ export const useSession = create<Session>((set, get) => ({
       events: [],
       onCables: [],
       voiceGiven,
+      startedAt: performance.now(),
     });
     set((s) => apply(s, batch));
     busy = false;
@@ -179,6 +192,11 @@ export const useSession = create<Session>((set, get) => ({
   },
 
   goTo: (device) => set({ here: device, panel: null }),
+
+  async reset() {
+    const batch = await exclusive(() => engine.reset());
+    set((s) => ({ ...apply(s, batch), panel: null }));
+  },
   openPanel: (panel) => set({ panel }),
   closePanel: () => set({ panel: null }),
 

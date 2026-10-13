@@ -146,7 +146,13 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
       {/* The way through (CORE-10): a chip in the arch; sealed rooms say why. */}
       <Html center position={[g.doorway[0], 2.9, g.doorway[2]]} zIndexRange={[10, 0]}>
         {info.enterable ? (
-          <button type="button" className="world-chip" onClick={() => goTo(info.peer)} aria-label={label}>
+          <button
+            type="button"
+            className="world-chip"
+            data-tour="door"
+            onClick={() => goTo(info.peer)}
+            aria-label={label}
+          >
             → {info.peer}
           </button>
         ) : (

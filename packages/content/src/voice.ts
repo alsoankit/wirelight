@@ -104,6 +104,64 @@ export const voice = {
     next: "Next",
     done: "Close",
   },
+  /** The top bar (interface.md: top right). */
+  bar: {
+    pause: "Pause",
+    play: "Play",
+    speed: "Speed",
+    reset: "Reset room",
+    notes: "Knight's notes",
+    ask: "Ask",
+    menu: "Menu",
+  },
+  /** The Knight's notes (HELP-08..10): his notes in the room, reactions, hints. */
+  notes: {
+    title: "The Knight's notes",
+    hint: "Hint {n} of 5",
+    nextHint: "Read the next hint",
+    waiting: "The next hint isn't ready yet. Look around, try something.",
+    allRead: "That's every hint.",
+    codex: "In the Codex: {card}",
+    memories: "Knight's Memories",
+    replay: "Play again",
+  },
+  /** The Guardian's questions (CORE-43). */
+  ask: { title: "Ask {guardian}", close: "Close" },
+  /** A discovery card (CORE-46). */
+  discovery: { new: "New", more: "Tell me more", ok: "Got it" },
+  /** After the win (HELP-13). */
+  after: {
+    key: "Key",
+    building: "See how they built it",
+    floorMemory: "{guardian} remembers",
+    journal: "A page of the Knight's journal",
+    next: "Continue",
+    nextRoom: "Next: {room}",
+    end: "That's the end of the first release. Thank you for playing.",
+  },
+  /** The menu (M, UI-13). */
+  menu: {
+    title: "Menu",
+    tabs: { dungeon: "The dungeon", codex: "Codex", guide: "Field Guide", keys: "Keyring", settings: "Settings" },
+    status: {
+      cleared: "cleared",
+      next: "next",
+      optional: "optional on your path",
+      locked: "not yet",
+      planned: "coming later",
+    },
+    play: "Play",
+    replay: "Play again",
+    objects: "Things you've found",
+    words: "Words you've learned",
+    commands: "Command book",
+    journal: "Journal pages",
+    noKeys: "No keys yet. Keys come back with answers.",
+    path: "Your path",
+    replayIntro: "Replay intro",
+    empty: "Nothing here yet.",
+    close: "Close",
+  },
   send: "Send",
   /** UI-06: before the gift of the voice, a click shows the command it ran under this caption. */
   heard: "the machine heard:",

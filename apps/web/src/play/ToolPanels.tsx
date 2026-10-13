@@ -4,6 +4,9 @@ import type { SlateLayer, SlateOpen } from "@wirelight/sim";
 import { useEffect, useState } from "react";
 import { useSession } from "../engine/store";
 
+/** One empty list, so selectors return the same value when there's nothing (no render loop). */
+const NONE: never[] = [];
+
 // The Knight's tools as panels (UI-03): the workbench (CORE-34), the messenger's card (CORE-35) and
 // the capture jar (CORE-19, CORE-20). Every action runs a real command or a catch through the engine;
 // acting closes the panel so the player watches what happens (UI-04); drafts are kept while closed.
@@ -71,7 +74,7 @@ function WorkbenchPanel() {
 
 function CardPanel() {
   const room = useRoom();
-  const cards = useSession((s) => (room ? (s.status?.cards[room.playerDevice] ?? []) : []));
+  const cards = useSession((s) => (room ? (s.status?.cards[room.playerDevice] ?? NONE) : NONE));
   const exec = useSession((s) => s.exec);
   const close = useSession((s) => s.closePanel);
   const [values, setValues] = useState<string[]>(cards);

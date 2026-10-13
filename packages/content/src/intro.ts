@@ -100,14 +100,16 @@ export const tour = {
   dontShow: "Don't show this again",
 };
 
-/** Shown once ever, the first time the player arrives in the Observatory. Never skipped. */
-export const seerGift = {
-  eyebrow: "A gift for you",
-  title: "The Seer's sight",
-  body: [
-    "Welcome to the dungeon. I'm the Seer. I've kept watch over the Knight's Observatory since he left.",
-    "Most people can't see the messages that travel these cables. I'm giving you the sight to see them. From now on they'll appear as small lights moving through the rooms and corridors.",
-    "Watch them closely. Where they go, and where they stop, will tell you what's wrong.",
+/** Choosing your path (ONB-11..13, 0009): asked once, right after the gift of sight. */
+export const pathChoice = {
+  options: [
+    { id: "new", title: "New to networking", line: "I'm curious but know nothing." },
+    { id: "little", title: "Know a little", line: "I've heard of IP addresses and routers." },
+    { id: "networking", title: "Know networking", line: "I'm comfortable with the concepts." },
   ],
-  accept: "Accept the sight",
-};
+  suggested: "Suggested",
+  note: "You can change this anytime in Settings.",
+} as const;
+
+/** The gift of sight (ONB-08..10): the Guardian's lines are the Prologue's voice lines P-GIFT-01…04. */
+export const sightGift = { accept: "Accept the sight" };

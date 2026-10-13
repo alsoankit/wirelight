@@ -21,7 +21,7 @@ export const regions: Record<number, RegionInfo> = {
 };
 
 export const floors: Record<number, FloorInfo> = {
-  0: { n: 0, region: 1, name: "The First Message" },
+  0: { n: 0, region: 1, name: "Prologue" },
   1: { n: 1, region: 1, name: "The Wire" },
   2: { n: 2, region: 1, name: "Names on the Wire" },
   3: { n: 3, region: 2, name: "The Switch", planned: true },

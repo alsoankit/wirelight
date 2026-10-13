@@ -63,7 +63,7 @@ export function App() {
     );
   return (
     <Suspense fallback={null}>
-      <PlayPage arriving />
+      <PlayPage arriving skipIntro={quick} />
     </Suspense>
   );
 }

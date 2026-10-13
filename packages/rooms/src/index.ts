@@ -4,6 +4,7 @@ import { region3Floors, region3Rooms } from "./region3";
 import { region4Floors, region4Rooms } from "./region4";
 import type { FloorDef, RoomDef } from "./types";
 
+export * from "./paths";
 export * from "./predicates";
 export * from "./runner";
 export * from "./tools";

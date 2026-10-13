@@ -4,6 +4,7 @@ import { roomById } from "@wirelight/rooms";
 import { useEffect, useState } from "react";
 import { EngineDriver } from "../engine/EngineDriver";
 import { useSession } from "../engine/store";
+import { useHydrated, useProgress } from "../progress/progress";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
 import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
 import { HOUSE_PIECES } from "../world/house/layout";
@@ -12,7 +13,10 @@ import { OBSERVATORY } from "../world/observatory/layout";
 import { World } from "../world/room/World";
 import { Console } from "./Console";
 import { Gift } from "./Gift";
+import { Menu } from "./Menu";
+import { Onboarding } from "./Onboarding";
 import { PlatePanel } from "./PlatePanel";
+import { AskPanel, DiscoveryCards, NotesPanel, Reaction, RoomStartLines, TopBar } from "./RoomHelp";
 import { RoomHud } from "./RoomHud";
 import { JarButton, ToolPanels } from "./ToolPanels";
 
@@ -20,8 +24,17 @@ import { JarButton, ToolPanels } from "./ToolPanels";
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
 // Dev aids: ?ruin=0|1 pins the dial; ?tier=high|medium|low|simple, T cycles.
 
-// Dev aid: ?room=<id> opens another room (e.g. f2.lights-out, which has the console).
-const ROOM = new URLSearchParams(location.search).get("room") ?? "p.first-message";
+/**
+ * The room to open: a link to a room (`/play/<room>` or `?room=<id>`), else where the player left off
+ * (ONB-20), else the Prologue.
+ */
+function startingRoom(): string {
+  const fromPath = window.location.pathname.match(/^\/play\/(.+)$/)?.[1];
+  const asked = fromPath ? decodeURIComponent(fromPath) : new URLSearchParams(window.location.search).get("room");
+  if (asked && roomById(asked)) return asked;
+  const current = useProgress.getState().current;
+  return current && roomById(current) ? current : "p.first-message";
+}
 
 /** Starts fetching the room's kit pieces (during the descent), so arriving doesn't wait on them. */
 export function preloadRoom(): void {
@@ -38,7 +51,10 @@ function Resolution({ scale }: { scale: number }) {
 }
 
 /** `arriving`: coming down from the landing; the room fades in from dark and the camera settles. */
-export function PlayPage({ arriving = false }: { arriving?: boolean }) {
+/** `skipIntro`: the player chose Skip intro on the landing (ONB-07: no tour). */
+export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: boolean; skipIntro?: boolean }) {
+  const hydrated = useHydrated();
+  const tourDone = useProgress((s) => s.tourDone);
   const backend = backendFromUrl() === "webgl2" ? "webgl2" : "webgpu";
   const forced = tierFromUrl();
   const [tier, setTier] = useState<Tier>(forced ?? (backend === "webgpu" ? "high" : "medium"));
@@ -50,9 +66,18 @@ export function PlayPage({ arriving = false }: { arriving?: boolean }) {
   const voiceGiven = useSession((s) => s.voiceGiven);
   const room = roomId ? roomById(roomId) : undefined;
 
+  // Saved progress is read first, so the game opens where the player left off.
   useEffect(() => {
-    void load(ROOM);
-  }, [load]);
+    if (!hydrated) return;
+    // Dev aid for play scripts: ?onboarded=1 marks the first visit as seen (gift of sight, path, tour).
+    if (import.meta.env.DEV && new URLSearchParams(window.location.search).get("onboarded") === "1") {
+      const p = useProgress.getState();
+      p.giveSight();
+      if (!p.path) p.choosePath("new");
+      p.finishTour();
+    }
+    void load(startingRoom());
+  }, [load, hydrated]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -95,6 +120,14 @@ export function PlayPage({ arriving = false }: { arriving?: boolean }) {
       <ToolPanels />
       <JarButton />
       <Gift />
+      <TopBar />
+      <Menu />
+      <NotesPanel />
+      <AskPanel />
+      <Reaction />
+      {hydrated && <Onboarding skipTour={skipIntro} />}
+      {hydrated && tourDone && <DiscoveryCards />}
+      {hydrated && tourDone && <RoomStartLines />}
       {room && room.controls.console === "typing" && voiceGiven && (
         <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
       )}
