@@ -14,6 +14,7 @@ import { OBSERVATORY } from "../world/observatory/layout";
 import { World } from "../world/room/World";
 import { Console } from "./Console";
 import { Gift } from "./Gift";
+import { Glass } from "./Glass";
 import { Menu } from "./Menu";
 import { Onboarding } from "./Onboarding";
 import { PlatePanel } from "./PlatePanel";
@@ -126,6 +127,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
       <JarButton />
       <Gift />
       <TopBar />
+      <Glass />
       <Menu />
       <NotesPanel />
       <AskPanel />

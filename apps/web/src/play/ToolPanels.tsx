@@ -397,7 +397,6 @@ export function JarButton() {
       <button
         type="button"
         className="jar-button"
-        data-tour="glass"
         data-raised={raised ? "yes" : "no"}
         onClick={() => openPanel({ kind: "slate" })}
       >

@@ -174,6 +174,16 @@ export const voice = {
     next: "Next",
     done: "Close",
   },
+  /** The Scrying Glass (CORE-31..33, 0064): the live map of the floor, and the world map. */
+  glass: {
+    title: "The Scrying Glass",
+    open: "Open the Scrying Glass (G)",
+    floorMap: "A live map of this floor: every machine, every cable and the messages on them.",
+    thisFloor: "This floor",
+    world: "The Deep Network",
+    close: "Close",
+    states: { restored: "restored", here: "you are here", open: "open", mist: "in the mist", fog: "under fog" },
+  },
   /** The top bar (interface.md: top right). */
   bar: {
     pause: "Pause",
