@@ -102,6 +102,11 @@ function packetKey(bytes: Uint8Array): string | null {
   return `${ip.src}>${ip.dst}/${ip.proto}#${ip.id}`;
 }
 
+/** Keeps a copy of a frame that was sent or taken in (the Slate, or catching by hand into the jar). */
+export function slateKeep(k: Kernel, e: FrameEvent, traced: boolean): void {
+  keep(k, e, traced);
+}
+
 function keep(k: Kernel, e: FrameEvent, traced: boolean): void {
   const s = slate(k);
   const n = s.catches.length + 1;

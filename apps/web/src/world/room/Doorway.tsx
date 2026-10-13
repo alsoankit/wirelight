@@ -25,6 +25,8 @@ export type DoorInfo = {
   barred?: string;
   /** Plates show the door name (Floor 1), then its MAC address (Floor 2 on). */
   showMac: boolean;
+  /** Messages crossing here can be caught by hand (the room has catching). */
+  catchable: boolean;
   /** Loose cable ends here can be plugged in by clicking (0040). */
   cableControl: "works" | "broken" | undefined;
 };
@@ -119,6 +121,7 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
         keeper={[keeper[0], 0.85, keeper[2] - 0.36]}
         watch={watch}
         cue={cue}
+        catchable={info.catchable}
       />
       {door && (
         <Plate

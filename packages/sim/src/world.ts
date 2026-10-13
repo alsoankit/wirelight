@@ -69,6 +69,7 @@ import {
   slateCatches,
   slateCatchNext,
   slateCompare,
+  slateKeep,
   slateOpen,
   slateSees,
   slateTraceNext,
@@ -203,6 +204,21 @@ export class Simulator implements WorldView {
   slateCatchNext(device: DeviceId, from?: string): void {
     slateCatchNext(this.k, device, from);
   }
+  /**
+   * Catching by hand (CORE-18): a copy of a message in flight goes into the jar (the Slate's catches,
+   * 0043); the message itself goes on. Returns the catch's number, or null if there's no such frame.
+   */
+  catchFrame(frameId: number): number | null {
+    for (let i = this.trace.length - 1; i >= 0; i--) {
+      const e = this.trace[i];
+      if (e?.kind === "frame.tx" && e.frameId === frameId) {
+        slateKeep(this.k, e, false);
+        return this.slateCatches().length;
+      }
+    }
+    return null;
+  }
+
   slateTraceNext(device: DeviceId): void {
     slateTraceNext(this.k, device);
   }

@@ -24,7 +24,11 @@ type Props = {
   /** Pointed at the message the keeper should watch (the newest one on screen). */
   watch: RefObject<Object3D | null>;
   cue: RefObject<KeeperCue>;
+  /** Messages can be caught by hand here (CORE-18): pointing slows time; clicking keeps a copy. */
+  catchable?: boolean;
 };
+
+const AIMING_SPEED = 0.12;
 
 // 0 → 1 over the first quarter of the path (the stretch of corridor beyond the doorway).
 function emerge(t: number): number {
@@ -46,8 +50,10 @@ function along(points: Vector3[], t: number, out: Vector3): Vector3 {
   return out;
 }
 
-export function Messages({ device, link, corridorEnd, doorway, keeper, watch, cue }: Props) {
+export function Messages({ device, link, corridorEnd, doorway, keeper, watch, cue, catchable = false }: Props) {
   const meshes = useRef<(Mesh | null)[]>([]);
+  /** Which message each pooled mesh is showing now. */
+  const slots = useRef<(number | null)[]>([]);
   // In from the corridor: corridor end → doorway → keeper. Out: the reverse.
   const inward = useMemo(
     () => [new Vector3(...corridorEnd), new Vector3(...doorway), new Vector3(...keeper)],
@@ -79,6 +85,7 @@ export function Messages({ device, link, corridorEnd, doorway, keeper, watch, cu
       if (!mesh) return;
       const c = here[i];
       mesh.visible = !!c;
+      slots.current[i] = c?.frameId ?? null;
       if (!c) return;
       const t = progress(c, now);
       const leaving = c.from === device;
@@ -102,6 +109,17 @@ export function Messages({ device, link, corridorEnd, doorway, keeper, watch, cu
             meshes.current[i] = m;
           }}
           visible={false}
+          onPointerOver={catchable ? () => useSession.getState().setSpeed(AIMING_SPEED) : undefined}
+          onPointerOut={catchable ? () => useSession.getState().setSpeed(1) : undefined}
+          onClick={
+            catchable
+              ? () => {
+                  const frameId = slots.current[i];
+                  useSession.getState().setSpeed(1);
+                  if (frameId != null) void useSession.getState().catchFrame(frameId);
+                }
+              : undefined
+          }
         >
           <sphereGeometry args={[0.13, 20, 12]} />
           <meshBasicMaterial color={MESSAGE_COLOUR} toneMapped={false} />

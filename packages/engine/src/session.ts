@@ -15,7 +15,7 @@ import {
   toolsIn,
 } from "@wirelight/rooms";
 import { type Completion, complete, type SimBackend, type ToolId } from "@wirelight/shell";
-import type { CmdSource, DeviceId, SimEvent, WorldState } from "@wirelight/sim";
+import type { CmdSource, DeviceId, SimEvent, SlateCatch, SlateLayerName, SlateOpen, WorldState } from "@wirelight/sim";
 
 export type RoomStatus = {
   roomId: string;
@@ -32,6 +32,8 @@ export type RoomStatus = {
   doors: Record<string, { mac: string; adminUp: boolean; up: boolean }>;
   /** Every cable end by "device:iface": plugged into that door, or out (a loose end on the floor). */
   cableEnds: Record<string, "in" | "out">;
+  /** Each machine's messengers' cards, in order ("" is a blank card). */
+  cards: Record<string, string[]>;
 };
 
 /** What the main thread gets after each call: the trace events it hasn't seen yet, and the status. */
@@ -80,6 +82,23 @@ export class Session {
   /** Tab: the typed word completed, from the tools the player has and this machine's doors (UI-09). */
   complete(device: DeviceId, line: string): Completion {
     return complete(this.live().world, device, line, toolsIn(this.current(), rooms) as Set<ToolId>);
+  }
+
+  /** Catches a copy of a message in flight into the jar (CORE-18); it goes on its way. */
+  catchFrame(frameId: number): Batch & { n: number | null } {
+    const n = this.live().world.catchFrame(frameId);
+    return { ...this.batch(), n };
+  }
+
+  /** Opens a catch down to a layer (CORE-20; the Slate peels it, 0043). */
+  openCatch(device: DeviceId, n: number, layer: SlateLayerName): Batch & { open: SlateOpen } {
+    const open = this.live().world.slateOpen(device, n, layer);
+    return { ...this.batch(), open };
+  }
+
+  /** Every catch so far: number, when, where, and its bytes as hex. */
+  catches(): SlateCatch[] {
+    return [...this.live().world.slateCatches()];
   }
 
   /** Touches a worn-out control (0040): nothing runs, but the room notices. */
@@ -156,6 +175,12 @@ export class Session {
             return [`${d.id}:${i.name}`, { mac: i.mac, adminUp: o.adminUp, up: o.up }];
           }),
         ),
+      ),
+      cards: Object.fromEntries(
+        f.world
+          .devices()
+          .filter((d) => d.messengers.length > 0)
+          .map((d) => [d.id, d.messengers.map((m) => m.to)]),
       ),
       cableEnds: Object.fromEntries(
         f.world.links().flatMap((l) => [

@@ -119,3 +119,22 @@ describe("cable ends", () => {
     expect(fixed.cableEnds["observatory:eth0"]).toBe("in");
   });
 });
+
+describe("catching by hand (CORE-18)", () => {
+  it("keeps a copy of a message in flight, and opens it; the message goes on", () => {
+    const s = new Session();
+    s.loadRoom("f2.wrong-name");
+    const b = s.advanceTo(10_000, "cable"); // stops as the first message enters a cable
+    const enter = b.events.find((e) => e.kind === "link.enter");
+    if (enter?.kind !== "link.enter") throw new Error("no message on a cable");
+    const caught = s.catchFrame(enter.frameId);
+    expect(caught.n).toBe(1);
+    expect(caught.events.some((e) => e.kind === "slate.catch" && e.n === 1)).toBe(true);
+    const opened = s.openCatch("observatory", 1, "frame");
+    expect(opened.open).toMatchObject({ ok: true, reached: true });
+    expect(s.catches()).toHaveLength(1);
+    // The original arrived anyway.
+    const later = s.advanceTo(12_000);
+    expect(later.events.some((e) => e.kind === "link.exit" && e.frameId === enter.frameId)).toBe(true);
+  });
+});

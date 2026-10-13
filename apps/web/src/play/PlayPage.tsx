@@ -11,8 +11,10 @@ import { pieceUrl } from "../world/kit/Piece";
 import { OBSERVATORY } from "../world/observatory/layout";
 import { World } from "../world/room/World";
 import { Console } from "./Console";
+import { Gift } from "./Gift";
 import { PlatePanel } from "./PlatePanel";
 import { RoomHud } from "./RoomHud";
+import { JarButton, ToolPanels } from "./ToolPanels";
 
 // B1 walking skeleton: the Prologue, played in the Observatory, driven by the engine in a worker.
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
@@ -45,6 +47,7 @@ export function PlayPage({ arriving = false }: { arriving?: boolean }) {
   const load = useSession((s) => s.load);
   const roomId = useSession((s) => s.roomId);
   const here = useSession((s) => s.here);
+  const voiceGiven = useSession((s) => s.voiceGiven);
   const room = roomId ? roomById(roomId) : undefined;
 
   useEffect(() => {
@@ -89,7 +92,10 @@ export function PlayPage({ arriving = false }: { arriving?: boolean }) {
       </div>
       <RoomHud />
       <PlatePanel />
-      {room && room.controls.console !== "hidden" && (
+      <ToolPanels />
+      <JarButton />
+      <Gift />
+      {room && room.controls.console === "typing" && voiceGiven && (
         <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
       )}
       {arriving && <div className="arrival-veil" />}

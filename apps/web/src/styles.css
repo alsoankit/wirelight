@@ -576,9 +576,12 @@ button.world-chip:focus-visible {
 }
 
 .world-chip[data-tone="sealed"] {
+  display: block;
+  width: max-content;
+  max-width: 240px;
+  border-radius: 10px;
   color: var(--text-dim);
   white-space: normal;
-  max-width: 220px;
   text-align: center;
 }
 
@@ -637,4 +640,194 @@ button.world-chip:focus-visible {
 .panel-actions button.quiet {
   border-color: var(--glass-border);
   background: none;
+}
+
+.panel .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.panel input,
+.panel select {
+  padding: 6px 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: 13px / 1.3 var(--mono);
+}
+
+.panel-note {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.catch-list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+  max-height: 160px;
+  overflow: auto;
+}
+
+.catch-list button {
+  width: 100%;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--text);
+  font: 12px / 1.3 var(--mono);
+  text-align: left;
+  cursor: pointer;
+}
+
+.catch-list button[data-open="yes"],
+.catch-list button:hover {
+  background: rgba(94, 224, 232, 0.12);
+}
+
+.catch-layer {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-left: 2px solid var(--cyan);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.catch-layer dt {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.catch-layer dd {
+  margin: 0;
+  font-size: 13px;
+}
+
+.jar-button {
+  position: fixed;
+  left: 16px;
+  bottom: 60px;
+  padding: 8px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass);
+  color: var(--text);
+  font: 13px / 1 var(--sans);
+  cursor: pointer;
+  z-index: 15;
+}
+
+/* Spoken lines (UI-20): speaker and text, above the console bar. */
+.lines {
+  position: fixed;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  width: min(640px, calc(100vw - 32px));
+  padding: 14px 18px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  z-index: 40;
+}
+
+.lines-speaker {
+  color: var(--amber);
+  font: 600 12px / 1 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lines-text {
+  margin: 8px 0 10px;
+  font: 16px / 1.5 var(--sans);
+}
+
+.lines button,
+.cmd-memory button {
+  padding: 6px 14px;
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  background: rgba(242, 165, 74, 0.14);
+  color: var(--text);
+  font: 13px / 1.2 var(--sans);
+  cursor: pointer;
+}
+
+/* A command memory over the dimmed room. */
+.cmd-memory {
+  position: fixed;
+  inset: 8vh 50% auto auto;
+  transform: translateX(50%);
+  width: min(860px, calc(100vw - 32px));
+  max-height: 80vh;
+  overflow: auto;
+  padding: 18px 22px;
+  background: rgba(12, 10, 8, 0.92);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.45);
+  z-index: 45;
+}
+
+.cmd-memory h2 {
+  margin: 0 0 10px;
+  font: 600 18px / 1.3 var(--sans);
+}
+
+.cmd-memory h3 {
+  margin: 6px 0;
+  color: var(--amber);
+  font: 600 14px / 1.3 var(--sans);
+}
+
+.cmd-words li {
+  margin: 4px 0;
+}
+
+.cmd-memory code {
+  color: var(--cyan);
+  font-family: var(--mono);
+}
+
+.cmd-output {
+  margin: 8px 0;
+  padding: 10px;
+  overflow-x: auto;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  font: 12.5px / 1.5 var(--mono);
+}
+
+.cmd-output .dimmed {
+  opacity: 0.45;
+}
+
+.cmd-output mark {
+  background: rgba(242, 165, 74, 0.22);
+  color: var(--text);
+  border-radius: 3px;
+}
+
+.cmd-legend div {
+  display: flex;
+  gap: 10px;
+  margin: 3px 0;
+}
+
+.cmd-legend dt {
+  flex: 0 0 auto;
+}
+
+.cmd-legend dd {
+  margin: 0;
+}
+
+.cmd-action {
+  font-size: 17px;
 }

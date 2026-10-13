@@ -1,6 +1,6 @@
 import type { Batch, RoomStatus } from "@wirelight/engine";
-import { roomById } from "@wirelight/rooms";
-import type { CmdSource, SimEvent } from "@wirelight/sim";
+import { roomById, rooms } from "@wirelight/rooms";
+import type { CmdSource, SimEvent, SlateCatch, SlateLayerName, SlateOpen } from "@wirelight/sim";
 import { create } from "zustand";
 import { type Crossing, nextNetworkTime } from "./clock";
 import { startEngine } from "./connect";
@@ -10,13 +10,20 @@ import { startEngine } from "./connect";
 // from the engine, or by the clock's own pause and speed.
 
 /** A reading panel open over the room (UI-03). */
-export type Panel = { kind: "plate"; device: string; iface: string };
+export type Panel =
+  | { kind: "plate"; device: string; iface: string }
+  | { kind: "workbench" }
+  | { kind: "card" }
+  | { kind: "jar"; open?: number };
 
 type Session = {
   roomId: string | null;
   /** The machine whose room the player is standing in (CORE-10); commands run there (UI-11). */
   here: string | null;
   panel: Panel | null;
+  /** The gift of the voice has been given (0032): the console exists from then on. */
+  voiceGiven: boolean;
+  giveVoice(): void;
   events: SimEvent[];
   status: RoomStatus | null;
   /** Messages on a cable now (link.enter not yet followed by link.exit). */
@@ -34,6 +41,12 @@ type Session = {
   interrupt(device: string, execId: number): Promise<void>;
   /** Touches a worn-out control (0040). */
   touch(device: string, control: string): Promise<void>;
+  /** The jar (CORE-19): every catch so far, newest last. */
+  jar: SlateCatch[];
+  /** Catches a copy of a message in flight (CORE-18). */
+  catchFrame(frameId: number): Promise<void>;
+  /** Opens catch `n` down to a layer; resolves with what it shows. */
+  openCatch(device: string, n: number, layer: SlateLayerName): Promise<SlateOpen>;
   /** Called every rendered frame with the screen time that passed. */
   tick(screenMs: number): void;
   setPaused(paused: boolean): void;
@@ -42,6 +55,15 @@ type Session = {
 
 const { engine } = startEngine();
 let busy = false; // one request to the worker at a time; frames in between just wait
+
+/** The room of the gift of the voice: the first whose console can be typed in (0032). */
+export const giftRoom = rooms.find((r) => r.controls.console === "typing");
+
+function afterGift(roomId: string): boolean {
+  const room = roomById(roomId);
+  if (!room || !giftRoom) return false;
+  return room.floor * 100 + room.order > giftRoom.floor * 100 + giftRoom.order;
+}
 
 /** Waits for the worker to be free, then runs one request on it. */
 async function exclusive<T>(fn: () => Promise<T>): Promise<T> {
@@ -87,6 +109,8 @@ export const useSession = create<Session>((set, get) => ({
   roomId: null,
   here: null,
   panel: null,
+  voiceGiven: false,
+  giveVoice: () => set({ voiceGiven: true }),
   events: [],
   status: null,
   onCables: [],
@@ -96,7 +120,17 @@ export const useSession = create<Session>((set, get) => ({
   async load(roomId) {
     busy = true;
     const batch = await engine.loadRoom(roomId);
-    set({ roomId, here: roomById(roomId)?.playerDevice ?? null, panel: null, events: [], onCables: [] });
+    // Until saves (M3): rooms after the gift's room start with the voice already given.
+    const voiceGiven = get().voiceGiven || afterGift(roomId);
+    set({
+      roomId,
+      here: roomById(roomId)?.playerDevice ?? null,
+      panel: null,
+      jar: [],
+      events: [],
+      onCables: [],
+      voiceGiven,
+    });
     set((s) => apply(s, batch));
     busy = false;
   },
@@ -115,6 +149,20 @@ export const useSession = create<Session>((set, get) => ({
   async touch(device, control) {
     const batch = await exclusive(() => engine.touch(device, control));
     set((s) => apply(s, batch));
+  },
+
+  jar: [],
+
+  async catchFrame(frameId) {
+    const batch = await exclusive(() => engine.catchFrame(frameId));
+    const jar = await exclusive(() => engine.catches());
+    set((s) => ({ ...apply(s, batch), jar }));
+  },
+
+  async openCatch(device, n, layer) {
+    const batch = await exclusive(() => engine.openCatch(device, n, layer));
+    set((s) => apply(s, batch));
+    return batch.open;
   },
 
   tick(screenMs) {

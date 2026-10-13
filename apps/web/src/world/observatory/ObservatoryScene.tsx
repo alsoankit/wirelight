@@ -10,6 +10,7 @@ import { LETTER, observatoryLayout } from "./layout";
 import { Moonbeams } from "./Moonbeams";
 import { RUNE_GLOWS, Runes } from "./Runes";
 import { ScryingGlass } from "./ScryingGlass";
+import { ObservatoryTools } from "./Tools";
 
 // The Observatory, the player's own machine on every floor (CORE-07): the Knight's old base, with the
 // Scrying Glass, his unfinished letter and the runes. An old fantasy ruin explored with modern tools
@@ -62,6 +63,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
         />
       )}
       <ScryingGlass position={[2.4, 0, 1.6]} />
+      <ObservatoryTools />
     </MachineScene>
   );
 }

@@ -10,8 +10,12 @@ import { useSession } from "../engine/store";
 export function PlatePanel() {
   const panel = useSession((s) => s.panel);
   const roomId = useSession((s) => s.roomId);
-  const door = useSession((s) => (s.panel ? s.status?.doors[`${s.panel.device}:${s.panel.iface}`] : undefined));
-  const end = useSession((s) => (s.panel ? s.status?.cableEnds[`${s.panel.device}:${s.panel.iface}`] : undefined));
+  const door = useSession((s) =>
+    s.panel?.kind === "plate" ? s.status?.doors[`${s.panel.device}:${s.panel.iface}`] : undefined,
+  );
+  const end = useSession((s) =>
+    s.panel?.kind === "plate" ? s.status?.cableEnds[`${s.panel.device}:${s.panel.iface}`] : undefined,
+  );
   const exec = useSession((s) => s.exec);
   const touch = useSession((s) => s.touch);
   const close = useSession((s) => s.closePanel);
