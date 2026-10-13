@@ -39,3 +39,17 @@ describe("corridor state (FR-COR-02)", () => {
     expect(corridorState(f, "wire", b.now())).toBe("dark");
   });
 });
+
+describe("the exchange tracker", () => {
+  it("agrees with lastExchange on every cable, fed a little at a time", async () => {
+    const { ExchangeTracker, lastExchange, roomById: byId } = await import("../src");
+    for (const id of ["f2.who-are-you", "f3.keepers-memory", "f8.across-the-street"]) {
+      const r = byId(id);
+      if (!r) throw new Error(id);
+      const f = play(r, loadRoom(r, rooms), r.solution);
+      const t = new ExchangeTracker();
+      for (let i = 0; i < f.trace.length; i += 37) t.feed(f.trace.slice(i, i + 37));
+      for (const l of r.topology.links) expect(t.last(l.id), `${id} ${l.id}`).toBe(lastExchange(f.trace, l.id));
+    }
+  });
+});

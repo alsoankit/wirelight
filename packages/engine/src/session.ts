@@ -6,8 +6,9 @@
 import {
   applyRules,
   type CorridorState,
-  corridorState,
+  ExchangeTracker,
   facts,
+  LIT_FOR_MS,
   loadRoom,
   type RoomDef,
   roomById,
@@ -57,6 +58,23 @@ export type Batch = { events: SimEvent[]; status: RoomStatus };
 /** A room in progress, for saves: enough to put the network back exactly as it was. */
 export type RoomSave = { roomId: string; world: WorldState };
 
+/** At most this long (screen ms) between rechecks of the room's checks when nothing meaningful happened. */
+const CHECK_MS = 400;
+/** Events after which the room's checks rerun at once: what the player did, and what arrived. */
+const MEANINGFUL = new Set<SimEvent["kind"]>([
+  "cmd.exec",
+  "proc.exit",
+  "proc.output",
+  "app.deliver",
+  "echo.heard",
+  "control.touch",
+  "keeper.step",
+  "slate.catch",
+  "slate.open",
+  "slate.compare",
+  "world.reset",
+]);
+
 export class Session {
   private backend: SimBackend | null = null;
   private room: RoomDef | null = null;
@@ -80,6 +98,9 @@ export class Session {
     if (save) this.backend.restore(save.world);
     this.sent = 0;
     this.fired = [];
+    this.checks = null;
+    this.corridorsSeen = 0;
+    this.exchanges = new ExchangeTracker();
     return this.batch();
   }
 
@@ -170,6 +191,7 @@ export class Session {
   reset(): Batch {
     this.live().reset();
     this.fired = [];
+    this.checks = null;
     return this.batch();
   }
 
@@ -182,18 +204,48 @@ export class Session {
     return [...toolsIn(this.current(), rooms)];
   }
 
-  status(): RoomStatus {
+  /**
+   * The room's checks (win, health, detectors) read the whole trace, so in a busy room (a storm) they
+   * rerun when something meaningful happened (a command, a delivery, a catch…) or every CHECK_MS of
+   * screen time, not on every step; everything else in the status is cheap and always current.
+   */
+  private checks: { won: boolean; health: Record<string, boolean> } | null = null;
+  private checkedAt = 0;
+  private corridorsSeen = 0;
+  private exchanges = new ExchangeTracker();
+
+  status(force = false): RoomStatus {
     const room = this.current();
     const b = this.live();
-    const f = facts(b.trace(), b.state());
-    for (const m of room.misconceptions) if (!this.fired.includes(m.id) && m.detect(f)) this.fired.push(m.id);
+    const trace = b.trace();
+    const fresh = trace.slice(this.corridorsSeen);
+    this.exchanges.feed(fresh);
+    this.corridorsSeen = trace.length;
+    const wall = performance.now();
+    if (force || !this.checks || wall - this.checkedAt > CHECK_MS || fresh.some((e) => MEANINGFUL.has(e.kind))) {
+      const f = facts(trace, b.state());
+      for (const m of room.misconceptions) if (!this.fired.includes(m.id) && m.detect(f)) this.fired.push(m.id);
+      this.checks = {
+        won: room.winCondition(f),
+        health: Object.fromEntries(room.healthChecks.map((h) => [h.id, h.check(f)])),
+      };
+      this.checkedAt = wall;
+    }
+    const world = b.state();
+    const now = b.now();
+    const f = { world };
     return {
       roomId: room.id,
-      now: b.now(),
-      won: room.winCondition(f),
-      health: Object.fromEntries(room.healthChecks.map((h) => [h.id, h.check(f)])),
+      now,
+      won: this.checks.won,
+      health: this.checks.health,
       detectors: [...this.fired],
-      corridors: Object.fromEntries(f.world.links().map((l) => [l.id, corridorState(f, l.id, b.now())])),
+      corridors: Object.fromEntries(
+        world.links().map((l) => {
+          if (!world.oper(l.a.device, l.a.iface).up) return [l.id, "broken"];
+          return [l.id, this.exchanges.last(l.id) >= now - LIT_FOR_MS ? "lit" : "dark"];
+        }),
+      ),
       doors: Object.fromEntries(
         f.world.devices().flatMap((d) =>
           d.ifaces.map((i) => {

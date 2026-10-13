@@ -282,3 +282,38 @@ export function stalledAfterFirstFix(fixes: { device: DeviceId; line: RegExp }[]
     return [...done.values()].filter((t) => t <= cut).length < fixes.length;
   };
 }
+
+/**
+ * `lastExchange` for every cable at once, fed only the new events each time (the engine's per-frame
+ * status, where rescanning a long trace for each cable would grow without end). Same rule: a message
+ * taken in at one end and one at the other, each after crossing that cable.
+ */
+export class ExchangeTracker {
+  private dirOf = new Map<number, { link: string; dir: 0 | 1 }>();
+  private lastIn = new Map<string, [number, number]>();
+  private lit = new Map<string, number>();
+
+  feed(events: readonly SimEvent[]): void {
+    for (const e of events) {
+      if (e.kind === "world.reset") {
+        this.dirOf.clear();
+        this.lastIn.clear();
+      } else if (e.kind === "link.enter") this.dirOf.set(e.frameId, { link: e.link, dir: e.dir });
+      else if (e.kind === "app.deliver") {
+        const d = this.dirOf.get(e.frameId);
+        if (!d) continue;
+        this.dirOf.delete(e.frameId);
+        const last = this.lastIn.get(d.link) ?? [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+        last[d.dir] = e.t;
+        this.lastIn.set(d.link, last);
+        const other = last[d.dir === 0 ? 1 : 0];
+        if (other > Number.NEGATIVE_INFINITY && other <= e.t) this.lit.set(d.link, e.t);
+      } else if (e.kind === "frame.drop") this.dirOf.delete(e.frameId);
+    }
+  }
+
+  /** Network time of the latest two-way exchange across `link`, or -Infinity. */
+  last(link: string): number {
+    return this.lit.get(link) ?? Number.NEGATIVE_INFINITY;
+  }
+}
