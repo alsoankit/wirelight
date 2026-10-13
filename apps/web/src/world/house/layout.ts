@@ -1,5 +1,9 @@
 import { makeEarth, makeFlagstones } from "../kit/floor";
 import type { Placement } from "../kit/StaticRoom";
+import type { RegionId } from "../region";
+import { CATHEDRAL_HOUSE_PIECES, cathedralHouse } from "../regions/cathedral";
+import { TOWN_HOUSE_PIECES, townHouse } from "../regions/town";
+import { worksHouse } from "../regions/works";
 import type { RoomLayout } from "../room/layout";
 
 // Another machine's room in the Overgrown Halls (lantern, Floor 1): a smaller ruin of the same
@@ -41,9 +45,18 @@ const FLOOR = [
   { name: "Earth", geometry: makeEarth(8.4) },
 ];
 
-export const HOUSE_PIECES = PLACEMENTS;
+/** Every piece a computer's room can use, in every region (for preloading). */
+export const HOUSE_PIECES = [...PLACEMENTS, ...TOWN_HOUSE_PIECES, ...CATHEDRAL_HOUSE_PIECES];
 
-export function houseLayout(): RoomLayout {
+export function houseLayout(region: RegionId = 1): RoomLayout {
+  const frame = {
+    doorSlots: [{ wall: "back", at: 0 }] as RoomLayout["doorSlots"],
+    keeper: [0, 0, -0.8] as RoomLayout["keeper"],
+    air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
+  };
+  if (region === 2) return { ...frame, ...worksHouse() };
+  if (region === 3) return { ...frame, ...townHouse() };
+  if (region === 4) return { ...frame, ...cathedralHouse() };
   return {
     placements: PLACEMENTS,
     extras: FLOOR,

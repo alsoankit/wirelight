@@ -8,6 +8,7 @@ import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { messageSummary } from "../world/messageKind";
 import { Memory } from "./Memory";
+import { noteMoment } from "./momentRules";
 
 // The Scrying Glass (CORE-31..33, 0064): a live map of the whole floor, view-only. Machines are
 // nodes, cables lines between doors; a corridor's state shows by shape and colour (dark: thin,
@@ -289,6 +290,10 @@ export function Glass() {
   useEffect(() => {
     if (replay !== null) setOpen(true);
   }, [replay]);
+  // The Glass opening is a moment (P-MEM-01 plays the first time).
+  useEffect(() => {
+    if (open) noteMoment("glass-open");
+  }, [open]);
   // Never under the open console (UI-02).
   const raised = useSession((s) => s.consoleOpen && s.voiceGiven);
   useEffect(() => {

@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react";
 import { useSession } from "../../engine/store";
 import { useQuality } from "../../render/quality";
 import { MOON_POSITION, MOON_TARGET } from "../moon";
+import { useRegion } from "../region";
 import { Board, Desk } from "../room/Furniture";
 import { MachineScene } from "../room/MachineScene";
 import { KnightLetter } from "./KnightLetter";
@@ -48,13 +49,21 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
     const spec = room?.topology.devices.find((d) => d.id === room.playerDevice);
     return spec?.interfaces.length ?? 1;
   }, [roomId]);
-  const layout = useMemo(() => observatoryLayout(doorCount), [doorCount]);
+  const region = useRegion();
+  const layout = useMemo(() => observatoryLayout(doorCount, region), [doorCount, region]);
 
   return (
-    <MachineScene device="observatory" layout={layout} barred={barred} glows={RUNE_GLOWS} arriving={arriving}>
-      <Runes />
+    <MachineScene
+      device="observatory"
+      layout={layout}
+      barred={barred}
+      glows={layout.glows ?? RUNE_GLOWS}
+      arriving={arriving}
+    >
+      {/* The weavers' runes are Region 1's light; other regions bring their own (layout.glows). */}
+      {region === 1 && <Runes />}
       <KnightLetter position={LETTER} />
-      {quality.moonbeams && (
+      {quality.moonbeams && region === 1 && (
         <Moonbeams
           beams={MOON_GAPS}
           direction={[
@@ -64,7 +73,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
           ]}
         />
       )}
-      <ScryingGlass position={[2.4, 0, 1.6]} />
+      <ScryingGlass position={[2.4, 0, 1.6]} region={region} />
       {/* The Glass stands here too (CORE-31): its label opens it, like G. */}
       <Html center position={[2.4, 1.75, 1.6]} zIndexRange={[10, 0]}>
         <button

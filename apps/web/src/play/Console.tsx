@@ -10,6 +10,7 @@ import { shellContent, voice } from "@wirelight/content";
 import type { SimEvent } from "@wirelight/sim";
 import { useEffect, useRef } from "react";
 import { ask, useSession } from "../engine/store";
+import { noteMoment } from "./momentRules";
 
 const RESET = "\x1b[0m";
 const DIM = "\x1b[38;2;185;173;156m";
@@ -178,6 +179,7 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
         return;
       }
       if (d === "\x1b[A" || d === "\x1b[B") {
+        if (d === "\x1b[A") noteMoment("history-up");
         void ask.history(device).then((h) => {
           if (h.length === 0) return;
           if (st.hi < 0) st.hi = h.length;

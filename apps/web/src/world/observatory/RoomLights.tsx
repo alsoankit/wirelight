@@ -2,9 +2,11 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { type AmbientLight, Color, Fog, type HemisphereLight, type PointLight } from "three";
 import { blend } from "../kit/regionMaterials";
+import { LOOKS, type RegionId } from "../region";
 import { ruin, ruinAtPoint } from "../ruin";
 
-// Region 1 light on the ruin dial (region-1 brief, 0021, 0052):
+// A room's light on the ruin dial, in its region's colours (region.ts LOOKS; Region 1 described here:
+// region-1 brief, 0021, 0052):
 // - Ruin: cold moonlight through the broken walls, deep blue-grey fog, the runes dark. Eerie and
 //   haunting, never frightening.
 // - Restored: the carved runes glow warm and steady; the moon is still there, softer.
@@ -14,23 +16,22 @@ import { ruin, ruinAtPoint } from "../ruin";
 // Balanced for the eyes (0051): the two states differ in colour more than in brightness; check with
 // the brightness line from tools/shots/b0.mjs.
 
-const AMBIENT_RUINED = new Color("#4A5878");
-const AMBIENT_RESTORED = new Color("#8A7058");
-const SKY_RUINED = new Color("#7f93c8");
-const SKY_RESTORED = new Color("#a08a70");
-const GROUND_RUINED = new Color("#30343c");
-const GROUND_RESTORED = new Color("#3a3028");
-const FOG_RUINED = new Color("#1E2433");
-const FOG_RESTORED = new Color("#3a2d22");
-
 type Glow = { position: [number, number, number]; colour: string; strength: number };
 
-export function RoomLights({ glows }: { glows: Glow[] }) {
+function pair(p: { ruined: string; restored: string }) {
+  return { ruined: new Color(p.ruined), restored: new Color(p.restored) };
+}
+
+export function RoomLights({ glows, region = 1 }: { glows: Glow[]; region?: RegionId }) {
   const { scene } = useThree();
+  const c = useMemo(() => {
+    const look = LOOKS[region];
+    return { ambient: pair(look.ambient), sky: pair(look.sky), ground: pair(look.ground), fog: pair(look.fog) };
+  }, [region]);
   const ambient = useRef<AmbientLight>(null);
   const fill = useRef<HemisphereLight>(null);
   const points = useRef<(PointLight | null)[]>([]);
-  const fog = useMemo(() => new Fog(FOG_RUINED.clone(), 20, 40), []);
+  const fog = useMemo(() => new Fog(new Color(), 20, 40), []);
 
   useEffect(() => {
     scene.fog = fog;
@@ -43,15 +44,15 @@ export function RoomLights({ glows }: { glows: Glow[] }) {
     const r = ruin.value;
     const warm = 1 - r;
     if (ambient.current) {
-      blend(ambient.current.color, AMBIENT_RUINED, AMBIENT_RESTORED, r);
+      blend(ambient.current.color, c.ambient.ruined, c.ambient.restored, r);
       ambient.current.intensity = 1.4 - warm * 0.6;
     }
     if (fill.current) {
-      blend(fill.current.color, SKY_RUINED, SKY_RESTORED, r);
-      blend(fill.current.groundColor, GROUND_RUINED, GROUND_RESTORED, r);
+      blend(fill.current.color, c.sky.ruined, c.sky.restored, r);
+      blend(fill.current.groundColor, c.ground.ruined, c.ground.restored, r);
       fill.current.intensity = 2.4 - warm * 1.5;
     }
-    blend(fog.color, FOG_RUINED, FOG_RESTORED, r);
+    blend(fog.color, c.fog.ruined, c.fog.restored, r);
     fog.near = 20 + warm * 8;
     fog.far = 40 + warm * 16;
     glows.forEach((glow, i) => {

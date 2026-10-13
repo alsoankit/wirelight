@@ -43,4 +43,24 @@ describe("the keeper's why", () => {
     const loop = [...answers("f9.round-and-round", "crossing", steps), ...answers("f9.round-and-round", "arch", steps)];
     expect(loop.some((t) => /countdown ran out/.test(t))).toBe(true);
   });
+
+  it("a switch says why a frame stopped at a door its spanning tree holds shut", () => {
+    // The kernel's egress check (br_forward: should_deliver) on a blocking port, as bridge.ts traces it.
+    const d: Decision = {
+      kind: "fwd.decision",
+      t: 0,
+      device: "hall-a",
+      frameId: 1,
+      layer: "l2",
+      decision: "forward",
+      egress: ["eth4"],
+      tableRef: {
+        dst: "02:00:00:00:00:13",
+        fdb: { mac: "02:00:00:00:00:13", port: "eth4", static: false, local: false },
+      },
+    };
+    expect(keeperSays(d, "port-blocked")).toBe(
+      "That frame was for 02:00:00:00:00:13. My board says 02:00:00:00:00:13 is behind eth4, but that door is held shut to keep the halls from going round in circles, so it went no further.",
+    );
+  });
 });

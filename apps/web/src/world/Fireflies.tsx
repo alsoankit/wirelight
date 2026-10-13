@@ -15,7 +15,7 @@ type Bounds = { min: [number, number, number]; max: [number, number, number] };
 const COUNT = 16;
 const GLOW = "#D9F28A"; // warm yellow-green: never cyan, which means "alive" (messages)
 
-export function Fireflies({ bounds }: { bounds: Bounds }) {
+export function Fireflies({ bounds, colour = GLOW }: { bounds: Bounds; colour?: string }) {
   const material = useMemo(() => {
     const m = new MeshBasicNodeMaterial({
       transparent: true,
@@ -47,9 +47,9 @@ export function Fireflies({ bounds }: { bounds: Bounds }) {
     const shown = float(1).sub(step(share, hash(i.add(5.5))));
     const glow = shown.mul(blink.mul(1.1).add(0.03));
     m.positionNode = positionLocal.mul(blink.mul(0.6).add(0.4)).add(home).add(wander);
-    m.colorNode = color(GLOW).mul(glow);
+    m.colorNode = color(colour).mul(glow);
     return m;
-  }, [bounds]);
+  }, [bounds, colour]);
 
   return (
     <instancedMesh args={[undefined, undefined, COUNT]} material={material} frustumCulled={false}>

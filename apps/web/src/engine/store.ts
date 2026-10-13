@@ -89,7 +89,11 @@ const NOT_LOST = new Set(["no-listener", "fdb-filter"]);
 /** How long a lost message's mark stays (CORE-17), screen ms. */
 export const MARK_MS = 10_000;
 
-let busy = false; // one request to the worker at a time; frames in between just wait
+// One request to the worker at a time, in order. Player actions queue first-come, first-served, and a
+// frame's tick gives way while any are waiting, so a click never waits behind a run of ticks.
+let busy = false;
+let waiting = 0;
+let lock: Promise<unknown> = Promise.resolve();
 
 /** The room of the gift of the voice: the first whose console can be typed in (0032). */
 export const giftRoom = rooms.find((r) => r.controls.console === "typing");
@@ -100,15 +104,20 @@ function afterGift(roomId: string): boolean {
   return room.floor * 100 + room.order > giftRoom.floor * 100 + giftRoom.order;
 }
 
-/** Waits for the worker to be free, then runs one request on it. */
-async function exclusive<T>(fn: () => Promise<T>): Promise<T> {
-  while (busy) await new Promise((r) => setTimeout(r, 4));
-  busy = true;
-  try {
-    return await fn();
-  } finally {
-    busy = false;
-  }
+/** Runs one request on the worker once every earlier one has finished. */
+function exclusive<T>(fn: () => Promise<T>): Promise<T> {
+  waiting++;
+  const run = lock.then(async () => {
+    waiting--;
+    busy = true;
+    try {
+      return await fn();
+    } finally {
+      busy = false;
+    }
+  });
+  lock = run.catch(() => undefined);
+  return run;
 }
 
 /** Questions for the worker that change nothing: history and Tab completion (UI-09). */
@@ -188,8 +197,7 @@ export const useSession = create<Session>((set, get) => ({
   speed: 1,
 
   async load(roomId) {
-    busy = true;
-    const batch = await engine.loadRoom(roomId);
+    const batch = await exclusive(() => engine.loadRoom(roomId));
     // The voice, once given, stays (saved); a room after the gift's room has it even if this browser never saw the gift.
     const voiceGiven = useProgress.getState().voiceGiven || afterGift(roomId);
     set({
@@ -204,7 +212,6 @@ export const useSession = create<Session>((set, get) => ({
       startedAt: performance.now(),
     });
     set((s) => apply(s, batch));
-    busy = false;
   },
 
   async exec(device, line, source) {
@@ -239,12 +246,13 @@ export const useSession = create<Session>((set, get) => ({
 
   tick(screenMs) {
     const s = get();
-    if (busy || s.paused || !s.status) return;
+    if (busy || waiting > 0 || s.paused || !s.status) return;
     busy = true;
     const target = nextNetworkTime(s.status.now, s.onCables, screenMs, s.speed);
-    engine
+    lock = engine
       .advanceTo(target, "cable")
       .then((batch) => set((st) => apply(st, batch)))
+      .catch(() => undefined)
       .finally(() => {
         busy = false;
       });

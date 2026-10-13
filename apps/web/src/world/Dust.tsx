@@ -12,7 +12,7 @@ type Bounds = { min: [number, number, number]; max: [number, number, number] };
 
 const COUNT = 36;
 
-export function Dust({ bounds }: { bounds: Bounds }) {
+export function Dust({ bounds, colour = "#c8d2e6" }: { bounds: Bounds; colour?: string }) {
   const material = useMemo(() => {
     const m = new MeshBasicNodeMaterial({
       transparent: true,
@@ -36,9 +36,9 @@ export function Dust({ bounds }: { bounds: Bounds }) {
     // A slow hang and sink of its own.
     const hang = vec3(0, sin(time.mul(0.3).add(h4.mul(6.28))).mul(0.12), 0);
     m.positionNode = positionLocal.add(wrapped).add(hang);
-    m.colorNode = color("#c8d2e6").mul(mix(float(0.08), float(0.32), ruin).mul(h2.mul(0.5).add(0.5)));
+    m.colorNode = color(colour).mul(mix(float(0.08), float(0.32), ruin).mul(h2.mul(0.5).add(0.5)));
     return m;
-  }, [bounds]);
+  }, [bounds, colour]);
 
   return (
     <instancedMesh args={[undefined, undefined, COUNT]} material={material} frustumCulled={false}>

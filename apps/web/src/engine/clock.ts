@@ -4,9 +4,13 @@
 //   of screen time, whatever its real length (fractions of a millisecond), so it can be followed.
 // - With nothing on a cable, network time runs at real speed (timers, the messenger's next call).
 // - Pause stops it; speed scales it (0.25× to 64×).
+// - A crowd (a storm) can't be followed message by message, so with more than CROWD on cables time
+//   runs at least CROWD_RATE of real speed: timers still move and the storm still reads as a storm.
 
 export const SCREEN_MS_PER_CROSSING = 900;
 export const SPEEDS = [0.25, 0.5, 1, 2, 4, 16, 64] as const;
+export const CROWD = 12;
+export const CROWD_RATE = 0.25;
 
 /** A message on a cable, from its `link.enter` event. */
 export type Crossing = {
@@ -27,7 +31,8 @@ export function nextNetworkTime(now: number, onCables: readonly Crossing[], scre
   if (onCables.length === 0) return now + screenMs * speed;
   // The shortest crossing sets the pace, so no message flashes past.
   const shortest = Math.min(...onCables.map((c) => Math.max(c.arriveAt - c.enter, 1e-6)));
-  return now + (screenMs * speed * shortest) / SCREEN_MS_PER_CROSSING;
+  const paced = (screenMs * speed * shortest) / SCREEN_MS_PER_CROSSING;
+  return now + (onCables.length > CROWD ? Math.max(paced, screenMs * speed * CROWD_RATE) : paced);
 }
 
 /** How far along its cable a message is, 0 → 1. */

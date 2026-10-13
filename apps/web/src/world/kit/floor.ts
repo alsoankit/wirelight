@@ -18,6 +18,51 @@ type FloorOptions = {
   missing?: number; // share of slabs that are gone
   cracked?: number; // share of slabs cracked across
   keep?: (x: number, z: number) => boolean; // only slabs whose centre passes (a path instead of a floor)
+  course?: [number, number]; // row depth range, metres (default 0.7–1.15: big flagstones)
+  slab?: [number, number]; // slab length range, metres (default 0.7–1.5)
+  long?: number; // share of extra-long slabs (default 0.15)
+  chipped?: number; // share of corners chipped (default 0.25)
+  sunk?: number; // share of slabs sunk or tilted (default 0.12)
+  bevel?: number; // metres (default 0.035)
+};
+
+// Each region's floor (art briefs): Region 1 big flagstones; the Works' slate laid in neat rows of
+// long slabs; the Lantern Town's small cobbled setts; the Cathedral's great dressed squares.
+export const FLOORS: Record<1 | 2 | 3 | 4, Omit<FloorOptions, "size" | "seed">> = {
+  1: {},
+  2: {
+    course: [0.55, 0.7],
+    slab: [1.0, 1.5],
+    long: 0.1,
+    chipped: 0.12,
+    cracked: 0.08,
+    sunk: 0.05,
+    missing: 0.015,
+    bevel: 0.02,
+    gap: 0.012,
+  },
+  3: {
+    course: [0.32, 0.42],
+    slab: [0.32, 0.5],
+    long: 0.05,
+    chipped: 0.3,
+    cracked: 0.04,
+    sunk: 0.15,
+    missing: 0.02,
+    bevel: 0.03,
+    gap: 0.02,
+  },
+  4: {
+    course: [1.2, 1.2],
+    slab: [1.2, 1.2],
+    long: 0,
+    chipped: 0.15,
+    cracked: 0.12,
+    sunk: 0.06,
+    missing: 0.01,
+    bevel: 0.03,
+    gap: 0.014,
+  },
 };
 
 // mulberry32, as in WindDriver: deterministic, never Math.random.
@@ -143,8 +188,8 @@ function freehandCracks(outline: Point[], random: () => number): Point[][] {
 }
 
 // One stone as triangles: a bevelled top (inner face and a sloped rim) and sides down into the earth.
-function stoneGeometry({ outline, convex, height, shade, cracks }: Stone): BufferGeometry {
-  const bevel = inset(convex, 0.035);
+function stoneGeometry({ outline, convex, height, shade, cracks }: Stone, bevelBy = 0.035): BufferGeometry {
+  const bevel = inset(convex, bevelBy);
   const positions: number[] = [];
   const ageing: number[] = [];
   const push = (x: number, y: number, z: number, dark: number) => {
@@ -240,17 +285,24 @@ export function makeFlagstones({
   missing = 0.03,
   cracked = 0.2,
   keep = () => true,
+  course = [0.7, 1.15],
+  slab = [0.7, 1.5],
+  long = 0.15,
+  chipped = 0.25,
+  sunk: sunkShare = 0.12,
+  bevel = 0.035,
 }: FloorOptions): BufferGeometry {
   const random = seeded(seed);
   const half = size / 2;
   const parts: BufferGeometry[] = [];
   let z0 = -half;
   while (z0 < half - 0.05) {
-    const depth = Math.min(0.7 + random() * 0.45, half - z0);
+    const depth = Math.min(course[0] + random() * (course[1] - course[0]), half - z0);
     const z1 = z0 + depth;
     let x0 = -half;
     while (x0 < half - 0.05) {
-      const length = Math.min((random() < 0.15 ? 1.5 : 0.7) + random() * 0.8, half - x0);
+      const longOne = random() < long;
+      const length = Math.min((longOne ? slab[1] : slab[0]) + random() * (slab[1] - slab[0]), half - x0);
       const x1 = x0 + length;
       const g = gap / 2 + random() * 0.004;
       // The slab, its corners nudged a little (no two quite square), some corners chipped off.
@@ -263,7 +315,7 @@ export function makeFlagstones({
       ];
       const outline: Point[] = [];
       corners.forEach((c, k) => {
-        if (random() < 0.25) {
+        if (random() < chipped) {
           // A chipped corner: cut it off with two points along its edges.
           const prev = corners[(k + 3) % 4] as Point;
           const next = corners[(k + 1) % 4] as Point;
@@ -279,22 +331,25 @@ export function makeFlagstones({
       const [cx, cz] = centroid(convex);
       if (random() >= missing && keep(cx, cz)) {
         // Mostly level; now and then one has sunk or tilted.
-        const sunk = random() < 0.12 ? -0.02 - random() * 0.02 : 0;
+        const sunk = random() < sunkShare ? -0.02 - random() * 0.02 : 0;
         const lift = 0.02 + (random() - 0.5) * 0.012 + sunk;
         const tiltX = (random() - 0.5) * (sunk ? 0.04 : 0.012);
         const tiltZ = (random() - 0.5) * (sunk ? 0.04 : 0.012);
         const shade = (random() - 0.5) * 0.18;
         parts.push(
-          stoneGeometry({
-            outline: convex,
-            convex,
-            height: (x, z) => lift + tiltX * (x - cx) + tiltZ * (z - cz),
-            shade,
-            // About one slab in five is cracked across: clearly visible, sometimes branching, a few twice.
-            cracks: (random() < cracked ? (random() < 0.2 ? [0, 1] : [0]) : []).flatMap(() =>
-              freehandCracks(convex, random).map((line) => ({ line, width: 1.1 + random() * 1.4 })),
-            ),
-          }),
+          stoneGeometry(
+            {
+              outline: convex,
+              convex,
+              height: (x, z) => lift + tiltX * (x - cx) + tiltZ * (z - cz),
+              shade,
+              // About one slab in five is cracked across: clearly visible, sometimes branching, a few twice.
+              cracks: (random() < cracked ? (random() < 0.2 ? [0, 1] : [0]) : []).flatMap(() =>
+                freehandCracks(convex, random).map((line) => ({ line, width: 1.1 + random() * 1.4 })),
+              ),
+            },
+            bevel,
+          ),
         );
       }
       x0 = x1;

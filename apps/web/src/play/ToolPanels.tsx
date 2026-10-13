@@ -4,6 +4,7 @@ import type { SlateLayer, SlateOpen } from "@wirelight/sim";
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "../engine/store";
 import { KeeperPanel } from "./KeeperPanel";
+import { noteMoment } from "./momentRules";
 import { SlatePanel } from "./SlatePanel";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
@@ -59,7 +60,13 @@ function WorkbenchPanel() {
       )}
       <label className="field">
         <span>{voice.workbench.message}</span>
-        <input value={msg} onChange={(e) => setMsg(e.target.value)} />
+        <input
+          value={msg}
+          onChange={(e) => {
+            setMsg(e.target.value);
+            if (e.target.value.trim()) noteMoment("workbench-message");
+          }}
+        />
       </label>
       {refused && <p className="panel-note">{voice.workbench.refused}</p>}
       <div className="panel-actions">

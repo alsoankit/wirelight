@@ -3,6 +3,7 @@ import { useEffect, useMemo } from "react";
 import { BufferAttribute, BufferGeometry, Euler, type Material, Matrix4, Mesh, Quaternion, Vector3 } from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { TO_MOON } from "../moon";
+import type { RegionId } from "../region";
 import { bakeAgeing, bakeMoonlight } from "./bake";
 import { pieceUrl } from "./Piece";
 import { bakedRegionMaterial } from "./regionMaterials";
@@ -81,7 +82,9 @@ export function StaticRoom({
   toCamera,
   toMoon = TO_MOON,
   shadowsWithin,
+  region = 1,
 }: {
+  region?: RegionId; // whose palette the pieces wear (kit/regionMaterials.ts)
   placements: Placement[];
   extras?: Extra[];
   toCamera: Vector3; // from the room toward the fixed camera
@@ -125,14 +128,17 @@ export function StaticRoom({
       const geometry = mergeGeometries(parts);
       if (!geometry) continue;
       bakeAgeing(geometry);
-      result.push({ name, geometry, material: bakedRegionMaterial(name) ?? original });
+      result.push({ name, geometry, material: bakedRegionMaterial(name, region) ?? original });
     }
     // Extras sharing a material become one mesh (one draw call).
     for (const name of new Set(extras.map((e) => e.name))) {
-      const material = bakedRegionMaterial(name);
+      const material = bakedRegionMaterial(name, region);
       const same = extras.filter((e) => e.name === name).map((e) => e.geometry);
       const geometry = same.length === 1 ? same[0] : mergeGeometries(same);
-      if (material && geometry) result.push({ name: `extra:${name}`, geometry, material });
+      if (!material || !geometry) continue;
+      // Pieces made in code age like the kit's (the floor brings its own ageing).
+      if (!geometry.getAttribute("ageing")) bakeAgeing(geometry);
+      result.push({ name: `extra:${name}`, geometry, material });
     }
     // Moonlight, baked once: everything static blocks it; nothing renders shadows at runtime.
     const occluder = mergeGeometries(
@@ -156,7 +162,7 @@ export function StaticRoom({
         shadowsWithin,
       );
     return visible;
-  }, [scenesKey, names, placements, extras, toCamera, toMoon, shadowsWithin]);
+  }, [scenesKey, names, placements, extras, toCamera, toMoon, shadowsWithin, region]);
 
   useEffect(() => {
     return () => {

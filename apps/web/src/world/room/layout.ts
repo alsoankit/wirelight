@@ -19,9 +19,42 @@ export type DoorSlot = {
   plate?: "beside" | "above";
 };
 
+/** A light in the room that relights as restoration reaches it (runes, lamps, lanterns, windows). */
+export type Glow = { position: Vec3; colour: string; strength: number };
+
+/** A gear on a wall (Region 2): turns while the room is restored, stands still in ruin. */
+export type Gear = {
+  wall: Wall;
+  along: number;
+  y: number;
+  radius: number;
+  teeth: number;
+  /** Which way it turns, and how fast relative to the others (meshing gears alternate). */
+  spin: number;
+  /** How far in front of the wall face. */
+  out?: number;
+  spokes?: number;
+};
+
+/** Shafts of light from where the outside gets in (moonbeams; stained glass in the Cathedral). */
+export type Beams = {
+  list: { from: Vec3; width: number; depth: number; colour?: string }[];
+  direction: Vec3;
+  colour: string;
+  /** Strength in ruin and restored. */
+  ruined: number;
+  restored: number;
+  /** Soft pools of the light where the shafts meet the floor. */
+  pools?: boolean;
+};
+
 export type RoomLayout = {
   placements: Placement[];
   extras: Extra[];
+  /** The room's own lights (when not given, the scene's). */
+  glows?: Glow[];
+  gears?: Gear[];
+  beams?: Beams;
   doorSlots: DoorSlot[];
   keeper: Vec3;
   /** The room's air (fireflies, dust). */

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { type Crossing, nextNetworkTime, progress, SCREEN_MS_PER_CROSSING } from "../src/engine/clock";
+import {
+  CROWD,
+  CROWD_RATE,
+  type Crossing,
+  nextNetworkTime,
+  progress,
+  SCREEN_MS_PER_CROSSING,
+} from "../src/engine/clock";
 
 const crossing = (enter: number, arriveAt: number): Crossing => ({
   frameId: 1,
@@ -35,5 +42,12 @@ describe("the presentation clock (CORE-42)", () => {
     const slow = crossing(0, 1);
     const fast = crossing(0, 0.1);
     expect(nextNetworkTime(0, [slow, fast], 900, 1)).toBeCloseTo(0.1);
+  });
+
+  it("keeps time moving in a crowd (a storm), at least CROWD_RATE of real speed", () => {
+    const many = Array.from({ length: CROWD + 1 }, () => crossing(0, 0.05));
+    expect(nextNetworkTime(0, many, 1000, 1)).toBeCloseTo(1000 * CROWD_RATE);
+    const few = Array.from({ length: CROWD }, () => crossing(0, 0.05));
+    expect(nextNetworkTime(0, few, 1000, 1)).toBeLessThan(1);
   });
 });

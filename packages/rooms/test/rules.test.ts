@@ -265,6 +265,12 @@ it("ROOM-09: every secret room belongs to a floor of its region, which names it"
   }
 });
 
-// ROOM-09: one secret room per region; Region 2's (The Peacekeeper) waits on the simulator's spanning tree.
-it.todo("ROOM-09: every region has a secret room");
+it("ROOM-09: every region has one secret room (0065)", () => {
+  const regions = [...new Set(rooms.filter((r) => r.kind !== "prologue").map((r) => r.region))];
+  for (const region of regions)
+    expect(
+      rooms.filter((r) => r.region === region && r.kind === "secret").map((r) => r.id),
+      `region ${region}`,
+    ).toHaveLength(1);
+});
 // ROOM-08 runs in the difftest (pnpm difftest), not here: it needs Linux namespaces.

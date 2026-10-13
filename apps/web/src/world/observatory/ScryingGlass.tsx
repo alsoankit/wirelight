@@ -4,6 +4,7 @@ import { AdditiveBlending, BoxGeometry, EdgesGeometry, type Group, type Mesh } f
 import { color, float, mix, positionLocal, sin, smoothstep, time } from "three/tsl";
 import { LineBasicNodeMaterial, MeshBasicNodeMaterial } from "three/webgpu";
 import { regionMaterial } from "../kit/regionMaterials";
+import type { RegionId } from "../region";
 import { ruin } from "../ruin";
 
 // Stand-in for the Scrying Glass (CORE-31), the player's modern tool (0051): an ancient stone basin
@@ -13,7 +14,10 @@ import { ruin } from "../ruin";
 
 const HOLO = "#CFE3FF";
 
-export function ScryingGlass({ position }: { position: [number, number, number] }) {
+// The basin wears its region: weavers' stone, a copper vat in the Works, town stone, cathedral sandstone.
+const BASIN: Record<RegionId, string> = { 1: "Main", 2: "Copper", 3: "Cobble", 4: "Sandstone" };
+
+export function ScryingGlass({ position, region = 1 }: { position: [number, number, number]; region?: RegionId }) {
   const map = useRef<Group>(null);
   const dot = useRef<Mesh>(null);
 
@@ -77,10 +81,10 @@ export function ScryingGlass({ position }: { position: [number, number, number] 
   return (
     <group position={position}>
       {/* the stone basin with its brass rim */}
-      <mesh position={[0, 0.42, 0]} material={regionMaterial("Main")}>
+      <mesh position={[0, 0.42, 0]} material={regionMaterial(BASIN[region], region)}>
         <cylinderGeometry args={[0.55, 0.38, 0.84, 20]} />
       </mesh>
-      <mesh position={[0, 0.85, 0]} rotation={[Math.PI / 2, 0, 0]} material={regionMaterial("Brass")}>
+      <mesh position={[0, 0.85, 0]} rotation={[Math.PI / 2, 0, 0]} material={regionMaterial("Brass", region)}>
         <torusGeometry args={[0.53, 0.045, 8, 32]} />
       </mesh>
       {/* its own soft, cool light: it catches the brass rim and the stone round it */}

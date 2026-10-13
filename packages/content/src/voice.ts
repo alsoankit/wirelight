@@ -36,6 +36,8 @@ export function keeperSays(d: Decision, reason?: DropReason): string {
     const line = r.fdb
       ? `My board says ${r.fdb.mac} is behind ${r.fdb.port}${r.fdb.static ? " (pinned)" : ""}`
       : "My board knew it";
+    if (d.decision === "forward" && reason === "port-blocked")
+      return `That frame was for ${r.dst}. ${line}, but that door is held shut to keep the halls from going round in circles, so it went no further.`;
     if (d.decision === "forward") return `That frame was for ${r.dst}. ${line}, so I sent it there.`;
     return `That frame was for ${r.dst}. ${line}, the door it came in by, so it didn't need to go anywhere.`;
   }
@@ -364,6 +366,40 @@ export const voice = {
     replayIntro: "Replay intro",
     empty: "Nothing here yet.",
     close: "Close",
+  },
+  /** The keyring (CORE-36): in the top bar, and the key flying to it when a room is won. */
+  keyring: {
+    name: "Keyring",
+    /** For screen readers: the button, and the key arriving. */
+    count: "Keyring: {n} keys",
+    arrived: "The key: {word}",
+  },
+  /** Knight's Memories (0008): offered on other paths, then the one small thing to do after. */
+  knightMemory: {
+    offer: "Knight's memory",
+    watch: "Watch",
+    later: "Not now",
+    yourTurn: "Your turn: {action}.",
+    done: "That's it.",
+    dismiss: "Close",
+  },
+  /** The gentle way back (HELP-12): the Knight's offer in a boss, on the Know a little and Know networking paths. */
+  wayBack: {
+    text: "This one puts several things together at once. When I got stuck here, I went back to {room} and looked at one piece on its own. Want to?",
+    go: "Go there",
+    stay: "Stay",
+  },
+  /** A journal page lying in its room (CORE-45). */
+  journalPage: {
+    glow: "A page, glowing faintly",
+    label: "Pick up a page of the Knight's journal",
+    title: "A page of the Knight's journal",
+    kept: "Kept with your journal pages, in the Codex.",
+    close: "Close",
+  },
+  /** The first release's ending card (END1): what "What's next" says. */
+  ending: {
+    next: "Below the cathedral, the roads become a maze: the Impossible Stair. It's coming later.",
   },
   send: "Send",
   /** UI-06: before the gift of the voice, a click shows the command it ran under this caption. */

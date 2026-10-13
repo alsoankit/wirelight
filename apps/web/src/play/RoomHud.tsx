@@ -44,11 +44,16 @@ export function RoomHud() {
   const hintsOpened = useProgress((s) => (roomId ? (s.hints[roomId] ?? 0) : 0));
   const clear = useProgress((s) => s.clear);
   const findJournalPage = useProgress((s) => s.findJournalPage);
+  const journalPages = useProgress((s) => s.journalPages);
   const [showDebrief, setShowDebrief] = useState(false);
   const [page, setPage] = useState(false);
 
   const room = roomId ? roomById(roomId) : undefined;
   const text = room ? roomTexts[room.content] : undefined;
+
+  // A page read in one room's debrief doesn't stay open into the next.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new room is the trigger
+  useEffect(() => setPage(false), [roomId]);
 
   useEffect(() => {
     if (!won) return setShowDebrief(false);
@@ -152,7 +157,8 @@ export function RoomHud() {
                 {fill(voice.after.floorMemory, { guardian: capital })}
               </button>
             )}
-            {isJournal && floorText && !page && (
+            {/* The page also lies glowing in the room (Moments: JournalPage); here for whoever didn't see it. */}
+            {isJournal && floorText && !page && !journalPages.includes(floorText.journal.page) && (
               <button
                 type="button"
                 className="quiet"

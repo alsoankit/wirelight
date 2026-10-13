@@ -5,6 +5,8 @@ import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { attempts, hintsReady, useElapsed, useNewPath } from "./hints";
 import { type Line, Lines } from "./Lines";
+import { KeyringButton } from "./Moments";
+import { floorCleared, questionOpen, useMoments } from "./momentRules";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
@@ -85,6 +87,7 @@ export function TopBar() {
       <button type="button" onClick={() => openPanel({ kind: "ask" })}>
         {voice.bar.ask}
       </button>
+      <KeyringButton />
       <button
         type="button"
         data-tour="menu"
@@ -176,10 +179,14 @@ export function AskPanel() {
   const panel = useSession((s) => s.panel);
   const close = useSession((s) => s.closePanel);
   const [answer, setAnswer] = useState<string | null>(null);
+  const happened = useMoments((s) => s.happened);
+  const cleared = useProgress((s) => s.cleared);
   if (panel?.kind !== "ask" || !room || !text) return null;
   const guardian = regions[room.region]?.guardian ?? "";
-  // Questions that open later (after something happened) stay hidden until then; the room says when.
-  const questions = (text.guardian ?? []).filter((g) => !g.after);
+  // Questions that open later stay hidden until what they're about has happened (or the floor is cleared).
+  const had = new Set(happened);
+  const floorDone = floorCleared(room.floor, cleared);
+  const questions = (text.guardian ?? []).filter((g) => questionOpen(g.after, had, floorDone));
   return (
     <section className="panel" aria-label={fill(voice.ask.title, { guardian })}>
       <h2>{fill(voice.ask.title, { guardian })}</h2>
@@ -264,34 +271,6 @@ export function DiscoveryCards() {
         </button>
       </div>
     </aside>
-  );
-}
-
-/**
- * Knight's Memories that play on entering a room (0008): automatically on the New path, once; then
- * replayable from the Knight's notes. A boss's introduction plays the first time too.
- */
-export function RoomStartLines() {
-  const { room, text } = useRoom();
-  const newPath = useNewPath();
-  const seen = useProgress((s) => s.memoriesSeen);
-  const seeMemory = useProgress((s) => s.seeMemory);
-  const voiceGiven = useSession((s) => s.voiceGiven);
-  if (!room || !text) return null;
-  const memories = (text.memories ?? [])
-    .filter((m) => /enter|first visit/i.test(m.trigger) && !seen.includes(m.id))
-    .map((m) => ({ id: m.id, speaker: `${m.title}`, text: m.text }));
-  const intro = (text.voice ?? []).filter((v) => /BOSS-01$/.test(v.id) && !seen.includes(v.id));
-  const lines: Line[] = [...intro, ...(newPath ? memories : [])];
-  // The gift's room has its own lines; nothing else plays over it.
-  if (lines.length === 0 || (room.commandMemory === "CMD-01" && !voiceGiven)) return null;
-  return (
-    <Lines
-      lines={lines}
-      onDone={() => {
-        for (const l of lines) seeMemory(l.id);
-      }}
-    />
   );
 }
 

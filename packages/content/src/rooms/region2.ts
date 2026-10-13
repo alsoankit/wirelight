@@ -1,3 +1,4 @@
+import { peacekeeper } from "./secrets2";
 import { SEALED } from "./shared";
 import type { FloorText, RoomText } from "./types";
 
@@ -417,6 +418,72 @@ const whoHasTheKey: RoomText = {
   },
 };
 
+const spareCable: RoomText = {
+  title: "The Spare Cable",
+  mission:
+    "The Knight left a spare cable between the two halls, in case the first one ever broke. Plug it in, then get a message to anvil.",
+  access: { compass: SEALED, beacon: SEALED, anvil: SEALED, bell: SEALED },
+  notes: ["Left a spare cable between the halls, just in case. Two cables are safer than one. Surely."],
+  hints: [
+    { text: "Plug in the spare, then watch one broadcast. Where does it go after it crosses to the other hall?" },
+    { text: "Read a hall's board, then read it again a few seconds later. Where is anvil now?" },
+    {
+      text: "Two halls joined by two cables make a circle: each hall floods every broadcast on to the other, round and round.",
+      codex: "loop",
+    },
+    { text: "Take one of the two cables away, let the halls settle, then write to anvil." },
+    {
+      text: 'Unplug the spare again (hall-b\'s eth4). Wait a few seconds, then send anvil a frame: `lab send-frame --to 02:00:00:00:00:0a --msg "hello"`. It answers with the key.',
+    },
+  ],
+  detectors: {
+    "message-in-the-storm": {
+      note: "In all those copies, a letter can get lost or sent the wrong way. Let the halls settle first.",
+      tried: "You wrote to anvil while the copies were still circling.",
+    },
+    "loop-again": {
+      note: "That brings the circle back, and the copies with it.",
+      tried: "You plugged a cable back in after the halls had settled, and the circle came back.",
+    },
+  },
+  debrief: {
+    happened:
+      "With the spare plugged in, the two halls were joined twice: a switching loop. Every broadcast crossed one cable and came back over the other, again and again, and the copies piled up: a broadcast storm. The boards kept moving names between doors, because copies came in by every door. You took one cable away, the copies drained, and anvil's answer got through.",
+    terms: [
+      {
+        id: "switching-loop",
+        term: "switching loop",
+        meaning: "switches joined in a circle, so frames can go round forever",
+      },
+      {
+        id: "broadcast-storm",
+        term: "broadcast storm",
+        meaning: "broadcast copies circling a loop and multiplying until the network drowns",
+      },
+    ],
+  },
+  guardian: [
+    {
+      q: "Why did the same message keep coming back?",
+      a: "Each hall sends a broadcast out of every other door. With two cables between them, what goes over one comes back over the other. Then round it goes again.",
+    },
+    {
+      q: "Why did the boards keep changing their minds?",
+      a: "A hall writes down the door a name came in by. The copies came in by both cables, one after another, so the line kept moving.",
+    },
+    {
+      q: "So a spare cable is a bad idea?",
+      a: "It shouldn't be. There was a way to keep one safely, I'm sure of it. Something about the halls talking to each other… It's gone again.",
+    },
+  ],
+  building: {
+    id: "F4-BLD-03",
+    text: "Someone always wanted a second cable. In case the first one breaks, they said. Nobody asked what a hall does with a message that comes back to it.",
+    shown: "an old plan of two halls; a careful hand draws a second span beside the first",
+  },
+  fieldGuide: ["Loops and storms"],
+};
+
 const storm: RoomText = {
   title: "The Storm",
   mission: "The great hall is drowning in its own messages. Somewhere inside, the key is still waiting.",
@@ -427,7 +494,7 @@ const storm: RoomText = {
     { text: "Count the cables between the two halls." },
     {
       text: "Two switches joined twice make a loop: each floods every broadcast back to the other, forever.",
-      codex: "span",
+      codex: "loop",
     },
     { text: "Break the loop by taking one of the two spans away, then check what hall-b remembers about wren." },
     {
@@ -459,7 +526,7 @@ const storm: RoomText = {
   },
   debrief: {
     happened:
-      "Two spans between the same two halls made a loop. Every broadcast was flooded across one span and back across the other, again and again: a broadcast storm. Removing one span stopped it. Then a pinned memory still pointed wren to the wrong door, and you cleared it.",
+      "Two spans between the same two halls made a switching loop. Every broadcast was flooded across one span and back across the other, again and again: the broadcast storm that drowned the Works. Removing one span stopped it. Then a pinned memory still pointed wren to the wrong door, and you cleared it.",
     terms: [],
   },
   voice: [
@@ -519,6 +586,8 @@ export const region2Texts: Record<string, RoomText> = {
   "f3.boss-busy-hall": busyHall,
   "f4.pinned-memory": pinnedMemory,
   "f4.who-has-the-key": whoHasTheKey,
+  "f4.spare-cable": spareCable,
   "f4.boss-storm": storm,
+  "f4.secret-peacekeeper": peacekeeper,
 };
 export const region2FloorTexts: Record<number, FloorText> = { 3: floor3, 4: floor4 };

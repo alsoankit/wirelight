@@ -1,10 +1,12 @@
-import { fill, floors, floorTexts, regions, roomTexts, voice } from "@wirelight/content";
+import { fill, firstReleaseEnding, floors, floorTexts, regions, roomTexts, voice } from "@wirelight/content";
 import { floorDefs, roomById, rooms } from "@wirelight/rooms";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { create } from "zustand";
 import { speak, stopVoice } from "../audio/audio";
+import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { FloorMap } from "./Glass";
+import { useMoments } from "./momentRules";
 import { RideAlong } from "./RideAlong";
 
 // Guardian memories in the Scrying Glass (0036, 0037, tech/rendering.md "Memories and
@@ -141,12 +143,28 @@ function MemoryView({ show, onClose }: { show: MemoryShow; onClose: () => void }
   );
 }
 
+/** After the last floor's memory closes, the first release's ending plays, once (END1 follows 9.B's). */
+function afterFloorMemory(floor: number): void {
+  const last = floorDefs.reduce((a, f) => (f.floor > a.floor ? f : a));
+  // Only from the last boss's debrief, not a replay from the Codex elsewhere.
+  const s = useSession.getState();
+  if (floor !== last.floor || s.roomId !== last.boss || !s.status?.won) return;
+  if (useProgress.getState().memoriesSeen.includes(firstReleaseEnding.lines[0]?.id ?? "")) return;
+  // The ending takes the stage: a panel left open (the Codex) closes.
+  useSession.getState().closePanel();
+  useMoments.getState().setEnding(true);
+}
+
 /** The memory being shown, if any; mounted once beside the Glass. */
 export function Memory() {
   const show = useMemory((s) => s.show);
   const close = useMemory((s) => s.close);
   if (!show) return null;
-  return <MemoryView key={JSON.stringify(show)} show={show} onClose={close} />;
+  const done = () => {
+    close();
+    if (show.kind === "floor") afterFloorMemory(show.floor);
+  };
+  return <MemoryView key={JSON.stringify(show)} show={show} onClose={done} />;
 }
 
 /** The Codex's list of Guardian memories seen (CORE-46), each one replayable. */

@@ -1,6 +1,7 @@
 import { voice } from "@wirelight/content";
 import { useEffect, useRef, useState } from "react";
 import { speak, stopVoice } from "../audio/audio";
+import { useSession } from "../engine/store";
 import { useDialogFocus } from "./focus";
 import { isTyping } from "./keys";
 
@@ -14,6 +15,8 @@ export function Lines({ lines, onDone }: { lines: Line[]; onDone: () => void }) 
   const [i, setI] = useState(0);
   const line = lines[i];
   const ref = useRef<HTMLElement>(null);
+  // Never over the open console (UI-02): a line may ask for something typed there (F2-MEM-04).
+  const raised = useSession((s) => s.consoleOpen && s.voiceGiven);
   // Its button takes focus when the room has it, so Enter goes on (UI-18); never from someone typing.
   useDialogFocus(ref, { polite: true, step: i });
   const next = () => (i + 1 < lines.length ? setI(i + 1) : onDone());
@@ -40,7 +43,14 @@ export function Lines({ lines, onDone }: { lines: Line[]; onDone: () => void }) 
   }, [i]);
   if (!line) return null;
   return (
-    <section ref={ref} className="lines" aria-live="polite" aria-label={line.speaker} data-line={line.id}>
+    <section
+      ref={ref}
+      className="lines"
+      data-raised={raised ? "yes" : "no"}
+      aria-live="polite"
+      aria-label={line.speaker}
+      data-line={line.id}
+    >
       <div className="lines-speaker">{line.speaker}</div>
       <p className="lines-text">{line.text}</p>
       <button type="button" onClick={next}>

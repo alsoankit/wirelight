@@ -1,4 +1,4 @@
-/** Region 2's own predicates: the switch's board, hand sorting (3.1), and loops (4.B). Trace and state only. */
+/** Region 2's own predicates: the switch's board, hand sorting (3.1), loops (4.3, 4.B) and the peacekeeper. Trace and state only. */
 import type { DeviceId, IfaceName, Mac, SimEvent } from "@wirelight/sim";
 import type { Facts, Predicate } from "../types";
 
@@ -207,6 +207,218 @@ export function stalledAfter(breaks: RegExp, ms: number, answered: (trace: reado
     const b = trace.find((e): e is Exec => e.kind === "cmd.exec" && e.exitCode === 0 && breaks.test(e.line));
     if (!b || world.now < b.t + ms) return false;
     return !answered(trace.filter((e) => e.t <= b.t + ms));
+  };
+}
+
+// ── Storms and the peacekeeper (4.3, the Peacekeeper) ─────────────────────────────────────
+
+/** Each span between the halls, by id: its two ends (device, door). */
+export type SpanEnds = Record<string, [DeviceId, IfaceName][]>;
+
+const SPAN_CMD = /^(?:ip link set (\S+) (up|down)|lab cable (plug|unplug) (\S+))$/;
+
+/** A command that worked on one end of a span: which span, and whether it joined (`mend`) or cut it. */
+export function spanCommand(e: SimEvent, spans: SpanEnds): { span: string; mend: boolean; t: number } | null {
+  if (e.kind !== "cmd.exec" || e.exitCode !== 0) return null;
+  const m = e.line.match(SPAN_CMD);
+  if (!m) return null;
+  const iface = m[1] ?? m[4];
+  const mend = m[2] === "up" || m[3] === "plug";
+  for (const [span, ends] of Object.entries(spans))
+    if (ends.some(([d, i]) => d === e.device && i === iface)) return { span, mend, t: e.t };
+  return null;
+}
+
+/** Frames that entered `links` in the `windowMs` before `t` (the trace is in time order). */
+function busyAt(trace: readonly SimEvent[], links: Set<string>, t: number, windowMs: number): number {
+  let n = 0;
+  for (const e of trace) {
+    if (e.t > t) break;
+    if (e.t >= t - windowMs && e.kind === "link.enter" && links.has(e.link)) n++;
+  }
+  return n;
+}
+
+/**
+ * When a storm first ran on `links`: the first moment at least `min` frames had entered them in
+ * `windowMs` (quiet halls carry one announcement every two seconds or so; a storm, dozens a
+ * second). Kept short: in the game the clock slows while frames cross, so a storm's network
+ * second can take a while to watch.
+ */
+export function stormSeenAt(trace: readonly SimEvent[], links: string[], windowMs = 1000, min = 12): number | null {
+  const set = new Set(links);
+  const times: number[] = [];
+  for (const e of trace) if (e.kind === "link.enter" && set.has(e.link)) times.push(e.t);
+  for (let i = min - 1; i < times.length; i++) {
+    const end = times[i] as number;
+    if (end - (times[i - min + 1] as number) <= windowMs) return end;
+  }
+  return null;
+}
+
+/**
+ * 4.3's win: the player joined a span while the halls were calm and a storm followed; then a span
+ * was taken away (cut or unplugged), the halls are down to one working span, and after that cut
+ * `text` reached `to` (a message got through).
+ */
+export function stormThenThrough(spans: SpanEnds, to: DeviceId, text: string): Predicate {
+  const links = Object.keys(spans);
+  const set = new Set(links);
+  return (f) => {
+    const joined = f.trace.find((e) => spanCommand(e, spans)?.mend && busyAt(f.trace, set, e.t - 1, 2000) < 20);
+    if (!joined || !noLoop(links)(f)) return false;
+    const storm = stormSeenAt(
+      f.trace.filter((e) => e.t >= joined.t),
+      links,
+    );
+    if (storm === null) return false;
+    let cut: number | null = null;
+    for (const e of f.trace) {
+      const c = spanCommand(e, spans);
+      if (c && !c.mend && c.t >= storm) cut = c.t;
+    }
+    if (cut === null) return false;
+    const after = cut;
+    return f.trace.some((e) => e.kind === "app.deliver" && e.device === to && e.text === text && e.t > after);
+  };
+}
+
+/** A storm ran, the loop is gone again, and the spans are calm (4.3's health check). */
+export function stormPassed(links: string[]): Predicate {
+  return (f) => stormSeenAt(f.trace, links) !== null && noLoop(links)(f) && calm(links, 2000, 20)(f);
+}
+
+/** `device` sent a frame by hand (the workbench) while the spans were storming (4.3). */
+export function sentInStorm(device: DeviceId, links: string[], windowMs = 2000, min = 20): Predicate {
+  const set = new Set(links);
+  return ({ trace }) =>
+    trace.some(
+      (e) =>
+        e.kind === "cmd.exec" &&
+        e.device === device &&
+        /^lab send-frame\b/.test(e.line) &&
+        busyAt(trace, set, e.t, windowMs) >= min,
+    );
+}
+
+/** A span was joined again after one had been taken away, once the storm had been seen (4.3). */
+export function loopAgain(spans: SpanEnds): Predicate {
+  return ({ trace }) => {
+    const storm = stormSeenAt(trace, Object.keys(spans));
+    if (storm === null) return false;
+    let cut = false;
+    for (const e of trace) {
+      const c = spanCommand(e, spans);
+      if (!c || c.t < storm) continue;
+      if (!c.mend) cut = true;
+      else if (cut) return true;
+    }
+    return false;
+  };
+}
+
+/** Turning the spanning tree on (any value but 0, as the kernel takes it). */
+const STP_ON = /^ip link set br0 type bridge stp_state 0*[1-9]\d*$/;
+
+/** The hall runs the spanning tree now. */
+export function stpOn(f: Facts, device: DeviceId): boolean {
+  return Object.values(f.world.device(device)?.bridges ?? {}).some((br) => br.stp.enabled);
+}
+
+/** A door's spanning-tree state at time `t`, from the trace (forwarding until it first changed). */
+export function portStateAt(trace: readonly SimEvent[], device: DeviceId, iface: IfaceName, t: number): string {
+  let state = "forwarding";
+  for (const e of trace) {
+    if (e.t > t) break;
+    if (e.kind === "table.change" && e.table === "stp" && e.device === device && e.key === iface)
+      state = String(e.after);
+  }
+  return state;
+}
+
+/**
+ * The Peacekeeper's win: both halls run the spanning tree; a span that had a door held shut
+ * (blocking) now forwards at both ends; the other span is out; and after it went, `text` reached
+ * `to`, so it came over the spare.
+ */
+export function spareTookOver(spans: SpanEnds, halls: DeviceId[], to: DeviceId, text: string): Predicate {
+  return (f) => {
+    if (!halls.every((h) => stpOn(f, h))) return false;
+    const now = f.world.now;
+    for (const [spare, ends] of Object.entries(spans)) {
+      const wasHeld = f.trace.some(
+        (e) =>
+          e.kind === "table.change" &&
+          e.table === "stp" &&
+          e.after === "blocking" &&
+          ends.some(([d, i]) => d === e.device && i === e.key),
+      );
+      if (!wasHeld || !ends.every(([d, i]) => portStateAt(f.trace, d, i, now) === "forwarding")) continue;
+      if (!corridorWorks(f, spare)) continue;
+      const others = Object.keys(spans).filter((s) => s !== spare);
+      if (others.some((o) => corridorWorks(f, o))) continue;
+      let cut = -1;
+      for (const e of f.trace) {
+        const c = spanCommand(e, spans);
+        if (c && !c.mend && c.span !== spare) cut = c.t;
+      }
+      if (cut < 0) continue;
+      if (f.trace.some((e) => e.kind === "app.deliver" && e.device === to && e.text === text && e.t > cut)) return true;
+    }
+    return false;
+  };
+}
+
+/** A span was cut before either hall had been asked to keep the peace (the Peacekeeper). */
+export function cutBeforePeace(spans: SpanEnds): Predicate {
+  return ({ trace }) => {
+    for (const e of trace) {
+      if (e.kind === "cmd.exec" && e.exitCode === 0 && STP_ON.test(e.line)) return false;
+      const c = spanCommand(e, spans);
+      if (c && !c.mend) return true;
+    }
+    return false;
+  };
+}
+
+/** One hall was asked to keep the peace, and `ms` later the other still hadn't been. */
+export function peaceInOneHall(halls: [DeviceId, DeviceId], ms: number): Predicate {
+  return ({ trace, world }) => {
+    const first = trace.find(
+      (e): e is Exec => e.kind === "cmd.exec" && e.exitCode === 0 && STP_ON.test(e.line) && halls.includes(e.device),
+    );
+    if (!first || world.now < first.t + ms) return false;
+    const other = halls.find((h) => h !== first.device);
+    return !trace.some(
+      (e) =>
+        e.kind === "cmd.exec" && e.device === other && e.exitCode === 0 && STP_ON.test(e.line) && e.t <= first.t + ms,
+    );
+  };
+}
+
+/**
+ * A span was cut while one of its doors wasn't forwarding: the one the halls had held shut. (The
+ * cut's own changes, its doors going disabled, are traced at the same moment, just before it.)
+ */
+export function cutTheHeldOne(spans: SpanEnds): Predicate {
+  return ({ trace }) => {
+    const state = new Map<string, { t: number; before: string; after: string }>();
+    const at = (key: string, t: number) => {
+      const s = state.get(key);
+      return !s ? "forwarding" : s.t < t ? s.after : s.before;
+    };
+    for (const e of trace) {
+      if (e.kind === "table.change" && e.table === "stp") {
+        const key = `${e.device}:${e.key}`;
+        const prev = state.get(key);
+        // Several changes at one moment: keep the state from before the first of them.
+        const before = prev && prev.t === e.t ? prev.before : String(e.before);
+        state.set(key, { t: e.t, before, after: String(e.after) });
+      }
+      const c = spanCommand(e, spans);
+      if (c && !c.mend && (spans[c.span] ?? []).some(([d, i]) => at(`${d}:${i}`, c.t) !== "forwarding")) return true;
+    }
+    return false;
   };
 }
 

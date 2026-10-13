@@ -12,9 +12,12 @@ import { Fireflies } from "../Fireflies";
 import { StaticRoom } from "../kit/StaticRoom";
 import { Keeper } from "../observatory/Keeper";
 import type { KeeperCue } from "../observatory/Messages";
+import { Moonbeams } from "../observatory/Moonbeams";
 import { RoomLights } from "../observatory/RoomLights";
 import { RoomCamera, VIEW_DIRECTION } from "../RoomCamera";
 import { RuinDial } from "../RuinDial";
+import { LOOKS, useRegion } from "../region";
+import { Gears } from "../regions/Gears";
 import { WindDriver } from "../WindDriver";
 import { type DoorInfo, Doorway } from "./Doorway";
 import { doorGeometry, type RoomLayout, type Vec3 } from "./layout";
@@ -70,6 +73,8 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
   const quality = useQuality();
   const roomId = useSession((s) => s.roomId);
   const room = roomId ? roomById(roomId) : undefined;
+  const region = useRegion();
+  const look = LOOKS[region];
   const openPanel = useSession((s) => s.openPanel);
   const doors = useMemo(() => (room ? doorsOf(room, device, barred) : []), [room, device, barred]);
   // CORE-38: ruin = failing checks ÷ all checks.
@@ -84,15 +89,26 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
   return (
     <>
       <RoomCamera target={[0, 1.1, -0.6]} distance={19} settleFrom={arriving ? 9 : 0} />
-      <color attach="background" args={["#0b0d12"]} />
+      <color attach="background" args={[look.background]} />
       <RuinDial level={ruinLevel} origin={origin} />
-      <RoomLights glows={glows} />
+      <RoomLights glows={layout.glows ?? glows} region={region} />
       <Suspense fallback={null}>
-        <StaticRoom placements={layout.placements} extras={layout.extras} toCamera={VIEW_DIRECTION} />
+        <StaticRoom region={region} placements={layout.placements} extras={layout.extras} toCamera={VIEW_DIRECTION} />
       </Suspense>
+      {layout.gears && <Gears gears={layout.gears} region={region} />}
+      {quality.moonbeams && layout.beams && (
+        <Moonbeams
+          beams={layout.beams.list}
+          direction={layout.beams.direction}
+          colour={layout.beams.colour}
+          ruined={layout.beams.ruined}
+          restored={layout.beams.restored}
+          pools={layout.beams.pools}
+        />
+      )}
       <WindDriver />
-      {quality.fireflies && <Fireflies bounds={layout.air} />}
-      {quality.dust && <Dust bounds={layout.air} />}
+      {quality.fireflies && look.fireflies && <Fireflies bounds={layout.air} colour={look.fireflies} />}
+      {quality.dust && <Dust bounds={layout.air} colour={look.dust} />}
       <Keeper position={layout.keeper} rest={[origin[0], 1.4, origin[2]]} watch={watch} cue={cue} />
       {/* Ask the keeper why (CORE-25). */}
       <Html center position={[layout.keeper[0], 2.35, layout.keeper[2]]} zIndexRange={[10, 0]}>

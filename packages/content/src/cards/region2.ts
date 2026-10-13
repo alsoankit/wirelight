@@ -28,4 +28,16 @@ export const REGION_2_CARDS: Card[] = [
     text: "A line someone wrote into the switch's memory by hand. It never fades, even when it's wrong.",
   },
   { id: "span", floor: 4, title: "Span", text: "A cable between two switches. Frames cross it like any other door." },
+  {
+    id: "loop",
+    floor: 4,
+    title: "Loop",
+    text: "A circle of cables between switches. A broadcast that goes in never comes out.",
+  },
+  {
+    id: "peacekeeper",
+    floor: 4,
+    title: "Peacekeeper",
+    text: "Switches that talk to each other and hold one door of every circle shut, until it's needed. Its real name is the spanning tree.",
+  },
 ];

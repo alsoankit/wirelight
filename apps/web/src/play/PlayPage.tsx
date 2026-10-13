@@ -3,6 +3,7 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { roomById } from "@wirelight/rooms";
 import { useEffect, useState } from "react";
 import { AudioDriver } from "../audio/AudioDriver";
+import { DevPanel } from "../dev/DevPanel";
 import { EngineDriver } from "../engine/EngineDriver";
 import { ask, useSession } from "../engine/store";
 import { useHydrated, useProgress } from "../progress/progress";
@@ -19,9 +20,10 @@ import { Glass } from "./Glass";
 import { Keyboard } from "./Keyboard";
 import { isTyping, withModifier } from "./keys";
 import { Menu } from "./Menu";
+import { Ending, JournalPage, KeyFlight, KnightMoments, MomentsDriver, WayBack } from "./Moments";
 import { Onboarding } from "./Onboarding";
 import { PlatePanel } from "./PlatePanel";
-import { AskPanel, DiscoveryCards, NotesPanel, Reaction, RoomStartLines, TopBar } from "./RoomHelp";
+import { AskPanel, DiscoveryCards, NotesPanel, Reaction, TopBar } from "./RoomHelp";
 import { RoomHud } from "./RoomHud";
 import { JarButton, ToolPanels } from "./ToolPanels";
 
@@ -156,6 +158,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
       )}
       <Keyboard />
       <AudioDriver />
+      <DevPanel />
       <SettingsApplied />
       <RoomHud />
       <PlatePanel />
@@ -170,7 +173,12 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
       <Reaction />
       {hydrated && <Onboarding skipTour={skipIntro} />}
       {hydrated && tourDone && <DiscoveryCards />}
-      {hydrated && tourDone && <RoomStartLines />}
+      {hydrated && tourDone && <KnightMoments />}
+      <MomentsDriver />
+      <JournalPage />
+      <WayBack />
+      <KeyFlight />
+      <Ending />
       {room && room.controls.console === "typing" && voiceGiven && (
         <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
       )}

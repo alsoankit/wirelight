@@ -1,5 +1,9 @@
 import { makeEarth, makeFlagstones } from "../kit/floor";
 import type { Placement } from "../kit/StaticRoom";
+import type { RegionId } from "../region";
+import { cathedralObservatory, cathedralObservatoryPieces } from "../regions/cathedral";
+import { townObservatory, townObservatoryPieces } from "../regions/town";
+import { worksObservatory, worksObservatoryPieces } from "../regions/works";
 import type { RoomLayout } from "../room/layout";
 
 // B0 mock layout of the Observatory (the player's computer room, Region 1), built from the Ruins kit.
@@ -97,8 +101,17 @@ function placements(secondDoor: boolean): Placement[] {
   ];
 }
 
-/** Every piece the Observatory can use (for preloading). */
-export const OBSERVATORY: Placement[] = [...placements(false), ...placements(true)];
+/** Every piece the Observatory can use, in every region (for preloading). */
+export const OBSERVATORY: Placement[] = [
+  ...placements(false),
+  ...placements(true),
+  ...worksObservatoryPieces(false),
+  ...worksObservatoryPieces(true),
+  ...townObservatoryPieces(false),
+  ...townObservatoryPieces(true),
+  ...cathedralObservatoryPieces(false),
+  ...cathedralObservatoryPieces(true),
+];
 
 const FLOOR = [
   { name: "Floor", geometry: makeFlagstones({ size: 8.4, seed: 1103 }) },
@@ -106,7 +119,18 @@ const FLOOR = [
 ];
 
 /** The Observatory with one door (eth0, the back arch) or two (eth1, the left wall's arch). */
-export function observatoryLayout(doors: number): RoomLayout {
+export function observatoryLayout(doors: number, region: RegionId = 1): RoomLayout {
+  const frame = {
+    doorSlots: [
+      { wall: "back", at: 0 },
+      { wall: "left", at: 2 },
+    ] as RoomLayout["doorSlots"],
+    keeper: [0, 0, -0.6] as RoomLayout["keeper"],
+    air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
+  };
+  if (region === 2) return { ...frame, ...worksObservatory(doors > 1) };
+  if (region === 3) return { ...frame, ...townObservatory(doors > 1) };
+  if (region === 4) return { ...frame, ...cathedralObservatory(doors > 1) };
   return {
     placements: placements(doors > 1),
     extras: FLOOR,

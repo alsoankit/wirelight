@@ -13,7 +13,10 @@ export async function launch() {
   return { browser, page, errors };
 }
 
-/** Takes whatever is waiting on screen: spoken lines, discovery cards. */
+/**
+ * Takes whatever is waiting on screen: spoken lines (memories, arrivals, boss introductions),
+ * discovery cards. A memory's action prompt and the key's flight never block a click.
+ */
 export async function tidy(p) {
   for (let k = 0; k < 12; k++) {
     if (await p.$(".lines")) await p.click(".lines button");
@@ -32,7 +35,7 @@ export async function open(p, base, room, ready = ".plate") {
 
 export async function won(p, name) {
   const ok = await p
-    .waitForSelector(".debrief", { timeout: 30000 })
+    .waitForSelector(".debrief", { timeout: 60000 })
     .then(() => true)
     .catch(() => false);
   console.log(name, ok ? "won" : "NOT WON");
@@ -40,6 +43,7 @@ export async function won(p, name) {
 }
 
 export async function type(p, line) {
+  await tidy(p);
   if (await p.$('.console[data-open="no"]')) {
     await p.click(".console-bar");
     await p.waitForTimeout(350);
@@ -55,7 +59,7 @@ export async function type(p, line) {
  * Waits until the console's last line is a bare prompt again: a command that keeps running (ping,
  * dhclient, tcpdump) holds the prompt until it ends, and messages crossing are shown slowed (CORE-14).
  */
-export async function waitPrompt(p, timeout = 60000) {
+export async function waitPrompt(p, timeout = 180000) {
   await p.waitForFunction(
     () => {
       const rows = [...document.querySelectorAll(".xterm-rows > div")].map((d) => d.textContent ?? "");

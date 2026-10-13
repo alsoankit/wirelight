@@ -13,6 +13,19 @@ const walk = async (to) => {
   await p.waitForTimeout(1800);
   await tidy(p);
 };
+const fast = async () => {
+  // 1× → 4× → 16× on the top bar's speed button.
+  for (let i = 0; i < 2; i++) await p.click(".top-bar button:has-text('×')");
+};
+/** Waits until `ms` more of network time have passed (the clock slows while frames cross). */
+const waitNet = async (ms) => {
+  const now = () => p.evaluate(() => window.__wirelight.useSession.getState().status?.now ?? 0);
+  const end = (await now()) + ms;
+  await p.waitForFunction((t) => (window.__wirelight.useSession.getState().status?.now ?? 0) >= t, end, {
+    timeout: 120000,
+    polling: 250,
+  });
+};
 /** Waits until the keeper's desk shows a frame from `mac`, then remembers it and sends it out. */
 const sortByHand = async (mac, out, learn = true) => {
   await p.waitForFunction((m) => document.querySelector(".panel")?.textContent?.includes(`A frame from ${m}`), mac, {
@@ -79,6 +92,21 @@ await p.waitForTimeout(3000);
 await bench(p, "02:00:00:00:00:0a");
 await check("4.2");
 
+// 4.3: plug in the spare, watch the storm, unplug it again, then write to anvil.
+await open(p, base, "f4.spare-cable");
+await walk("hall-a");
+await walk("hall-b");
+await type(p, "lab cable plug eth4");
+await fast();
+await waitNet(3000);
+await type(p, "bridge fdb show");
+await type(p, "lab cable unplug eth4");
+await waitNet(5000);
+await walk("hall-a");
+await walk("observatory");
+await bench(p, "02:00:00:00:00:0a");
+await check("4.3");
+
 // 4.B: break the loop in hall-b, remove the wrong memory, write to wren.
 await open(p, base, "f4.boss-storm");
 await walk("hall-a");
@@ -89,6 +117,25 @@ await walk("hall-a");
 await walk("observatory");
 await bench(p, "02:00:00:00:00:13");
 await check("4.B");
+
+// The Peacekeeper: the spanning tree on in both halls, the span in use pulled, the spare takes over.
+await open(p, base, "f4.secret-peacekeeper");
+await walk("hall-a");
+await type(p, "ip link set br0 type bridge stp_state 1");
+await walk("hall-b");
+await type(p, "ip link set br0 type bridge stp_state 1");
+await fast();
+// The first hello comes 2 s after the peacekeeper wakes; one door blocks when it comes back round.
+await waitNet(6000);
+await type(p, "bridge link show");
+await walk("hall-a");
+await type(p, "bridge link show");
+await type(p, "lab cable unplug eth3");
+// The held door waits for its stale note (20 s), listens 15 s, learns 15 s.
+await waitNet(55000);
+await walk("observatory");
+await bench(p, "02:00:00:00:00:13");
+await check("secret: The Peacekeeper");
 
 const failed = results.filter(([, ok]) => !ok).map(([n]) => n);
 console.log(failed.length ? `FAILED: ${failed.join(", ")}` : `all ${results.length} rooms won`);

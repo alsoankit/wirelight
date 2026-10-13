@@ -2,6 +2,7 @@ import { roomById } from "@wirelight/rooms";
 import { useMemo } from "react";
 import { useSession } from "../../engine/store";
 import { useBarred } from "../observatory/ObservatoryScene";
+import { useRegion } from "../region";
 import { Board, Desk } from "../room/Furniture";
 import { doorGeometry } from "../room/layout";
 import { MachineScene } from "../room/MachineScene";
@@ -43,6 +44,26 @@ function DoorFrames({ count }: { count: number }) {
   );
 }
 
+/** Beyond each doorway, the dark of the corridor (regions whose frames are part of the static room). */
+function DoorDark({ count }: { count: number }) {
+  return (
+    <>
+      {HALL_SLOTS.slice(0, count).map((slot) => {
+        const g = doorGeometry(slot);
+        const rotationY = slot.wall === "back" ? 0 : Math.PI / 2;
+        return (
+          <group key={`${slot.wall}${slot.at}`} position={[g.doorway[0], 0, g.doorway[2]]} rotation={[0, rotationY, 0]}>
+            <mesh position={[0, 1.2, -0.25]}>
+              <planeGeometry args={[1.75, 2.4]} />
+              <meshBasicMaterial color="#030405" />
+            </mesh>
+          </group>
+        );
+      })}
+    </>
+  );
+}
+
 export function HallScene({ device }: { device: string }) {
   const roomId = useSession((s) => s.roomId);
   const barred = useBarred();
@@ -50,11 +71,12 @@ export function HallScene({ device }: { device: string }) {
     const room = roomId ? roomById(roomId) : undefined;
     return room?.topology.devices.find((d) => d.id === device)?.interfaces.length ?? 4;
   }, [roomId, device]);
-  const layout = useMemo(() => hallLayout(count), [count]);
+  const region = useRegion();
+  const layout = useMemo(() => hallLayout(count, region), [count, region]);
   const glows = [{ position: [0, 2.6, -1] as [number, number, number], colour: "#FFC27A", strength: 2.6 }];
   return (
     <MachineScene device={device} layout={layout} barred={barred} glows={glows}>
-      <DoorFrames count={count} />
+      {region === 1 ? <DoorFrames count={count} /> : region !== 4 && <DoorDark count={count} />}
       <Board device={device} kind="mac" at={[-2.3, 0, 2.6]} turn={0.7} />
       <Desk device={device} at={[0.4, 0, 1.3]} />
       <Board device={device} kind="routes" at={[2.5, 0, 2.4]} turn={-0.6} />
