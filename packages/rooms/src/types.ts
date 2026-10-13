@@ -180,6 +180,8 @@ export interface FloorDef {
   boss: string;
   /** Which room hides the journal page. */
   journalRoom: string;
+  /** The region's secret room, on the floor where its door is (CORE-45): optional, never blocking. */
+  secret?: string;
 }
 
 export function defineFloor(def: FloorDef): FloorDef {

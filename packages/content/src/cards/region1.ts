@@ -108,4 +108,10 @@ export const REGION_1_CARDS: Card[] = [
     title: "Console",
     text: "Where you speak to a machine in its own words. Each machine has its own; you speak to the one in the room you're in.",
   },
+  {
+    id: "makers-mark",
+    floor: 2,
+    title: "Maker's mark",
+    text: "The first half of a door's name: who made the door. A name starting with 02 was chosen by a person instead.",
+  },
 ];

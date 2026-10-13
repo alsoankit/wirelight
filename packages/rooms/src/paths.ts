@@ -11,6 +11,8 @@ import type { RoomDef } from "./types";
 export type Path = "new" | "little" | "networking";
 
 export function onPath(room: RoomDef, path: Path): boolean {
+  // Secret rooms are never on the main route, on any path (CORE-45): found, not required.
+  if (room.kind === "secret") return false;
   if (path === "new") return true;
   if (room.pathTag === "building-block") return false;
   if (path === "networking" && room.pathTag === "core") return false;

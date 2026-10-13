@@ -234,7 +234,8 @@ describe("across rooms", () => {
 });
 
 describe.each(floorDefs.map((f) => [f.floor, f] as const))("floor %i", (_n, floor) => {
-  const mine = rooms.filter((r) => r.floor === floor.floor);
+  // A secret room sits on its floor but isn't one of the floor's rooms (it's found after the boss).
+  const mine = rooms.filter((r) => r.floor === floor.floor && r.kind !== "secret");
 
   it("ROOM-09: lists its rooms in order, ending with its boss", () => {
     expect(floor.rooms).toEqual(mine.map((r) => r.id));
@@ -256,6 +257,14 @@ describe.each(floorDefs.map((f) => [f.floor, f] as const))("floor %i", (_n, floo
   });
 });
 
-// ROOM-09's secret room per region comes with each region's polish pass (floors/floor-2.md, *Why 48 bits?*).
+it("ROOM-09: every secret room belongs to a floor of its region, which names it", () => {
+  for (const r of rooms.filter((x) => x.kind === "secret")) {
+    const floor = floorDefs.find((f) => f.floor === r.floor);
+    expect(floor?.secret, r.id).toBe(r.id);
+    expect(floor?.region).toBe(r.region);
+  }
+});
+
+// ROOM-09: one secret room per region; Region 2's (The Peacekeeper) waits on the simulator's spanning tree.
 it.todo("ROOM-09: every region has a secret room");
 // ROOM-08 runs in the difftest (pnpm difftest), not here: it needs Linux namespaces.

@@ -1,6 +1,6 @@
 import { defineFloor, type FloorDef, type RoomDef } from "../types";
 import { bothEnds, darkCorridor, looseCable, twoRooms } from "./floor1";
-import { firstLight, lightsOut, silentLine, whoAreYou, wrongName } from "./floor2";
+import { firstLight, lightsOut, silentLine, whoAreYou, why48Bits, wrongName } from "./floor2";
 import { firstMessage } from "./prologue";
 
 /** Region 1's rooms in play order: the Prologue, then Floors 1 and 2. */
@@ -15,6 +15,7 @@ export const region1Rooms: RoomDef[] = [
   whoAreYou,
   lightsOut,
   silentLine,
+  why48Bits,
 ];
 
 /** Region 1's floors (ROOM-09). The Prologue is floor 0 and has none. */
@@ -34,5 +35,6 @@ export const region1Floors: FloorDef[] = [
     rooms: ["f2.first-light", "f2.wrong-name", "f2.who-are-you", "f2.lights-out", "f2.boss-silent-line"],
     boss: "f2.boss-silent-line",
     journalRoom: "f2.who-are-you",
+    secret: "f2.secret-48-bits",
   }),
 ];

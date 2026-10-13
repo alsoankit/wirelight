@@ -9,8 +9,8 @@ const route = (path: Path) => {
 };
 
 describe("paths", () => {
-  it("New to networking plays every room", () => {
-    expect(route("new")).toEqual(rooms.map((r) => r.id));
+  it("New to networking plays every room but the secret ones (found, never on a path)", () => {
+    expect(route("new")).toEqual(rooms.filter((r) => r.kind !== "secret").map((r) => r.id));
   });
 
   for (const path of ["little", "networking"] as const)

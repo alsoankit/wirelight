@@ -344,3 +344,35 @@ export const silentLine = defineRoom({
   // Moth's own calls arrive as ignored marks once eth1 is up; catching one shows moth's name.
   altSolutions: [[typed("observatory", "ip link set eth1 up"), click("observatory", `lab card --to ${MOTH}`)]],
 });
+
+// ── Secret · Why 48 bits? (Region 1's secret room, decision 0065) ──────────────────────────
+
+const RELIC = "00:1b:21:3a:4f:9c";
+const secretId = "f2.secret-48-bits";
+const relicReply = helloWithKey("relic", keyFor(secretId));
+export const why48Bits = defineRoom({
+  id: secretId,
+  region: 1,
+  floor: 2,
+  order: 50,
+  kind: "secret",
+  pathTag: "all",
+  content: secretId,
+  seed: 250,
+  topology: halls({ second: { id: "relic", mac: RELIC, link: "seam", reply: relicReply } }),
+  faults: [],
+  playerDevice: "observatory",
+  access: { ...LANTERN_ROOM, relic: { state: "off-limits" } },
+  controls: { console: "typing", workbench: "works", catching: true },
+  tools: {},
+  glow: "none",
+  winCondition: labDelivered("observatory", relicReply),
+  key: { word: keyFor(secretId), via: "lab-text" },
+  healthChecks: [{ id: "seam-lit", object: { kind: "corridor", link: "seam" }, check: corridorLit("seam") }],
+  teaches: [],
+  uses: ["frame", "mac-address", "broadcast", "source-address"],
+  cards: ["makers-mark"],
+  misconceptions: [{ id: "guessed-02", detect: ran("observatory", /^lab send-frame\b.*--dev eth1\b.*--to 02:/) }],
+  detectorTests: [{ misconception: "guessed-02", steps: [bench("02:00:00:00:00:0d", "hi", "eth1")] }],
+  solution: [bench(BROADCAST, "who?", "eth1"), bench(RELIC, "hello", "eth1")],
+});

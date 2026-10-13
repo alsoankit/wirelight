@@ -20,7 +20,7 @@ export interface HallsOptions {
   messenger?: { to: string; dev?: string; msg: string };
   /** A machine behind the observatory's second door, in a sealed room (2.3, 2.B). */
   second?: {
-    id: "quill" | "moth";
+    id: string;
     mac: string;
     link: string;
     reply: string;

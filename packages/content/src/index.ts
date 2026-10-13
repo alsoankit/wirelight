@@ -6,6 +6,7 @@ import { firstMessage } from "./rooms/prologue";
 import { region2FloorTexts, region2Texts } from "./rooms/region2";
 import { region3FloorTexts, region3Texts } from "./rooms/region3";
 import { region4FloorTexts, region4Texts } from "./rooms/region4";
+import { why48Bits } from "./rooms/secrets1";
 import type { FloorText, RoomText } from "./rooms/types";
 
 export * from "./cards";
@@ -35,6 +36,7 @@ export const roomTexts: Record<string, RoomText> = {
   "f2.who-are-you": whoAreYou,
   "f2.lights-out": lightsOut,
   "f2.boss-silent-line": silentLine,
+  "f2.secret-48-bits": why48Bits,
   ...region2Texts,
   ...region3Texts,
   ...region4Texts,
