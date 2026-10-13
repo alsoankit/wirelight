@@ -8,17 +8,37 @@
  * Linux behaviours kept: taking a door down removes every route through it and forgets its
  * neighbours; an address brings its connected route (proto kernel scope link src …) while its door
  * is up; ICMP errors are rate-limited per destination (icmp_ratelimit 1000 ms, burst 6).
+ * ICMP redirects (measured, tools/golden/capture-redirect.sh): a router forwarding a packet back out
+ * of the door it came in on, when the sender is directly on that door's street, tells the sender of
+ * the better next hop (send_redirects), at most as often as ip_rt_send_redirect allows (load 20 ms
+ * doubling per redirect, 9 at most, reset after 20.48 s of quiet); a redirect resets the same
+ * per-destination bucket ICMP errors draw on. A host (accept_redirects; a router doesn't, because
+ * turning forwarding on clears conf.all.accept_redirects) whose route goes through the redirecting
+ * router keeps a route exception for that destination for 300 s, once the new gateway's address is
+ * known (otherwise it only asks for it).
  */
 import { broadcastOf, inSubnet, ipToInt, networkOf, parseCidr, routeNet } from "./addr";
+import { dhcpUdp } from "./dhcp";
 import { hold } from "./keeper";
 import { deviceOf, ifaceOf, type Kernel } from "./kernel";
 import { BROADCAST, type Mac } from "./mac";
-import { arpInput, neighFlushDev, resolve } from "./neigh";
+import { messengerHears } from "./messenger";
+import { arpInput, neighEventSend, neighFlushDev, resolve } from "./neigh";
 import { pingHears } from "./ping";
 import { decodeEth, ETHERTYPE, encodeEth, fromHex, toHex } from "./proto/ethernet";
 import { decodeIcmp, encodeIcmp, ICMP, UNREACH } from "./proto/icmp";
 import { decodeIPv4, decodeUDP, encodeIPv4, IPPROTO } from "./proto/ipv4";
-import type { AddrState, DeviceId, DeviceState, FrameOrigin, IfaceName, Ip, NeighState, RouteState } from "./types";
+import type {
+  AddrState,
+  DeviceId,
+  DeviceState,
+  FrameOrigin,
+  IfaceName,
+  Ip,
+  NeighState,
+  RouteException,
+  RouteState,
+} from "./types";
 
 export const SYSCTL_DEFAULTS: Record<string, string> = {
   "net.ipv4.ip_forward": "0",
@@ -104,6 +124,8 @@ function removeRoutes(k: Kernel, device: DeviceId, which: (r: RouteState) => boo
       after: null,
     });
   }
+  // A route exception hangs on its nexthop: when no route uses that nexthop any more, it goes too.
+  if (d.exceptions?.length) d.exceptions = d.exceptions.filter((e) => d.routes.some((r) => nhKey(r) === e.nh));
 }
 
 export type AddrResult = { ok: true } | { ok: false; error: "exists" | "missing" | "no-dev" | "bad" };
@@ -157,9 +179,12 @@ function dropAddr(k: Kernel, device: DeviceId, d: DeviceState, a: AddrState): vo
   removeRoutes(k, device, (r) => r.dev === a.dev && r.src === a.ip);
 }
 
-/** The last IPv4 address on a door went: Linux disables IP there, and every route through it goes. */
+/** The last IPv4 address on a door went: Linux disables IP there; every route through it and every neighbour on it go. */
 function afterRemoval(k: Kernel, device: DeviceId, d: DeviceState, dev: IfaceName): void {
-  if (!d.addrs.some((a) => a.dev === dev)) removeRoutes(k, device, (r) => r.dev === dev);
+  if (d.addrs.some((a) => a.dev === dev)) return;
+  removeRoutes(k, device, (r) => r.dev === dev);
+  // fib_disable_ip also runs arp_ifdown: the door's neighbours are forgotten (measured).
+  neighFlushDev(k, device, dev, (dv, q) => queuedFailed(k, dv, q));
 }
 
 /**
@@ -289,8 +314,32 @@ export function routesInOrder(d: Readonly<DeviceState>): RouteState[] {
   });
 }
 
+/** The nexthop a route exception belongs to (Linux shares one fib_info between identical nexthops). */
+export function nhKey(r: RouteState): string {
+  return `${r.via}|${r.dev}|${r.proto}`;
+}
+
+/** The live route exception for `dst` through route `r`, if any. */
+function exceptionFor(d: Readonly<DeviceState>, r: RouteState, dst: Ip, now: number): RouteException | undefined {
+  const key = nhKey(r);
+  return d.exceptions?.find((e) => e.dst === dst && e.nh === key && e.expires > now);
+}
+
+/**
+ * The route a packet to `dst` takes now: the longest-prefix match, with its gateway replaced by a
+ * redirect's route exception if one is live (`now` given). Without `now`, the table alone.
+ */
+export function lookupRoute(d: DeviceState, dst: Ip, now?: number): RouteState | null {
+  const r = tableLookup(d, dst);
+  if (!r || now === undefined) return r;
+  const e = exceptionFor(d, r, dst, now);
+  if (!e) return r;
+  e.bound = true;
+  return { ...r, via: e.gw };
+}
+
 /** Longest-prefix match over the main table (lookups skip routes whose door is down). */
-export function lookupRoute(d: DeviceState, dst: Ip): RouteState | null {
+function tableLookup(d: DeviceState, dst: Ip): RouteState | null {
   let best: RouteState | null = null;
   let bestPrefix = -1;
   for (const r of d.routes) {
@@ -308,14 +357,50 @@ export function lookupRoute(d: DeviceState, dst: Ip): RouteState | null {
 /** `ip route get <addr>`: where a packet to it would go, and from which address. */
 export type RouteGet =
   | { kind: "local"; dst: Ip }
-  | { kind: "unicast"; dst: Ip; via: Ip | null; dev: IfaceName; src: Ip }
+  | {
+      kind: "unicast";
+      dst: Ip;
+      via: Ip | null;
+      dev: IfaceName;
+      src: Ip;
+      /** A redirect's exception: ms until it expires (`cache <redirected> expires Nsec`). */
+      redirected?: number;
+    }
   | { kind: "unreachable" };
 
-export function routeGet(d: DeviceState, dst: Ip): RouteGet {
+export function routeGet(d: DeviceState, dst: Ip, now?: number): RouteGet {
   if (isLocal(d, dst)) return { kind: "local", dst };
-  const r = lookupRoute(d, dst);
-  if (!r) return { kind: "unreachable" };
-  return { kind: "unicast", dst, via: r.via, dev: r.dev, src: sourceFor(d, r, dst) ?? "0.0.0.0" };
+  const base = tableLookup(d, dst);
+  if (!base) return { kind: "unreachable" };
+  const e = now === undefined ? undefined : exceptionFor(d, base, dst, now);
+  const r = e ? { ...base, via: e.gw } : base;
+  return {
+    kind: "unicast",
+    dst,
+    via: r.via,
+    dev: r.dev,
+    src: sourceFor(d, r, dst) ?? "0.0.0.0",
+    ...(e && now !== undefined ? { redirected: e.expires - now } : {}),
+  };
+}
+
+/**
+ * `ip route show cache`: the route exceptions, listed under each route that shares their nexthop, in
+ * table order (so one exception shows twice when two routes share a gateway, as on Linux).
+ */
+export function routeCache(d: Readonly<DeviceState>, now: number): { dst: Ip; gw: Ip; dev: IfaceName; ms: number }[] {
+  const out: { dst: Ip; gw: Ip; dev: IfaceName; ms: number }[] = [];
+  for (const r of routesInOrder(d))
+    for (const e of d.exceptions ?? [])
+      if (e.nh === nhKey(r) && e.expires > now && e.bound)
+        out.push({ dst: e.dst, gw: e.gw, dev: e.dev, ms: e.expires - now });
+  return out;
+}
+
+/** `ip route flush cache`: every route exception goes (Linux bumps the exceptions' generation). */
+export function routeFlushCache(k: Kernel, device: DeviceId): void {
+  const d = deviceOf(k, device);
+  if (d) d.exceptions = [];
 }
 
 function sourceFor(d: DeviceState, r: RouteState, dst: Ip): Ip | null {
@@ -359,7 +444,7 @@ export function sendIp(
     ipLocal(k, device, "lo", null, decodeIPv4(bytes), bytes);
     return { ok: true };
   }
-  const r = lookupRoute(d, p.dst);
+  const r = lookupRoute(d, p.dst, k.s.t);
   if (!r) return { ok: false, error: "unreachable" };
   const src = p.src ?? sourceFor(d, r, p.dst) ?? "0.0.0.0";
   const bytes = encodeIPv4({
@@ -415,7 +500,7 @@ function output(
 export function outputPacket(k: Kernel, device: DeviceId, packet: Uint8Array, parent: number): void {
   const d = deviceOf(k, device);
   const dst = decodeIPv4(packet).dst;
-  const r = d && lookupRoute(d, dst);
+  const r = d && lookupRoute(d, dst, k.s.t);
   if (r) output(k, device, r, dst, packet, "kernel", parent || null);
 }
 
@@ -446,7 +531,7 @@ export function queuedFailed(k: Kernel, device: DeviceId, q: NeighState["queue"]
 export function inetInput(k: Kernel, device: DeviceId, dev: IfaceName, frameId: number, bytes: Uint8Array): boolean {
   const f = decodeEth(bytes);
   if (f.type === ETHERTYPE.arp) {
-    arpInput(k, device, dev, f.payload, (q, mac, outDev) => frameOut(k, device, outDev, mac, q));
+    arpInput(k, device, dev, f.payload, (q, mac, outDev) => frameOut(k, device, outDev, mac, q), f.dst);
     return true;
   }
   if (f.type !== ETHERTYPE.ipv4) return false;
@@ -516,7 +601,7 @@ function forward(
     icmpError(k, device, packet, ICMP.timeExceeded, 0, frameId);
     return;
   }
-  const r = lookupRoute(d, ip.dst);
+  const r = lookupRoute(d, ip.dst, k.s.t);
   if (!r) {
     drop("no-route", null);
     if (allowRoutingError(k, d, ip.src)) icmpError(k, device, packet, ICMP.unreachable, UNREACH.net, frameId);
@@ -532,7 +617,84 @@ function forward(
     egress: [r.dev],
     tableRef: { dst: frameDst, ip: ip.dst, route: { dst: r.dst, via: r.via, dev: r.dev } },
   });
-  output(k, device, r, ip.dst, decrementTtl(packet), "forward", frameId);
+  const out = decrementTtl(packet);
+  // Back out of the door it came in on, from a sender on that street: tell the sender (after the
+  // TTL decrement, so the quoted header shows the new TTL), then forward it anyway.
+  if (r.dev === inDev && sendsRedirects(d, inDev) && onLinkVia(d, ip.src, inDev) && allowRedirect(k, d, ip.src))
+    icmpError(k, device, out, ICMP.redirect, REDIRECT_HOST, frameId, r.via ?? ip.dst);
+  output(k, device, r, ip.dst, out, "forward", frameId);
+}
+
+const REDIRECT_HOST = 1;
+
+/** conf.all.send_redirects OR conf.<door>.send_redirects (IN_DEV_TX_REDIRECTS). */
+function sendsRedirects(d: DeviceState, dev: IfaceName): boolean {
+  return (
+    sysctl(d, "net.ipv4.conf.all.send_redirects") !== "0" ||
+    (d.sysctl[`net.ipv4.conf.${dev}.send_redirects`] ?? "1") !== "0"
+  );
+}
+
+/** The sender is directly on this door's street: its route back is a gateway-less route out of it. */
+function onLinkVia(d: DeviceState, src: Ip, dev: IfaceName): boolean {
+  const back = tableLookup(d, src);
+  return !!back && back.via === null && back.dev === dev;
+}
+
+/**
+ * Whether this machine takes redirects on `dev` (IN_DEV_RX_REDIRECTS): a host if conf.all or the
+ * door's accept_redirects is on, a router only if both are. Turning forwarding on sets
+ * conf.all.accept_redirects to 0 (and off, to 1), as Linux's inet_forward_change does.
+ */
+export function acceptsRedirects(d: Readonly<DeviceState>, dev: IfaceName): boolean {
+  const fwd = forwarding(d as DeviceState);
+  const all = (d.sysctl["net.ipv4.conf.all.accept_redirects"] ?? (fwd ? "0" : "1")) !== "0";
+  const door = (d.sysctl[`net.ipv4.conf.${dev}.accept_redirects`] ?? "1") !== "0";
+  return fwd ? all && door : all || door;
+}
+
+const EXCEPTION_MS = 300_000;
+
+/**
+ * An ICMP redirect arrived (icmp_redirect → __ip_do_redirect): the route to the quoted packet's
+ * destination must go through the router that sent it; the new gateway must be an ordinary address;
+ * if its link address is known, a route exception sends that destination to it from now on, else
+ * the machine only starts asking for it.
+ */
+function takeRedirect(k: Kernel, device: DeviceId, dev: IfaceName, from: Ip, gw: Ip, code: number, quoted: Ip): void {
+  const d = deviceOf(k, device);
+  if (!d || code > 3) return;
+  const base = tableLookup(d, quoted);
+  if (!base) return;
+  const now = k.s.t;
+  const current = exceptionFor(d, base, quoted, now)?.gw ?? base.via;
+  if (current !== from || gw === from || !acceptsRedirects(d, dev)) return;
+  const n = ipToInt(gw) ?? 0;
+  if (n === 0 || n >>> 28 === 14 || gw === "255.255.255.255" || isLocal(d, gw) || isBroadcastFor(d, gw)) return;
+  const neigh = d.neigh.find((x) => x.ip === gw && x.dev === base.dev);
+  if (!neigh || neigh.state === "INCOMPLETE" || neigh.state === "FAILED") {
+    neighEventSend(k, device, base.dev, gw);
+    return;
+  }
+  const nh = nhKey(base);
+  d.exceptions ??= [];
+  const list = d.exceptions;
+  const e = list.find((x) => x.dst === quoted && x.nh === nh);
+  const before = e ? { dst: quoted, via: e.gw, dev: e.dev, redirected: true } : null;
+  if (e) {
+    e.gw = gw;
+    e.expires = now + EXCEPTION_MS;
+  } else list.push({ dst: quoted, gw, dev: base.dev, nh, expires: now + EXCEPTION_MS });
+  k.emit({
+    kind: "table.change",
+    t: now,
+    device,
+    table: "route",
+    op: e ? "set" : "add",
+    key: `cache ${quoted}`,
+    before,
+    after: { dst: quoted, via: gw, dev: base.dev, redirected: true },
+  });
 }
 
 /** TTL down by one, the header checksum recomputed: what a router does to every packet it passes. */
@@ -609,6 +771,7 @@ function ipLocal(
       return;
     }
     if (m.type === ICMP.echoReply) {
+      messengerHears(k, device, { from: ip.src, id: m.id, seq: m.seq, frameId });
       pingHears(k, device, {
         kind: "reply",
         from: ip.src,
@@ -617,6 +780,17 @@ function ipLocal(
         ttl: ip.ttl,
         bytes: ip.payload.length,
       });
+      return;
+    }
+    if (m.type === ICMP.redirect) {
+      const inner = decodeIPv4(m.data);
+      const gw = [m.id >> 8, m.id & 0xff, m.seq >> 8, m.seq & 0xff].join(".");
+      takeRedirect(k, device, dev, ip.src, gw, m.code, inner.dst);
+      // ping's raw socket sees it too, and prints it.
+      if (inner.proto !== IPPROTO.icmp) return;
+      const echo = decodeIcmp(m.data.subarray(inner.ihl));
+      if (echo.type !== ICMP.echoRequest) return;
+      pingHears(k, device, { kind: "redirect", from: ip.src, id: echo.id, seq: echo.seq, code: m.code, gw });
       return;
     }
     if (m.type === ICMP.unreachable || m.type === ICMP.timeExceeded) {
@@ -630,14 +804,15 @@ function ipLocal(
     return;
   }
   if (ip.proto === IPPROTO.udp) {
-    // Nothing listens on these machines' UDP ports (DHCP comes with Floor 7): Linux answers
-    // "port unreachable", except to broadcasts.
+    // DHCP's ports, when a server or client runs here (dhcp.ts). Nothing else listens: Linux
+    // answers "port unreachable", except to broadcasts.
+    const udp = decodeUDP(ip.payload);
+    if (dhcpUdp(k, device, dev, udp.dstPort, udp.data)) return;
     if (broadcast) {
       if (frameId !== null)
         k.emit({ kind: "frame.drop", t: k.s.t, device, iface: dev, frameId, reason: "no-listener" });
       return;
     }
-    decodeUDP(ip.payload);
     icmpError(k, device, packet, ICMP.unreachable, UNREACH.port, frameId ?? 0);
   }
 }
@@ -646,7 +821,7 @@ function ipLocal(
 
 /** Linux's per-destination token bucket for ICMP errors (inet_peer: 1 per icmp_ratelimit, burst 6). */
 /** The per-destination token bucket (inet_peer): a new peer starts as if last used a minute ago. */
-function peerTokens(k: Kernel, d: DeviceState, to: Ip): { tokens: number; at: number } {
+function peerTokens(k: Kernel, d: DeviceState, to: Ip): { tokens: number; at: number; redirects?: number } {
   const b = d.icmpTokens[to] ?? { tokens: 0, at: k.s.t - 60_000 };
   d.icmpTokens[to] = b;
   return b;
@@ -680,8 +855,45 @@ function allowError(k: Kernel, d: DeviceState, to: Ip): boolean {
   return true;
 }
 
-/** Sends an ICMP error about `packet` back to its sender. */
-function icmpError(k: Kernel, device: DeviceId, packet: Uint8Array, type: number, code: number, about: number): void {
+/**
+ * ip_rt_send_redirect's limit, per destination, on the same peer as the ICMP error bucket: after
+ * 20.48 s of quiet it starts over (and empties the error tokens); the first redirect goes at once,
+ * the next only after 20 ms << (redirects sent); after 9, none (each refusal restarts the quiet).
+ */
+const REDIRECT_LOAD_MS = 20;
+const REDIRECT_NUMBER = 9;
+const REDIRECT_SILENCE_MS = REDIRECT_LOAD_MS << (REDIRECT_NUMBER + 1);
+
+function allowRedirect(k: Kernel, d: DeviceState, to: Ip): boolean {
+  const now = k.s.t;
+  const b = peerTokens(k, d, to);
+  if (now > b.at + REDIRECT_SILENCE_MS) {
+    b.tokens = 0;
+    b.redirects = 0;
+  }
+  const n = b.redirects ?? 0;
+  if (n >= REDIRECT_NUMBER) {
+    b.at = now;
+    return false;
+  }
+  if (n === 0 || now > b.at + (REDIRECT_LOAD_MS << n)) {
+    b.at = now;
+    b.redirects = n + 1;
+    return true;
+  }
+  return false;
+}
+
+/** Sends an ICMP error (or a redirect, with the new `gateway`) about `packet` back to its sender. */
+function icmpError(
+  k: Kernel,
+  device: DeviceId,
+  packet: Uint8Array,
+  type: number,
+  code: number,
+  about: number,
+  gateway?: Ip,
+): void {
   const d = deviceOf(k, device);
   if (!d) return;
   const ip = decodeIPv4(packet);
@@ -689,17 +901,22 @@ function icmpError(k: Kernel, device: DeviceId, packet: Uint8Array, type: number
   if (ip.proto === IPPROTO.icmp && ![ICMP.echoRequest, ICMP.echoReply].includes(decodeIcmp(ip.payload).type as 0 | 8))
     return;
   if (isBroadcastFor(d, ip.dst) || ip.src === "0.0.0.0") return;
-  if (!allowError(k, d, ip.src)) return;
+  // Only the types in icmp_ratemask (unreachable, source quench, time exceeded, parameter problem) are limited.
+  const mask = Number(sysctl(d, "net.ipv4.icmp_ratemask") ?? 6168);
+  if ((mask >> type) & 1 && !allowError(k, d, ip.src)) return;
   const quoted = packet.subarray(0, Math.min(packet.length, ICMP_QUOTE_MAX));
-  const msg = encodeIcmp({ type, code, id: 0, seq: 0, data: quoted });
+  const g = ipToInt(gateway ?? "0.0.0.0") ?? 0;
+  const msg = encodeIcmp({ type, code, id: g >>> 16, seq: g & 0xffff, data: quoted });
   const kind =
-    type === ICMP.timeExceeded
-      ? "time-exceeded"
-      : code === UNREACH.net
-        ? "net-unreachable"
-        : code === UNREACH.port
-          ? "port-unreachable"
-          : "host-unreachable";
+    type === ICMP.redirect
+      ? "redirect"
+      : type === ICMP.timeExceeded
+        ? "time-exceeded"
+        : code === UNREACH.net
+          ? "net-unreachable"
+          : code === UNREACH.port
+            ? "port-unreachable"
+            : "host-unreachable";
   k.emit({ kind: "icmp.error", t: k.s.t, device, type: kind, to: ip.src, about });
   sendIp(k, device, { dst: ip.src, proto: IPPROTO.icmp, payload: msg, ttl: 64, df: false, tos: 0xc0 }, "kernel", about);
 }

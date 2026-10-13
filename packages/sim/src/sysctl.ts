@@ -4,6 +4,7 @@
  * per door. Values the simulator models are live:
  * - net.ipv4.ip_forward and every net.ipv4.conf.*.forwarding (Linux keeps them in step: writing
  *   ip_forward sets all of them);
+ * - net.ipv4.conf.all.accept_redirects follows forwarding (0 when on) until written;
  * - net.ipv4.neigh.<door>.* timers and counts (a door's neighbour settings; writing
  *   base_reachable_time_ms picks a new random reachable time, as Linux does).
  * Other keys keep what was written. kernel.*, vm.*, fs.* aren't modelled (docs/sim-deviations.md).
@@ -42,8 +43,12 @@ function defaults(d: Readonly<DeviceState>): Map<string, string> {
   return m;
 }
 
+/** Turning forwarding on sets conf.all.accept_redirects to 0, off to 1 (inet_forward_change, measured). */
+const ACCEPT_ALL = "net.ipv4.conf.all.accept_redirects";
+
 function live(d: Readonly<DeviceState>, key: string, fallback: string): string {
   if (isForwardingKey(key)) return forwardingValue(d);
+  if (key === ACCEPT_ALL) return d.sysctl[key] ?? (forwardingValue(d) === "0" ? "1" : "0");
   const n = key.match(/^net\.ipv4\.neigh\.([^.]+)\.([a-z_]+)$/);
   const reader = n && NEIGH_KEYS[n[2] as string];
   if (n && reader) return String(parmsOf(d as DeviceState, n[1] as string)[reader.field] / reader.scale);
@@ -86,6 +91,7 @@ export function sysctlWrite(k: Kernel, device: DeviceId, key: string, value: str
   const v = value.trim();
   if (isForwardingKey(key)) {
     d.sysctl["net.ipv4.ip_forward"] = v;
+    delete d.sysctl[ACCEPT_ALL];
     // The router's navigator, asleep at the lectern (8.5), wakes when it's allowed to pass packets on.
     if (v === "1" && d.keeper.asleep === "router") {
       k.emit({ kind: "table.change", t: k.s.t, device, table: "sysctl", op: "set", key, before, after: v });

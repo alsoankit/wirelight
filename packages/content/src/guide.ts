@@ -213,11 +213,11 @@ export const guide: GuideTopic[] = [
         { text: "", tone: "prompt" },
       ],
     },
-    from: "f0.r1-first-light",
+    from: "f2.lights-out",
     body: [
       "Every machine has a console: its command line. Press [[`]] (the key above Tab) to open or close it.",
       "Commands run on the machine whose room you're in. The Glass has no console.",
-      "When you click to do something, the console shows the real command that click ran, marked with ↳. For now the console only shows these. Later you'll type your own.",
+      "When you click to do something, the console shows the real command that click ran, marked with ↳.",
       "Commands that start with lab are Wirelight's own tools and show in purple. Everything else works the same on a real Linux machine.",
     ],
   },
@@ -231,12 +231,11 @@ export const guide: GuideTopic[] = [
       off: "Light off: it doesn't",
       address: "02:00:00:00:00:07",
     },
-    from: "f0.r1-first-light",
+    from: "f1.two-rooms",
     body: [
-      "Every door has a plate beside it. The plate shows the door's name (like eth0), its address, and a light.",
-      "The address on the plate is the door's MAC address: six pairs of characters like 02:00:00:00:00:07. It belongs to that one door.",
-      "To find out a machine's address, walk to its room and read the plate on its door. Click a plate to read it up close; you can copy the address from there.",
+      "Every door has a plate beside it. The plate shows the door's name, like eth0, and a light.",
       "The light is a filled diamond when the cable is working and a hollow ring when it isn't.",
+      "Click a plate to read it up close. Some plates have a small switch that turns the door on or off.",
     ],
   },
   {
@@ -251,7 +250,7 @@ export const guide: GuideTopic[] = [
         { target: "door", label: "Your frame leaves through here" },
       ],
     },
-    from: "f0.r1-first-light",
+    from: "f2.first-light",
     body: [
       "The workbench in the Observatory builds a frame, the envelope a message travels in. Write who it's for, add a message, then seal and send it.",
       "The bench keeps what you wrote, so you can come back and change it.",

@@ -11,7 +11,8 @@ If you re-capture on a different machine, update this file and review the diff o
 | libpcap | 1.10.6 (64-bit time_t, with TPACKET_V3) | `tcpdump --version` |
 | procps-ng (`sysctl`) | 4.0.6 | `sysctl --version` |
 | Linux kernel | 7.1.13-200.fc44.x86_64 | `uname -r` |
-| dhclient / udhcpc | not installed: no DHCP client goldens yet | |
+| ISC dhclient | 4.4.3-P1 (Fedora 44 `dhcp-client-4.4.3-26.fc44`, with Fedora's dhclient-script; ipcalc 1.1.0-4.fc44) | `dhclient --version`; unpacked from the RPMs, not installed (capture-dhcp.sh) |
+| dnsmasq | 2.92rel2 | `dnsmasq --version` |
 | tc | not installed | |
 
 Captured on 2026-10-13, Fedora 44, in unprivileged namespaces (`unshare -rmn`), with IPv6 disabled

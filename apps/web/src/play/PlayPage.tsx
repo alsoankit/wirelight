@@ -1,5 +1,6 @@
 import { PerformanceMonitor, useGLTF } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
+import { roomById } from "@wirelight/rooms";
 import { useEffect, useState } from "react";
 import { EngineDriver } from "../engine/EngineDriver";
 import { useSession } from "../engine/store";
@@ -8,13 +9,15 @@ import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from ".
 import { pieceUrl } from "../world/kit/Piece";
 import { OBSERVATORY } from "../world/observatory/layout";
 import { ObservatoryScene } from "../world/observatory/ObservatoryScene";
+import { Console } from "./Console";
 import { RoomHud } from "./RoomHud";
 
 // B1 walking skeleton: the Prologue, played in the Observatory, driven by the engine in a worker.
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
 // Dev aids: ?ruin=0|1 pins the dial; ?tier=high|medium|low|simple, T cycles.
 
-const ROOM = "prologue.first-message";
+// Dev aid: ?room=<id> opens another room (e.g. f2.lights-out, which has the console).
+const ROOM = new URLSearchParams(location.search).get("room") ?? "p.first-message";
 
 /** Starts fetching the room's kit pieces (during the descent), so arriving doesn't wait on them. */
 export function preloadRoom(): void {
@@ -38,6 +41,8 @@ export function PlayPage({ arriving = false }: { arriving?: boolean }) {
   const [auto, setAuto] = useState(!forced);
   const quality = QUALITY[tier];
   const load = useSession((s) => s.load);
+  const roomId = useSession((s) => s.roomId);
+  const room = roomId ? roomById(roomId) : undefined;
 
   useEffect(() => {
     void load(ROOM);
@@ -80,6 +85,9 @@ export function PlayPage({ arriving = false }: { arriving?: boolean }) {
         {auto ? " (auto)" : ""} · T to change
       </div>
       <RoomHud />
+      {room && room.controls.console !== "hidden" && (
+        <Console device={room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
+      )}
       {arriving && <div className="arrival-veil" />}
     </QualityContext.Provider>
   );

@@ -2,7 +2,7 @@
  * `ip addr` (iproute2 6.17): show, add, del, flush. Output and errors match the golden files captured
  * on real Linux (tools/golden/capture-ipv4.sh, packages/shell/test/golden/addr).
  */
-import { type AddrState, type IfaceState, parseCidr } from "@wirelight/sim";
+import { type AddrState, type IfaceState, lftLeft, parseCidr } from "@wirelight/sim";
 import type { CommandContext } from "../types";
 import { linkHeader } from "./iplink";
 
@@ -24,12 +24,19 @@ function ordered(addrs: readonly AddrState[]): AddrState[] {
   return [...addrs.filter((a) => !a.secondary), ...addrs.filter((a) => a.secondary)];
 }
 
-function addrLines(i: IfaceState, addrs: readonly AddrState[]): string[] {
+function addrLines(i: IfaceState, addrs: readonly AddrState[], now: number): string[] {
   const lines: string[] = [];
   for (const a of ordered(addrs.filter((x) => x.dev === i.name))) {
     const brd = a.broadcast ? ` brd ${a.broadcast}` : "";
-    lines.push(`    inet ${a.ip}/${a.prefix}${brd} scope ${a.scope}${a.secondary ? " secondary" : ""} ${a.dev}`);
-    lines.push("       valid_lft forever preferred_lft forever");
+    // An address given with lifetimes (dhclient's) is "dynamic" and counts down.
+    const left = lftLeft(a, now);
+    const dyn = left ? " dynamic" : "";
+    lines.push(`    inet ${a.ip}/${a.prefix}${brd} scope ${a.scope}${a.secondary ? " secondary" : ""}${dyn} ${a.dev}`);
+    lines.push(
+      left
+        ? `       valid_lft ${left.valid}sec preferred_lft ${left.preferred}sec`
+        : "       valid_lft forever preferred_lft forever",
+    );
   }
   return lines;
 }
@@ -54,7 +61,7 @@ function show(ctx: CommandContext, args: string[]): number {
   }
   for (const i of ifaces) {
     for (const line of linkHeader(ctx, i, false)) ctx.out(line);
-    for (const line of addrLines(i, d.addrs)) ctx.out(line);
+    for (const line of addrLines(i, d.addrs, ctx.sim.now)) ctx.out(line);
   }
   return 0;
 }

@@ -1,0 +1,326 @@
+/** floors/floor-6.md · Envelopes. The Slate replaces the capture jar (0043); the house's keeper by hand (0042). */
+import { keyFor, lanternLampsRemember } from "@wirelight/content";
+import type { Fault } from "@wirelight/sim";
+import { all, not, ran } from "../predicates";
+import { type Access, defineRoom, type Misconception, type SolutionStep } from "../types";
+import {
+  answeredBy,
+  askedWhatTheLedgerKnew,
+  claims,
+  hasAddr,
+  keeperAwake,
+  lastAnswersFrom,
+  ledgerHas,
+  openedFramesOnly,
+  openedToMessage,
+  waitedOnLedger,
+  wrappedTo,
+} from "./predicates";
+import { ANVIL, IP, LANTERN, LANTERN_OLD, town } from "./topology";
+
+const typed = (device: string, line: string, waitMs?: number): SolutionStep => ({
+  device,
+  line,
+  source: "typed",
+  ...(waitMs ? { waitMs } : {}),
+});
+const click = (device: string, line: string, waitMs?: number): SolutionStep => ({
+  device,
+  line,
+  source: "click",
+  ...(waitMs ? { waitMs } : {}),
+});
+
+const OPEN: Access = { state: "enterable" };
+const LOCKED: Access = { state: "locked-for-now" };
+const access = (houses: string[], open: string[] = []) => ({
+  observatory: OPEN,
+  square: OPEN,
+  ...Object.fromEntries(houses.map((h) => [h, open.includes(h) ? OPEN : LOCKED])),
+});
+const SLATE = { catch: true } as const;
+
+// ── 6.1 · Inside the Envelope ──────────────────────────────────────────────────────────────
+
+const envelopeId = "f6.inside-the-envelope";
+const openedLantern = openedToMessage(LANTERN);
+export const insideTheEnvelope = defineRoom({
+  id: envelopeId,
+  region: 3,
+  floor: 6,
+  order: 1,
+  kind: "learn",
+  pathTag: "tool",
+  content: envelopeId,
+  seed: 61,
+  topology: town({
+    houses: ["lantern", "quill", "anvil"],
+    lanternAnnounces: { text: lanternLampsRemember(keyFor(envelopeId)) },
+  }),
+  faults: [],
+  playerDevice: "observatory",
+  access: access(["lantern", "quill", "anvil"]),
+  controls: { console: "typing", slate: SLATE },
+  tools: { unlock: ["lab slate"] },
+  glow: "symptoms",
+  winCondition: openedLantern,
+  key: { word: keyFor(envelopeId), via: "mark" },
+  healthChecks: [],
+  teaches: ["packet", "encapsulation"],
+  uses: ["frame", "mac-address", "broadcast", "ip-address"],
+  cards: ["slate", "packet"],
+  misconceptions: [{ id: "frame-is-everything", detect: openedFramesOnly(3) }],
+  detectorTests: [
+    {
+      misconception: "frame-is-everything",
+      steps: [
+        click("observatory", "lab slate catch --next", 7000),
+        click("observatory", "lab slate catch --next", 7000),
+        click("observatory", "lab slate catch --next", 7000),
+        click("observatory", "lab slate open 1"),
+        click("observatory", "lab slate open 2"),
+        click("observatory", "lab slate open 3"),
+      ],
+    },
+  ],
+  solution: [
+    click("observatory", `lab slate catch --next --from ${IP.lantern}`, 8000),
+    click("observatory", "lab slate open 1 --layer message"),
+  ],
+});
+
+// ── 6.2 · Who Has This Address? ────────────────────────────────────────────────────────────
+
+const whoHasId = "f6.who-has-this-address";
+export const whoHasThisAddress = defineRoom({
+  id: whoHasId,
+  region: 3,
+  floor: 6,
+  order: 2,
+  kind: "learn",
+  pathTag: "tool",
+  content: whoHasId,
+  seed: 62,
+  topology: town({ houses: ["lantern", "quill", "anvil"] }),
+  faults: [{ kind: "keeper-asleep", device: "observatory", desk: "host" }],
+  playerDevice: "observatory",
+  access: access(["lantern", "quill", "anvil"]),
+  controls: { console: "typing", desk: "observatory", ledgers: { observatory: "works" }, slate: SLATE },
+  tools: { unlock: ["ip neigh"] },
+  glow: "symptoms",
+  winCondition: answeredBy("observatory", IP.lantern, LANTERN),
+  key: { word: keyFor(whoHasId), via: "mark" },
+  healthChecks: [
+    {
+      id: "ledger-has-lantern",
+      object: { kind: "ledger", device: "observatory" },
+      check: ledgerHas("observatory", IP.lantern, LANTERN),
+    },
+    { id: "keeper-awake", object: { kind: "keeper", device: "observatory" }, check: keeperAwake("observatory") },
+  ],
+  teaches: ["arp", "neighbour-ledger"],
+  uses: ["packet", "encapsulation", "frame", "broadcast", "mac-address", "ip-address", "ping"],
+  cards: ["neighbour-ledger", "arp-question"],
+  commandMemory: "CMD-06",
+  misconceptions: [
+    { id: "wrap-with-ip", detect: ran("observatory", /^lab keeper wrap \d+\.\d+\.\d+\.\d+$/) },
+    { id: "wrap-to-everyone", detect: ran("observatory", /^lab keeper wrap ff:ff:ff:ff:ff:ff$/i) },
+    { id: "ask-again", detect: askedWhatTheLedgerKnew("observatory") },
+  ],
+  detectorTests: [
+    {
+      misconception: "wrap-with-ip",
+      steps: [typed("observatory", "ping -c 3 10.0.1.7", 500), click("observatory", "lab keeper wrap 10.0.1.7")],
+    },
+    {
+      misconception: "wrap-to-everyone",
+      steps: [
+        typed("observatory", "ping -c 3 10.0.1.7", 500),
+        click("observatory", "lab keeper wrap ff:ff:ff:ff:ff:ff"),
+      ],
+    },
+    {
+      misconception: "ask-again",
+      steps: [
+        typed("observatory", "ping -c 3 10.0.1.7", 500),
+        click("observatory", "lab keeper arp-ask 10.0.1.7", 500),
+        click("observatory", "lab keeper arp-ask 10.0.1.7"),
+      ],
+    },
+  ],
+  solution: [
+    typed("observatory", "ping -c 3 10.0.1.7", 500),
+    click("observatory", "lab keeper arp-ask 10.0.1.7", 500),
+    click("observatory", `lab keeper wrap ${LANTERN}`, 1100),
+    click("observatory", `lab keeper wrap ${LANTERN}`),
+    typed("observatory", "ip neigh"),
+  ],
+  // After two packets wrapped by hand to lantern's door, the keeper remembers (F6-KEEP-01).
+  rules: [
+    {
+      id: "keeper-remembers",
+      when: wrappedTo("observatory", LANTERN, 2),
+      // biome-ignore lint/suspicious/noThenProperty: the room format names a rule's effect `then` (types.ts).
+      then: { kind: "wake-keeper", device: "observatory" },
+    },
+  ],
+});
+
+// ── 6.3 · Two of Me ────────────────────────────────────────────────────────────────────────
+
+const twoId = "f6.two-of-me";
+const quillOwnHouse = all(hasAddr("quill", "10.0.1.12/24"), not(claims("quill", IP.lantern)));
+const flushAndHope: Misconception = {
+  id: "flush-and-hope",
+  detect: ran("observatory", /^ip neigh (flush|del)\b/, 2),
+};
+const changeMyAddress: Misconception = { id: "change-my-address", detect: ran("observatory", /^ip addr (add|del) /) };
+const deleteLantern: Misconception = { id: "delete-lantern", detect: ran("lantern", /^ip addr del 10\.0\.1\.7\b/) };
+export const twoOfMe = defineRoom({
+  id: twoId,
+  region: 3,
+  floor: 6,
+  order: 3,
+  kind: "break",
+  pathTag: "core",
+  content: twoId,
+  seed: 63,
+  // The Knight's messenger keeps pinging lantern, so the answers (and who sends them) keep coming.
+  // Lantern and quill each call on the observatory now and then; on real Linux the ledger keeps the
+  // first answer and switches only when the other house asks the observatory something itself
+  // (decision 0061), so these calls are what make the stranger answer "sometimes".
+  topology: town({
+    houses: ["lantern", "quill", "anvil"],
+    messenger: { to: IP.lantern, intervalMs: 2000 },
+    extra: {
+      lantern: { messenger: { to: "10.0.1.5", intervalMs: 9000 } },
+      quill: { messenger: { to: "10.0.1.5", intervalMs: 13_000 } },
+    },
+  }),
+  faults: [
+    { kind: "addr-remove", device: "quill", cidr: "10.0.1.12/24", dev: "eth0" },
+    { kind: "addr-set", device: "quill", cidr: "10.0.1.7/24", dev: "eth0" },
+  ],
+  playerDevice: "observatory",
+  access: access(["lantern", "quill", "anvil"], ["lantern", "quill"]),
+  controls: {
+    console: "typing",
+    slate: SLATE,
+    ledgers: { observatory: "works" },
+    addressSlots: { "quill:eth0": "broken" },
+  },
+  tools: {},
+  glow: "symptoms",
+  winCondition: all(quillOwnHouse, lastAnswersFrom("observatory", IP.lantern, LANTERN, 3)),
+  key: { word: keyFor(twoId), via: "mark" },
+  healthChecks: [
+    {
+      id: "one-claims-lantern",
+      object: { kind: "slot", device: "quill", iface: "eth0" },
+      check: not(claims("quill", IP.lantern)),
+    },
+    {
+      id: "quill-at-12",
+      object: { kind: "slot", device: "quill", iface: "eth0" },
+      check: hasAddr("quill", "10.0.1.12/24"),
+    },
+  ],
+  teaches: ["duplicate-address"],
+  uses: ["arp", "neighbour-ledger", "ip-address", "mac-address", "ping"],
+  cards: ["two-answers"],
+  misconceptions: [flushAndHope, changeMyAddress, deleteLantern],
+  detectorTests: [
+    {
+      misconception: "flush-and-hope",
+      steps: [typed("observatory", "ip neigh flush dev eth0"), typed("observatory", "ip neigh flush dev eth0")],
+    },
+    { misconception: "change-my-address", steps: [typed("observatory", "ip addr del 10.0.1.5/24 dev eth0")] },
+    { misconception: "delete-lantern", steps: [typed("lantern", "ip addr del 10.0.1.7/24 dev eth0")] },
+  ],
+  solution: [
+    typed("quill", "ip addr del 10.0.1.7/24 dev eth0"),
+    typed("quill", "ip addr add 10.0.1.12/24 dev eth0", 90_000),
+  ],
+});
+
+// ── 6.B · The Mixed-Up Letters ─────────────────────────────────────────────────────────────
+
+const mixedId = "f6.boss-mixed-up-letters";
+/** A pinned ledger line for lantern's old door (`ip neigh add 10.0.1.7 lladdr 02:00:00:00:00:07 dev eth0 nud permanent`). */
+const pinnedLine = {
+  kind: "neigh-permanent",
+  device: "observatory",
+  ip: IP.lantern,
+  mac: LANTERN_OLD,
+  dev: "eth0",
+} as const satisfies Fault;
+export const mixedUpLetters = defineRoom({
+  id: mixedId,
+  region: 3,
+  floor: 6,
+  order: 9,
+  kind: "boss",
+  pathTag: "boss",
+  content: mixedId,
+  seed: 69,
+  topology: town({ houses: ["lantern", "quill", "anvil", "bell"] }),
+  faults: [
+    pinnedLine,
+    { kind: "addr-remove", device: "bell", cidr: "10.0.1.18/24", dev: "eth0" },
+    { kind: "addr-set", device: "bell", cidr: "10.0.1.10/24", dev: "eth0" },
+  ],
+  playerDevice: "observatory",
+  access: access(["lantern", "quill", "anvil", "bell"], ["lantern", "bell"]),
+  controls: {
+    console: "typing",
+    slate: SLATE,
+    ledgers: { observatory: "works" },
+    addressSlots: { "observatory:eth0": "broken", "bell:eth0": "broken" },
+  },
+  tools: {},
+  glow: "none",
+  winCondition: all(answeredBy("observatory", IP.lantern, LANTERN), answeredBy("observatory", IP.anvil, ANVIL)),
+  key: { word: keyFor(mixedId), via: "mark" },
+  healthChecks: [
+    {
+      id: "no-pinned-line",
+      object: { kind: "ledger", device: "observatory" },
+      check: not(ledgerHas("observatory", IP.lantern, LANTERN_OLD)),
+    },
+    {
+      id: "bell-own-house",
+      object: { kind: "slot", device: "bell", iface: "eth0" },
+      check: all(hasAddr("bell", "10.0.1.18/24"), not(claims("bell", IP.anvil))),
+    },
+  ],
+  hintTiming: { revealAfterMs: 12 * 60_000 },
+  teaches: [],
+  uses: ["arp", "neighbour-ledger", "duplicate-address", "ip-address", "mac-address", "ping", "packet"],
+  cards: [],
+  misconceptions: [
+    flushAndHope,
+    changeMyAddress,
+    { id: "delete-lantern", detect: ran("lantern", /^ip addr del 10\.0\.1\.7\b/) },
+    { id: "permanent-again", detect: waitedOnLedger("observatory", 30_000) },
+  ],
+  detectorTests: [
+    {
+      misconception: "flush-and-hope",
+      steps: [typed("observatory", "ip neigh flush dev eth0"), typed("observatory", "ip neigh flush dev eth0")],
+    },
+    { misconception: "change-my-address", steps: [typed("observatory", "ip addr del 10.0.1.5/24 dev eth0")] },
+    { misconception: "delete-lantern", steps: [typed("lantern", "ip addr del 10.0.1.7/24 dev eth0")] },
+    {
+      misconception: "permanent-again",
+      steps: [typed("observatory", "ip neigh", 35_000), typed("observatory", "ip neigh")],
+    },
+  ],
+  solution: [
+    typed("observatory", "ip neigh"),
+    typed("observatory", "ip neigh del 10.0.1.7 dev eth0"),
+    typed("bell", "ip addr del 10.0.1.10/24 dev eth0"),
+    typed("bell", "ip addr add 10.0.1.18/24 dev eth0"),
+    typed("observatory", "ping -c 3 10.0.1.7"),
+    typed("observatory", "ping -c 3 10.0.1.10"),
+  ],
+});

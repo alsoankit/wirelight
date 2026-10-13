@@ -16,6 +16,12 @@ export function ipRoute(ctx: CommandContext, args: string[]): number {
   if (cmd === "replace") return change(ctx, rest, true);
   if (matches(cmd, "delete")) return del(ctx, rest);
   if (cmd === "get") return get(ctx, rest);
+  // The route cache: the exceptions ICMP redirects leave (tools/golden/capture-redirect.sh).
+  if (matches(cmd, "flush") && rest[0] === "cache") {
+    ctx.sim.routeFlushCache(ctx.device);
+    return 0;
+  }
+  if ((matches(cmd, "show") || matches(cmd, "list")) && rest[0] === "cache") return showCache(ctx, rest.slice(1));
   if (matches(cmd, "show") || matches(cmd, "list") || cmd === "lst") return show(ctx, rest);
   ctx.err(`Command "${cmd}" is unknown, try "ip route help".`);
   return 255;
@@ -45,6 +51,17 @@ function show(ctx: CommandContext, args: string[]): number {
     return 1;
   }
   for (const r of routesInOrder(d)) if (dev === undefined || r.dev === dev) ctx.out(line(ctx, r, dev === undefined));
+  return 0;
+}
+
+/** `ip route show cache [<addr>]`: each exception as two lines, as iproute2 prints them. */
+function showCache(ctx: CommandContext, args: string[]): number {
+  const only = args.find((w) => w !== "to");
+  for (const e of ctx.sim.routeCache(ctx.device)) {
+    if (only !== undefined && only !== e.dst) continue;
+    ctx.out(`${e.dst} via ${e.gw} dev ${e.dev} `);
+    ctx.out(`    cache <redirected> expires ${Math.floor(e.ms / 1000)}sec `);
+  }
   return 0;
 }
 
@@ -135,6 +152,8 @@ function get(ctx: CommandContext, args: string[]): number {
     return 0;
   }
   ctx.out(`${r.dst}${r.via ? ` via ${r.via}` : ""} dev ${r.dev} src ${r.src} uid 0 `);
-  ctx.out("    cache ");
+  ctx.out(
+    r.redirected === undefined ? "    cache " : `    cache <redirected> expires ${Math.floor(r.redirected / 1000)}sec `,
+  );
   return 0;
 }

@@ -1,9 +1,8 @@
 import type { CardId } from "../cards";
 
 /**
- * A room's player-facing text (tech/room-format.md). The room itself (packages/rooms) holds only
- * logic and refers to this by its id. `{name}` placeholders are filled from the room's `vars`
- * (addresses and the like), so the text never copies a value the room defines.
+ * A room's player-facing text (tech/room-format.md, 0055). The room itself (packages/rooms) holds only
+ * logic and refers to this by its id. `{name}` placeholders are filled from the room's `vars`.
  */
 export interface RoomText {
   title: string;
@@ -15,12 +14,31 @@ export interface RoomText {
   hints: [Hint, Hint, Hint, Hint, Hint];
   /** For each of the room's detectors, by id: the Knight's note when it fires, and one line for the debrief. */
   detectors: Record<string, { note: string; tried: string }>;
-  debrief: { happened: string; terms: { term: string; meaning: string }[] };
+  /** What happened, and the new words: each with its term id (the room's `teaches`). */
+  debrief: { happened: string; terms: { id: string; term: string; meaning: string }[] };
   /** Why a machine can't be entered, by device id (sealed or not yet). */
   access?: Record<string, string>;
+  /** Knight's Memories (0008): when they play, what he says, what the player then does. */
+  memories?: { id: string; title: string; trigger: string; text: string; action?: string }[];
+  /** The Guardian's fragments (0036): question and answer; `after` when it opens later. */
+  guardian?: { q: string; a: string; after?: string }[];
+  /** Building memory (0037, Regions 1–2): what's said, and what's shown. */
+  building?: { id: string; text: string; shown: string };
+  /** Field Guide topics this room opens. */
+  fieldGuide?: string[];
+  /** Other voiced lines (a boss introduction, the gift of the voice, a navigator…), by id. */
+  voice?: { id: string; speaker: string; text: string }[];
 }
 
 export interface Hint {
   text: string;
   codex?: CardId;
+}
+
+/** A floor's own text: its memory, its journal page, its Guardian's farewell. */
+export interface FloorText {
+  name: string;
+  memory: { id: string; title: string; text: string; shown?: string }[];
+  journal: { page: number; title: string; where: string; text: string };
+  farewell?: { id: string; speaker: string; text: string };
 }

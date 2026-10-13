@@ -3,7 +3,7 @@
  * statistics arrive through the trace as the network runs (SH-03); Ctrl+C stops it. Output and
  * errors match real iputils (tools/golden/capture-ipv4.sh).
  */
-import { ipToInt, pingHeader } from "@wirelight/sim";
+import { ipToInt, lookupRoute, pingHeader } from "@wirelight/sim";
 import type { CommandContext } from "../types";
 import { PING_USAGE } from "./usage";
 
@@ -73,6 +73,13 @@ export function ping(ctx: CommandContext, args: string[]): number | null {
   // Anything that isn't an address is a name, and there's no DNS server in these rooms.
   if (ipToInt(target) === null) {
     ctx.err(`ping: ${target}: Temporary failure in name resolution`);
+    return 2;
+  }
+  // The kernel refuses a time-to-live of 0; iputils asks only after connecting (measured: with no
+  // route, "connect: Network is unreachable" comes first).
+  const here = ctx.sim.device(ctx.device);
+  if (ttl === 0 && here && lookupRoute(here, target)) {
+    ctx.err("ping: cannot set unicast time-to-live: Invalid argument");
     return 2;
   }
   const r = ctx.sim.startPing(ctx.device, ctx.execId, { dst: target, target, count, ttl, intervalMs, waitMs, numeric });

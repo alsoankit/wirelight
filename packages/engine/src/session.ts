@@ -4,6 +4,7 @@
 // batches and derives every view from them; the session adds only what the room's rules say about
 // them (won, health checks, detectors fired).
 import {
+  applyRules,
   type CorridorState,
   corridorState,
   facts,
@@ -13,7 +14,7 @@ import {
   rooms,
   toolsIn,
 } from "@wirelight/rooms";
-import type { SimBackend } from "@wirelight/shell";
+import { type Completion, complete, type SimBackend, type ToolId } from "@wirelight/shell";
 import type { CmdSource, DeviceId, SimEvent, WorldState } from "@wirelight/sim";
 
 export type RoomStatus = {
@@ -61,6 +62,28 @@ export class Session {
   exec(device: DeviceId, line: string, source: CmdSource): Batch & { execId: number; exitCode: number | null } {
     const { execId, exitCode } = this.live().exec(device, line, source);
     return { ...this.batch(), execId, exitCode };
+  }
+
+  /** Ctrl+C: stops a command that keeps running (ping, tcpdump) and reports its end. */
+  interrupt(device: DeviceId, execId: number): Batch {
+    this.live().world.interrupt(device, execId);
+    return this.batch();
+  }
+
+  /** What was typed on a machine's console, oldest first (↑/↓). */
+  history(device: DeviceId): string[] {
+    return [...this.live().history(device)];
+  }
+
+  /** Tab: the typed word completed, from the tools the player has and this machine's doors (UI-09). */
+  complete(device: DeviceId, line: string): Completion {
+    return complete(this.live().world, device, line, toolsIn(this.current(), rooms) as Set<ToolId>);
+  }
+
+  /** Touches a worn-out control (0040): nothing runs, but the room notices. */
+  touch(device: DeviceId, control: string): Batch {
+    this.live().touch(device, control);
+    return this.batch();
   }
 
   /**
@@ -135,6 +158,7 @@ export class Session {
   }
 
   private batch(): Batch {
+    applyRules(this.current(), this.live());
     const trace = this.live().trace();
     const events = trace.slice(this.sent);
     this.sent = trace.length;

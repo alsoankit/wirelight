@@ -61,6 +61,11 @@ export class SimBackend implements NetworkBackend {
     return { execId: r.execId, exitCode: r.exitCode, interrupt: () => sim.interrupt(deviceId, r.execId) };
   }
 
+  /** A worn-out control was touched: it runs nothing, but the trace records it (0040). */
+  touch(deviceId: DeviceId, control: string): void {
+    this.world.touch(deviceId, control);
+  }
+
   advance(to: number): void {
     this.world.advance(to);
   }

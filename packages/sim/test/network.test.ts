@@ -37,8 +37,9 @@ describe("bridges (switches)", () => {
       SimEvent,
       { kind: "fwd.decision" }
     >[];
-    // a's ARP request (broadcast) floods to eth2 and eth3; b's reply and the pings are forwarded.
-    expect(decisions[0]).toMatchObject({ decision: "flood", egress: ["eth2", "eth3"] });
+    // a's ARP request (broadcast) floods to eth3 and eth2 (newest port first, as Linux floods);
+    // b's reply and the pings are forwarded.
+    expect(decisions[0]).toMatchObject({ decision: "flood", egress: ["eth3", "eth2"] });
     expect(decisions.slice(1).every((d) => d.decision === "forward")).toBe(true);
     const learned = sim
       .device("hall")

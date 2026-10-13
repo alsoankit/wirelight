@@ -449,3 +449,90 @@ html:has(.landing) {
     animation-delay: 0.2s;
   }
 }
+
+/* The console (UI-06): a bar along the bottom edge that slides up with `. */
+.console {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 38vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  transition: height 0.26s ease-out;
+  z-index: 30;
+}
+
+.console[data-open="no"] {
+  height: 44px;
+}
+
+.console-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0 16px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font: 13px / 1 var(--sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.console-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+.console-title {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.console-host {
+  font-family: var(--mono);
+}
+
+.console-toggle {
+  margin-left: auto;
+}
+
+.console-toggle kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  font-family: var(--mono);
+}
+
+.console-body {
+  flex: 1;
+  min-height: 0;
+  padding: 0 16px 12px;
+}
+
+.console-term {
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .console {
+    transition: none;
+  }
+}
+
+.console .xterm,
+.console .xterm-viewport,
+.console .xterm-screen {
+  background: transparent !important;
+}

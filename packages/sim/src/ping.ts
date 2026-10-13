@@ -95,10 +95,11 @@ function sendNext(k: Kernel, device: DeviceId, p: PingProc): void {
   }
 }
 
-export function pingTimer(k: Kernel, device: DeviceId, execId: number, what: "send" | "finish"): void {
+export function pingTimer(k: Kernel, device: DeviceId, execId: number, what: "send" | "finish" | "read"): void {
   const p = deviceOf(k, device)?.procs.find((x): x is PingProc => x.kind === "ping" && x.execId === execId);
   if (!p || p.done) return;
   if (what === "send") sendNext(k, device, p);
+  else if (what === "read") readInbox(k, device, p);
   else finish(k, device, p);
 }
 
@@ -123,18 +124,67 @@ const ERROR_TEXT: Record<string, string> = {
 
 export type PingEvent =
   | { kind: "reply"; from: Ip; id: number; seq: number; ttl: number; bytes: number }
-  | { kind: "error"; from: Ip; id: number; seq: number; type: number; code: number };
+  | { kind: "error"; from: Ip; id: number; seq: number; type: number; code: number }
+  | { kind: "redirect"; from: Ip; id: number; seq: number; code: number; gw: Ip };
 
-/** An echo reply or an ICMP error about one of our echoes reached this machine. */
+/**
+ * How long ping takes to wake and read a redirect waiting on its socket. Linux delivers ICMP errors
+ * as a socket error, which ping's next read returns before any queued data: measured, a redirect
+ * followed ~0.15 ms later by the "time exceeded" that ends `ping -c 1 -t 2` is never printed
+ * (5 runs of 5). Replies queued behind a redirect wait with it, so the order stays the arrival order.
+ */
+const READ_WAKE_MS = 1;
+
+const REDIRECT_TEXT = [
+  "Redirect Network",
+  "Redirect Host",
+  "Redirect Type of Service and Network",
+  "Redirect Type of Service and Host",
+];
+
+/** An echo reply, an ICMP error or a redirect about one of our echoes reached this machine. */
 export function pingHears(k: Kernel, device: DeviceId, e: PingEvent): void {
   const p = deviceOf(k, device)?.procs.find((x): x is PingProc => x.kind === "ping" && !x.done && x.id === e.id);
   if (!p) return;
   const sentAt = p.sentAt[e.seq];
   if (sentAt === undefined) return;
+  if (e.kind === "redirect" || (e.kind === "reply" && p.inbox?.length)) {
+    p.inbox ??= [];
+    const inbox = p.inbox;
+    if (inbox.length === 0)
+      k.schedule({ t: k.s.t + READ_WAKE_MS, kind: "ping", device, execId: p.execId, what: "read" });
+    inbox.push(
+      e.kind === "redirect"
+        ? { kind: "redirect", from: e.from, seq: e.seq, ttl: 0, bytes: 0, at: k.s.t, gw: e.gw, code: e.code }
+        : { kind: "reply", from: e.from, seq: e.seq, ttl: e.ttl, bytes: e.bytes, at: k.s.t, gw: "", code: 0 },
+    );
+    return;
+  }
+  hear(k, device, p, e, k.s.t);
+}
+
+function readInbox(k: Kernel, device: DeviceId, p: PingProc): void {
+  const inbox = p.inbox ?? [];
+  p.inbox = [];
+  for (const m of inbox) {
+    if (p.done) return;
+    if (m.kind === "redirect")
+      out(
+        k,
+        device,
+        p.execId,
+        `From ${m.from}: icmp_seq=${m.seq} ${REDIRECT_TEXT[m.code] ?? "Redirect"}(New nexthop: ${m.gw})`,
+      );
+    else hear(k, device, p, { kind: "reply", from: m.from, id: p.id, seq: m.seq, ttl: m.ttl, bytes: m.bytes }, m.at);
+  }
+}
+
+function hear(k: Kernel, device: DeviceId, p: PingProc, e: Exclude<PingEvent, { kind: "redirect" }>, at: number): void {
+  const sentAt = p.sentAt[e.seq] ?? at;
   // iputils' "pipe": how many were sent by the time this answer (or error) came back, from its seq on.
   p.pipe = Math.max(p.pipe, p.sent - e.seq + 1);
   if (e.kind === "reply") {
-    const rtt = k.s.t - sentAt;
+    const rtt = at - sentAt;
     p.received += 1;
     p.rtts.push(rtt);
     out(

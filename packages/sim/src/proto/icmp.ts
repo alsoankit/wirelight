@@ -4,6 +4,7 @@ import { checksum } from "./ipv4";
 export const ICMP = {
   echoReply: 0,
   unreachable: 3,
+  redirect: 5,
   echoRequest: 8,
   timeExceeded: 11,
 } as const;
@@ -13,7 +14,7 @@ export const UNREACH = { net: 0, host: 1, port: 3 } as const;
 export interface IcmpMessage {
   type: number;
   code: number;
-  /** Echo: identifier and sequence. Errors: unused (zero). */
+  /** Echo: identifier and sequence. Errors: unused (zero). Redirect: the new gateway (id = high half). */
   id: number;
   seq: number;
   /** Echo: the payload. Errors: the original IP header and the first 8 bytes of its data. */

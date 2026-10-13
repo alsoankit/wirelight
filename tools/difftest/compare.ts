@@ -13,7 +13,10 @@ export function normaliseOutput(line: string): string {
     .replace(/time=\d+(\.\d+)? ms/g, "time=<t> ms")
     .replace(/, time \d+ms/g, ", time <t>ms")
     .replace(/rtt min\/avg\/max\/mdev = [\d./]+ ms/g, "rtt min/avg/max/mdev = <rtt> ms")
-    .replace(/, pipe \d+/g, "");
+    .replace(/, pipe \d+/g, "")
+    .replace(/\(xid=0x[0-9a-f]+\)/g, "(xid=<xid>)")
+    .replace(/ interval \d+ \(xid/g, " interval <n> (xid")
+    .replace(/renewal in \d+ seconds/g, "renewal in <n> seconds");
 }
 
 type Table = { neigh: string[]; route: string[]; fdb: string[] };

@@ -11,17 +11,17 @@ function textOf(room: RoomDef): RoomText {
 
 describe.each(rooms.map((r) => [r.id, r] as const))("%s", (_id, room) => {
   it("does not start already won (a)", () => {
-    const f = play(loadRoom(room, rooms), [], 30_000);
+    const f = play(room, loadRoom(room, rooms), [], 30_000);
     expect(room.winCondition(f)).toBe(false);
   });
 
   it("its solution wins within a bounded network time (b)", () => {
-    const f = play(loadRoom(room, rooms), room.solution);
+    const f = play(room, loadRoom(room, rooms), room.solution);
     expect(room.winCondition(f)).toBe(true);
   });
 
   it("the solution passes every health check (restored at the end)", () => {
-    const f = play(loadRoom(room, rooms), room.solution);
+    const f = play(room, loadRoom(room, rooms), room.solution);
     for (const h of room.healthChecks) expect(h.check(f), h.id).toBe(true);
   });
 
@@ -29,8 +29,8 @@ describe.each(rooms.map((r) => [r.id, r] as const))("%s", (_id, room) => {
     for (const m of room.misconceptions) {
       const tests = room.detectorTests.filter((t) => t.misconception === m.id);
       expect(tests.length, `${m.id} has no test`).toBeGreaterThan(0);
-      for (const t of tests) expect(m.detect(play(loadRoom(room, rooms), t.steps)), `${m.id}`).toBe(true);
-      expect(m.detect(play(loadRoom(room, rooms), room.solution)), `${m.id} fires on the solution`).toBe(false);
+      for (const t of tests) expect(m.detect(play(room, loadRoom(room, rooms), t.steps)), `${m.id}`).toBe(true);
+      expect(m.detect(play(room, loadRoom(room, rooms), room.solution)), `${m.id} fires on the solution`).toBe(false);
     }
     for (const t of room.detectorTests) expect(room.misconceptions.some((m) => m.id === t.misconception)).toBe(true);
   });

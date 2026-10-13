@@ -2,7 +2,17 @@
  * `lab` — game-only tools (FR-CON-07). Not real Linux; shown in the lab color, and the first use
  * says so. Syntax per SRS SIM-09.
  */
-import { type DeviceState, decodeEth, decodeIPv4, fromHex, ipToInt, lookupRoute, parseMac } from "@wirelight/sim";
+import {
+  type DeviceState,
+  decodeEth,
+  decodeIPv4,
+  fromHex,
+  ipToInt,
+  lookupRoute,
+  parseMac,
+  peel,
+  type SlateLayer,
+} from "@wirelight/sim";
 import type { CommandContext, ToolId } from "../types";
 
 const SUB: { name: string; tool: ToolId }[] = [
@@ -10,6 +20,7 @@ const SUB: { name: string; tool: ToolId }[] = [
   { name: "card", tool: "lab card" },
   { name: "cable", tool: "lab cable" },
   { name: "keeper", tool: "lab keeper" },
+  { name: "slate", tool: "lab slate" },
 ];
 
 export function lab(ctx: CommandContext, args: string[]): number {
@@ -32,7 +43,148 @@ export function lab(ctx: CommandContext, args: string[]): number {
   if (found.name === "send-frame") return sendFrame(ctx, rest);
   if (found.name === "card") return card(ctx, rest);
   if (found.name === "cable") return cable(ctx, rest);
+  if (found.name === "slate") return slate(ctx, rest);
   return keeper(ctx, rest);
+}
+
+/** `lab slate …`: the Knight's capture tablet (0043). It only catches and reads. */
+function slate(ctx: CommandContext, args: string[]): number {
+  const say = (key: string, vars?: Record<string, string>) => ctx.out(ctx.content.lab(key, vars));
+  const usage = () => {
+    ctx.err(ctx.content.lab("slate.usage"));
+    return 2;
+  };
+  const [action, ...rest] = args;
+  if (action === undefined || action === "list") {
+    if (rest.length) return usage();
+    const all = ctx.sim.slateCatches();
+    if (all.length === 0) say("slate.empty");
+    for (const c of all) {
+      const [frame, inner] = peel(fromHex(c.hex));
+      if (frame?.layer !== "frame") continue;
+      const ip = inner?.layer === "packet" ? inner : null;
+      say("slate.row", {
+        n: String(c.n),
+        time: (c.t / 1000).toFixed(3),
+        device: c.device,
+        door: c.iface,
+        dir: c.dir,
+        from: ip ? ip.from : frame.from,
+        to: ip ? ip.to : frame.to,
+        what: ctx.content.lab(`slate.what-${carrying(frame.type)}`, { type: frame.type.toString(16) }),
+        traced: c.traced ? ctx.content.lab("slate.traced") : "",
+      });
+    }
+    return 0;
+  }
+  if (action === "catch") {
+    if (rest[0] !== "--next") return usage();
+    if (rest.length === 1) {
+      ctx.sim.slateCatchNext(ctx.device);
+      say("slate.armed", { device: ctx.device });
+      return 0;
+    }
+    if (rest[1] !== "--from" || rest[2] === undefined || rest.length > 3) return usage();
+    const from = parseMac(rest[2]) ?? rest[2];
+    ctx.sim.slateCatchNext(ctx.device, from);
+    say("slate.armed-from", { device: ctx.device, from });
+    return 0;
+  }
+  if (action === "open") {
+    const n = Number(rest[0]);
+    const layer = rest[1] === undefined ? "frame" : rest[1] === "--layer" ? rest[2] : undefined;
+    if (!Number.isInteger(n) || n < 1 || (layer !== "frame" && layer !== "packet" && layer !== "message"))
+      return usage();
+    if (rest.length !== 1 && rest.length !== 3) return usage();
+    const r = ctx.sim.slateOpen(ctx.device, n, layer);
+    if (!r.ok) {
+      ctx.err(ctx.content.lab("slate.no-catch", { n: String(n) }));
+      return 1;
+    }
+    for (const l of r.layers) say(...layerLine(ctx, l));
+    if (!r.reached && layer === "packet") say("slate.no-packet");
+    return 0;
+  }
+  if (action === "trace" || action === "compare") {
+    if (!ctx.tools.has("lab slate trace")) {
+      ctx.note(ctx.content.notes.locked);
+      return 127;
+    }
+    if (action === "trace") {
+      if (rest.length !== 1 || rest[0] !== "--next") return usage();
+      ctx.sim.slateTraceNext(ctx.device);
+      say("slate.tracing", { device: ctx.device });
+      return 0;
+    }
+    const [a, b] = rest.map(Number);
+    if (rest.length !== 2 || !Number.isInteger(a) || !Number.isInteger(b)) return usage();
+    const r = ctx.sim.slateCompare(a as number, b as number);
+    if (!r) {
+      const missing = ctx.sim.slateCatches()[(a as number) - 1] ? b : a;
+      ctx.err(ctx.content.lab("slate.no-catch", { n: String(missing) }));
+      return 1;
+    }
+    for (const x of r.a) {
+      const y = r.b.find((l) => l.layer === x.layer);
+      for (const [key, v] of Object.entries(x)) {
+        if (key === "layer" || key === "kind") continue;
+        const w = y ? (y as Record<string, unknown>)[key] : undefined;
+        say("slate.compare", {
+          field: `${x.layer}.${key}`.padEnd(16),
+          a: String(v).padEnd(18),
+          b: String(w ?? "-").padEnd(18),
+          mark: ctx.content.lab(r.changed.includes(`${x.layer}.${key}`) ? "slate.changed" : "slate.same"),
+        });
+      }
+    }
+    return 0;
+  }
+  return usage();
+}
+
+/** What a frame carries, by its EtherType: the key of its name in the Slate's text. */
+function carrying(type: number): string {
+  if (type === 0x0800) return "packet";
+  if (type === 0x0806) return "arp";
+  if (type === 0x88b5) return "lab";
+  if (type === 0x88b6) return "lab-answer";
+  return "other";
+}
+
+/** One layer of a catch as a line of the Slate's text. */
+function layerLine(ctx: CommandContext, l: SlateLayer): [string, Record<string, string>] {
+  if (l.layer === "frame")
+    return [
+      "slate.frame",
+      {
+        to: l.to,
+        from: l.from,
+        what: ctx.content.lab(`slate.what-${carrying(l.type)}`, { type: l.type.toString(16) }),
+      },
+    ];
+  if (l.layer === "packet")
+    return [
+      "slate.packet",
+      {
+        to: l.to,
+        from: l.from,
+        ttl: String(l.ttl),
+        proto: l.proto === 1 ? "icmp" : l.proto === 17 ? "udp" : String(l.proto),
+        checksum: l.checksum.toString(16).padStart(4, "0"),
+      },
+    ];
+  if (l.kind === "udp") return ["slate.message-udp", { text: l.text, port: String(l.toPort) }];
+  if (l.kind === "icmp") {
+    if (l.type === 8) return ["slate.message-echo-request", { seq: String(l.seq) }];
+    if (l.type === 0) return ["slate.message-echo-reply", { seq: String(l.seq) }];
+    return ["slate.message-icmp", { type: String(l.type), code: String(l.code) }];
+  }
+  if (l.kind === "lab") return ["slate.message-lab", { text: l.text }];
+  if (l.kind === "arp")
+    return l.op === 1
+      ? ["slate.message-arp-request", { target: l.targetIp, sender: l.senderIp }]
+      : ["slate.message-arp-reply", { sender: l.senderIp, mac: l.senderMac }];
+  return ["slate.message-other", { bytes: String(l.bytes) }];
 }
 
 /** `lab cable plug|unplug <door>`: the cable end at one of this machine's doors (Floor 1). */
@@ -188,40 +340,54 @@ function sendFrame(ctx: CommandContext, args: string[]): number {
   return 0;
 }
 
-const CARD_USAGE = "usage: lab card show | lab card set --to <mac>";
+const CARD_USAGE = "usage: lab card [show] | lab card [--messenger N] --to <mac|address>";
 
-/** `lab card`: the messenger's address card on the desk (SIM-09). */
+/**
+ * `lab card`: the messengers' address cards on the desk (SIM-09). `--to` takes a door name (MAC) or,
+ * from Floor 5, a house address (IPv4); `--messenger N` picks a card when there are several.
+ */
 function card(ctx: CommandContext, args: string[]): number {
-  const m = ctx.sim.device(ctx.device)?.messenger;
-  if (!m) {
+  const all = ctx.sim.device(ctx.device)?.messengers ?? [];
+  if (all.length === 0) {
     ctx.err("lab card: there's no address card on this machine");
     return 1;
   }
-  const [sub, ...rest] = args;
-  if (sub === undefined || sub === "show") {
-    if (rest.length) {
+  // The older `lab card set --to <mac>` still works.
+  const words = args[0] === "set" ? args.slice(1) : args;
+  if (words.length === 0 || (words.length === 1 && words[0] === "show")) {
+    all.forEach((m, i) => {
+      if (all.length > 1) ctx.out(`card ${i + 1}`);
+      ctx.out(`to       ${m.to || "(blank)"}`);
+      ctx.out(`message  ${m.msg}`);
+      ctx.out(`every    ${m.intervalMs / 1000} s`);
+    });
+    return 0;
+  }
+  let index = 1;
+  let to: string | undefined;
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    const v = words[i + 1];
+    if (w === "--messenger" && v !== undefined && /^\d+$/.test(v)) index = Number(v);
+    else if (w === "--to" && v !== undefined) to = v;
+    else {
       ctx.err(CARD_USAGE);
       return 2;
     }
-    ctx.out(`to       ${m.to}`);
-    ctx.out(`message  ${m.msg}`);
-    ctx.out(`every    ${m.intervalMs / 1000} s`);
-    return 0;
+    i++;
   }
-  if (sub === "set") {
-    if (rest[0] !== "--to" || rest[1] === undefined || rest.length > 2) {
-      ctx.err(CARD_USAGE);
-      return 2;
-    }
-    const mac = parseMac(rest[1]);
-    if (!mac) {
-      ctx.err(`lab card: "${rest[1]}" is not a MAC address (like 02:00:00:00:00:07)`);
-      return 2;
-    }
-    ctx.sim.setCard(ctx.device, mac);
-    return 0;
+  if (to === undefined) {
+    ctx.err(CARD_USAGE);
+    return 2;
   }
-  ctx.err(`lab card: unknown command "${sub}"`);
-  ctx.err(CARD_USAGE);
-  return 2;
+  if (index < 1 || index > all.length) {
+    ctx.err(`lab card: there's no card ${index} (this desk has ${all.length})`);
+    return 2;
+  }
+  if (!ctx.sim.setCard(ctx.device, to, index)) {
+    // Names only door names: house addresses aren't taught until Floor 5, where they simply work.
+    ctx.err(`lab card: "${to}" is not a MAC address (like 02:00:00:00:00:07)`);
+    return 2;
+  }
+  return 0;
 }

@@ -45,6 +45,9 @@
 #   - tcpdump: a leading "HH:MM:SS.uuuuuu " timestamp -> "<time> "; ICMP echo "id 12345" -> "id <id>"
 #     (ping picks a random identifier); a UDP source port "10.0.0.5.54165 >" -> "10.0.0.5.<port> >"
 #     (the sender's ephemeral port is random).
+#   - dhclient: "(xid=0x5bb4bb21)" -> "(xid=<xid>)", "interval 8 (xid" -> "interval <n> (xid", "renewal in
+#     1517 seconds" -> "renewal in <n> seconds", "dhclient(323463) is already running" ->
+#     "dhclient(<pid>) is already running" (transaction id, backoff, renewal time and pid are random).
 #   - ifindex numbers are kept: each topology creates its doors in the order the room lists them,
 #     so lo=1 and then the doors in topology order.
 #   - Trailing spaces are kept (Linux really prints "REACHABLE " and "master br0 " with one).
@@ -181,7 +184,11 @@ normalize() {
     -e 's#= [0-9.]+/[0-9.]+/[0-9.]+/[0-9.]+ ms#= <time>/<time>/<time>/<time> ms#' \
     -e 's/^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6} /<time> /' \
     -e 's/(ICMP echo (request|reply), id )[0-9]+/\1<id>/' \
-    -e '/UDP, length/ s/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\.[0-9]+ > /\1.<port> > /'
+    -e '/UDP, length/ s/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\.[0-9]+ > /\1.<port> > /' \
+    -e 's/\(xid=0x[0-9a-f]+\)/(xid=<xid>)/' \
+    -e 's/ interval [0-9]+ \(xid/ interval <n> (xid/' \
+    -e 's/renewal in [0-9]+ seconds/renewal in <n> seconds/' \
+    -e 's/^dhclient\([0-9]+\) is already running/dhclient(<pid>) is already running/'
 }
 
 real_cmd() { # what actually runs for a player command (see "Environment choices")

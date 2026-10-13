@@ -35,8 +35,10 @@ export const voice = {
     badAddress: "Addresses look like 02:00:00:00:00:07.",
   },
   console: {
-    echoOnly: "For now it shows what your actions do; typing comes later.",
-    cantType: "You can't type here yet. Your clicks show up here as commands.",
+    title: "Console",
+    open: "open",
+    hide: "hide",
+    reset: "— room reset —",
   },
   debrief: {
     title: "Restored",

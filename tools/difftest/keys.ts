@@ -38,17 +38,23 @@ export function keyFromBytes(bytes: Uint8Array): string | null {
     const ip = decodeIPv4(f.payload);
     if (ip.proto === IPPROTO.icmp) {
       const m = decodeIcmp(ip.payload);
-      const what = ICMP_TEXT[`${m.type}:${m.code}`] ?? `icmp ${m.type}/${m.code}`;
+      const gw = [m.id >> 8, m.id & 0xff, m.seq >> 8, m.seq & 0xff].join(".");
+      const what =
+        m.type === ICMP.redirect
+          ? `redirect to ${gw}`
+          : (ICMP_TEXT[`${m.type}:${m.code}`] ?? `icmp ${m.type}/${m.code}`);
       const seq = m.type === ICMP.echoRequest || m.type === ICMP.echoReply ? ` seq ${m.seq}` : "";
       return `${head} IP ${ip.src} > ${ip.dst} ICMP ${what}${seq}`;
     }
     if (ip.proto === IPPROTO.udp) {
       const u = decodeUDP(ip.payload);
+      if ([67, 68].includes(u.srcPort) && [67, 68].includes(u.dstPort))
+        return `${head} IP ${ip.src} > ${ip.dst} BOOTP ${u.data[0] === 1 ? "Request" : "Reply"}`;
       return `${head} IP ${ip.src}.${u.srcPort} > ${ip.dst}.${u.dstPort} UDP`;
     }
     return `${head} IP ${ip.src} > ${ip.dst} proto ${ip.proto}`;
   }
-  if (f.type === ETHERTYPE.lab) return `${head} lab`;
+  if (f.type === ETHERTYPE.lab || f.type === ETHERTYPE.labAnswer) return `${head} lab`;
   return `${head} type 0x${f.type.toString(16)}`;
 }
 
@@ -64,7 +70,8 @@ export function keyFromTcpdump(line: string): string | null {
   if (isMulticastNoise(dst)) return null;
   const head = `${src} > ${dst}`;
   if (type === "0806") {
-    const req = rest.match(/Request who-has (\S+) tell (\S+),/);
+    // "(Broadcast)" marks a request whose target MAC is ff:ff:ff:ff:ff:ff (arping -D's probes).
+    const req = rest.match(/Request who-has (\S+) (?:\(Broadcast\) )?tell (\S+),/);
     if (req) return `${head} ARP who-has ${req[1]} tell ${req[2]}`;
     const rep = rest.match(/Reply (\S+) is-at ([0-9a-f:]{17}),/);
     if (rep) return `${head} ARP ${rep[1]} is-at ${rep[2]}`;
@@ -76,6 +83,8 @@ export function keyFromTcpdump(line: string): string | null {
       const [, a, b, body = ""] = icmp;
       const echo = body.match(/^echo (request|reply), id \d+, seq (\d+)/);
       if (echo) return `${head} IP ${a} > ${b} ICMP echo ${echo[1]} seq ${echo[2]}`;
+      const redirect = body.match(/^redirect \S+ to host (\S+),/);
+      if (redirect) return `${head} IP ${a} > ${b} ICMP redirect to ${redirect[1]}`;
       const what = /time exceeded/.test(body)
         ? "time exceeded"
         : /net \S+ unreachable/.test(body)
@@ -89,8 +98,11 @@ export function keyFromTcpdump(line: string): string | null {
     }
     const udp = rest.match(/^(\S+) > (\S+): UDP/);
     if (udp) return `${head} IP ${udp[1]} > ${(udp[2] ?? "").replace(/:$/, "")} UDP`;
+    // tcpdump names DHCP's ports even with -n: "0.0.0.0.bootpc > 255.255.255.255.bootps: BOOTP/DHCP, Request …"
+    const bootp = rest.match(/^(\S+)\.boot(?:pc|ps) > (\S+)\.boot(?:pc|ps): BOOTP\/DHCP, (Request|Reply)/);
+    if (bootp) return `${head} IP ${bootp[1]} > ${bootp[2]} BOOTP ${bootp[3]}`;
     return `${head} IP ${rest}`;
   }
-  if (type === "88b5") return `${head} lab`;
+  if (type === "88b5" || type === "88b6") return `${head} lab`;
   return `${head} type 0x${type}`;
 }

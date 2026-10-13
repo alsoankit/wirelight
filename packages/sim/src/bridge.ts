@@ -60,6 +60,32 @@ function scheduleAgeing(k: Kernel, device: DeviceId, br: BridgeState, e: FdbEntr
   k.schedule({ t, kind: "fdb-age", device, bridge: br.name, mac: e.mac, updated: e.updated });
 }
 
+/**
+ * A bridge port stopped forwarding (carrier lost or switched off): its learned entries go, static
+ * ones stay (br_stp_disable_port → br_fdb_delete_by_port without do_all; measured on 7.1.13).
+ */
+export function fdbPortDown(k: Kernel, device: DeviceId, port: IfaceName): void {
+  const d = deviceOf(k, device);
+  const master = d?.ifaces.find((i) => i.name === port)?.master;
+  for (const br of Object.values(d?.bridges ?? {})) {
+    if (br.name !== master) continue;
+    const gone = br.fdb.filter((e) => e.port === port && !e.static && !e.local);
+    if (gone.length === 0) continue;
+    br.fdb = br.fdb.filter((e) => !gone.includes(e));
+    for (const e of gone)
+      k.emit({
+        kind: "table.change",
+        t: k.s.t,
+        device,
+        table: "fdb",
+        op: "del",
+        key: e.mac,
+        before: port,
+        after: null,
+      });
+  }
+}
+
 /** An ageing timer fired: forget the entry if nothing refreshed it since. */
 export function fdbAge(k: Kernel, device: DeviceId, bridge: IfaceName, mac: Mac, updated: number): void {
   const br = deviceOf(k, device)?.bridges[bridge];
@@ -69,9 +95,16 @@ export function fdbAge(k: Kernel, device: DeviceId, bridge: IfaceName, mac: Mac,
   k.emit({ kind: "table.change", t: k.s.t, device, table: "fdb", op: "del", key: mac, before: e.port, after: null });
 }
 
-/** The ports that can carry a frame now (up, with carrier). */
+/**
+ * The ports that can carry a frame now (up, with carrier), in the order Linux floods them: its port
+ * list puts each new port first, so the last port added gets a flooded frame first (measured: with
+ * two machines answering one ARP question, the one on the newest port answers first, every time).
+ */
 function livePorts(k: Kernel, d: DeviceState, br: BridgeState): IfaceName[] {
-  return d.ifaces.filter((i) => i.master === br.name && k.oper(d.id, i.name).up).map((i) => i.name);
+  return d.ifaces
+    .filter((i) => i.master === br.name && k.oper(d.id, i.name).up)
+    .map((i) => i.name)
+    .reverse();
 }
 
 /**

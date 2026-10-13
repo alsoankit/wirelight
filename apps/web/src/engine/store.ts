@@ -17,7 +17,12 @@ type Session = {
   paused: boolean;
   speed: number;
   load(roomId: string): Promise<void>;
-  exec(device: string, line: string, source: CmdSource): Promise<void>;
+  /** Runs a command line; resolves with its exec id and exit code (null while it keeps running). */
+  exec(device: string, line: string, source: CmdSource): Promise<{ execId: number; exitCode: number | null }>;
+  /** Ctrl+C on a command that keeps running. */
+  interrupt(device: string, execId: number): Promise<void>;
+  /** Touches a worn-out control (0040). */
+  touch(device: string, control: string): Promise<void>;
   /** Called every rendered frame with the screen time that passed. */
   tick(screenMs: number): void;
   setPaused(paused: boolean): void;
@@ -26,6 +31,23 @@ type Session = {
 
 const { engine } = startEngine();
 let busy = false; // one request to the worker at a time; frames in between just wait
+
+/** Waits for the worker to be free, then runs one request on it. */
+async function exclusive<T>(fn: () => Promise<T>): Promise<T> {
+  while (busy) await new Promise((r) => setTimeout(r, 4));
+  busy = true;
+  try {
+    return await fn();
+  } finally {
+    busy = false;
+  }
+}
+
+/** Questions for the worker that change nothing: history and Tab completion (UI-09). */
+export const ask = {
+  history: (device: string) => engine.history(device),
+  complete: (device: string, line: string) => engine.complete(device, line),
+};
 
 function apply(state: Session, batch: Batch): Partial<Session> {
   let onCables = state.onCables;
@@ -67,11 +89,19 @@ export const useSession = create<Session>((set, get) => ({
   },
 
   async exec(device, line, source) {
-    while (busy) await new Promise((r) => setTimeout(r, 4));
-    busy = true;
-    const batch = await engine.exec(device, line, source);
+    const batch = await exclusive(() => engine.exec(device, line, source));
     set((s) => apply(s, batch));
-    busy = false;
+    return { execId: batch.execId, exitCode: batch.exitCode };
+  },
+
+  async interrupt(device, execId) {
+    const batch = await exclusive(() => engine.interrupt(device, execId));
+    set((s) => apply(s, batch));
+  },
+
+  async touch(device, control) {
+    const batch = await exclusive(() => engine.touch(device, control));
+    set((s) => apply(s, batch));
   },
 
   tick(screenMs) {

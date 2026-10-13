@@ -12,6 +12,7 @@
 import { deviceOf, type Kernel } from "./kernel";
 import { BROADCAST } from "./mac";
 import { decodeArp } from "./proto/arp";
+import { decodeDhcp } from "./proto/dhcp";
 import { decodeEth, ETHERTYPE } from "./proto/ethernet";
 import { decodeIcmp, ICMP, UNREACH } from "./proto/icmp";
 import { decodeIPv4, decodeUDP, IPPROTO } from "./proto/ipv4";
@@ -179,6 +180,13 @@ function body(bytes: Uint8Array, p: TcpdumpProc, d: DeviceState): string {
         return `${head}: ICMP echo ${what}, id ${m.id}, seq ${m.seq}, length ${len}`;
       }
       if (m.type === ICMP.timeExceeded) return `${head}: ICMP time exceeded in-transit, length ${len}`;
+      if (m.type === ICMP.redirect) {
+        // print-icmp.c: "redirect <dst> to host <gateway>" (net / -tos forms for the other codes).
+        const gw = [m.id >> 8, m.id & 0xff, m.seq >> 8, m.seq & 0xff].join(".");
+        const what = ["redirect", "redirect", "redirect-tos", "redirect-tos"][m.code] ?? "redirect";
+        const to = m.code % 2 === 0 ? "net" : "host";
+        return `${head}: ICMP ${what} ${name(decodeIPv4(m.data).dst)} to ${to} ${name(gw)}, length ${len}`;
+      }
       if (m.type === ICMP.unreachable) {
         const inner = decodeIPv4(m.data);
         if (m.code === UNREACH.port && inner.proto === IPPROTO.udp) {
@@ -192,6 +200,14 @@ function body(bytes: Uint8Array, p: TcpdumpProc, d: DeviceState): string {
     }
     if (ip.proto === IPPROTO.udp) {
       const u = decodeUDP(ip.payload);
+      const bootp = [67, 68];
+      if (bootp.includes(u.srcPort) && bootp.includes(u.dstPort)) {
+        // print-bootp.c without -v: who asks (the client's MAC), or "Reply".
+        const m = decodeDhcp(u.data);
+        const oui = p.numeric > 0 ? "" : " (oui Unknown)";
+        const what = m?.op === 1 ? `Request from ${m.chaddr}${oui}` : "Reply";
+        return `${name(ip.src)}.${port(u.srcPort, p.numeric)} > ${name(ip.dst)}.${port(u.dstPort, p.numeric)}: BOOTP/DHCP, ${what}, length ${u.length - 8}`;
+      }
       return `${name(ip.src)}.${port(u.srcPort, p.numeric)} > ${name(ip.dst)}.${port(u.dstPort, p.numeric)}: UDP, length ${u.length - 8}`;
     }
     return `${head}: ip-proto-${ip.proto} ${ip.payload.length}`;

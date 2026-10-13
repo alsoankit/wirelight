@@ -11,6 +11,10 @@
  * - sending a probe counts as using the entry. (Measured: with a reachable time under 5 s, an entry
  *   cycles REACHABLE → DELAY → probe → REACHABLE every ~6 s for as long as the neighbour answers.)
  * Only ARP replies confirm an entry; ICMP (ping) traffic doesn't.
+ * Updating a known entry from ARP (neigh_update): a request for one of our addresses always
+ * overrides; any other ARP (a reply, or a request we only overheard) changes the link address only
+ * if the entry is older than `locktime` (1 s), so of two back-to-back replies the FIRST wins
+ * (measured with two machines claiming one address, tools/golden/capture-redirect.sh).
  * Settings are per door (net.ipv4.neigh.<door>.*). reachable_time is randomised (×0.5–1.5) from
  * base_reachable_time_ms per door, and again whenever that setting changes.
  */
@@ -32,6 +36,9 @@ export const NEIGH_DEFAULTS: Omit<NeighParms, "reachableMs"> = {
 
 /** Packets kept per unresolved neighbour (Linux limits by bytes, unres_qlen_bytes 212992). */
 const QUEUE_MAX = 100;
+
+/** net.ipv4.neigh.*.locktime: 100 centiseconds. */
+const LOCKTIME_MS = 1000;
 
 export function randomReachable(k: Kernel, base: number): number {
   return Math.floor(base * (0.5 + k.random()));
@@ -204,23 +211,69 @@ function fail(k: Kernel, device: DeviceId, n: NeighState, failed: Failed): void 
   for (const item of queued) failed(device, item);
 }
 
-function confirm(
+const VALID: NeighState["state"][] = ["REACHABLE", "STALE", "DELAY", "PROBE", "PERMANENT"];
+
+/**
+ * neigh_update for what ARP says: `state` is REACHABLE for a reply sent to us, else STALE. An entry
+ * that already has a link address keeps it unless `override`; a STALE update with the same address
+ * leaves the state alone. Waiting packets go out once the entry has an address.
+ */
+function update(
   k: Kernel,
   device: DeviceId,
   n: NeighState,
   mac: Mac,
+  state: "REACHABLE" | "STALE",
+  override: boolean,
   flush: (q: NeighState["queue"][number], mac: Mac) => void,
 ): void {
   const d = deviceOf(k, device);
-  if (!d) return;
+  if (!d || n.state === "PERMANENT") return;
+  const now = k.s.t;
+  const valid = VALID.includes(n.state);
+  if (state === "REACHABLE") n.confirmed = now;
+  let next: NeighState["state"] = state;
+  if (valid) {
+    if (n.mac !== mac && !override) return;
+    if (n.mac === mac && state === "STALE") next = n.state;
+  }
+  const macChanged = n.mac !== mac;
   n.mac = mac;
-  n.confirmed = k.s.t;
-  n.probes = 0;
-  change(k, device, n, "REACHABLE");
-  arm(k, device, n, k.s.t + parmsOf(d, n.dev).reachableMs);
-  const queued = n.queue;
-  n.queue = [];
-  for (const item of queued) flush(item, mac);
+  if (macChanged && next !== "REACHABLE") n.confirmed = now - 2 * parmsOf(d, n.dev).baseReachableMs;
+  if (next !== n.state) {
+    n.probes = 0;
+    change(k, device, n, next);
+    if (next === "REACHABLE") arm(k, device, n, now + parmsOf(d, n.dev).reachableMs);
+    else n.stamp += 1; // STALE runs no timer
+  } else if (macChanged) change(k, device, n, next);
+  if (!valid) {
+    const queued = n.queue;
+    n.queue = [];
+    for (const item of queued) flush(item, mac);
+  }
+}
+
+/** neigh_event_send without a packet: start (or restart) resolving, or wake a STALE entry. */
+export function neighEventSend(k: Kernel, device: DeviceId, dev: IfaceName, ip: Ip): void {
+  const d = deviceOf(k, device);
+  if (!d) return;
+  const n = entry(d, ip, dev);
+  if (!n) {
+    ask(k, device, dev, ip);
+    return;
+  }
+  if (n.state === "FAILED") {
+    n.probes = 0;
+    change(k, device, n, "INCOMPLETE");
+    solicit(k, device, n, false);
+    arm(k, device, n, k.s.t + parmsOf(d, dev).retransMs);
+    return;
+  }
+  if (n.state === "STALE") {
+    n.used = k.s.t;
+    change(k, device, n, "DELAY");
+    arm(k, device, n, k.s.t + parmsOf(d, dev).delayFirstProbeMs);
+  }
 }
 
 /**
@@ -237,6 +290,8 @@ export function arpInput(
   dev: IfaceName,
   payload: Uint8Array,
   sendQueued: (q: NeighState["queue"][number], mac: Mac, dev: IfaceName) => void,
+  /** The frame's destination: a reply only confirms an entry when it was sent to us (not broadcast). */
+  frameDst?: Mac,
 ): void {
   const d = deviceOf(k, device);
   const iface = ifaceOf(d, dev);
@@ -296,8 +351,12 @@ export function arpInput(
     k.send(device, dev, encodeEth({ dst: p.senderMac, src: iface.mac, type: ETHERTYPE.arp, payload: reply }), "kernel");
     return;
   }
-  if (p.op === ARP_REPLY && existing && existing.state !== "PERMANENT")
-    confirm(k, device, existing, p.senderMac, flush);
+  // Anything else heard from an address we know: a reply, or a request for someone else.
+  if (!existing || existing.state === "PERMANENT") return;
+  const garp = p.senderIp === p.targetIp;
+  const override = k.s.t > existing.updated + LOCKTIME_MS || garp;
+  const toUs = frameDst === undefined || frameDst === iface.mac;
+  update(k, device, existing, p.senderMac, p.op === ARP_REPLY && toUs ? "REACHABLE" : "STALE", override, flush);
 }
 
 /** A door went down or lost its cable: Linux forgets what it knew on it (neigh_ifdown). */

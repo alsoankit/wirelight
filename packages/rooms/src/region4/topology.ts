@@ -1,0 +1,147 @@
+/**
+ * The Cathedral of Crossings' machines (floors/floor-8.md, floor-9.md: "Machines", "Streets").
+ * Streets are `10.0.N.0/24`: the nave (1), the cloister (2), the bell tower (3), the high window (4).
+ * Each street has its own switch, already known and working. Routers use `.1` (and arch and spire
+ * `.2` on the street they share with the router before them); houses as the specs say.
+ *
+ * The topology is the CORRECT network a room describes; rooms break it with faults.
+ */
+import type { DeviceSpec, LinkSpec, RouteSpec, Topology } from "@wirelight/sim";
+
+export const MAC = {
+  observatory: "02:00:00:00:00:05",
+  crossing0: "02:00:00:00:00:21",
+  crossing1: "02:00:00:00:00:22",
+  arch0: "02:00:00:00:00:23",
+  arch1: "02:00:00:00:00:24",
+  spire0: "02:00:00:00:00:25",
+  spire1: "02:00:00:00:00:26",
+  vesper: "02:00:00:00:00:27",
+  lumen: "02:00:00:00:00:37",
+  wren: "02:00:00:00:00:39",
+  halo: "02:00:00:00:00:47",
+} as const;
+
+export const IP = {
+  observatory: "10.0.1.5",
+  crossing0: "10.0.1.1",
+  crossing1: "10.0.2.1",
+  arch0: "10.0.2.2",
+  arch1: "10.0.3.1",
+  spire0: "10.0.3.2",
+  spire1: "10.0.4.1",
+  vesper: "10.0.2.7",
+  lumen: "10.0.3.7",
+  wren: "10.0.3.9",
+  halo: "10.0.4.7",
+} as const;
+
+export const STREET = {
+  nave: "10.0.1.0/24",
+  cloister: "10.0.2.0/24",
+  tower: "10.0.3.0/24",
+  window: "10.0.4.0/24",
+} as const;
+
+export interface CathedralOptions {
+  /** The observatory knows its way off the nave (default via crossing). Not in 8.1. */
+  observatoryGateway?: boolean;
+  /** Arch, lumen and the bell tower (from 8.3). */
+  tower?: boolean;
+  /** Wren on the bell tower (9.2). */
+  wren?: boolean;
+  /** Spire, halo and the high window (from 9.4). */
+  highWindow?: boolean;
+}
+
+const house = (id: string, mac: string, ip: string, gateway: string | null): DeviceSpec => ({
+  id,
+  hostname: id,
+  kind: "host",
+  interfaces: [{ name: "eth0", mac }],
+  addrs: [{ dev: "eth0", cidr: `${ip}/24` }],
+  ...(gateway ? { routes: [{ dst: "default", via: gateway }] } : {}),
+});
+
+/** A router: a door on each of two streets, allowed to forward (net.ipv4.ip_forward = 1). */
+const router = (id: string, macs: [string, string], ips: [string, string], routes: RouteSpec[]): DeviceSpec => ({
+  id,
+  hostname: id,
+  kind: "host",
+  interfaces: [
+    { name: "eth0", mac: macs[0] },
+    { name: "eth1", mac: macs[1] },
+  ],
+  addrs: [
+    { dev: "eth0", cidr: `${ips[0]}/24` },
+    { dev: "eth1", cidr: `${ips[1]}/24` },
+  ],
+  routes,
+  sysctl: { "net.ipv4.ip_forward": "1" },
+});
+
+/** A street's switch: a bridge over `ports` doors (MACs `02:00:00:00:00:<base+i>`). */
+const streetSwitch = (id: string, base: number, ports: number): DeviceSpec => {
+  const names = Array.from({ length: ports }, (_, i) => `eth${i}`);
+  return {
+    id,
+    hostname: id,
+    kind: "host",
+    interfaces: names.map((name, i) => ({ name, mac: `02:00:00:00:00:${(base + i).toString(16).padStart(2, "0")}` })),
+    bridges: [{ name: "br0", ports: names }],
+  };
+};
+
+/** The nave, the cloister and, as the room needs them, the bell tower and the high window. */
+export function cathedral(o: CathedralOptions = {}): Topology {
+  const crossingRoutes: RouteSpec[] = [];
+  if (o.tower) crossingRoutes.push({ dst: STREET.tower, via: IP.arch0 });
+  if (o.highWindow) crossingRoutes.push({ dst: STREET.window, via: IP.arch0 });
+  const archRoutes: RouteSpec[] = [];
+  if (o.highWindow) archRoutes.push({ dst: STREET.window, via: IP.spire0 });
+  archRoutes.push({ dst: "default", via: IP.crossing1 });
+
+  const devices: DeviceSpec[] = [
+    house("observatory", MAC.observatory, IP.observatory, o.observatoryGateway === false ? null : IP.crossing0),
+    router("crossing", [MAC.crossing0, MAC.crossing1], [IP.crossing0, IP.crossing1], crossingRoutes),
+    house("vesper", MAC.vesper, IP.vesper, IP.crossing1),
+  ];
+  // Each street's switch, with a door for every machine on it.
+  const nave: string[] = ["observatory", "crossing:eth0"];
+  const cloister: string[] = ["crossing:eth1", "vesper"];
+  const tower: string[] = [];
+  const window: string[] = [];
+  if (o.tower) {
+    devices.push(router("arch", [MAC.arch0, MAC.arch1], [IP.arch0, IP.arch1], archRoutes));
+    devices.push(house("lumen", MAC.lumen, IP.lumen, IP.arch1));
+    cloister.push("arch:eth0");
+    tower.push("arch:eth1", "lumen");
+  }
+  if (o.wren) {
+    devices.push(house("wren", MAC.wren, IP.wren, IP.arch1));
+    tower.push("wren");
+  }
+  if (o.highWindow) {
+    devices.push(
+      router("spire", [MAC.spire0, MAC.spire1], [IP.spire0, IP.spire1], [{ dst: "default", via: IP.arch1 }]),
+    );
+    devices.push(house("halo", MAC.halo, IP.halo, IP.spire1));
+    tower.push("spire:eth0");
+    window.push("spire:eth1", "halo");
+  }
+
+  const links: LinkSpec[] = [];
+  const street = (id: string, base: number, ends: string[]) => {
+    if (ends.length === 0) return;
+    devices.push(streetSwitch(id, base, ends.length));
+    ends.forEach((end, i) => {
+      const [device, iface] = end.includes(":") ? (end.split(":") as [string, string]) : [end, "eth0"];
+      links.push({ id: `${id}-${device}`, a: { device: id, iface: `eth${i}` }, b: { device, iface } });
+    });
+  };
+  street("nave", 0xa0, nave);
+  street("cloister", 0xb0, cloister);
+  street("tower", 0xc0, tower);
+  street("window", 0xd0, window);
+  return { devices, links };
+}

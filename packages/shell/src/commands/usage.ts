@@ -165,3 +165,42 @@ export const TCPDUMP_USAGE: readonly string[] = [
   "\t\t[ --time-stamp-precision precision ] [ --micro ] [ --nano ]",
   "\t\t[ -z postrotate-command ] [ -Z user ] [ expression ]",
 ];
+
+/** What ISC dhclient 4.4.3-P1 (Fedora 44) prints first with -v (captured: tools/golden/capture-dhcp.sh). */
+export const DHCLIENT_BANNER: readonly string[] = [
+  "Internet Systems Consortium DHCP Client 4.4.3-P1",
+  "Copyright 2004-2022 Internet Systems Consortium.",
+  "All rights reserved.",
+  "For info, please visit https://www.isc.org/software/dhcp/",
+];
+
+/** dhclient's usage, after "Unknown command: <word>". */
+export const DHCLIENT_USAGE: readonly string[] = [
+  "Usage: dhclient [-4|-6] [-SNTPRI1dvrxi] [-nw] [-p <port>] [-D LL|LLT]",
+  "                [--dad-wait-time <seconds>] [--prefix-len-hint <length>]",
+  "                [--decline-wait-time <seconds>]",
+  "                [--address-prefix-len <length>]",
+  "                [-s server-addr] [-cf config-file]",
+  "                [-df duid-file] [-lf lease-file]",
+  "                [-pf pid-file] [--no-pid] [-e VAR=val]",
+  "                [-sf script-file] [interface]*",
+  "                [-C <dhcp-client-identifier>] [-B]",
+  "                [-H <host-name> | -F <fqdn.fqdn>] [--timeout <timeout>]",
+  "                [-V <vendor-class-identifier>]",
+  "                [--request-options <request option list>]",
+  "       dhclient {--version|--help|-h}",
+];
+
+/** Fedora's closing words on every fatal dhclient error (trailing space after "via:" is real). */
+export const DHCLIENT_FATAL_END: readonly string[] = [
+  "",
+  "This version of ISC DHCP is based on the release available",
+  "on ftp.isc.org. Features have been added and other changes",
+  "have been made to the base software release in order to make",
+  "it work better with this distribution.",
+  "",
+  "Please report issues with this software via: ",
+  "https://bugzilla.redhat.com/",
+  "",
+  "exiting.",
+];

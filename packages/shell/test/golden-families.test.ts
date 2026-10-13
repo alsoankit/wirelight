@@ -5,7 +5,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { SimEvent, Topology } from "@wirelight/sim";
+import type { RouteSpec, SimEvent, Topology } from "@wirelight/sim";
 import { describe, expect, it } from "vitest";
 import { SimBackend, type ToolId } from "../src";
 import { testContent as shellContent } from "./content";
@@ -71,6 +71,8 @@ function topology(name: string): Topology {
       ],
     };
   }
+  if (name === "cathedral") return cathedral();
+  if (name.startsWith("square-")) return square(name.slice("square-".length));
   const m = name.match(/^routed-fwd-(on|off)(-nogw)?$/);
   if (!m) throw new Error(`unknown golden topology ${name}`);
   const gw = !m[2];
@@ -100,7 +102,114 @@ function topology(name: string): Topology {
   };
 }
 
+/** Floor 9's four streets (tools/golden/capture-redirect.sh, topo_cathedral). */
+function cathedral(): Topology {
+  const router = (id: string, a: [string, string, string], b: [string, string, string], routes: RouteSpec[]) => ({
+    id,
+    hostname: id,
+    kind: "host" as const,
+    interfaces: [
+      { name: a[0], mac: a[1] },
+      { name: b[0], mac: b[1] },
+    ],
+    addrs: [
+      { dev: a[0], cidr: a[2] },
+      { dev: b[0], cidr: b[2] },
+    ],
+    routes,
+    sysctl: { "net.ipv4.ip_forward": "1" },
+  });
+  return {
+    devices: [
+      host("observatory", "eth0", "02:00:00:00:01:05", "10.0.1.5/24", "10.0.1.1"),
+      router(
+        "crossing",
+        ["eth0", "02:00:00:00:01:01", "10.0.1.1/24"],
+        ["eth1", "02:00:00:00:02:01", "10.0.2.1/24"],
+        [
+          { dst: "10.0.3.0/24", via: "10.0.2.2" },
+          { dst: "10.0.4.0/24", via: "10.0.2.2" },
+        ],
+      ),
+      {
+        id: "cloister",
+        hostname: "cloister",
+        kind: "host",
+        interfaces: [
+          { name: "eth1", mac: "02:00:00:00:02:a1" },
+          { name: "eth2", mac: "02:00:00:00:02:a2" },
+          { name: "eth3", mac: "02:00:00:00:02:a3" },
+        ],
+        bridges: [{ name: "br0", ports: ["eth1", "eth2", "eth3"] }],
+      },
+      router(
+        "arch",
+        ["eth0", "02:00:00:00:02:02", "10.0.2.2/24"],
+        ["eth1", "02:00:00:00:03:01", "10.0.3.1/24"],
+        [{ dst: "default", via: "10.0.2.1" }],
+      ),
+      host("vesper", "eth0", "02:00:00:00:02:07", "10.0.2.7/24", "10.0.2.1"),
+      router(
+        "spire",
+        ["eth0", "02:00:00:00:03:02", "10.0.3.2/24"],
+        ["eth1", "02:00:00:00:04:01", "10.0.4.1/24"],
+        [{ dst: "default", via: "10.0.3.1" }],
+      ),
+      host("halo", "eth0", "02:00:00:00:04:07", "10.0.4.7/24", "10.0.4.1"),
+    ],
+    links: [
+      { id: "nave", a: { device: "observatory", iface: "eth0" }, b: { device: "crossing", iface: "eth0" } },
+      { id: "c1", a: { device: "cloister", iface: "eth1" }, b: { device: "crossing", iface: "eth1" } },
+      { id: "c2", a: { device: "cloister", iface: "eth2" }, b: { device: "arch", iface: "eth0" } },
+      { id: "c3", a: { device: "cloister", iface: "eth3" }, b: { device: "vesper", iface: "eth0" } },
+      { id: "tower", a: { device: "arch", iface: "eth1" }, b: { device: "spire", iface: "eth0" } },
+      { id: "window", a: { device: "spire", iface: "eth1" }, b: { device: "halo", iface: "eth0" } },
+    ],
+  };
+}
+
+/**
+ * Floor 7's square (tools/golden/capture-dhcp.sh): hall's br0 joins observatory (no address),
+ * registry (10.0.1.2, the DHCP server, as dnsmasq: range .100-.150, 1 h) and lantern (10.0.1.7).
+ */
+function square(variant: string): Topology {
+  const server =
+    variant === "none"
+      ? undefined
+      : {
+          range: ["10.0.1.100", "10.0.1.150"] as [string, string],
+          leaseSecs: 3600,
+          pingCheck: variant !== "noping",
+          sequential: variant === "seq",
+          ...(variant === "norouter" ? { router: null } : {}),
+        };
+  return {
+    devices: [
+      {
+        id: "hall",
+        hostname: "hall",
+        kind: "host",
+        interfaces: [
+          { name: "eth1", mac: "02:00:00:00:00:11" },
+          { name: "eth2", mac: "02:00:00:00:00:12" },
+          { name: "eth3", mac: "02:00:00:00:00:13" },
+        ],
+        bridges: [{ name: "br0", ports: ["eth1", "eth2", "eth3"] }],
+      },
+      host("observatory", "eth0", "02:00:00:00:00:05"),
+      { ...host("registry", "eth0", "02:00:00:00:00:02", "10.0.1.2/24"), ...(server ? { dhcpServer: server } : {}) },
+      host("lantern", "eth0", "02:00:00:00:00:07", "10.0.1.7/24"),
+    ],
+    links: [
+      { id: "l1", a: { device: "hall", iface: "eth1" }, b: { device: "observatory", iface: "eth0" } },
+      { id: "l2", a: { device: "hall", iface: "eth2" }, b: { device: "registry", iface: "eth0" } },
+      { id: "l3", a: { device: "hall", iface: "eth3" }, b: { device: "lantern", iface: "eth0" } },
+    ],
+  };
+}
+
 const ALL: ToolId[] = [
+  "dhclient",
   "ip link",
   "ip addr",
   "ip route",
@@ -120,7 +229,11 @@ function normalise(line: string): string {
     .replace(/= [0-9.]+\/[0-9.]+\/[0-9.]+\/[0-9.]+ ms/, "= <time>/<time>/<time>/<time> ms")
     .replace(/^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6} /, "<time> ")
     .replace(/(ICMP echo (request|reply), id )[0-9]+/, "$1<id>")
-    .replace(/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\.[0-9]+ > (.*UDP, length)/, "$1.<port> > $2");
+    .replace(/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\.[0-9]+ > (.*UDP, length)/, "$1.<port> > $2")
+    .replace(/\(xid=0x[0-9a-f]+\)/, "(xid=<xid>)")
+    .replace(/ interval [0-9]+ \(xid/, " interval <n> (xid")
+    .replace(/renewal in [0-9]+ seconds/, "renewal in <n> seconds")
+    .replace(/^dhclient\([0-9]+\) is already running/, "dhclient(<pid>) is already running");
 }
 
 function exitOf(b: SimBackend, execId: number): number | null {
@@ -169,7 +282,7 @@ function runCase(c: Case): { lines: string[]; exit: number | null } {
   b.options = () => ({ tools: new Set(ALL), subtitles: false });
   b.loadSync(topology(c.topology), [], 1);
   // The switch topology waits 2.5 s for the bridge's own IGMP reports to pass before anything runs.
-  if (c.topology.startsWith("switch")) b.advance(2500);
+  if (c.topology.startsWith("switch") || c.topology.startsWith("square") || c.topology === "cathedral") b.advance(2500);
   const during = c.setup.filter((s) => s.startsWith("during capture, ")).map((s) => s.slice("during capture, ".length));
   for (const s of c.setup.filter((x) => !x.startsWith("during capture, "))) setupStep(b, s);
   const interrupt = c.actualCommand.match(/timeout -s INT ([0-9.]+) /);
@@ -219,10 +332,12 @@ function variable(frame: number[]): Set<number> {
       if (type === 0 || type === 8) {
         mark(l4 + 4, l4 + 5); // echo identifier
         mark(l4 + 8, l4 + 23); // ping's send time
-      } else if (type === 3 || type === 11) ip(l4 + 8); // the quoted packet
+      } else if (type === 3 || type === 5 || type === 11) ip(l4 + 8); // the quoted packet
     } else if (proto === 17) {
       mark(l4, l4 + 1); // source port
       mark(l4 + 6, l4 + 7); // UDP checksum
+      const port = (at: number) => ((frame[at] ?? 0) << 8) | (frame[at + 1] ?? 0);
+      if ([67, 68].includes(port(l4)) && [67, 68].includes(port(l4 + 2))) mark(l4 + 12, l4 + 15); // DHCP xid
     }
   };
   if (frame[12] === 0x08 && frame[13] === 0x00) ip(14);

@@ -1053,6 +1053,53 @@
     },
     {
       "family": "bytes",
+      "case": "dhcp-decline",
+      "file": "bytes/dhcp-decline.txt",
+      "raw": "raw/bytes/dhcp-decline.txt",
+      "topology": "square-noping",
+      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "during capture, lantern: ip addr add 10.0.1.149/24 dev eth0",
+        "during capture, observatory: dhclient eth0"
+      ],
+      "command": "tcpdump -n -e -xx -c 9 -i eth0",
+      "actualCommand": "timeout -s INT 20 stdbuf -oL tcpdump -Z root -n -e -xx -c 9 -i eth0",
+      "exit": 0
+    },
+    {
+      "family": "bytes",
+      "case": "dhcp-exchange",
+      "file": "bytes/dhcp-exchange.txt",
+      "raw": "raw/bytes/dhcp-exchange.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "during capture, observatory: dhclient eth0"
+      ],
+      "command": "tcpdump -n -e -xx -c 10 -i eth0",
+      "actualCommand": "timeout -s INT 12 stdbuf -oL tcpdump -Z root -n -e -xx -c 10 -i eth0",
+      "exit": 0
+    },
+    {
+      "family": "bytes",
+      "case": "dhcp-release",
+      "file": "bytes/dhcp-release.txt",
+      "raw": "raw/bytes/dhcp-release.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0",
+        "during capture, observatory: dhclient -r eth0"
+      ],
+      "command": "tcpdump -n -e -xx -c 3 -i eth0",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -e -xx -c 3 -i eth0",
+      "exit": 0
+    },
+    {
+      "family": "bytes",
       "case": "icmp-echo",
       "file": "bytes/icmp-echo.txt",
       "raw": "raw/bytes/icmp-echo.txt",
@@ -1129,6 +1176,21 @@
     },
     {
       "family": "bytes",
+      "case": "icmp-redirect",
+      "file": "bytes/icmp-redirect.txt",
+      "raw": "raw/bytes/icmp-redirect.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "during capture, vesper: ping -c 1 -t 2 10.0.4.7"
+      ],
+      "command": "tcpdump -n -e -xx -c 3 -i eth0 icmp",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -e -xx -c 3 -i eth0 icmp",
+      "exit": 0
+    },
+    {
+      "family": "bytes",
       "case": "icmp-time-exceeded",
       "file": "bytes/icmp-time-exceeded.txt",
       "raw": "raw/bytes/icmp-time-exceeded.txt",
@@ -1155,6 +1217,483 @@
       ],
       "command": "tcpdump -n -e -xx -c 2 -i eth0 udp or icmp",
       "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -e -xx -c 2 -i eth0 udp or icmp",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-after-release",
+      "file": "dhcp/dhclient-after-release.txt",
+      "raw": "raw/dhcp/dhclient-after-release.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0",
+        "observatory: dhclient -r eth0"
+      ],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-already-running",
+      "file": "dhcp/dhclient-already-running.txt",
+      "raw": "raw/dhcp/dhclient-already-running.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
+      "exit": 1
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-already-running-quiet",
+      "file": "dhcp/dhclient-already-running-quiet.txt",
+      "raw": "raw/dhcp/dhclient-already-running-quiet.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "dhclient eth0",
+      "actualCommand": "dhclient eth0",
+      "exit": 1
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-bad-option",
+      "file": "dhcp/dhclient-bad-option.txt",
+      "raw": "raw/dhcp/dhclient-bad-option.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -Z",
+      "actualCommand": "dhclient -Z",
+      "exit": 1
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-door-down",
+      "file": "dhcp/dhclient-door-down.txt",
+      "raw": "raw/dhcp/dhclient-door-down.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: ip link set eth0 down"
+      ],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-door-down-addr",
+      "file": "dhcp/dhclient-door-down-addr.txt",
+      "raw": "raw/dhcp/dhclient-door-down-addr.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: ip link set eth0 down",
+        "observatory: dhclient eth0"
+      ],
+      "command": "ip addr show dev eth0",
+      "actualCommand": "ip addr show dev eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-in-use",
+      "file": "dhcp/dhclient-in-use.txt",
+      "raw": "raw/dhcp/dhclient-in-use.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "lantern: ip addr add 10.0.1.149/24 dev eth0"
+      ],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-in-use-noping",
+      "file": "dhcp/dhclient-in-use-noping.txt",
+      "raw": "raw/dhcp/dhclient-in-use-noping.txt",
+      "topology": "square-noping",
+      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "lantern: ip addr add 10.0.1.149/24 dev eth0"
+      ],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-in-use-noping-addr",
+      "file": "dhcp/dhclient-in-use-noping-addr.txt",
+      "raw": "raw/dhcp/dhclient-in-use-noping-addr.txt",
+      "topology": "square-noping",
+      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "lantern: ip addr add 10.0.1.149/24 dev eth0",
+        "observatory: dhclient eth0"
+      ],
+      "command": "ip addr show dev eth0",
+      "actualCommand": "ip addr show dev eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-ip-addr",
+      "file": "dhcp/dhclient-ip-addr.txt",
+      "raw": "raw/dhcp/dhclient-ip-addr.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "ip addr show dev eth0",
+      "actualCommand": "ip addr show dev eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-ip-addr-later",
+      "file": "dhcp/dhclient-ip-addr-later.txt",
+      "raw": "raw/dhcp/dhclient-ip-addr-later.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0",
+        "wait 3s"
+      ],
+      "command": "ip addr show dev eth0",
+      "actualCommand": "ip addr show dev eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-ip-route",
+      "file": "dhcp/dhclient-ip-route.txt",
+      "raw": "raw/dhcp/dhclient-ip-route.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "ip route",
+      "actualCommand": "ip route",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-missing-dev",
+      "file": "dhcp/dhclient-missing-dev.txt",
+      "raw": "raw/dhcp/dhclient-missing-dev.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -v eth9",
+      "actualCommand": "dhclient -v eth9",
+      "exit": 1
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-missing-dev-quiet",
+      "file": "dhcp/dhclient-missing-dev-quiet.txt",
+      "raw": "raw/dhcp/dhclient-missing-dev-quiet.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient eth9",
+      "actualCommand": "dhclient eth9",
+      "exit": 1
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-no-iface",
+      "file": "dhcp/dhclient-no-iface.txt",
+      "raw": "raw/dhcp/dhclient-no-iface.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -v",
+      "actualCommand": "dhclient -v",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-no-server",
+      "file": "dhcp/dhclient-no-server.txt",
+      "raw": "raw/dhcp/dhclient-no-server.txt",
+      "topology": "square-none",
+      "topologyDesc": "square-none: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: no DHCP server, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -v eth0",
+      "actualCommand": "timeout -s INT 1.5 dhclient -v eth0",
+      "exit": 130
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-no-server-quiet",
+      "file": "dhcp/dhclient-no-server-quiet.txt",
+      "raw": "raw/dhcp/dhclient-no-server-quiet.txt",
+      "topology": "square-none",
+      "topologyDesc": "square-none: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: no DHCP server, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient eth0",
+      "actualCommand": "timeout -s INT 1.5 dhclient eth0",
+      "exit": 130
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-noping",
+      "file": "dhcp/dhclient-noping.txt",
+      "raw": "raw/dhcp/dhclient-noping.txt",
+      "topology": "square-noping",
+      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-norouter",
+      "file": "dhcp/dhclient-norouter.txt",
+      "raw": "raw/dhcp/dhclient-norouter.txt",
+      "topology": "square-norouter",
+      "topologyDesc": "square-norouter: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-option=3 (no router option), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-norouter-route",
+      "file": "dhcp/dhclient-norouter-route.txt",
+      "raw": "raw/dhcp/dhclient-norouter-route.txt",
+      "topology": "square-norouter",
+      "topologyDesc": "square-norouter: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-option=3 (no router option), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "ip route",
+      "actualCommand": "ip route",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-ping",
+      "file": "dhcp/dhclient-ping.txt",
+      "raw": "raw/dhcp/dhclient-ping.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "ping -c 2 10.0.1.7",
+      "actualCommand": "ping -c 2 10.0.1.7",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-quiet",
+      "file": "dhcp/dhclient-quiet.txt",
+      "raw": "raw/dhcp/dhclient-quiet.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient eth0",
+      "actualCommand": "dhclient eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-registry-neigh",
+      "file": "dhcp/dhclient-registry-neigh.txt",
+      "raw": "raw/dhcp/dhclient-registry-neigh.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "registry",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-release",
+      "file": "dhcp/dhclient-release.txt",
+      "raw": "raw/dhcp/dhclient-release.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "dhclient -r eth0",
+      "actualCommand": "dhclient -r eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-release-addr",
+      "file": "dhcp/dhclient-release-addr.txt",
+      "raw": "raw/dhcp/dhclient-release-addr.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0",
+        "observatory: dhclient -r eth0"
+      ],
+      "command": "ip addr show dev eth0",
+      "actualCommand": "ip addr show dev eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-release-door-down",
+      "file": "dhcp/dhclient-release-door-down.txt",
+      "raw": "raw/dhcp/dhclient-release-door-down.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0",
+        "observatory: ip link set eth0 down"
+      ],
+      "command": "dhclient -r -v eth0",
+      "actualCommand": "dhclient -r -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-release-nothing",
+      "file": "dhcp/dhclient-release-nothing.txt",
+      "raw": "raw/dhcp/dhclient-release-nothing.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -r eth0",
+      "actualCommand": "dhclient -r eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-release-nothing-v",
+      "file": "dhcp/dhclient-release-nothing-v.txt",
+      "raw": "raw/dhcp/dhclient-release-nothing-v.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -r -v eth0",
+      "actualCommand": "dhclient -r -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-release-route",
+      "file": "dhcp/dhclient-release-route.txt",
+      "raw": "raw/dhcp/dhclient-release-route.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0",
+        "observatory: dhclient -r eth0"
+      ],
+      "command": "ip route",
+      "actualCommand": "ip route",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-release-twice",
+      "file": "dhcp/dhclient-release-twice.txt",
+      "raw": "raw/dhcp/dhclient-release-twice.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0",
+        "observatory: dhclient -r eth0"
+      ],
+      "command": "dhclient -r -v eth0",
+      "actualCommand": "dhclient -r -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-release-v",
+      "file": "dhcp/dhclient-release-v.txt",
+      "raw": "raw/dhcp/dhclient-release-v.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: dhclient eth0"
+      ],
+      "command": "dhclient -r -v eth0",
+      "actualCommand": "dhclient -r -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-sequential",
+      "file": "dhcp/dhclient-sequential.txt",
+      "raw": "raw/dhcp/dhclient-sequential.txt",
+      "topology": "square-seq",
+      "topologyDesc": "square-seq: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-sequential-ip, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
+      "exit": 0
+    },
+    {
+      "family": "dhcp",
+      "case": "dhclient-v",
+      "file": "dhcp/dhclient-v.txt",
+      "raw": "raw/dhcp/dhclient-v.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "dhclient -v eth0",
+      "actualCommand": "dhclient -v eth0",
       "exit": 0
     },
     {
@@ -1291,6 +1830,138 @@
         "wait 3s",
         "observatory: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=30000 net.ipv4.neigh.eth0.delay_first_probe_time=5",
         "observatory: ping -c 1 -W 1 10.0.0.7"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "neigh",
+      "case": "neigh-dup-first-reply",
+      "file": "neigh/neigh-dup-first-reply.txt",
+      "raw": "raw/neigh/neigh-dup-first-reply.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: ping -c 1 10.0.0.2"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "neigh",
+      "case": "neigh-dup-flip",
+      "file": "neigh/neigh-dup-flip.txt",
+      "raw": "raw/neigh/neigh-dup-flip.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: ping -c 1 10.0.0.2",
+        "wait 1.5s",
+        "b: ip neigh flush dev eth0",
+        "b: ping -c 1 10.0.0.1"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "neigh",
+      "case": "neigh-dup-heard",
+      "file": "neigh/neigh-dup-heard.txt",
+      "raw": "raw/neigh/neigh-dup-heard.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: ping -c 1 10.0.0.2",
+        "wait 1.5s",
+        "b: ping -c 1 -W 1 10.0.0.9"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "neigh",
+      "case": "neigh-dup-other-b",
+      "file": "neigh/neigh-dup-other-b.txt",
+      "raw": "raw/neigh/neigh-dup-other-b.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "b",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: ping -c 1 10.0.0.2"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "neigh",
+      "case": "neigh-dup-other-c",
+      "file": "neigh/neigh-dup-other-c.txt",
+      "raw": "raw/neigh/neigh-dup-other-c.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "c",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: ping -c 1 10.0.0.2"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "neigh",
+      "case": "neigh-dup-recovered",
+      "file": "neigh/neigh-dup-recovered.txt",
+      "raw": "raw/neigh/neigh-dup-recovered.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=1000 net.ipv4.neigh.eth0.delay_first_probe_time=0",
+        "a: ping -c 1 10.0.0.2",
+        "c: ip addr del 10.0.0.2/24 dev eth0",
+        "wait 2s",
+        "a: ping -c 1 -W 1 10.0.0.2",
+        "wait 4s",
+        "a: ping -c 2 10.0.0.2"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "neigh",
+      "case": "neigh-dup-removed",
+      "file": "neigh/neigh-dup-removed.txt",
+      "raw": "raw/neigh/neigh-dup-removed.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: ping -c 1 10.0.0.2",
+        "c: ip addr del 10.0.0.2/24 dev eth0",
+        "a: ping -c 2 -W 1 10.0.0.2"
       ],
       "command": "ip neigh",
       "actualCommand": "ip neigh",
@@ -1442,6 +2113,22 @@
       "device": "observatory",
       "setup": [
         "observatory: ip neigh add 10.0.0.7 lladdr 02:00:00:00:00:07 dev eth0 nud permanent"
+      ],
+      "command": "ip neigh",
+      "actualCommand": "ip neigh",
+      "exit": 0
+    },
+    {
+      "family": "neigh",
+      "case": "neigh-permanent-old-door",
+      "file": "neigh/neigh-permanent-old-door.txt",
+      "raw": "raw/neigh/neigh-permanent-old-door.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "a: ip neigh add 10.0.0.2 lladdr 02:00:00:00:00:99 dev eth0 nud permanent",
+        "a: ping -c 2 -W 1 10.0.0.2"
       ],
       "command": "ip neigh",
       "actualCommand": "ip neigh",
@@ -1759,6 +2446,82 @@
     },
     {
       "family": "ping",
+      "case": "ping-dup",
+      "file": "ping/ping-dup.txt",
+      "raw": "raw/ping/ping-dup.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0"
+      ],
+      "command": "ping -c 2 10.0.0.2",
+      "actualCommand": "ping -c 2 10.0.0.2",
+      "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-dup-flipped",
+      "file": "ping/ping-dup-flipped.txt",
+      "raw": "raw/ping/ping-dup-flipped.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: ping -c 1 10.0.0.2",
+        "wait 1.5s",
+        "b: ip neigh flush dev eth0",
+        "b: ping -c 1 10.0.0.1"
+      ],
+      "command": "ping -c 2 10.0.0.2",
+      "actualCommand": "ping -c 2 10.0.0.2",
+      "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-dup-recovered",
+      "file": "ping/ping-dup-recovered.txt",
+      "raw": "raw/ping/ping-dup-recovered.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=1000 net.ipv4.neigh.eth0.delay_first_probe_time=0",
+        "a: ping -c 1 10.0.0.2",
+        "c: ip addr del 10.0.0.2/24 dev eth0",
+        "wait 2s",
+        "a: ping -c 1 -W 1 10.0.0.2",
+        "wait 4s"
+      ],
+      "command": "ping -c 2 10.0.0.2",
+      "actualCommand": "ping -c 2 10.0.0.2",
+      "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-dup-removed",
+      "file": "ping/ping-dup-removed.txt",
+      "raw": "raw/ping/ping-dup-removed.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "a: ping -c 1 10.0.0.2",
+        "c: ip addr del 10.0.0.2/24 dev eth0"
+      ],
+      "command": "ping -c 3 -W 1 10.0.0.2",
+      "actualCommand": "ping -c 3 -W 1 10.0.0.2",
+      "exit": 1
+    },
+    {
+      "family": "ping",
       "case": "ping-gw-wrong",
       "file": "ping/ping-gw-wrong.txt",
       "raw": "raw/ping/ping-gw-wrong.txt",
@@ -1864,6 +2627,60 @@
       "command": "ping 10.0.0.7",
       "actualCommand": "timeout -s INT 3.5 ping 10.0.0.7",
       "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-loop",
+      "file": "ping/ping-loop.txt",
+      "raw": "raw/ping/ping-loop.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "ping -c 3 10.0.4.7",
+      "actualCommand": "ping -c 3 10.0.4.7",
+      "exit": 1
+    },
+    {
+      "family": "ping",
+      "case": "ping-loop-fixed",
+      "file": "ping/ping-loop-fixed.txt",
+      "raw": "raw/ping/ping-loop-fixed.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "arch: ip route add 10.0.4.0/24 via 10.0.3.2"
+      ],
+      "command": "ping -c 2 10.0.4.7",
+      "actualCommand": "ping -c 2 10.0.4.7",
+      "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-loop-ttl-1",
+      "file": "ping/ping-loop-ttl-1.txt",
+      "raw": "raw/ping/ping-loop-ttl-1.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "ping -c 1 -t 1 10.0.4.7",
+      "actualCommand": "ping -c 1 -t 1 10.0.4.7",
+      "exit": 1
+    },
+    {
+      "family": "ping",
+      "case": "ping-loop-ttl-2",
+      "file": "ping/ping-loop-ttl-2.txt",
+      "raw": "raw/ping/ping-loop-ttl-2.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "observatory",
+      "setup": [],
+      "command": "ping -c 1 -t 2 10.0.4.7",
+      "actualCommand": "ping -c 1 -t 2 10.0.4.7",
+      "exit": 1
     },
     {
       "family": "ping",
@@ -2013,6 +2830,135 @@
       "command": "ping -c 2 10.0.0.7",
       "actualCommand": "ping -c 2 10.0.0.7",
       "exit": 1
+    },
+    {
+      "family": "ping",
+      "case": "ping-permanent-deleted",
+      "file": "ping/ping-permanent-deleted.txt",
+      "raw": "raw/ping/ping-permanent-deleted.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "a: ip neigh add 10.0.0.2 lladdr 02:00:00:00:00:99 dev eth0 nud permanent",
+        "a: ping -c 1 -W 1 10.0.0.2",
+        "a: ip neigh del 10.0.0.2 dev eth0"
+      ],
+      "command": "ping -c 2 10.0.0.2",
+      "actualCommand": "ping -c 2 10.0.0.2",
+      "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-permanent-old-door",
+      "file": "ping/ping-permanent-old-door.txt",
+      "raw": "raw/ping/ping-permanent-old-door.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "a: ip neigh add 10.0.0.2 lladdr 02:00:00:00:00:99 dev eth0 nud permanent"
+      ],
+      "command": "ping -c 2 -W 1 10.0.0.2",
+      "actualCommand": "ping -c 2 -W 1 10.0.0.2",
+      "exit": 1
+    },
+    {
+      "family": "ping",
+      "case": "ping-redirect",
+      "file": "ping/ping-redirect.txt",
+      "raw": "raw/ping/ping-redirect.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [],
+      "command": "ping -c 3 10.0.3.2",
+      "actualCommand": "ping -c 3 10.0.3.2",
+      "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-redirect-after",
+      "file": "ping/ping-redirect-after.txt",
+      "raw": "raw/ping/ping-redirect-after.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 2 10.0.3.2"
+      ],
+      "command": "ping -c 2 10.0.3.2",
+      "actualCommand": "ping -c 2 10.0.3.2",
+      "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-redirect-loop",
+      "file": "ping/ping-redirect-loop.txt",
+      "raw": "raw/ping/ping-redirect-loop.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [],
+      "command": "ping -c 3 -W 1 10.0.4.7",
+      "actualCommand": "ping -c 3 -W 1 10.0.4.7",
+      "exit": 1
+    },
+    {
+      "family": "ping",
+      "case": "ping-redirect-loop-fast",
+      "file": "ping/ping-redirect-loop-fast.txt",
+      "raw": "raw/ping/ping-redirect-loop-fast.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [],
+      "command": "ping -c 30 -i 0.2 -W 1 10.0.4.7",
+      "actualCommand": "ping -c 30 -i 0.2 -W 1 10.0.4.7",
+      "exit": 1
+    },
+    {
+      "family": "ping",
+      "case": "ping-redirect-loop-ttl-2",
+      "file": "ping/ping-redirect-loop-ttl-2.txt",
+      "raw": "raw/ping/ping-redirect-loop-ttl-2.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [],
+      "command": "ping -c 1 -t 2 10.0.4.7",
+      "actualCommand": "ping -c 1 -t 2 10.0.4.7",
+      "exit": 1
+    },
+    {
+      "family": "ping",
+      "case": "ping-redirect-not-sent",
+      "file": "ping/ping-redirect-not-sent.txt",
+      "raw": "raw/ping/ping-redirect-not-sent.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "crossing: sysctl -w net.ipv4.conf.all.send_redirects=0 net.ipv4.conf.eth1.send_redirects=0"
+      ],
+      "command": "ping -c 2 10.0.3.2",
+      "actualCommand": "ping -c 2 10.0.3.2",
+      "exit": 0
+    },
+    {
+      "family": "ping",
+      "case": "ping-redirect-refused",
+      "file": "ping/ping-redirect-refused.txt",
+      "raw": "raw/ping/ping-redirect-refused.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: sysctl -w net.ipv4.conf.all.accept_redirects=0 net.ipv4.conf.eth0.accept_redirects=0"
+      ],
+      "command": "ping -c 3 10.0.3.2",
+      "actualCommand": "ping -c 3 10.0.3.2",
+      "exit": 0
     },
     {
       "family": "ping",
@@ -2649,6 +3595,22 @@
     },
     {
       "family": "route",
+      "case": "route-after-flush-cache",
+      "file": "route/route-after-flush-cache.txt",
+      "raw": "raw/route/route-after-flush-cache.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 3 10.0.3.2",
+        "vesper: ip route flush cache"
+      ],
+      "command": "ip route show cache",
+      "actualCommand": "ip route show cache",
+      "exit": 0
+    },
+    {
+      "family": "route",
       "case": "route-after-replace",
       "file": "route/route-after-replace.txt",
       "raw": "raw/route/route-after-replace.txt",
@@ -2661,6 +3623,24 @@
       ],
       "command": "ip route",
       "actualCommand": "ip route",
+      "exit": 0
+    },
+    {
+      "family": "route",
+      "case": "route-cache-door-down",
+      "file": "route/route-cache-door-down.txt",
+      "raw": "raw/route/route-cache-door-down.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 3 10.0.3.2",
+        "vesper: ip link set eth0 down",
+        "vesper: ip link set eth0 up",
+        "vesper: ip route add default via 10.0.2.1"
+      ],
+      "command": "ip route show cache",
+      "actualCommand": "ip route show cache",
       "exit": 0
     },
     {
@@ -2786,6 +3766,21 @@
     },
     {
       "family": "route",
+      "case": "route-flush-cache",
+      "file": "route/route-flush-cache.txt",
+      "raw": "raw/route/route-flush-cache.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 3 10.0.3.2"
+      ],
+      "command": "ip route flush cache",
+      "actualCommand": "ip route flush cache",
+      "exit": 0
+    },
+    {
+      "family": "route",
       "case": "route-get-bad-addr",
       "file": "route/route-get-bad-addr.txt",
       "raw": "raw/route/route-get-bad-addr.txt",
@@ -2796,6 +3791,21 @@
       "command": "ip route get 10.0.2.300",
       "actualCommand": "ip route get 10.0.2.300",
       "exit": 1
+    },
+    {
+      "family": "route",
+      "case": "route-get-loop",
+      "file": "route/route-get-loop.txt",
+      "raw": "raw/route/route-get-loop.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "observatory: ping -c 2 10.0.4.7"
+      ],
+      "command": "ip route get 10.0.4.7",
+      "actualCommand": "ip route get 10.0.4.7",
+      "exit": 0
     },
     {
       "family": "route",
@@ -2825,6 +3835,21 @@
     },
     {
       "family": "route",
+      "case": "route-get-not-redirected",
+      "file": "route/route-get-not-redirected.txt",
+      "raw": "raw/route/route-get-not-redirected.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 1 10.0.3.2"
+      ],
+      "command": "ip route get 10.0.3.2",
+      "actualCommand": "ip route get 10.0.3.2",
+      "exit": 0
+    },
+    {
+      "family": "route",
       "case": "route-get-nothing",
       "file": "route/route-get-nothing.txt",
       "raw": "raw/route/route-get-nothing.txt",
@@ -2847,6 +3872,21 @@
       "setup": [],
       "command": "ip route get 10.0.2.0/24",
       "actualCommand": "ip route get 10.0.2.0/24",
+      "exit": 0
+    },
+    {
+      "family": "route",
+      "case": "route-get-redirected",
+      "file": "route/route-get-redirected.txt",
+      "raw": "raw/route/route-get-redirected.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 2 10.0.3.2"
+      ],
+      "command": "ip route get 10.0.3.2",
+      "actualCommand": "ip route get 10.0.3.2",
       "exit": 0
     },
     {
@@ -2968,6 +4008,65 @@
     },
     {
       "family": "route",
+      "case": "route-show-cache",
+      "file": "route/route-show-cache.txt",
+      "raw": "raw/route/route-show-cache.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 3 10.0.3.2"
+      ],
+      "command": "ip route show cache",
+      "actualCommand": "ip route show cache",
+      "exit": 0
+    },
+    {
+      "family": "route",
+      "case": "route-show-cache-empty",
+      "file": "route/route-show-cache-empty.txt",
+      "raw": "raw/route/route-show-cache-empty.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [],
+      "command": "ip route show cache",
+      "actualCommand": "ip route show cache",
+      "exit": 0
+    },
+    {
+      "family": "route",
+      "case": "route-show-cache-shared",
+      "file": "route/route-show-cache-shared.txt",
+      "raw": "raw/route/route-show-cache-shared.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 3 10.0.3.2",
+        "vesper: ip route add 10.9.0.0/16 via 10.0.2.1"
+      ],
+      "command": "ip route show cache",
+      "actualCommand": "ip route show cache",
+      "exit": 0
+    },
+    {
+      "family": "route",
+      "case": "route-show-cache-unused",
+      "file": "route/route-show-cache-unused.txt",
+      "raw": "raw/route/route-show-cache-unused.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "vesper: ping -c 2 10.0.3.2"
+      ],
+      "command": "ip route show cache",
+      "actualCommand": "ip route show cache",
+      "exit": 0
+    },
+    {
+      "family": "route",
       "case": "route-show-dev",
       "file": "route/route-show-dev.txt",
       "raw": "raw/route/route-show-dev.txt",
@@ -3004,6 +4103,19 @@
       "command": "ip route frobnicate",
       "actualCommand": "ip route frobnicate",
       "exit": 255
+    },
+    {
+      "family": "route",
+      "case": "sysctl-forward-accept-redirects",
+      "file": "route/sysctl-forward-accept-redirects.txt",
+      "raw": "raw/route/sysctl-forward-accept-redirects.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "crossing",
+      "setup": [],
+      "command": "sysctl net.ipv4.conf.all.accept_redirects",
+      "actualCommand": "sysctl net.ipv4.conf.all.accept_redirects",
+      "exit": 0
     },
     {
       "family": "sysctl",
@@ -3500,6 +4612,51 @@
     },
     {
       "family": "tcpdump",
+      "case": "tcpdump-dhcp",
+      "file": "tcpdump/tcpdump-dhcp.txt",
+      "raw": "raw/tcpdump/tcpdump-dhcp.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "during capture, observatory: dhclient eth0"
+      ],
+      "command": "tcpdump -n -c 4 -i eth0 udp",
+      "actualCommand": "timeout -s INT 12 stdbuf -oL tcpdump -Z root -n -c 4 -i eth0 udp",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
+      "case": "tcpdump-dhcp-e",
+      "file": "tcpdump/tcpdump-dhcp-e.txt",
+      "raw": "raw/tcpdump/tcpdump-dhcp-e.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "lantern",
+      "setup": [
+        "during capture, observatory: dhclient eth0"
+      ],
+      "command": "tcpdump -n -e -c 2 -i eth0 udp",
+      "actualCommand": "timeout -s INT 12 stdbuf -oL tcpdump -Z root -n -e -c 2 -i eth0 udp",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
+      "case": "tcpdump-dhcp-names",
+      "file": "tcpdump/tcpdump-dhcp-names.txt",
+      "raw": "raw/tcpdump/tcpdump-dhcp-names.txt",
+      "topology": "square-ping",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "during capture, observatory: dhclient eth0"
+      ],
+      "command": "tcpdump -c 4 -i eth0 udp",
+      "actualCommand": "timeout -s INT 12 stdbuf -oL tcpdump -Z root -c 4 -i eth0 udp",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
       "case": "tcpdump-door-down",
       "file": "tcpdump/tcpdump-door-down.txt",
       "raw": "raw/tcpdump/tcpdump-door-down.txt",
@@ -3512,6 +4669,23 @@
       "command": "tcpdump -n -i eth0",
       "actualCommand": "timeout -s INT 3 stdbuf -oL tcpdump -Z root -n -i eth0",
       "exit": 1
+    },
+    {
+      "family": "tcpdump",
+      "case": "tcpdump-dup",
+      "file": "tcpdump/tcpdump-dup.txt",
+      "raw": "raw/tcpdump/tcpdump-dup.txt",
+      "topology": "switch-ip",
+      "topologyDesc": "switch-ip: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, takes MAC 02:00:00:00:00:11 from its lowest port) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->a eth0 02:00:00:00:00:0a, eth2<->b eth0 02:00:00:00:00:0b, eth3<->c eth0 02:00:00:00:00:0c; all up; IPv6 off; a 10.0.0.1/24, b 10.0.0.2/24, c 10.0.0.3/24",
+      "device": "a",
+      "setup": [
+        "c: ip addr flush dev eth0",
+        "c: ip addr add 10.0.0.2/24 dev eth0",
+        "during capture, a: ping -c 1 10.0.0.2"
+      ],
+      "command": "tcpdump -n -e -c 5 -i eth0",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -e -c 5 -i eth0",
+      "exit": 0
     },
     {
       "family": "tcpdump",
@@ -3651,6 +4825,21 @@
     },
     {
       "family": "tcpdump",
+      "case": "tcpdump-loop",
+      "file": "tcpdump/tcpdump-loop.txt",
+      "raw": "raw/tcpdump/tcpdump-loop.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "observatory",
+      "setup": [
+        "during capture, observatory: ping -c 1 10.0.4.7"
+      ],
+      "command": "tcpdump -n -c 2 -i eth0 icmp",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -c 2 -i eth0 icmp",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
       "case": "tcpdump-missing-dev",
       "file": "tcpdump/tcpdump-missing-dev.txt",
       "raw": "raw/tcpdump/tcpdump-missing-dev.txt",
@@ -3733,6 +4922,21 @@
       ],
       "command": "tcpdump -n -c 1 -i eth0 icmp",
       "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -c 1 -i eth0 icmp",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
+      "case": "tcpdump-redirect",
+      "file": "tcpdump/tcpdump-redirect.txt",
+      "raw": "raw/tcpdump/tcpdump-redirect.txt",
+      "topology": "cathedral",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "vesper",
+      "setup": [
+        "during capture, vesper: ping -c 1 10.0.3.2"
+      ],
+      "command": "tcpdump -n -c 3 -i eth0 icmp",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -c 3 -i eth0 icmp",
       "exit": 0
     },
     {

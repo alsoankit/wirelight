@@ -48,6 +48,47 @@ function faultCommands(f: Fault): string[] {
   }
 }
 
+/**
+ * DHCP on the real side: dnsmasq (the host's) for each machine with a `dhcpServer`, run as the
+ * goldens run it; and, if $DHCP_ROOT is set, a `dhclient` on PATH that adds the paths a real install
+ * has (tools/golden/capture-dhcp.sh, with the same one-line PATH change to Fedora's script).
+ */
+function dhcpSetup(sc: Scenario, dir: string): string[] {
+  const L: string[] = [];
+  const root = process.env.DHCP_ROOT;
+  if (root) {
+    const bin = join(dir, "bin");
+    L.push(
+      `mkdir -p ${q(bin)} /run/systemd/resolve && touch /run/systemd/resolve/stub-resolv.conf`,
+      `cp ${q(`${root}/usr/bin/ipcalc`)} ${q(bin)}/`,
+      `sed 's#^PATH=/bin:/usr/bin:/sbin#PATH=${bin}:/bin:/usr/bin:/sbin#' ${q(`${root}/usr/bin/dhclient-script`)} > ${q(join(dir, "dhclient-script"))}`,
+      `chmod +x ${q(join(dir, "dhclient-script"))}`,
+      // dhclient's first retransmission is random (3–8 s after, from the next whole second): it can
+      // beat dnsmasq's 3 s ping wait and add frames the simulator's seeded run doesn't have. Here
+      // (only) the first wait starts at 5 s so the run is repeatable; nothing else changes.
+      `echo 'initial-interval 5;' > ${q(join(dir, "dhclient.conf"))}`,
+      `printf '%s\\n' '#!/bin/bash' 'ns=$(ip netns identify $$)' ${q(`exec ${root}/usr/bin/dhclient -sf ${join(dir, "dhclient-script")} -cf ${join(dir, "dhclient.conf")} -lf ${dir}/$ns.leases -pf ${dir}/$ns.pid "$@"`)} > ${q(join(bin, "dhclient"))}`,
+      `chmod +x ${q(join(bin, "dhclient"))}`,
+      `export PATH=${q(bin)}:$PATH`,
+    );
+  }
+  for (const d of sc.topology.devices) {
+    const s = d.dhcpServer;
+    if (!s) continue;
+    const flags = [
+      `-i ${s.dev ?? d.interfaces[0]?.name ?? "eth0"}`,
+      `--dhcp-range=${s.range[0]},${s.range[1]},${s.leaseSecs ?? 3600}`,
+      s.pingCheck === false ? "--no-ping" : "",
+      s.sequential ? "--dhcp-sequential-ip" : "",
+      s.router === null ? "--dhcp-option=3" : s.router ? `--dhcp-option=3,${s.router}` : "",
+    ].filter(Boolean);
+    L.push(
+      `ip netns exec ${d.id} dnsmasq --no-daemon -C /dev/null --port=0 -u root --bind-interfaces ${flags.join(" ")} --dhcp-leasefile=${q(join(dir, `dnsmasq.${d.id}.leases`))} --pid-file=${q(join(dir, `dnsmasq.${d.id}.pid`))} > /dev/null 2>&1 &`,
+    );
+  }
+  return L;
+}
+
 export function buildScript(sc: Scenario, dir: string): string {
   const L: string[] = ["set -u", "mount -t tmpfs none /run && mkdir -p /run/netns"];
   const { devices, links } = sc.topology;
@@ -92,6 +133,7 @@ export function buildScript(sc: Scenario, dir: string): string {
       L.push(`ip -n ${d.id} route add ${r.dst}${r.via ? ` via ${r.via}` : ""}${r.dev ? ` dev ${r.dev}` : ""}`);
   }
   for (const f of sc.faults ?? []) L.push(...faultCommands(f));
+  L.push(...dhcpSetup(sc, dir));
   // Listen on every door (not loopback, not bridges: the ports show the wire).
   for (const d of devices)
     for (const i of d.interfaces)
@@ -116,6 +158,7 @@ export function buildScript(sc: Scenario, dir: string): string {
       `ip netns exec ${d.id} bridge -j fdb show > ${q(join(dir, `fdb.${d.id}`))} 2>/dev/null || echo '[]' > ${q(join(dir, `fdb.${d.id}`))}`,
     );
   }
+  if (process.env.DHCP_ROOT) L.push(`pkill -f ${q(`${process.env.DHCP_ROOT}/usr/bin/dhclient`)} 2>/dev/null`);
   L.push("kill $(jobs -p) 2>/dev/null; wait 2>/dev/null; true");
   return L.join("\n");
 }

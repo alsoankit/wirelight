@@ -6,7 +6,7 @@ const LANTERN = "02:00:00:00:00:07";
 describe("the game session", () => {
   it("loads a room unsolved, with its health checks failing", () => {
     const s = new Session();
-    const { status } = s.loadRoom("f0.r3-lights-out");
+    const { status } = s.loadRoom("f2.lights-out");
     expect(status.won).toBe(false);
     expect(status.health).toEqual({ "door-up": false, "wire-lit": false });
   });
@@ -15,7 +15,7 @@ describe("the game session", () => {
     const s = new Session();
     const seen: number[] = [];
     const take = (b: { events: { t: number }[] }) => seen.push(b.events.length);
-    take(s.loadRoom("f0.r3-lights-out"));
+    take(s.loadRoom("f2.lights-out"));
     const up = s.exec("observatory", "ip link set eth0 up", "typed");
     expect(up.exitCode).toBe(0);
     expect(up.events.some((e) => e.kind === "cmd.exec")).toBe(true);
@@ -31,10 +31,9 @@ describe("the game session", () => {
 
   it("reports a detector once it fires, and forgets it on reset", () => {
     const s = new Session();
-    s.loadRoom("f0.r3-lights-out");
-    s.exec("observatory", `lab send-frame --to ${LANTERN}`, "typed");
-    const b = s.exec("observatory", `lab send-frame --to ${LANTERN}`, "typed");
-    expect(b.status.detectors).toEqual(["sending-into-a-dark-door"]);
+    s.loadRoom("f2.lights-out");
+    const b = s.exec("observatory", "ip link set eth0 down", "typed");
+    expect(b.status.detectors).toEqual(["down-not-up"]);
     const r = s.reset();
     expect(r.events.at(-1)?.kind).toBe("world.reset");
     expect(r.status.detectors).toEqual([]);
@@ -42,19 +41,19 @@ describe("the game session", () => {
 
   it("advances network time only forward", () => {
     const s = new Session();
-    s.loadRoom("f0.r2-wrong-name");
+    s.loadRoom("f2.wrong-name");
     expect(s.advanceTo(20_000).status.now).toBe(20_000);
     expect(s.advanceTo(5_000).status.now).toBe(20_000);
   });
 
   it("puts a saved room back exactly as it was", () => {
     const s = new Session();
-    s.loadRoom("f0.r3-lights-out");
+    s.loadRoom("f2.lights-out");
     s.exec("observatory", "ip link set eth0 up", "typed");
     s.advanceTo(3_000);
     const save = s.snapshot();
     const t = new Session();
-    const { status } = t.loadRoom("f0.r3-lights-out", save);
+    const { status } = t.loadRoom("f2.lights-out", save);
     expect(status.health["door-up"]).toBe(true);
     expect(status.now).toBe(3_000);
     t.exec("observatory", `lab send-frame --to ${LANTERN}`, "typed");
@@ -64,11 +63,11 @@ describe("the game session", () => {
   it("is deterministic: the same commands give the same trace", () => {
     const run = () => {
       const s = new Session();
-      s.loadRoom("f0.boss-silent-line");
-      s.exec("observatory", "ip link set eth0 up", "typed");
-      s.exec("observatory", "lab send-frame --to ff:ff:ff:ff:ff:ff", "typed");
+      s.loadRoom("f2.boss-silent-line");
+      s.exec("observatory", "ip link set eth1 up", "typed");
+      s.exec("observatory", "lab send-frame --dev eth1 --to ff:ff:ff:ff:ff:ff", "typed");
       s.advanceTo(4_000);
-      s.exec("observatory", `lab card set --to ${LANTERN}`, "click");
+      s.exec("observatory", "lab card --to 02:00:00:00:00:0e", "click");
       return JSON.stringify(s.advanceTo(30_000)) + s.tools().join();
     };
     expect(run()).toBe(run());
@@ -77,15 +76,15 @@ describe("the game session", () => {
   it("refuses unknown rooms and mismatched saves", () => {
     const s = new Session();
     expect(() => s.loadRoom("nowhere")).toThrow();
-    s.loadRoom("f0.r3-lights-out");
-    expect(() => new Session().loadRoom("f0.r2-wrong-name", s.snapshot())).toThrow();
+    s.loadRoom("f2.lights-out");
+    expect(() => new Session().loadRoom("f2.wrong-name", s.snapshot())).toThrow();
   });
 });
 
 describe("what the room shows", () => {
   it("reports doors and corridors: down and broken, then up and lit", () => {
     const s = new Session();
-    const start = s.loadRoom("f0.r3-lights-out").status;
+    const start = s.loadRoom("f2.lights-out").status;
     expect(start.doors["observatory:eth0"]).toEqual({ mac: "02:00:00:00:00:05", up: false });
     expect(start.corridors).toEqual({ wire: "broken" });
     s.exec("observatory", "ip link set eth0 up", "typed");
@@ -97,7 +96,7 @@ describe("what the room shows", () => {
 
   it("can stop time the moment a message enters a cable, so the crossing can be shown", () => {
     const s = new Session();
-    s.loadRoom("prologue.first-message");
+    s.loadRoom("p.first-message");
     s.exec("observatory", `lab send-frame --to ${LANTERN} --msg "hello"`, "click");
     // The command put the message on the cable at once; step until lantern's answer goes on.
     const out = s.advanceTo(10_000, "cable");

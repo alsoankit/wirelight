@@ -6,6 +6,7 @@
 import type { CmdSource, DeviceId, Simulator } from "@wirelight/sim";
 import { bridge } from "./commands/bridge";
 import { clear, exit, help, history, hostname, man } from "./commands/builtins";
+import { dhclient } from "./commands/dhclient";
 import { ip } from "./commands/ip";
 import { lab } from "./commands/lab";
 import { ping } from "./commands/ping";
@@ -15,9 +16,9 @@ import { tokenize } from "./tokenize";
 import type { CommandContext, CommandFn, ShellContent, ToolId } from "./types";
 
 const BUILTINS: Record<string, CommandFn> = { help, man, history, clear, exit, hostname };
-const PROGRAMS: Record<string, CommandFn> = { ip, lab, bridge, ping, sysctl, tcpdump };
+const PROGRAMS: Record<string, CommandFn> = { ip, lab, bridge, ping, sysctl, tcpdump, dhclient };
 /** Real Linux programs the player meets later; until unlocked they answer FR-CON-11. */
-const LATER = new Set(["tcpdump", "sysctl", "dhclient", "traceroute", "ssh", "ss", "nc", "dig", "curl", "iptables"]);
+const LATER = new Set(["tcpdump", "sysctl", "traceroute", "ssh", "ss", "nc", "dig", "curl", "iptables"]);
 
 export interface ExecOptions {
   tools: ReadonlySet<ToolId>;

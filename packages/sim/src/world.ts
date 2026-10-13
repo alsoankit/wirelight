@@ -9,7 +9,27 @@
  */
 
 import type { WorldView } from "./backend";
-import { bridgeInput, bridgeXmit, DEFAULT_AGEING_MS, type FdbResult, fdbAdd, fdbAge, fdbDel, isGroup } from "./bridge";
+import {
+  bridgeInput,
+  bridgeXmit,
+  DEFAULT_AGEING_MS,
+  type FdbResult,
+  fdbAdd,
+  fdbAge,
+  fdbDel,
+  fdbPortDown,
+  isGroup,
+} from "./bridge";
+import {
+  configureDhcpServer,
+  type DhclientStart,
+  dhcpSend,
+  dhcpTap,
+  dhcpTimer,
+  initDhcpServer,
+  interruptDhclient,
+  startDhclient,
+} from "./dhcp";
 import {
   type AddrResult,
   addrAdd,
@@ -23,7 +43,9 @@ import {
   type RouteGet,
   type RouteResult,
   routeAdd,
+  routeCache,
   routeDel,
+  routeFlushCache,
   routeGet,
   SYSCTL_DEFAULTS,
   sendIp,
@@ -35,9 +57,22 @@ import { NEIGH_DEFAULTS, neighAddPermanent, neighDelete, neighFlush, neighTimer 
 import { interruptPing, type PingStart, pingHears, pingTimer, startPing } from "./ping";
 import { nextFloat, seedPrng } from "./prng";
 import { decodeEth, ETHERTYPE, encodeEth, fromHex, summarizeEth, toHex } from "./proto/ethernet";
-import { encodeIPv4, encodeUDP, IPPROTO } from "./proto/ipv4";
+import { encodeIcmp, ICMP, pingPayload } from "./proto/icmp";
+import { encodeIPv4, encodeUDP, IPPROTO, parseIp } from "./proto/ipv4";
 import { decodeLab, encodeLab } from "./proto/lab";
 import { heapPop, heapPush } from "./queue";
+import {
+  type SlateCatch,
+  type SlateCompare,
+  type SlateLayerName,
+  type SlateOpen,
+  slateCatches,
+  slateCatchNext,
+  slateCompare,
+  slateOpen,
+  slateSees,
+  slateTraceNext,
+} from "./slate";
 import { type SysctlWrite, sysctlList, sysctlRead, sysctlWrite } from "./sysctl";
 import { interruptTcpdump, startTcpdump, type TcpdumpStart, tcpdumpHears } from "./tcpdump";
 import type {
@@ -160,6 +195,25 @@ export class Simulator implements WorldView {
     if (this.muted) return;
     this.trace.push(e);
     for (const fn of this.listeners) fn(e);
+    if (e.kind === "frame.tx" || e.kind === "frame.rx") slateSees(this.k, e);
+  }
+
+  // ── The Slate (0043) ──────────────────────────────────────────────────────────────────
+
+  slateCatchNext(device: DeviceId, from?: string): void {
+    slateCatchNext(this.k, device, from);
+  }
+  slateTraceNext(device: DeviceId): void {
+    slateTraceNext(this.k, device);
+  }
+  slateCatches(): readonly SlateCatch[] {
+    return slateCatches(this.k);
+  }
+  slateOpen(device: DeviceId, n: number, layer: SlateLayerName): SlateOpen {
+    return slateOpen(this.k, device, n, layer);
+  }
+  slateCompare(a: number, b: number): SlateCompare | null {
+    return slateCompare(this.k, a, b);
   }
 
   // ── Snapshots (SIM-39) ────────────────────────────────────────────────────────────────
@@ -188,6 +242,7 @@ export class Simulator implements WorldView {
         n.confirmed += t;
       }
       for (const b of Object.values(d.icmpTokens)) b.at += t;
+      for (const e of d.exceptions ?? []) e.expires += t;
     }
     for (const q of this.s.queue) if (q.kind === "fdb-age") q.updated += t;
     this.emit({ kind: "world.reset", t });
@@ -249,29 +304,39 @@ export class Simulator implements WorldView {
     if (up) i.everUp = true;
     this.emit({ kind: "table.change", t: this.s.t, device, table: "link", op: "set", key: name, before, after: up });
     if (up) onIfaceUp(this.k, device, name);
-    else onIfaceDown(this.k, device, name);
+    else {
+      onIfaceDown(this.k, device, name);
+      fdbPortDown(this.k, device, name);
+    }
     this.carrierChanges(carriers, { device, iface: name });
     return true;
   }
 
-  setPlugged(linkId: string, plugged: boolean): boolean {
+  /** Plugs or pulls a cable: at one end (`end`, the machine whose door it is) or at both. */
+  setPlugged(linkId: string, plugged: boolean, end?: DeviceId): boolean {
     const l = this.s.links[linkId];
     if (!l) return false;
-    if (l.plugged === plugged) return true;
+    const sides: ("a" | "b")[] =
+      end === undefined ? ["a", "b"] : end === l.a.device ? ["a"] : end === l.b.device ? ["b"] : [];
+    if (sides.length === 0) return false;
     const carriers = this.carrierSnapshot();
-    l.plugged = plugged;
-    for (const end of [l.a, l.b]) {
+    for (const side of sides) {
+      const isOut = l.out.includes(side);
+      if (isOut !== plugged) continue; // already as asked
+      l.out = plugged ? l.out.filter((x) => x !== side) : [...l.out, side];
+      const ref = side === "a" ? l.a : l.b;
       this.emit({
         kind: "table.change",
         t: this.s.t,
-        device: end.device,
+        device: ref.device,
         table: "link",
         op: "set",
-        key: `${end.iface}:cable`,
+        key: `${ref.iface}:cable`,
         before: !plugged,
         after: plugged,
       });
     }
+    l.plugged = l.out.length === 0;
     this.carrierChanges(carriers);
     return true;
   }
@@ -289,8 +354,10 @@ export class Simulator implements WorldView {
     for (const d of Object.values(this.s.devices))
       for (const i of d.ifaces) {
         if (skip && skip.device === d.id && skip.iface === i.name) continue;
-        if (before.get(`${d.id}\u0000${i.name}`) && !this.oper(d.id, i.name).carrier)
+        if (before.get(`${d.id}\u0000${i.name}`) && !this.oper(d.id, i.name).carrier) {
           onCarrierDown(this.k, d.id, i.name);
+          fdbPortDown(this.k, d.id, i.name);
+        }
       }
   }
 
@@ -309,23 +376,23 @@ export class Simulator implements WorldView {
     return { ok: true, frameId, length: bytes.length };
   }
 
-  /** `lab card set --to`: change the address on the messenger's card. */
-  setCard(device: DeviceId, to: string): boolean {
-    const m = this.s.devices[device]?.messenger;
-    const mac = parseMac(to);
-    if (!m || !mac) return false;
-    if (m.to === mac) return true;
+  /** `lab card --to`: change the address on a messenger's card (number `index`, from 1): a door name or a house address. */
+  setCard(device: DeviceId, to: string, index = 1): boolean {
+    const m = this.s.devices[device]?.messengers[index - 1];
+    const card = cardAddress(to);
+    if (!m || card === null) return false;
+    if (m.to === card) return true;
     const before = m.to;
-    m.to = mac;
+    m.to = card;
     this.emit({
       kind: "table.change",
       t: this.s.t,
       device,
       table: "lab",
       op: "set",
-      key: "card.to",
+      key: index === 1 ? "card.to" : `card.${index}.to`,
       before,
-      after: mac,
+      after: card,
     });
     return true;
   }
@@ -369,7 +436,18 @@ export class Simulator implements WorldView {
 
   routeGet(device: DeviceId, dst: Ip): RouteGet {
     const d = this.s.devices[device];
-    return d ? routeGet(d, dst) : { kind: "unreachable" };
+    return d ? routeGet(d, dst, this.s.t) : { kind: "unreachable" };
+  }
+
+  /** `ip route show cache`: the route exceptions redirects left (ms until each expires). */
+  routeCache(device: DeviceId): ReturnType<typeof routeCache> {
+    const d = this.s.devices[device];
+    return d ? routeCache(d, this.s.t) : [];
+  }
+
+  /** `ip route flush cache`. */
+  routeFlushCache(device: DeviceId): void {
+    routeFlushCache(this.k, device);
   }
 
   routeAdd(device: DeviceId, spec: { dst: string; via?: Ip; dev?: IfaceName }, replace = false): RouteResult {
@@ -447,28 +525,57 @@ export class Simulator implements WorldView {
   }
 
   /** `lab cable plug|unplug <door>`: the cable at this door. */
+  /** A worn-out control was touched (0040): it runs nothing, but rooms notice. */
+  touch(device: DeviceId, control: string): void {
+    this.emit({ kind: "control.touch", t: this.s.t, device, control });
+  }
+
   plugCable(device: DeviceId, door: IfaceName, plugged: boolean): "ok" | "no-door" | "no-cable" {
     const i = this.iface(device, door);
     if (!i || i.kind !== "ether") return "no-door";
     if (!i.link) return "no-cable";
-    this.setPlugged(i.link, plugged);
+    this.setPlugged(i.link, plugged, device);
     return "ok";
   }
 
   /** Ctrl+C on a running command. */
   interrupt(device: DeviceId, execId: number): boolean {
-    return interruptPing(this.k, device, execId) || interruptTcpdump(this.k, device, execId);
+    return (
+      interruptPing(this.k, device, execId) ||
+      interruptTcpdump(this.k, device, execId) ||
+      interruptDhclient(this.k, device, execId)
+    );
+  }
+
+  /** `dhclient` (dhcp.ts): a client per door, or a release. */
+  startDhclient(device: DeviceId, execId: number, opts: Parameters<typeof startDhclient>[3]): DhclientStart {
+    return startDhclient(this.k, device, execId, opts);
   }
 
   startTcpdump(device: DeviceId, execId: number, opts: Parameters<typeof startTcpdump>[3]): TcpdumpStart {
     return startTcpdump(this.k, device, execId, opts);
   }
 
-  private messengerTick(device: DeviceId): void {
+  private messengerTick(device: DeviceId, index: number): void {
     const d = this.s.devices[device];
-    const m = d?.messenger;
+    const m = d?.messengers[index];
     if (!d || !m) return;
-    this.schedule({ t: this.s.t + m.intervalMs, kind: "timer", device, service: "messenger" });
+    this.schedule({ t: this.s.t + m.intervalMs, kind: "timer", device, service: "messenger", index });
+    // A blank card: nowhere to send to.
+    if (!m.to) return;
+    if (parseIp(m.to)) {
+      // A house address: one real echo request, as `ping -c 1` would send, routed and resolved as usual.
+      m.seq += 1;
+      const msg = encodeIcmp({
+        type: ICMP.echoRequest,
+        code: 0,
+        id: m.echoId,
+        seq: m.seq,
+        data: pingPayload(this.s.t, 56),
+      });
+      sendIp(this.k, device, { dst: m.to, proto: IPPROTO.icmp, payload: msg }, "messenger");
+      return;
+    }
     const iface = d.ifaces.find((i) => i.name === m.dev);
     // Like any program on a door that's switched off, the messenger's send fails (ENETDOWN): nothing leaves.
     if (!iface?.adminUp) return;
@@ -483,10 +590,10 @@ export class Simulator implements WorldView {
     this.schedule({ t: this.s.t + a.intervalMs, kind: "timer", device, service: "announcer" });
     const iface = d.ifaces.find((i) => i.name === a.dev);
     if (!iface?.adminUp) return;
-    const udp = encodeUDP(a.ip, "255.255.255.255", a.port, a.port, encodeLab(a.text));
+    const udp = encodeUDP(a.ip, a.dst, a.port, a.port, encodeLab(a.text));
     const ip = encodeIPv4({
       src: a.ip,
-      dst: "255.255.255.255",
+      dst: a.dst,
       proto: IPPROTO.udp,
       ttl: 64,
       id: a.nextId,
@@ -513,7 +620,7 @@ export class Simulator implements WorldView {
       }
       case "unplug": {
         if (!s.links[f.link]) throw new Error(`fault: no link ${f.link}`);
-        this.setPlugged(f.link, false);
+        this.setPlugged(f.link, false, f.end);
         return;
       }
       case "lab": {
@@ -523,8 +630,8 @@ export class Simulator implements WorldView {
         return;
       }
       case "card": {
-        const m = s.devices[f.device]?.messenger;
-        if (!m) throw new Error(`fault: ${f.device} has no messenger`);
+        const m = s.devices[f.device]?.messengers[(f.messenger ?? 1) - 1];
+        if (!m) throw new Error(`fault: ${f.device} has no messenger ${f.messenger ?? 1}`);
         m.to = f.to;
         return;
       }
@@ -561,6 +668,17 @@ export class Simulator implements WorldView {
       }
       case "sysctl": {
         if (this.setSysctl(f.device, f.key, f.value) !== "ok") throw new Error(`fault: sysctl ${f.key}`);
+        return;
+      }
+      case "neigh-permanent": {
+        if (neighAddPermanent(this.k, f.device, f.ip, f.mac, f.dev, true) !== "ok")
+          throw new Error(`fault: neigh-permanent ${f.ip}`);
+        return;
+      }
+      case "dhcp-config": {
+        const srv = s.devices[f.device]?.dhcpServer;
+        if (!srv) throw new Error(`fault: ${f.device} runs no DHCP server`);
+        configureDhcpServer(srv, f.config);
         return;
       }
     }
@@ -644,12 +762,12 @@ export class Simulator implements WorldView {
         const d = this.s.devices[ev.device];
         const iface = d?.ifaces.find((i) => i.name === ev.iface);
         if (!d || !iface) return;
-        const bytes = encodeEth({ dst: ev.to, src: iface.mac, type: ETHERTYPE.lab, payload: encodeLab(ev.text) });
+        const bytes = encodeEth({ dst: ev.to, src: iface.mac, type: ETHERTYPE.labAnswer, payload: encodeLab(ev.text) });
         this.sendFrame(d.id, iface.name, bytes, "responder");
         return;
       }
       case "timer":
-        if (ev.service === "messenger") this.messengerTick(ev.device);
+        if (ev.service === "messenger") this.messengerTick(ev.device, ev.index ?? 0);
         else this.announcerTick(ev.device);
         return;
       case "fdb-age":
@@ -670,6 +788,12 @@ export class Simulator implements WorldView {
           type: ev.type,
           code: ev.code,
         });
+        return;
+      case "dhcp":
+        dhcpTimer(this.k, ev);
+        return;
+      case "dhcp-send":
+        dhcpSend(this.k, ev);
         return;
     }
   }
@@ -752,12 +876,14 @@ export class Simulator implements WorldView {
         return;
       }
     }
-    if (f.type === ETHERTYPE.lab) {
+    if (f.type === ETHERTYPE.lab || f.type === ETHERTYPE.labAnswer) {
       const text = decodeLab(f.payload);
       this.emit({ kind: "app.deliver", t, device, iface: name, proto: "lab", frameId, from: f.src, to: f.dst, text });
-      this.labRespond(d, iface, f.src, f.dst === BROADCAST);
+      if (f.type === ETHERTYPE.lab) this.labRespond(d, iface, f.src, f.dst === BROADCAST);
       return;
     }
+    // Raw packet sockets (dhclient, arping, dnsmasq's ping) see the frame before the IP layer does.
+    dhcpTap(this.k, device, name, bytes);
     if (inetInput(this.k, device, name, frameId, bytes)) return;
     this.emit({ kind: "frame.drop", t, device, iface: name, frameId, reason: "no-listener" });
   }
@@ -768,7 +894,7 @@ export class Simulator implements WorldView {
     let text: string;
     if (wasBroadcast) {
       if (!lab.answersBroadcast) return;
-      text = `I'm here — ${d.hostname}`;
+      text = lab.broadcastReply ?? `I'm here — ${d.hostname}`;
     } else {
       text = lab.reply ?? `hello from ${d.hostname}`;
     }
@@ -782,6 +908,13 @@ export class Simulator implements WorldView {
       text,
     });
   }
+}
+
+/** What a card can hold: a door name (MAC), a house address (IPv4), or nothing. Null if it's neither. */
+export function cardAddress(text: string): string | null {
+  if (text === "") return "";
+  if (parseIp(text)) return text;
+  return parseMac(text);
 }
 
 /** The first door that isn't the loopback: where lab tools send by default. */
@@ -863,17 +996,23 @@ function build(topology: Topology, seed: number): WorldState {
       procs: [],
       keeper: { asleep: null, desk: [] },
       lab: spec.lab ? { ...spec.lab } : null,
-      messenger: spec.messenger
+      messengers: [...(spec.messenger ? [spec.messenger] : []), ...(spec.messengers ?? [])].map((m) => ({
+        to: m.to,
+        msg: m.msg ?? "hello",
+        intervalMs: m.intervalMs ?? 4000,
+        dev: m.dev ?? spec.interfaces[0]?.name ?? "eth0",
+        echoId: 0,
+        seq: 0,
+      })),
+      announcer: spec.announcer
         ? {
-            to: spec.messenger.to,
-            msg: spec.messenger.msg ?? "hello",
-            intervalMs: spec.messenger.intervalMs ?? 4000,
-            dev: spec.messenger.dev ?? spec.interfaces[0]?.name ?? "eth0",
+            ...spec.announcer,
+            dst: spec.announcer.dst ?? "255.255.255.255",
+            dev: spec.announcer.dev ?? spec.interfaces[0]?.name ?? "eth0",
+            nextId: 0,
           }
         : null,
-      announcer: spec.announcer
-        ? { ...spec.announcer, dev: spec.announcer.dev ?? spec.interfaces[0]?.name ?? "eth0", nextId: 0 }
-        : null,
+      dhcpServer: spec.dhcpServer ? initDhcpServer(spec.dhcpServer, spec.interfaces[0]?.name ?? "eth0") : null,
     };
   }
   const links: Record<string, LinkState> = {};
@@ -890,6 +1029,7 @@ function build(topology: Topology, seed: number): WorldState {
       a: spec.a,
       b: spec.b,
       plugged: spec.plugged ?? true,
+      out: spec.plugged === false ? ["a", "b"] : [],
       delayMs: spec.delayMs ?? DEFAULT_DELAY_MS,
       bandwidthBps: spec.bandwidthBps ?? DEFAULT_BW,
       queueLimit: spec.queueLimit ?? DEFAULT_QUEUE,
@@ -901,14 +1041,18 @@ function build(topology: Topology, seed: number): WorldState {
   const s: WorldState = { t: 0, seq: 0, nextFrameId: 1, prng, devices, links, queue: [] };
   for (const d of Object.values(devices)) {
     // First messages come early so the player sees the service working; then at its interval.
-    if (d.messenger)
+    // Several messengers start a little apart, so their letters don't all cross at once.
+    d.messengers.forEach((m, index) => {
+      m.echoId = Math.floor(nextFloat(prng) * 0xffff) + 1;
       heapPush(s.queue, {
-        t: Math.min(1500, d.messenger.intervalMs),
+        t: Math.min(1500, m.intervalMs) + index * 400,
         seq: s.seq++,
         kind: "timer",
         device: d.id,
         service: "messenger",
+        index,
       });
+    });
     if (d.announcer) {
       d.announcer.nextId = Math.floor(nextFloat(prng) * 0xffff);
       heapPush(s.queue, {

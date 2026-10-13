@@ -8,7 +8,7 @@ import { decodeIPv4, decodeUDP, IPPROTO } from "./ipv4";
  */
 export const ETH_HEADER = 14;
 
-export const ETHERTYPE = { ipv4: 0x0800, arp: 0x0806, lab: 0x88b5 } as const;
+export const ETHERTYPE = { ipv4: 0x0800, arp: 0x0806, lab: 0x88b5, labAnswer: 0x88b6 } as const;
 
 export interface EthFrame {
   dst: Mac;

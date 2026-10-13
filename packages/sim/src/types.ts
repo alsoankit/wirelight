@@ -1,5 +1,6 @@
 import type { Mac } from "./mac";
 import type { PrngState } from "./prng";
+import type { SlateState } from "./slate";
 
 export type DeviceId = string;
 export type IfaceName = string;
@@ -15,14 +16,26 @@ export interface LabSpec {
   /** Reply to a direct message. Default `hello from <hostname>`; a room with a key uses `key: <word>`. */
   reply?: string;
   answersBroadcast?: boolean;
+  /** Its answer to a broadcast (default `I'm here — <hostname>`). */
+  broadcastReply?: string;
 }
 
-/** The automatic messenger: sends a lab frame every `intervalMs` to the address on its card (SIM-08). */
+/**
+ * The automatic messenger: every `intervalMs` it writes to the address on its card (SIM-08). A door
+ * name (MAC) gets a lab frame; a house address (IPv4, from Floor 5) gets a real ping (one echo request).
+ */
 export interface MessengerSpec {
-  to: Mac;
+  /** The card's address: a MAC, an IPv4 address, or "" for a blank card (the messenger sends nothing). */
+  to: string;
   msg?: string;
   intervalMs?: number;
   dev?: IfaceName;
+}
+
+/** A messenger as it runs: its card, and the echo identifier and sequence of its pings. */
+export interface MessengerState extends Required<MessengerSpec> {
+  echoId: number;
+  seq: number;
 }
 
 /**
@@ -31,6 +44,8 @@ export interface MessengerSpec {
  */
 export interface AnnouncerSpec {
   ip: string;
+  /** Who it's for: the whole street (e.g. 10.0.1.255, 6.1) or everyone (default 255.255.255.255). */
+  dst?: string;
   port: number;
   text: string;
   intervalMs: number;
@@ -73,7 +88,30 @@ export interface DeviceSpec {
   sysctl?: Record<string, string>;
   lab?: LabSpec;
   messenger?: MessengerSpec;
+  /** Several messengers (3.3: one card per door); `lab card --messenger N` picks one, from 1. */
+  messengers?: MessengerSpec[];
   announcer?: AnnouncerSpec;
+  /** A DHCP server on this machine (the registry, Floor 7): dnsmasq, as captured. */
+  dhcpServer?: DhcpServerSpec;
+}
+
+/**
+ * A DHCP server as dnsmasq runs it (`dnsmasq -i <dev> --dhcp-range=<a>,<b>,<lease>`, no DNS;
+ * tools/golden/capture-dhcp.sh). Defaults are dnsmasq's.
+ */
+export interface DhcpServerSpec {
+  /** The door it serves. Default: the machine's first door. */
+  dev?: IfaceName;
+  /** The first and last address it hands out. */
+  range: [Ip, Ip];
+  /** Default 3600 (dnsmasq's 1h). */
+  leaseSecs?: number;
+  /** The router option (3). Default: the server's own address (dnsmasq's default); null sends none. */
+  router?: Ip | null;
+  /** Ping an address before offering it (dnsmasq's default). false is `--no-ping`. */
+  pingCheck?: boolean;
+  /** `--dhcp-sequential-ip`: the lowest free address, not one picked from the client's MAC. */
+  sequential?: boolean;
 }
 
 export interface EndRef {
@@ -102,10 +140,11 @@ export interface Topology {
 /** Declarative mutations applied on top of the correct network. */
 export type Fault =
   | { kind: "iface-down"; device: DeviceId; iface: IfaceName }
-  | { kind: "unplug"; link: string }
+  /** The cable is out: at one machine's end (`end`), or at both. */
+  | { kind: "unplug"; link: string; end?: DeviceId }
   | { kind: "lab"; device: DeviceId; lab: LabSpec }
-  /** The messenger's card holds the wrong address. */
-  | { kind: "card"; device: DeviceId; to: Mac }
+  /** A messenger's card (the first, or number `messenger`) holds the wrong address. */
+  | { kind: "card"; device: DeviceId; to: string; messenger?: number }
   /** A static forwarding-database entry, as `bridge fdb add <mac> dev <port> master static [sticky]`. */
   | { kind: "fdb-static"; device: DeviceId; mac: Mac; port: IfaceName; sticky?: boolean }
   | { kind: "addr-remove"; device: DeviceId; cidr: string; dev: IfaceName }
@@ -113,6 +152,10 @@ export type Fault =
   | { kind: "route-remove"; device: DeviceId; dst: string }
   | { kind: "route-set"; device: DeviceId; route: RouteSpec }
   | { kind: "sysctl"; device: DeviceId; key: string; value: string }
+  /** The registry's settings change (`dhcp-config`): no conflict check, another range, no router… */
+  | { kind: "dhcp-config"; device: DeviceId; config: Partial<DhcpServerSpec> }
+  /** A pinned neighbour line, as `ip neigh add <ip> lladdr <mac> dev <dev> nud permanent` (6.B). */
+  | { kind: "neigh-permanent"; device: DeviceId; ip: Ip; mac: Mac; dev: IfaceName }
   /** The keeper has forgotten its job (hand mode, 0042): a switch's, a house's, or a router's. */
   | { kind: "keeper-asleep"; device: DeviceId; desk: "switch" | "host" | "router" };
 
@@ -158,6 +201,11 @@ export interface AddrState {
   scope: "global" | "host";
   /** A further address in a subnet the door already has (shown "secondary"; no route of its own). */
   secondary: boolean;
+  /**
+   * Lifetimes, for an address given with them (`valid_lft`/`preferred_lft`, as dhclient-script
+   * does): shown "dynamic", counting down from `since`, and removed when `valid` runs out. Absent: forever.
+   */
+  lft?: { valid: number; preferred: number; since: number };
 }
 
 export interface RouteState {
@@ -171,6 +219,22 @@ export interface RouteState {
   /** The preferred source (`src`), set on connected routes. */
   src: Ip | null;
   metric: number | null;
+}
+
+/**
+ * A route exception (Linux's fib_nh_exception): an ICMP redirect told this machine a better next hop
+ * for one destination. It hangs on the nexthop (`nh`: gateway and door of the route it came through)
+ * and expires 300 s after it was last set (ip_rt_gc_timeout).
+ */
+export interface RouteException {
+  dst: Ip;
+  gw: Ip;
+  dev: IfaceName;
+  /** The nexthop it belongs to: `<via>|<dev>` of the route used. */
+  nh: string;
+  expires: number;
+  /** A packet has gone out through it (only then does `ip route show cache` list it, as measured). */
+  bound?: boolean;
 }
 
 export type NeighNud = "INCOMPLETE" | "REACHABLE" | "STALE" | "DELAY" | "PROBE" | "FAILED" | "PERMANENT";
@@ -218,6 +282,20 @@ export interface PingProc {
   started: number;
   numeric: boolean;
   done: boolean;
+  /**
+   * Messages queued on ping's socket while it wakes to read them (only once a redirect is waiting:
+   * a socket error that arrives meanwhile is read first, as on Linux).
+   */
+  inbox?: {
+    kind: "reply" | "redirect";
+    from: Ip;
+    seq: number;
+    ttl: number;
+    bytes: number;
+    at: number;
+    gw: Ip;
+    code: number;
+  }[];
 }
 
 /** A door's neighbour settings (net.ipv4.neigh.<door>.*), as Linux keeps them per door. */
@@ -271,20 +349,108 @@ export interface DeviceState {
   /** Next IPv4 identification value for packets this machine originates. */
   ipId: number;
   /** ICMP error rate limiting per destination (Linux inet_peer tokens, ms). */
-  icmpTokens: Record<Ip, { tokens: number; at: number }>;
-  procs: (PingProc | TcpdumpProc)[];
+  icmpTokens: Record<Ip, { tokens: number; at: number; redirects?: number }>;
+  /** Route exceptions ("cache <redirected>") left by ICMP redirects this machine accepted. */
+  exceptions?: RouteException[];
+  procs: (PingProc | TcpdumpProc | DhclientProc)[];
   /** Hand mode (0042): which keeper has forgotten its job, and what waits at its desk. */
   keeper: { asleep: "switch" | "host" | "router" | null; desk: DeskItem[] };
   lab: LabSpec | null;
-  messenger: Required<MessengerSpec> | null;
+  messengers: MessengerState[];
   announcer: (Required<AnnouncerSpec> & { nextId: number }) | null;
+  /** The DHCP server's state, if this machine runs one. */
+  dhcpServer?: DhcpServerState | null;
+  /** What dhclient keeps on disk: its pid file and each door's last lease (the lease file). */
+  dhclientDb?: {
+    pidFile: "none" | "live" | "stale";
+    pid: number;
+    leases: Record<IfaceName, { ip: Ip; server: Ip; prefix: number }>;
+  };
+}
+
+export interface DhcpServerState {
+  dev: IfaceName;
+  range: [Ip, Ip];
+  leaseSecs: number;
+  /** "self": the server's own address. */
+  router: Ip | null | "self";
+  pingCheck: boolean;
+  sequential: boolean;
+  leases: { mac: Mac; ip: Ip; expires: number }[];
+  /** Declined addresses, held back until `until`. */
+  declined: { ip: Ip; until: number }[];
+  /** Addresses whose ping went unanswered (free), remembered 30 s. */
+  pinged: { ip: Ip; mac: Mac; at: number }[];
+  /** The ping it is waiting on (it handles nothing else meanwhile), with the DISCOVER it is for. */
+  ping: { ip: Ip; id: number; mac: Mac; request: string; tried: Ip[]; started: number } | null;
+  /** Messages that arrived while it waited (hex of the BOOTP payload). */
+  backlog: string[];
+  stamp: number;
+}
+
+/** A lease as the client holds it (times are network ms). */
+export interface DhcpLease {
+  ip: Ip;
+  server: Ip;
+  prefix: number;
+  broadcast: Ip;
+  router: Ip | null;
+  leaseSecs: number;
+  t1: number | null;
+  t2: number | null;
+  since: number;
+  renewAt: number;
+  rebindAt: number;
+  expiresAt: number;
+}
+
+/** A running ISC dhclient for one door. Its output goes to the trace as `proc.output` for its exec id. */
+export interface DhclientProc {
+  kind: "dhclient";
+  execId: number;
+  pid: number;
+  dev: IfaceName;
+  verbose: boolean;
+  /** Still holding the console; false once it has gone to the background (or for later doors). */
+  foreground: boolean;
+  /** The door whose end ends the command (with several doors, the first). */
+  leader: boolean;
+  mode: "get" | "release";
+  state:
+    | "init"
+    | "selecting"
+    | "requesting"
+    | "checking"
+    | "bound"
+    | "renewing"
+    | "rebinding"
+    | "declined"
+    | "sleeping"
+    | "releasing";
+  xid: number;
+  /** ISC's retransmission interval, seconds. */
+  interval: number;
+  /** Whole network seconds when it started sending this message. */
+  firstSending: number;
+  secs: number;
+  /** The lease being requested or checked. */
+  offer: DhcpLease | null;
+  /** The lease it holds. */
+  lease: DhcpLease | null;
+  /** Fedora's arping check in progress. */
+  check: { step: "probe" | "settle" | "reprobe" | "reprobing" | "decline"; probes: number; renewing: boolean } | null;
+  stamp: number;
+  done: boolean;
 }
 
 export interface LinkState {
   id: string;
   a: EndRef;
   b: EndRef;
+  /** Both ends in. (A cable works only when it is plugged in at both ends.) */
   plugged: boolean;
+  /** Which ends are out: "a", "b". Empty when plugged. */
+  out: ("a" | "b")[];
   delayMs: number;
   bandwidthBps: number;
   queueLimit: number;
@@ -296,10 +462,11 @@ export interface LinkState {
 export type Scheduled =
   | { t: number; seq: number; kind: "arrive"; link: string; dir: 0 | 1; frameId: number; hex: string }
   | { t: number; seq: number; kind: "lab-reply"; device: DeviceId; iface: IfaceName; to: Mac; text: string }
-  | { t: number; seq: number; kind: "timer"; device: DeviceId; service: "messenger" | "announcer" }
+  | { t: number; seq: number; kind: "timer"; device: DeviceId; service: "messenger" | "announcer"; index?: number }
   | { t: number; seq: number; kind: "fdb-age"; device: DeviceId; bridge: IfaceName; mac: Mac; updated: number }
   | { t: number; seq: number; kind: "neigh"; device: DeviceId; dev: IfaceName; ip: Ip; stamp: number }
-  | { t: number; seq: number; kind: "ping"; device: DeviceId; execId: number; what: "send" | "finish" }
+  /** ping's timers; "read": it wakes to read what's waiting on its socket. */
+  | { t: number; seq: number; kind: "ping"; device: DeviceId; execId: number; what: "send" | "finish" | "read" }
   /** A local error reaching ping a moment after the kernel posts it (the process wakes and reads it). */
   | {
       t: number;
@@ -311,6 +478,30 @@ export type Scheduled =
       icmpSeq: number;
       type: number;
       code: number;
+    }
+  /** DHCP timers: a client's (by pid), the server's ping wait, an address lifetime ending (`lft`). */
+  | {
+      t: number;
+      seq: number;
+      kind: "dhcp";
+      device: DeviceId;
+      role: "client" | "server" | "lft";
+      pid: number;
+      stamp: number;
+      dev?: IfaceName;
+      ip?: Ip;
+    }
+  /** A DHCP server's reply leaving, a moment after the request came in. */
+  | {
+      t: number;
+      seq: number;
+      kind: "dhcp-send";
+      device: DeviceId;
+      role: "server";
+      hex: string;
+      name: "OFFER" | "ACK" | "NAK";
+      ip: Ip;
+      ciaddr: Ip;
     };
 
 export interface WorldState {
@@ -321,6 +512,8 @@ export interface WorldState {
   devices: Record<DeviceId, DeviceState>;
   links: Record<string, LinkState>;
   queue: Scheduled[];
+  /** The Slate's catches and what it's waiting for (0043); absent until it's first used. */
+  slate?: SlateState;
 }
 
 // ── The event trace (SIM-35) ───────────────────────────────────────────────────────────────
@@ -448,7 +641,7 @@ export type SimEvent =
       kind: "icmp.error";
       t: number;
       device: DeviceId;
-      type: "net-unreachable" | "host-unreachable" | "port-unreachable" | "time-exceeded";
+      type: "net-unreachable" | "host-unreachable" | "port-unreachable" | "time-exceeded" | "redirect";
       to: Ip;
       /** The frame whose packet caused it. */
       about: number;
@@ -464,6 +657,66 @@ export type SimEvent =
     }
   /** A hand step the player took (learn, send, arp-ask, wrap, forward) or the keeper waking. */
   | { kind: "keeper.step"; t: number; device: DeviceId; action: string; args: string[]; frameId: number | null }
+  /** The Slate (0043): armed, a catch kept, a catch opened down to a layer, two catches compared. */
+  | { kind: "slate.arm"; t: number; device: DeviceId; what: "catch" | "trace" }
+  | {
+      kind: "slate.catch";
+      t: number;
+      n: number;
+      device: DeviceId;
+      iface: IfaceName;
+      dir: "in" | "out";
+      frameId: number;
+      traced: boolean;
+    }
+  | { kind: "slate.open"; t: number; n: number; layer: "frame" | "packet" | "message"; reached: boolean }
+  | {
+      kind: "slate.compare";
+      t: number;
+      a: number;
+      b: number;
+      changed: string[];
+      samePacket: boolean;
+      sameStreet: boolean;
+    }
+  /** A messenger's ping (its card holds a house address) was answered. */
+  | {
+      kind: "echo.heard";
+      t: number;
+      device: DeviceId;
+      messenger: number;
+      from: Ip;
+      seq: number;
+      frameId: number | null;
+    }
+  /** The player touched a control that runs nothing: a worn-out switch or lever (0040). */
+  | { kind: "control.touch"; t: number; device: DeviceId; control: string }
+  /**
+   * DHCP, step by step (the room shows the four messages): a message sent (DISCOVER, OFFER,
+   * REQUEST, ACK, NAK, DECLINE, RELEASE), or a change: BOUND (the client took its lease), IN-USE (the
+   * server's ping was answered), CONFLICT (the client's ARP check was answered), EXPIRED.
+   */
+  | {
+      kind: "dhcp.state";
+      t: number;
+      device: DeviceId;
+      role: "client" | "server";
+      what:
+        | "DISCOVER"
+        | "OFFER"
+        | "REQUEST"
+        | "ACK"
+        | "NAK"
+        | "DECLINE"
+        | "RELEASE"
+        | "BOUND"
+        | "IN-USE"
+        | "CONFLICT"
+        | "EXPIRED";
+      xid: number;
+      ip: Ip | null;
+      leaseSecs?: number;
+    }
   | { kind: "world.reset"; t: number };
 
 export type SimEventKind = SimEvent["kind"];
@@ -475,5 +728,6 @@ export type FrameOrigin =
   | "forward"
   | "kernel"
   | "ping"
-  | "keeper";
+  | "keeper"
+  | "dhcp";
 export type Unsubscribe = () => void;

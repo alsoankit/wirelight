@@ -197,7 +197,7 @@ describe("lab card", () => {
   it("set changes the address quietly, and the messenger uses it", () => {
     const { b, run } = cardSetup();
     expect(run("lab card set --to 02:00:00:00:00:07")).toEqual(["exit 0"]);
-    expect(b.world.device("observatory")?.messenger?.to).toBe("02:00:00:00:00:07");
+    expect(b.world.device("observatory")?.messengers[0]?.to).toBe("02:00:00:00:00:07");
   });
 
   it("rejects bad input and machines without a card", () => {

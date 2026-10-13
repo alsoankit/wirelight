@@ -14,7 +14,7 @@ export function EngineCheck() {
     const say = (line: string) => setLines((l) => [...l, line]);
     (async () => {
       const started = performance.now();
-      const load = await engine.loadRoom("f0.r3-lights-out");
+      const load = await engine.loadRoom("f2.lights-out");
       say(`loaded ${load.status.roomId}: won ${load.status.won}, health ${JSON.stringify(load.status.health)}`);
       for (const line of ["ip link set eth0 up", `lab send-frame --to ${LANTERN}`]) {
         const r = await engine.exec("observatory", line, "typed");

@@ -10,7 +10,10 @@ export const fields = {
       meaning: "Who this frame is for: the address of the door that should take it in. All f's means everyone.",
     },
     from: { name: "Source", meaning: "Who sent it: the address of the door it left through." },
-    type: { name: "EtherType", meaning: "What kind of thing is inside. 0x88b5 means a Wirelight lab message." },
+    type: {
+      name: "EtherType",
+      meaning: "What kind of thing is inside. 0x88b5 means a Wirelight lab message; 0x88b6, an answer to one.",
+    },
     length: {
       name: "Length",
       meaning: "How many bytes the whole frame is: the addresses, the type and what's inside.",

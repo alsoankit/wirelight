@@ -45,6 +45,8 @@ export interface BackendCapabilities {
 export interface NetworkBackend {
   load(topology: Topology, faults: Fault[], seed: number): Promise<void>;
   exec(deviceId: DeviceId, line: string, source: CmdSource): ExecHandle;
+  /** A worn-out control was touched (0040): nothing runs; the trace records it. */
+  touch(deviceId: DeviceId, control: string): void;
   advance(toNetworkTime: number): void;
   nextEventTime(): number | null;
   now(): number;

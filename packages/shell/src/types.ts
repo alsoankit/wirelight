@@ -7,6 +7,10 @@ export type ToolId =
   | "lab card"
   | "lab cable"
   | "lab keeper"
+  /** The Slate (6.1): catch, list and open. */
+  | "lab slate"
+  /** The Slate's tracer and compare (9.1). */
+  | "lab slate trace"
   | "workbench"
   | "bridge fdb"
   | "ip addr"

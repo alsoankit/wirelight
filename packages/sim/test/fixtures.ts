@@ -1,4 +1,4 @@
-import type { Topology } from "../src";
+import type { RouteSpec, Topology } from "../src";
 
 /** A switch: `hall` bridges eth1..eth3 (br0); hosts a, b, c hang off it. */
 export function switchNet(): Topology {
@@ -95,6 +95,84 @@ export function routed(forward = true): Topology {
     links: [
       { id: "l1", a: { device: "left", iface: "eth0" }, b: { device: "bridgehead", iface: "eth0" } },
       { id: "l2", a: { device: "bridgehead", iface: "eth1" }, b: { device: "right", iface: "eth0" } },
+    ],
+  };
+}
+
+/**
+ * Floor 9's four streets (tools/golden/capture-redirect.sh): observatory on the nave, crossing between
+ * the nave and the cloister (a switch with crossing, arch and vesper), arch to the bell tower, spire
+ * to the high window (halo). Arch has no route for the high window, so 10.0.4.0/24 loops (9.4).
+ */
+export function cathedral(): Topology {
+  const host = (id: string, mac: string, cidr: string, gw: string) => ({
+    id,
+    hostname: id,
+    kind: "host" as const,
+    interfaces: [{ name: "eth0", mac }],
+    addrs: [{ dev: "eth0", cidr }],
+    routes: [{ dst: "default", via: gw }],
+  });
+  const router = (id: string, a: [string, string, string], b: [string, string, string], routes: RouteSpec[]) => ({
+    id,
+    hostname: id,
+    kind: "host" as const,
+    interfaces: [
+      { name: a[0], mac: a[1] },
+      { name: b[0], mac: b[1] },
+    ],
+    addrs: [
+      { dev: a[0], cidr: a[2] },
+      { dev: b[0], cidr: b[2] },
+    ],
+    routes,
+    sysctl: { "net.ipv4.ip_forward": "1" },
+  });
+  return {
+    devices: [
+      host("observatory", "02:00:00:00:01:05", "10.0.1.5/24", "10.0.1.1"),
+      router(
+        "crossing",
+        ["eth0", "02:00:00:00:01:01", "10.0.1.1/24"],
+        ["eth1", "02:00:00:00:02:01", "10.0.2.1/24"],
+        [
+          { dst: "10.0.3.0/24", via: "10.0.2.2" },
+          { dst: "10.0.4.0/24", via: "10.0.2.2" },
+        ],
+      ),
+      {
+        id: "cloister",
+        hostname: "cloister",
+        kind: "host",
+        interfaces: [
+          { name: "eth1", mac: "02:00:00:00:02:a1" },
+          { name: "eth2", mac: "02:00:00:00:02:a2" },
+          { name: "eth3", mac: "02:00:00:00:02:a3" },
+        ],
+        bridges: [{ name: "br0", ports: ["eth1", "eth2", "eth3"] }],
+      },
+      router(
+        "arch",
+        ["eth0", "02:00:00:00:02:02", "10.0.2.2/24"],
+        ["eth1", "02:00:00:00:03:01", "10.0.3.1/24"],
+        [{ dst: "default", via: "10.0.2.1" }],
+      ),
+      host("vesper", "02:00:00:00:02:07", "10.0.2.7/24", "10.0.2.1"),
+      router(
+        "spire",
+        ["eth0", "02:00:00:00:03:02", "10.0.3.2/24"],
+        ["eth1", "02:00:00:00:04:01", "10.0.4.1/24"],
+        [{ dst: "default", via: "10.0.3.1" }],
+      ),
+      host("halo", "02:00:00:00:04:07", "10.0.4.7/24", "10.0.4.1"),
+    ],
+    links: [
+      { id: "nave", a: { device: "observatory", iface: "eth0" }, b: { device: "crossing", iface: "eth0" } },
+      { id: "c1", a: { device: "cloister", iface: "eth1" }, b: { device: "crossing", iface: "eth1" } },
+      { id: "c2", a: { device: "cloister", iface: "eth2" }, b: { device: "arch", iface: "eth0" } },
+      { id: "c3", a: { device: "cloister", iface: "eth3" }, b: { device: "vesper", iface: "eth0" } },
+      { id: "tower", a: { device: "arch", iface: "eth1" }, b: { device: "spire", iface: "eth0" } },
+      { id: "window", a: { device: "spire", iface: "eth1" }, b: { device: "halo", iface: "eth0" } },
     ],
   };
 }

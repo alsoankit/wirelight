@@ -1,5 +1,7 @@
 /**
- * The Floor 0–1 lab protocol (SIM-06): EtherType 0x88B5 ("local experimental"), payload = UTF-8 text.
+ * The Floors 1–4 lab protocol (SIM-06): payload = UTF-8 text. A message goes out with EtherType
+ * 0x88B5 and an answer with 0x88B6 (IEEE 802's two "local experimental" types), so a machine can
+ * see from the bytes that a frame is an answer, and never answers an answer (no endless echo).
  * Ethernet padding is zeros and the text never contains NUL, so trailing zeros are stripped on decode.
  */
 export const LAB_MAX = 1400;

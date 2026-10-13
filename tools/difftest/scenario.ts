@@ -13,4 +13,9 @@ export interface Scenario {
   topology: Topology;
   faults?: Fault[];
   steps: Step[];
+  /**
+   * Programs the real side needs beyond iproute2 and tcpdump. "dhclient": ISC dhclient, unpacked
+   * from Fedora's RPMs into $DHCP_ROOT (tools/golden/capture-dhcp.sh); without it the scenario is skipped.
+   */
+  needs?: "dhclient"[];
 }

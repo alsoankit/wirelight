@@ -26,6 +26,7 @@ const ALL_TOOLS: ToolId[] = [
   "lab send-frame",
   "lab card",
   "lab cable",
+  "dhclient",
 ];
 
 export function runOnSim(sc: Scenario, seed = 1): SimRun {
@@ -62,14 +63,24 @@ export function runOnSim(sc: Scenario, seed = 1): SimRun {
     } else {
       const before = sim.trace.length;
       const h = b.exec(s.device, s.run, "script");
+      // A command that keeps running (dhclient) blocks the step until it ends, as on Linux.
+      let exitCode = h.exitCode;
+      const limit = b.now() + 120_000;
+      while (exitCode === null && b.now() < limit) {
+        b.advance(b.now() + 10);
+        const done = sim.trace.find(
+          (e): e is Extract<SimEvent, { kind: "proc.exit" }> => e.kind === "proc.exit" && e.execId === h.execId,
+        );
+        if (done) exitCode = done.exitCode;
+      }
       const lines = sim.trace
         .slice(before)
         .filter(
           (e): e is Extract<SimEvent, { kind: "proc.output" }> =>
-            e.kind === "proc.output" && (e.stream === "stdout" || e.stream === "stderr"),
+            e.kind === "proc.output" && e.execId === h.execId && (e.stream === "stdout" || e.stream === "stderr"),
         )
         .map((e) => e.text);
-      outputs.push({ lines, exit: h.exitCode ?? -1 });
+      outputs.push({ lines, exit: exitCode ?? -1 });
     }
     b.advance(b.now() + s.settleMs);
   });

@@ -85,9 +85,21 @@ export function facts(trace: readonly SimEvent[], world: Facts["world"]): Facts 
   return { trace: sinceReset(trace), world };
 }
 
-/** The messenger's card holds this address. */
-export function cardPointsTo(device: DeviceId, mac: string): Predicate {
-  return ({ world }) => world.device(device)?.messenger?.to === mac;
+/** A messenger's card (the first, or number `index`) holds this address. */
+export function cardPointsTo(device: DeviceId, address: string, index = 1): Predicate {
+  return ({ world }) => world.device(device)?.messengers[index - 1]?.to === address;
+}
+
+/** A messenger's ping (its card holds a house address) was answered by `from` (any messenger, or number `index`). */
+export function messengerPingAnswered(device: DeviceId, from: string, index?: number): Predicate {
+  return ({ trace }) =>
+    trace.some(
+      (e) =>
+        e.kind === "echo.heard" &&
+        e.device === device &&
+        e.from === from &&
+        (index === undefined || e.messenger === index),
+    );
 }
 
 /** Frames `fromDevice` sent with a given origin, that `atDevice` took in. */
@@ -149,3 +161,124 @@ export const not =
   (p: Predicate): Predicate =>
   (f) =>
     !p(f);
+
+// ── Commands, clicks and touches (Region 1 detectors) ───────────────────────────────────────
+
+type Exec = Extract<SimEvent, { kind: "cmd.exec" }>;
+
+function execs(trace: readonly SimEvent[], device: DeviceId | null, pattern: RegExp): Exec[] {
+  return trace.filter(
+    (e): e is Exec => e.kind === "cmd.exec" && (device === null || e.device === device) && pattern.test(e.line),
+  );
+}
+
+/** A command matching `pattern` ran on `device` (any device when null) at least `n` times. */
+export function ran(device: DeviceId | null, pattern: RegExp, n = 1): Predicate {
+  return ({ trace }) => execs(trace, device, pattern).length >= n;
+}
+
+/** `first` ran on `device` before `then` had run anywhere (e.g. lantern's plate read while the cable was out). */
+export function ranBefore(device: DeviceId, first: RegExp, then: RegExp): Predicate {
+  return ({ trace }) => {
+    for (const e of trace) {
+      if (e.kind !== "cmd.exec") continue;
+      if (then.test(e.line)) return false;
+      if (e.device === device && first.test(e.line)) return true;
+    }
+    return false;
+  };
+}
+
+/** On one device, `first` ran and later `then` (e.g. unplugging, then plugging back in). */
+export function ranThen(first: RegExp, then: RegExp): Predicate {
+  return ({ trace }) => {
+    const seen = new Set<DeviceId>();
+    for (const e of trace) {
+      if (e.kind !== "cmd.exec") continue;
+      if (seen.has(e.device) && then.test(e.line)) return true;
+      if (first.test(e.line)) seen.add(e.device);
+    }
+    return false;
+  };
+}
+
+/** A worn-out control was touched at least `n` times (after `after` ran, when given). */
+export function touched(device: DeviceId, control: string, n = 1, after?: RegExp): Predicate {
+  return ({ trace }) => {
+    let armed = !after;
+    let count = 0;
+    for (const e of trace) {
+      if (after && e.kind === "cmd.exec" && after.test(e.line)) armed = true;
+      if (armed && e.kind === "control.touch" && e.device === device && e.control === control) count++;
+    }
+    return count >= n;
+  };
+}
+
+/** A command's output contained `text` (e.g. a real error such as `Cannot find device`). */
+export function printed(device: DeviceId, text: string): Predicate {
+  return ({ trace }) => trace.some((e) => e.kind === "proc.output" && e.device === device && e.text.includes(text));
+}
+
+// ── Frames the player sent ──────────────────────────────────────────────────────────────────
+
+type Tx = Extract<SimEvent, { kind: "frame.tx" }>;
+
+const macAt = (b: Uint8Array, at: number) =>
+  Array.from(b.subarray(at, at + 6), (x) => x.toString(16).padStart(2, "0")).join(":");
+
+/** Frames the player's own commands put on the wire from `device` (out of `iface`, when given). */
+function ownFrames(trace: readonly SimEvent[], device: DeviceId, iface?: IfaceName): Tx[] {
+  return trace.filter(
+    (e): e is Tx =>
+      e.kind === "frame.tx" && e.device === device && e.origin === "command" && (!iface || e.iface === iface),
+  );
+}
+
+/** The player sent at least `n` frames from `device` (out of `iface`) to `to` (a MAC, or "unknown": no door has it). */
+export function sentTo(device: DeviceId, to: string, n = 1, iface?: IfaceName): Predicate {
+  return ({ trace, world }) => {
+    const known = new Set(world.devices().flatMap((d) => d.ifaces.map((i) => i.mac)));
+    known.add("ff:ff:ff:ff:ff:ff");
+    const hits = ownFrames(trace, device, iface).filter((e) => {
+      const dst = macAt(e.bytes, 0);
+      return to === "unknown" ? !known.has(dst) : dst === to;
+    });
+    return hits.length >= n;
+  };
+}
+
+/**
+ * A lab message whose text starts with `text` reached `device`, and then the player's commands sent
+ * nothing out of `iface` for `quietMs` of network time (e.g. quill said who it was, and the player
+ * stopped there).
+ */
+export function quietAfter(device: DeviceId, text: string, iface: IfaceName, quietMs: number): Predicate {
+  return ({ trace, world }) => {
+    const heard = trace.find((e) => e.kind === "app.deliver" && e.device === device && e.text.startsWith(text));
+    if (!heard) return false;
+    const until = heard.t + quietMs;
+    if (world.now < until) return false;
+    return !ownFrames(trace, device, iface).some((e) => e.t > heard.t && e.t <= until);
+  };
+}
+
+/**
+ * The player made one of the room's fixes, then `waitMs` of network time passed without the rest
+ * (the boss's "fixed one thing and stopped looking"). Read from the trace alone.
+ */
+export function stalledAfterFirstFix(fixes: { device: DeviceId; line: RegExp }[], waitMs: number): Predicate {
+  return ({ trace, world }) => {
+    const done = new Map<number, number>(); // fix index → when it was first made
+    for (const e of trace) {
+      if (e.kind !== "cmd.exec" || e.exitCode !== 0) continue;
+      fixes.forEach((x, i) => {
+        if (!done.has(i) && x.device === e.device && x.line.test(e.line)) done.set(i, e.t);
+      });
+    }
+    if (done.size === 0) return false;
+    const cut = Math.min(...done.values()) + waitMs;
+    if (world.now < cut) return false;
+    return [...done.values()].filter((t) => t <= cut).length < fixes.length;
+  };
+}
