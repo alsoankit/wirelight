@@ -3,6 +3,7 @@ import { roomById } from "@wirelight/rooms";
 import type { SlateLayer, SlateOpen } from "@wirelight/sim";
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "../engine/store";
+import { SlatePanel } from "./SlatePanel";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
@@ -197,7 +198,7 @@ function JarPanel({ open }: { open?: number }) {
 }
 
 /** The MAC board (CORE-27): what `bridge fdb show` printed when it was read, or clouded glass. */
-function BoardPanel({ device, execId }: { device: string; execId?: number }) {
+function BoardPanel({ device, board, execId }: { device: string; board: "mac" | "ledger"; execId?: number }) {
   const events = useSession((s) => s.events);
   // Filtered here, not in the selector: a selector must return the same value for the same state.
   const lines = useMemo(
@@ -209,15 +210,15 @@ function BoardPanel({ device, execId }: { device: string; execId?: number }) {
   );
   const close = useSession((s) => s.closePanel);
   return (
-    <section className="panel" aria-label={voice.board.title}>
+    <section className="panel" aria-label={board === "mac" ? voice.board.title : voice.ledger.title}>
       <h2>
-        {voice.board.title} · {device}
+        {board === "mac" ? voice.board.title : voice.ledger.title} · {device}
       </h2>
       {execId === undefined ? (
         <p className="panel-note">{voice.board.clouded}</p>
       ) : (
         <>
-          <p>{voice.board.about}</p>
+          <p>{board === "mac" ? voice.board.about : voice.ledger.about}</p>
           <pre className="cmd-output">{lines.map((e) => (e.kind === "proc.output" ? e.text : "")).join("\n")}</pre>
         </>
       )}
@@ -238,6 +239,7 @@ function DeskPanel({ device }: { device: string }) {
   const close = useSession((s) => s.closePanel);
   const doors = room?.topology.devices.find((d) => d.id === device)?.interfaces.map((i) => i.name) ?? [];
   const [out, setOut] = useState("flood");
+  const [mac, setMac] = useState("");
   const first = desk?.waiting[0];
   const act = (line: string) => void exec(device, line, "click");
   return (
@@ -261,6 +263,29 @@ function DeskPanel({ device }: { device: string }) {
               </li>
             ))}
           </ol>
+          {first && desk.desk !== "switch" && (
+            <div className="panel-actions">
+              <button type="button" onClick={() => act(`lab keeper arp-ask ${first.to}`)}>
+                {fill(voice.desk.ask, { to: first.to })}
+              </button>
+              <label className="field inline">
+                <span>{desk.desk === "host" ? voice.desk.wrap : voice.desk.forward}</span>
+                <input
+                  value={mac}
+                  onChange={(e) => setMac(e.target.value)}
+                  placeholder="02:00:00:00:00:00"
+                  spellCheck={false}
+                />
+              </label>
+              <button
+                type="button"
+                disabled={!mac.trim()}
+                onClick={() => act(`lab keeper ${desk.desk === "host" ? "wrap" : "forward"} ${mac.trim()}`)}
+              >
+                {voice.desk.go}
+              </button>
+            </div>
+          )}
           {first && desk.desk === "switch" && (
             <div className="panel-actions">
               <button type="button" onClick={() => act(`lab keeper learn ${first.from} ${first.door}`)}>
@@ -296,6 +321,13 @@ export function JarButton() {
   const room = useRoom();
   const count = useSession((s) => s.jar.length);
   const openPanel = useSession((s) => s.openPanel);
+  // From Floor 6 the Slate replaces the jar (0043).
+  if (room?.controls.slate)
+    return (
+      <button type="button" className="jar-button" data-tour="glass" onClick={() => openPanel({ kind: "slate" })}>
+        {voice.slate.name} · {count}
+      </button>
+    );
   if (!room?.controls.catching) return null;
   return (
     <button type="button" className="jar-button" onClick={() => openPanel({ kind: "jar" })}>
@@ -309,7 +341,8 @@ export function ToolPanels() {
   if (panel?.kind === "workbench") return <WorkbenchPanel />;
   if (panel?.kind === "card") return <CardPanel />;
   if (panel?.kind === "jar") return <JarPanel open={panel.open} />;
-  if (panel?.kind === "board") return <BoardPanel device={panel.device} execId={panel.execId} />;
+  if (panel?.kind === "board") return <BoardPanel device={panel.device} board={panel.board} execId={panel.execId} />;
   if (panel?.kind === "desk") return <DeskPanel device={panel.device} />;
+  if (panel?.kind === "slate") return <SlatePanel />;
   return null;
 }

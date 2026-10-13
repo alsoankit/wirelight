@@ -41,6 +41,8 @@ export function doorsOf(room: RoomDef, device: string, barred: (peer: string) =>
       enterable: access === "enterable",
       barred: access === "enterable" ? undefined : barred(peer),
       showMac: room.floor !== 1,
+      showAddrs: room.floor >= 5,
+      streets: room.floor >= 7,
       catchable: !!room.controls.catching,
       cableControl: room.controls.cableEnds?.[`${device}:${i.name}`],
     });

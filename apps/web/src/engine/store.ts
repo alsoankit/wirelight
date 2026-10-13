@@ -16,8 +16,9 @@ export type Panel =
   | { kind: "workbench" }
   | { kind: "card" }
   | { kind: "jar"; open?: number }
-  | { kind: "board"; device: string; execId?: number }
+  | { kind: "board"; device: string; board: "mac" | "ledger"; execId?: number }
   | { kind: "desk"; device: string }
+  | { kind: "slate" }
   | { kind: "notes" }
   | { kind: "ask" }
   | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "keys" | "settings" };
@@ -95,7 +96,14 @@ export const ask = {
   complete: (device: string, line: string) => engine.complete(device, line),
 };
 
+/** A batch caught something (the Slate by command, 0043): the jar's list is fetched again. */
+function refreshJarIfCaught(batch: Batch): void {
+  if (!batch.events.some((e) => e.kind === "slate.catch")) return;
+  void engine.catches().then((jar) => useSession.setState({ jar }));
+}
+
 function apply(state: Session, batch: Batch): Partial<Session> {
+  refreshJarIfCaught(batch);
   let onCables = state.onCables;
   for (const e of batch.events) {
     if (e.kind === "link.enter")

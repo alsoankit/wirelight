@@ -1145,3 +1145,66 @@ button.link.inline {
   margin: 6px 0;
   cursor: pointer;
 }
+
+.plate-addr {
+  color: var(--text);
+}
+
+.plate-addr .street {
+  color: #9fd6ff;
+}
+
+.plate-addr .house {
+  font-weight: 700;
+}
+
+.plate-addr .prefix {
+  color: var(--text-dim);
+}
+
+.addr-row {
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+.addr-form {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.addr-form input {
+  flex: 1;
+}
+
+.addr-form button {
+  padding: 6px 10px;
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  background: rgba(242, 165, 74, 0.14);
+  color: var(--text);
+  font: 12px / 1.2 var(--sans);
+  cursor: pointer;
+}
+
+.panel.slate {
+  width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+}
+
+.panel.slate .catch-list li {
+  padding: 3px 0;
+  font: 12px / 1.4 var(--mono);
+}
+
+.panel .addr-form input[type="number"] {
+  width: 64px;
+  flex: 0 0 auto;
+}
+
+.panel.slate .catch-list button.link.inline {
+  display: inline;
+  width: auto;
+  padding: 0 4px;
+}

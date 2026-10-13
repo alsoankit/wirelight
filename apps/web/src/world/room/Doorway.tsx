@@ -25,6 +25,9 @@ export type DoorInfo = {
   barred?: string;
   /** Plates show the door name (Floor 1), then its MAC address (Floor 2 on). */
   showMac: boolean;
+  /** …its house addresses (Floor 5 on), and streets apart from house numbers (Floor 7 on). */
+  showAddrs: boolean;
+  streets: boolean;
   /** Messages crossing here can be caught by hand (the room has catching). */
   catchable: boolean;
   /** Loose cable ends here can be plugged in by clicking (0040). */
@@ -128,6 +131,8 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
           position={g.plate}
           name={info.iface}
           mac={info.showMac ? door.mac : undefined}
+          addrs={info.showAddrs ? door.addrs : undefined}
+          streets={info.streets}
           linkUp={door.up}
           onOpen={readPlate}
         />

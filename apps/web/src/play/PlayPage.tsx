@@ -25,6 +25,9 @@ import { JarButton, ToolPanels } from "./ToolPanels";
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
 // Dev aids: ?ruin=0|1 pins the dial; ?tier=high|medium|low|simple, T cycles.
 
+// Dev aid for scripts and debugging: the stores on `window` (never in a production build).
+if (import.meta.env.DEV) (window as unknown as { __wirelight?: unknown }).__wirelight = { useSession, useProgress };
+
 /**
  * The room to open: a link to a room (`/play/<room>` or `?room=<id>`), else where the player left off
  * (ONB-20), else the Prologue.

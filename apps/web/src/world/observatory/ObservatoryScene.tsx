@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import { useSession } from "../../engine/store";
 import { useQuality } from "../../render/quality";
 import { MOON_POSITION, MOON_TARGET } from "../moon";
+import { Board, Desk } from "../room/Furniture";
 import { MachineScene } from "../room/MachineScene";
 import { KnightLetter } from "./KnightLetter";
 import { LETTER, observatoryLayout } from "./layout";
@@ -64,6 +65,8 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
       )}
       <ScryingGlass position={[2.4, 0, 1.6]} />
       <ObservatoryTools />
+      <Board device="observatory" kind="ledger" at={[-1.2, 0, -2.9]} turn={0.15} />
+      <Desk device="observatory" at={[0.6, 0, 1.2]} />
     </MachineScene>
   );
 }

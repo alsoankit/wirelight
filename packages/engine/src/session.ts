@@ -40,7 +40,7 @@ export type RoomStatus = {
   /** Every corridor (cable) by link id: dark, lit or broken (CORE-12). */
   corridors: Record<string, CorridorState>;
   /** Every door by "device:iface": its address, whether it's switched on, and whether its link is up. */
-  doors: Record<string, { mac: string; adminUp: boolean; up: boolean }>;
+  doors: Record<string, { mac: string; adminUp: boolean; up: boolean; addrs: string[] }>;
   /** Every cable end by "device:iface": plugged into that door, or out (a loose end on the floor). */
   cableEnds: Record<string, "in" | "out">;
   /** Each machine's messengers' cards, in order ("" is a blank card). */
@@ -185,7 +185,8 @@ export class Session {
         f.world.devices().flatMap((d) =>
           d.ifaces.map((i) => {
             const o = f.world.oper(d.id, i.name);
-            return [`${d.id}:${i.name}`, { mac: i.mac, adminUp: o.adminUp, up: o.up }];
+            const addrs = d.addrs.filter((a) => a.dev === i.name).map((a) => `${a.ip}/${a.prefix}`);
+            return [`${d.id}:${i.name}`, { mac: i.mac, adminUp: o.adminUp, up: o.up, addrs }];
           }),
         ),
       ),

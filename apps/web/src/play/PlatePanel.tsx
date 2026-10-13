@@ -1,7 +1,8 @@
 import { fill, voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "../engine/store";
+import { Address } from "../world/Plate";
 
 // A door's plate, opened (UI-03): its name, its MAC address (Floor 2 on), whether its link works, and
 // the controls the room gives it (0040): the door's switch, working or worn out, and pulling its cable.
@@ -19,6 +20,7 @@ export function PlatePanel() {
   const exec = useSession((s) => s.exec);
   const touch = useSession((s) => s.touch);
   const close = useSession((s) => s.closePanel);
+  const [draft, setDraft] = useState("");
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
@@ -31,6 +33,7 @@ export function PlatePanel() {
   const key = `${panel.device}:${panel.iface}`;
   const sw = room.controls.plateSwitches?.[key];
   const cable = room.controls.cableEnds?.[key];
+  const slot = room.controls.addressSlots?.[key];
   const act = (line: string) => {
     close();
     void exec(panel.device, line, "click");
@@ -44,6 +47,44 @@ export function PlatePanel() {
         {room.floor !== 1 && <span className="plate-mac"> {door.mac}</span>}
       </p>
       <p>{door.up ? voice.plate.linkUp : voice.plate.linkDown}</p>
+      {room.floor >= 5 && (
+        <div className="field">
+          <span>{voice.plate.address}</span>
+          {door.addrs.length === 0 && <span className="panel-note">{voice.plate.noAddress}</span>}
+          {door.addrs.map((a) => (
+            <div key={a} className="addr-row">
+              <Address cidr={a} streets={room.floor >= 7} />
+              {slot === "works" && (
+                <button
+                  type="button"
+                  className="link inline"
+                  onClick={() => act(`ip addr del ${a} dev ${panel.iface}`)}
+                >
+                  {voice.plate.removeAddress}
+                </button>
+              )}
+            </div>
+          ))}
+          {slot === "works" && (
+            <form
+              className="addr-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (draft.trim()) act(`ip addr add ${draft.trim()} dev ${panel.iface}`);
+              }}
+            >
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="10.0.1.5/24"
+                spellCheck={false}
+              />
+              <button type="submit">{voice.plate.addAddress}</button>
+            </form>
+          )}
+          {slot === "broken" && <span className="panel-note">{voice.plate.slotBroken}</span>}
+        </div>
+      )}
       <div className="panel-actions">
         {sw === "works" && (
           <button type="button" onClick={() => act(`ip link set ${panel.iface} ${door.adminUp ? "down" : "up"}`)}>

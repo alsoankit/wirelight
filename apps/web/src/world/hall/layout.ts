@@ -7,7 +7,8 @@ import type { DoorSlot, RoomLayout } from "../room/layout";
 // pipes), it's built from the Ruins kit with plain 2 m doorways in the walls: the gaps are left
 // open and given a stone frame (DoorFrames in HallScene).
 //
-// Doors in order (eth0 first): back wall x = −3 and 1, left wall z = −1 and 3, then back wall x = 3.
+// Doors in order (eth0 first): back wall x = −3 and 1, left wall z = −1 and 3, back wall x = 3, then
+// (for the town square's many houses) left wall z = −3, back wall x = −1 and left wall z = 1.
 
 const QUARTER = Math.PI / 2;
 
@@ -17,6 +18,9 @@ export const HALL_SLOTS: DoorSlot[] = [
   { wall: "left", at: -1, plate: "above" },
   { wall: "left", at: 3, plate: "above" },
   { wall: "back", at: 3, plate: "above" },
+  { wall: "left", at: -3, plate: "above" },
+  { wall: "back", at: -1, plate: "above" },
+  { wall: "left", at: 1, plate: "above" },
 ];
 
 /** The walls, with a gap wherever a door is. */

@@ -47,7 +47,24 @@ export async function type(p, line) {
   await p.click(".console-term");
   await p.keyboard.type(line);
   await p.keyboard.press("Enter");
-  await p.waitForTimeout(700);
+  await p.waitForTimeout(400);
+  await waitPrompt(p);
+}
+
+/**
+ * Waits until the console's last line is a bare prompt again: a command that keeps running (ping,
+ * dhclient, tcpdump) holds the prompt until it ends, and messages crossing are shown slowed (CORE-14).
+ */
+export async function waitPrompt(p, timeout = 60000) {
+  await p.waitForFunction(
+    () => {
+      const rows = [...document.querySelectorAll(".xterm-rows > div")].map((d) => d.textContent ?? "");
+      const last = rows.filter((t) => t.trim()).at(-1) ?? "";
+      return /:~# *$/.test(last);
+    },
+    null,
+    { timeout },
+  );
 }
 
 export async function bench(p, to, door) {

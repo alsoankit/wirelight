@@ -85,7 +85,7 @@ describe("what the room shows", () => {
   it("reports doors and corridors: down and broken, then up and lit", () => {
     const s = new Session();
     const start = s.loadRoom("f2.lights-out").status;
-    expect(start.doors["observatory:eth0"]).toEqual({ mac: "02:00:00:00:00:05", adminUp: false, up: false });
+    expect(start.doors["observatory:eth0"]).toEqual({ mac: "02:00:00:00:00:05", adminUp: false, up: false, addrs: [] });
     expect(start.cableEnds).toEqual({ "observatory:eth0": "in", "lantern:eth0": "in" });
     expect(start.corridors).toEqual({ wire: "broken" });
     s.exec("observatory", "ip link set eth0 up", "typed");

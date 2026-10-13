@@ -55,6 +55,12 @@ export const voice = {
     clouded: "The board's glass is clouded and cracked. You can't read it from here.",
     close: "Close",
   },
+  /** A machine's neighbour ledger (CORE-27): reading it runs `ip neigh show`. */
+  ledger: {
+    name: "Neighbour ledger",
+    title: "The neighbour ledger",
+    about: "Each line: a house on this street, the door name that answered for it, and how sure the machine is.",
+  },
   /** A keeper's desk in hand mode (0042): what waits, and the keeper's job, step by step. */
   desk: {
     name: "Keeper's desk",
@@ -67,8 +73,33 @@ export const voice = {
     sendOut: "Send it out of",
     everyOther: "every other door",
     send: "Send",
+    ask: "Ask everyone: who has {to}?",
+    wrap: "Wrap it in a frame to",
+    forward: "Take one off its countdown and send it in a new frame to",
+    go: "Send",
     awake: "The keeper remembers its job now.",
     close: "Close",
+  },
+  /** The Slate (0043): catches tagged and peeled; Capture (tcpdump), Trace and Compare later. */
+  slate: {
+    name: "Slate",
+    title: "The Slate",
+    catchNext: "Catch the next message",
+    from: "only from (optional)",
+    layers: { frame: "Frame", packet: "Packet", message: "Message" },
+    packet: "Packet",
+    ttl: "countdown (ttl)",
+    protocol: "inside",
+    checksum: "checksum",
+    port: "to port",
+    capture: "Capture at a door",
+    start: "Start",
+    stop: "Stop",
+    trace: "Trace my next packet",
+    compare: "Compare",
+    changed: "changed",
+    same: "same",
+    empty: "Nothing caught yet.",
   },
   /** The capture jar (CORE-19, CORE-20): catches, opened one layer at a time. */
   jar: {
@@ -107,6 +138,11 @@ export const voice = {
     switchOff: "Switch the door off",
     switchBroken: "The switch is cracked and stuck. It won't move.",
     unplug: "Pull the cable out",
+    address: "House address",
+    noAddress: "No address yet.",
+    addAddress: "Give this door an address",
+    removeAddress: "Remove",
+    slotBroken: "The address slot is cracked. It won't take anything now.",
     close: "Close",
   },
   /** A loose cable end on the floor by a door. */
