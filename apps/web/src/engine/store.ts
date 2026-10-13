@@ -40,6 +40,8 @@ type Session = {
   voiceGiven: boolean;
   giveVoice(): void;
   events: SimEvent[];
+  /** How many of the oldest events were let go (so positions in the whole trace stay countable). */
+  dropped: number;
   status: RoomStatus | null;
   /** Messages on a cable now (link.enter not yet followed by link.exit). */
   onCables: Crossing[];
@@ -74,6 +76,10 @@ type Session = {
 };
 
 const { engine } = startEngine();
+/** The store keeps at most this many trace events, trimming down to KEEP_EVENTS when it's reached. */
+const MAX_EVENTS = 40_000;
+const KEEP_EVENTS = 30_000;
+
 /** How long a lost message's mark stays (CORE-17), screen ms. */
 export const MARK_MS = 10_000;
 
@@ -142,7 +148,15 @@ function apply(state: Session, batch: Batch): Partial<Session> {
   for (const e of batch.events)
     if (e.kind === "frame.drop" && e.iface)
       marks = [...marks, { door: `${e.device}:${e.iface}`, at: now, frameId: e.frameId }];
-  return { events: [...state.events, ...batch.events], status: batch.status, onCables, marks };
+  // Long sessions (a storm makes thousands of events a second) keep the most recent ones only.
+  let events = [...state.events, ...batch.events];
+  let dropped = state.dropped;
+  if (events.length > MAX_EVENTS) {
+    const cut = events.length - KEEP_EVENTS;
+    events = events.slice(cut);
+    dropped += cut;
+  }
+  return { events, dropped, status: batch.status, onCables, marks };
 }
 
 export const useSession = create<Session>((set, get) => ({
@@ -158,6 +172,7 @@ export const useSession = create<Session>((set, get) => ({
     set({ voiceGiven: true, consoleOpen: true });
   },
   events: [],
+  dropped: 0,
   status: null,
   onCables: [],
   marks: [],
@@ -177,6 +192,7 @@ export const useSession = create<Session>((set, get) => ({
       panel: null,
       jar: [],
       events: [],
+      dropped: 0,
       onCables: [],
       voiceGiven,
       startedAt: performance.now(),

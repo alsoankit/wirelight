@@ -39,6 +39,7 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
   const written = useRef(0);
   const state = useRef({ buf: "", running: null as number | null, labExecs: new Set<number>(), hi: -1, tabbed: false });
   const events = useSession((s) => s.events);
+  const dropped = useSession((s) => s.dropped);
   const roomId = useSession((s) => s.roomId);
   const P = prompt(device);
 
@@ -82,8 +83,9 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
     const t = term.current;
     if (!t) return;
     const st = state.current;
-    const fresh = events.slice(written.current);
-    written.current = events.length;
+    // `written` counts the whole trace; the store may have let the oldest events go.
+    const fresh = events.slice(Math.max(0, written.current - dropped));
+    written.current = dropped + events.length;
     if (fresh.length === 0) return;
     let out = "";
     let needPrompt = false;
@@ -122,7 +124,7 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
     // Output arrives above the line being typed: clear it, write, then put the prompt back.
     t.write(`\x1b[2K\r${out}`);
     if (st.running === null) t.write(P + st.buf);
-  }, [events, device, P, subtitles]);
+  }, [events, dropped, device, P, subtitles]);
 
   // Keys.
   useEffect(() => {

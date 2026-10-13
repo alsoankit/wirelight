@@ -47,13 +47,14 @@ export function AudioDriver() {
           void effect("sfx.restore");
           setTimeout(() => void effect("sfx.key"), 1800);
         }
-        if (s.events.length < seen.current) seen.current = 0;
-        for (const e of s.events.slice(seen.current)) {
+        // `seen` counts the whole trace; the store may have let the oldest events go.
+        if (s.dropped + s.events.length < seen.current) seen.current = 0;
+        for (const e of s.events.slice(Math.max(0, seen.current - s.dropped))) {
           if (e.kind === "link.enter" && e.bytes[0] === 0xff && e.bytes[5] === 0xff) void effect("sfx.broadcast", 250);
           else if (e.kind === "fwd.decision") void effect("sfx.keeper.decide", 150);
           else if (e.kind === "cmd.exec" && /^lab cable plug/.test(e.line)) void effect("sfx.cable.plug");
         }
-        seen.current = s.events.length;
+        seen.current = s.dropped + s.events.length;
       }),
     [],
   );
