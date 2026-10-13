@@ -15,6 +15,8 @@ export type DoorSlot = {
   wall: Wall;
   /** Along the wall: x for the back wall, z for the left. */
   at: number;
+  /** Where its plate hangs: beside the arch (default) or above a narrow doorway (halls). */
+  plate?: "beside" | "above";
 };
 
 export type RoomLayout = {
@@ -34,7 +36,10 @@ export function doorGeometry(slot: DoorSlot) {
   const doorway: Vec3 = slot.wall === "back" ? [slot.at, 0.9, FACE] : [FACE, 0.9, slot.at];
   const corridorEnd: Vec3 = [doorway[0] + out[0] * 2.5, 0.35, doorway[2] + out[2] * 2.5];
   // The plate hangs on the wall to the right of the arch, as seen from inside.
-  const plate: Vec3 = slot.wall === "back" ? [slot.at + 1.6, 2.35, FACE + 0.15] : [FACE + 0.15, 2.35, slot.at + 1.6];
+  const beside = slot.plate === "above" ? 0 : 1.6;
+  const height = slot.plate === "above" ? 2.2 : 2.35;
+  const plate: Vec3 =
+    slot.wall === "back" ? [slot.at + beside, height, FACE + 0.15] : [FACE + 0.15, height, slot.at + beside];
   // A loose cable end lies on the floor just inside the doorway.
   const looseEnd: Vec3 = slot.wall === "back" ? [slot.at + 0.7, 0.06, FACE + 0.9] : [FACE + 0.9, 0.06, slot.at - 0.7];
   return { out, doorway, corridorEnd, plate, looseEnd };

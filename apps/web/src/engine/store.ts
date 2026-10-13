@@ -16,6 +16,8 @@ export type Panel =
   | { kind: "workbench" }
   | { kind: "card" }
   | { kind: "jar"; open?: number }
+  | { kind: "board"; device: string; execId?: number }
+  | { kind: "desk"; device: string }
   | { kind: "notes" }
   | { kind: "ask" }
   | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "keys" | "settings" };
@@ -29,6 +31,9 @@ type Session = {
   startedAt: number;
   /** Back to the room's faulted start (HELP-03). */
   reset(): Promise<void>;
+  /** The console bar is slid up (UI-06): ` or a click toggles it; it opens by itself after the gift. */
+  consoleOpen: boolean;
+  setConsoleOpen(open: boolean): void;
   /** The gift of the voice has been given (0032): the console exists from then on. */
   voiceGiven: boolean;
   giveVoice(): void;
@@ -119,9 +124,11 @@ export const useSession = create<Session>((set, get) => ({
   panel: null,
   startedAt: 0,
   voiceGiven: false,
+  consoleOpen: false,
+  setConsoleOpen: (consoleOpen) => set({ consoleOpen }),
   giveVoice: () => {
     useProgress.getState().giveVoice();
-    set({ voiceGiven: true });
+    set({ voiceGiven: true, consoleOpen: true });
   },
   events: [],
   status: null,

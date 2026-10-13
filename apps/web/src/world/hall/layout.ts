@@ -1,0 +1,62 @@
+import { makeEarth, makeFlagstones } from "../kit/floor";
+import type { Placement } from "../kit/StaticRoom";
+import type { DoorSlot, RoomLayout } from "../room/layout";
+
+// A switch's room, the sorting hall (CORE-06, Region 2's brief): many doors around the keeper, the
+// MAC board on its stand, and the keeper's desk. Until Region 2's own kit is in (brass, gears,
+// pipes), it's built from the Ruins kit with plain 2 m doorways in the walls: the gaps are left
+// open and given a stone frame (DoorFrames in HallScene).
+//
+// Doors in order (eth0 first): back wall x = −3 and 1, left wall z = −1 and 3, then back wall x = 3.
+
+const QUARTER = Math.PI / 2;
+
+export const HALL_SLOTS: DoorSlot[] = [
+  { wall: "back", at: -3, plate: "above" },
+  { wall: "back", at: 1, plate: "above" },
+  { wall: "left", at: -1, plate: "above" },
+  { wall: "left", at: 3, plate: "above" },
+  { wall: "back", at: 3, plate: "above" },
+];
+
+/** The walls, with a gap wherever a door is. */
+function walls(doors: number): Placement[] {
+  const used = HALL_SLOTS.slice(0, doors);
+  const gap = (wall: "back" | "left", at: number) => used.some((s) => s.wall === wall && s.at === at);
+  const out: Placement[] = [];
+  for (const at of [-3, -1, 1, 3]) {
+    if (!gap("back", at)) out.push({ piece: at === -1 ? "Wall_Overgrown" : "Wall", position: [at, 0, -4] });
+    if (!gap("left", at))
+      out.push({ piece: at === 1 ? "Wall_Broken" : "Wall", position: [-4, 0, at], rotationY: QUARTER });
+  }
+  return out;
+}
+
+const DRESSING: Placement[] = [
+  { piece: "Column_Square", position: [-4, 0, -4] },
+  { piece: "Column_Round_Short", position: [4, 0, -4] },
+  { piece: "Bricks", position: [2.9, 0, 2.6], rotationY: 0.8 },
+  { piece: "Brick", position: [0.9, 0, 3.1], rotationY: 0.3 },
+  { piece: "Barrel", position: [3.2, 0, -2.9] },
+  { piece: "Crate", position: [2.6, 0, -3.3], rotationY: 0.4 },
+  { piece: "Grass", position: [-3.4, 0, 2.2] },
+  { piece: "Grass", position: [2.2, 0, 1.0] },
+];
+
+const FLOOR = [
+  { name: "Floor", geometry: makeFlagstones({ size: 8.4, seed: 3301 }) },
+  { name: "Earth", geometry: makeEarth(8.4) },
+];
+
+/** Every piece a hall can use (for preloading). */
+export const HALL_PIECES: Placement[] = [...walls(0), ...DRESSING];
+
+export function hallLayout(doors: number): RoomLayout {
+  return {
+    placements: [...walls(doors), ...DRESSING],
+    extras: FLOOR,
+    doorSlots: HALL_SLOTS,
+    keeper: [0.4, 0, 0.2],
+    air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] },
+  };
+}

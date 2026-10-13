@@ -8,7 +8,7 @@ import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import { shellContent, voice } from "@wirelight/content";
 import type { SimEvent } from "@wirelight/sim";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ask, useSession } from "../engine/store";
 
 const RESET = "\x1b[0m";
@@ -23,8 +23,15 @@ const prompt = (host: string) => `\x1b[38;2;242;165;74mroot@${host}${RESET}:\x1b
  * prints as it starts; lines a running command prints later (ping's "Time to live exceeded") get
  * theirs here.
  */
+/** Slides the console up or down (a function of the store, so it never changes between renders). */
+function setOpen(v: boolean | ((o: boolean) => boolean)): void {
+  const s = useSession.getState();
+  s.setConsoleOpen(typeof v === "function" ? v(s.consoleOpen) : v);
+}
+
 export function Console({ device, subtitles }: { device: string; subtitles: boolean }) {
-  const [open, setOpen] = useState(true);
+  const open = useSession((s) => s.consoleOpen);
+
   const host = useRef<HTMLDivElement>(null);
   const term = useRef<Terminal | null>(null);
   const fit = useRef<FitAddon | null>(null);

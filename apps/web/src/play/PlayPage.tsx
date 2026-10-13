@@ -7,6 +7,7 @@ import { useSession } from "../engine/store";
 import { useHydrated, useProgress } from "../progress/progress";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
 import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
+import { HALL_PIECES } from "../world/hall/layout";
 import { HOUSE_PIECES } from "../world/house/layout";
 import { pieceUrl } from "../world/kit/Piece";
 import { OBSERVATORY } from "../world/observatory/layout";
@@ -38,7 +39,8 @@ function startingRoom(): string {
 
 /** Starts fetching the room's kit pieces (during the descent), so arriving doesn't wait on them. */
 export function preloadRoom(): void {
-  for (const name of new Set([...OBSERVATORY, ...HOUSE_PIECES].map((p) => p.piece))) useGLTF.preload(pieceUrl(name));
+  for (const name of new Set([...OBSERVATORY, ...HOUSE_PIECES, ...HALL_PIECES].map((p) => p.piece)))
+    useGLTF.preload(pieceUrl(name));
 }
 
 // Resolution follows the tier, capped at twice the CSS pixels.

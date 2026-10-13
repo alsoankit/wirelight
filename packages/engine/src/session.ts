@@ -15,7 +15,18 @@ import {
   toolsIn,
 } from "@wirelight/rooms";
 import { type Completion, complete, type SimBackend, type ToolId } from "@wirelight/shell";
-import type { CmdSource, DeviceId, SimEvent, SlateCatch, SlateLayerName, SlateOpen, WorldState } from "@wirelight/sim";
+import {
+  type CmdSource,
+  type DeviceId,
+  decodeEth,
+  decodeIPv4,
+  fromHex,
+  type SimEvent,
+  type SlateCatch,
+  type SlateLayerName,
+  type SlateOpen,
+  type WorldState,
+} from "@wirelight/sim";
 
 export type RoomStatus = {
   roomId: string;
@@ -34,6 +45,8 @@ export type RoomStatus = {
   cableEnds: Record<string, "in" | "out">;
   /** Each machine's messengers' cards, in order ("" is a blank card). */
   cards: Record<string, string[]>;
+  /** Keepers that have forgotten their job (0042): which desk, and what waits on it, oldest first. */
+  desks: Record<string, { desk: "switch" | "host" | "router"; waiting: { from: string; to: string; door: string }[] }>;
 };
 
 /** What the main thread gets after each call: the trace events it hasn't seen yet, and the status. */
@@ -175,6 +188,26 @@ export class Session {
             return [`${d.id}:${i.name}`, { mac: i.mac, adminUp: o.adminUp, up: o.up }];
           }),
         ),
+      ),
+      desks: Object.fromEntries(
+        f.world
+          .devices()
+          .filter((d) => d.keeper.asleep !== null)
+          .map((d) => [
+            d.id,
+            {
+              desk: d.keeper.asleep as "switch" | "host" | "router",
+              waiting: d.keeper.desk.map((item) => {
+                const bytes = fromHex(item.hex);
+                if (item.kind === "frame") {
+                  const eth = decodeEth(bytes);
+                  return { from: eth.src, to: eth.dst, door: item.port ?? "" };
+                }
+                const ip = decodeIPv4(bytes);
+                return { from: ip.src, to: ip.dst, door: item.port ?? "" };
+              }),
+            },
+          ]),
       ),
       cards: Object.fromEntries(
         f.world

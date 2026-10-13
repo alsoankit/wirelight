@@ -40,6 +40,10 @@ export async function won(p, name) {
 }
 
 export async function type(p, line) {
+  if (await p.$('.console[data-open="no"]')) {
+    await p.click(".console-bar");
+    await p.waitForTimeout(350);
+  }
   await p.click(".console-term");
   await p.keyboard.type(line);
   await p.keyboard.press("Enter");

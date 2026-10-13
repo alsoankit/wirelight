@@ -47,6 +47,29 @@ export const voice = {
     blank: "(blank)",
     write: "Write it on the card",
   },
+  /** A switch's MAC board (CORE-27): reading it runs `bridge fdb show`. */
+  board: {
+    name: "MAC board",
+    title: "The hall's memory",
+    about: "Each line: a door name the hall has seen, and the door it was seen behind.",
+    clouded: "The board's glass is clouded and cracked. You can't read it from here.",
+    close: "Close",
+  },
+  /** A keeper's desk in hand mode (0042): what waits, and the keeper's job, step by step. */
+  desk: {
+    name: "Keeper's desk",
+    title: "The keeper's desk",
+    asleep: "The keeper has forgotten its job. Messages wait here until you do it.",
+    empty: "Nothing is waiting.",
+    frame: "A frame from {from} to {to}, in at {door}.",
+    packet: "A packet from {from} to {to}.",
+    learn: "Remember: {from} is behind {door}",
+    sendOut: "Send it out of",
+    everyOther: "every other door",
+    send: "Send",
+    awake: "The keeper remembers its job now.",
+    close: "Close",
+  },
   /** The capture jar (CORE-19, CORE-20): catches, opened one layer at a time. */
   jar: {
     name: "Capture jar",

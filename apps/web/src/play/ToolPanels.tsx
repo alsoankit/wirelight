@@ -1,7 +1,7 @@
 import { fill, voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import type { SlateLayer, SlateOpen } from "@wirelight/sim";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "../engine/store";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
@@ -196,6 +196,101 @@ function JarPanel({ open }: { open?: number }) {
   );
 }
 
+/** The MAC board (CORE-27): what `bridge fdb show` printed when it was read, or clouded glass. */
+function BoardPanel({ device, execId }: { device: string; execId?: number }) {
+  const events = useSession((s) => s.events);
+  // Filtered here, not in the selector: a selector must return the same value for the same state.
+  const lines = useMemo(
+    () =>
+      execId === undefined
+        ? NONE
+        : events.filter((e) => e.kind === "proc.output" && e.execId === execId && e.stream === "stdout"),
+    [events, execId],
+  );
+  const close = useSession((s) => s.closePanel);
+  return (
+    <section className="panel" aria-label={voice.board.title}>
+      <h2>
+        {voice.board.title} · {device}
+      </h2>
+      {execId === undefined ? (
+        <p className="panel-note">{voice.board.clouded}</p>
+      ) : (
+        <>
+          <p>{voice.board.about}</p>
+          <pre className="cmd-output">{lines.map((e) => (e.kind === "proc.output" ? e.text : "")).join("\n")}</pre>
+        </>
+      )}
+      <div className="panel-actions">
+        <button type="button" className="quiet" onClick={close}>
+          {voice.board.close}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/** A keeper's desk in hand mode (0042): the waiting message, then the keeper's two steps by hand. */
+function DeskPanel({ device }: { device: string }) {
+  const room = useRoom();
+  const desk = useSession((s) => s.status?.desks[device]);
+  const exec = useSession((s) => s.exec);
+  const close = useSession((s) => s.closePanel);
+  const doors = room?.topology.devices.find((d) => d.id === device)?.interfaces.map((i) => i.name) ?? [];
+  const [out, setOut] = useState("flood");
+  const first = desk?.waiting[0];
+  const act = (line: string) => void exec(device, line, "click");
+  return (
+    <section className="panel" aria-label={voice.desk.title}>
+      <h2>{voice.desk.title}</h2>
+      {!desk ? (
+        <p>{voice.desk.awake}</p>
+      ) : (
+        <>
+          <p className="panel-note">{voice.desk.asleep}</p>
+          {desk.waiting.length === 0 && <p>{voice.desk.empty}</p>}
+          <ol className="catch-list">
+            {desk.waiting.map((w, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: the desk's queue, in order
+              <li key={i}>
+                {fill(desk.desk === "switch" ? voice.desk.frame : voice.desk.packet, {
+                  from: w.from,
+                  to: w.to,
+                  door: w.door,
+                })}
+              </li>
+            ))}
+          </ol>
+          {first && desk.desk === "switch" && (
+            <div className="panel-actions">
+              <button type="button" onClick={() => act(`lab keeper learn ${first.from} ${first.door}`)}>
+                {fill(voice.desk.learn, { from: first.from, door: first.door })}
+              </button>
+              <label className="field inline">
+                <span>{voice.desk.sendOut}</span>
+                <select value={out} onChange={(e) => setOut(e.target.value)}>
+                  <option value="flood">{voice.desk.everyOther}</option>
+                  {doors.map((d) => (
+                    <option key={d}>{d}</option>
+                  ))}
+                </select>
+              </label>
+              <button type="button" onClick={() => act(`lab keeper send ${out}`)}>
+                {voice.desk.send}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+      <div className="panel-actions">
+        <button type="button" className="quiet" onClick={close}>
+          {voice.desk.close}
+        </button>
+      </div>
+    </section>
+  );
+}
+
 /** The jar button (bottom left, UI layout): how many catches, and opens the jar. */
 export function JarButton() {
   const room = useRoom();
@@ -214,5 +309,7 @@ export function ToolPanels() {
   if (panel?.kind === "workbench") return <WorkbenchPanel />;
   if (panel?.kind === "card") return <CardPanel />;
   if (panel?.kind === "jar") return <JarPanel open={panel.open} />;
+  if (panel?.kind === "board") return <BoardPanel device={panel.device} execId={panel.execId} />;
+  if (panel?.kind === "desk") return <DeskPanel device={panel.device} />;
   return null;
 }
