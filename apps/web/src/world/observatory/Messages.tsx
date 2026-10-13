@@ -87,7 +87,9 @@ export function Messages({ device, link, corridorEnd, doorway, keeper, watch, cu
       mesh.scale.setScalar(pulse * emerge(leaving ? 1 - t : t));
       newest = mesh;
     });
-    watch.current = newest;
+    // Several doorways share one keeper: only clear what it watches if that message has gone.
+    if (newest) watch.current = newest;
+    else if (watch.current && !watch.current.visible) watch.current = null;
   });
 
   return (

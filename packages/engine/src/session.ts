@@ -28,8 +28,10 @@ export type RoomStatus = {
   detectors: string[];
   /** Every corridor (cable) by link id: dark, lit or broken (CORE-12). */
   corridors: Record<string, CorridorState>;
-  /** Every door by "device:iface": its address and whether it's up (for plates and link lights). */
-  doors: Record<string, { mac: string; up: boolean }>;
+  /** Every door by "device:iface": its address, whether it's switched on, and whether its link is up. */
+  doors: Record<string, { mac: string; adminUp: boolean; up: boolean }>;
+  /** Every cable end by "device:iface": plugged into that door, or out (a loose end on the floor). */
+  cableEnds: Record<string, "in" | "out">;
 };
 
 /** What the main thread gets after each call: the trace events it hasn't seen yet, and the status. */
@@ -148,11 +150,18 @@ export class Session {
       detectors: [...this.fired],
       corridors: Object.fromEntries(f.world.links().map((l) => [l.id, corridorState(f, l.id, b.now())])),
       doors: Object.fromEntries(
-        f.world
-          .devices()
-          .flatMap((d) =>
-            d.ifaces.map((i) => [`${d.id}:${i.name}`, { mac: i.mac, up: f.world.oper(d.id, i.name).up }]),
-          ),
+        f.world.devices().flatMap((d) =>
+          d.ifaces.map((i) => {
+            const o = f.world.oper(d.id, i.name);
+            return [`${d.id}:${i.name}`, { mac: i.mac, adminUp: o.adminUp, up: o.up }];
+          }),
+        ),
+      ),
+      cableEnds: Object.fromEntries(
+        f.world.links().flatMap((l) => [
+          [`${l.a.device}:${l.a.iface}`, l.out.includes("a") ? "out" : "in"],
+          [`${l.b.device}:${l.b.iface}`, l.out.includes("b") ? "out" : "in"],
+        ]),
       ),
     };
   }

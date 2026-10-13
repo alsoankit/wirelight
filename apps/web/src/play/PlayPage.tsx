@@ -6,10 +6,12 @@ import { EngineDriver } from "../engine/EngineDriver";
 import { useSession } from "../engine/store";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
 import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
+import { HOUSE_PIECES } from "../world/house/layout";
 import { pieceUrl } from "../world/kit/Piece";
 import { OBSERVATORY } from "../world/observatory/layout";
-import { ObservatoryScene } from "../world/observatory/ObservatoryScene";
+import { World } from "../world/room/World";
 import { Console } from "./Console";
+import { PlatePanel } from "./PlatePanel";
 import { RoomHud } from "./RoomHud";
 
 // B1 walking skeleton: the Prologue, played in the Observatory, driven by the engine in a worker.
@@ -21,7 +23,7 @@ const ROOM = new URLSearchParams(location.search).get("room") ?? "p.first-messag
 
 /** Starts fetching the room's kit pieces (during the descent), so arriving doesn't wait on them. */
 export function preloadRoom(): void {
-  for (const name of new Set(OBSERVATORY.map((p) => p.piece))) useGLTF.preload(pieceUrl(name));
+  for (const name of new Set([...OBSERVATORY, ...HOUSE_PIECES].map((p) => p.piece))) useGLTF.preload(pieceUrl(name));
 }
 
 // Resolution follows the tier, capped at twice the CSS pixels.
@@ -42,6 +44,7 @@ export function PlayPage({ arriving = false }: { arriving?: boolean }) {
   const quality = QUALITY[tier];
   const load = useSession((s) => s.load);
   const roomId = useSession((s) => s.roomId);
+  const here = useSession((s) => s.here);
   const room = roomId ? roomById(roomId) : undefined;
 
   useEffect(() => {
@@ -78,15 +81,16 @@ export function PlayPage({ arriving = false }: { arriving?: boolean }) {
           }}
         />
         <EngineDriver />
-        <ObservatoryScene arriving={arriving} />
+        <World arriving={arriving} />
       </Canvas>
       <div className="dev-badge">
         Quality: {tier}
         {auto ? " (auto)" : ""} · T to change
       </div>
       <RoomHud />
+      <PlatePanel />
       {room && room.controls.console !== "hidden" && (
-        <Console device={room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
+        <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
       )}
       {arriving && <div className="arrival-veil" />}
     </QualityContext.Provider>

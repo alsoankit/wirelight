@@ -536,3 +536,105 @@ html:has(.landing) {
 .console .xterm-screen {
   background: transparent !important;
 }
+
+/* A plate you can open. */
+button.plate {
+  color: var(--text);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+button.plate:hover,
+button.plate:focus-visible {
+  border-color: var(--amber);
+}
+
+/* Small labels in the world: the way through a doorway, a loose cable end. */
+.world-chip {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  font: 12px / 1.3 var(--sans);
+  white-space: nowrap;
+  pointer-events: auto;
+  user-select: none;
+}
+
+button.world-chip {
+  cursor: pointer;
+}
+
+button.world-chip:hover,
+button.world-chip:focus-visible {
+  border-color: var(--cyan);
+}
+
+.world-chip[data-tone="usable"] {
+  border-color: var(--amber);
+}
+
+.world-chip[data-tone="sealed"] {
+  color: var(--text-dim);
+  white-space: normal;
+  max-width: 220px;
+  text-align: center;
+}
+
+/* Reading panels (UI-03): glass, beside the room, never over the console bar (UI-02). */
+.panel {
+  position: fixed;
+  top: 140px;
+  right: 16px;
+  width: min(340px, calc(100vw - 32px));
+  padding: 14px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text);
+  font: 14px / 1.45 var(--sans);
+  z-index: 20;
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+  font: 600 15px / 1.3 var(--sans);
+}
+
+.panel-plate {
+  font-family: var(--mono);
+}
+
+.panel-plate[data-link="up"] .plate-light {
+  color: var(--cyan);
+}
+
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.panel-actions button {
+  padding: 7px 12px;
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  background: rgba(242, 165, 74, 0.14);
+  color: var(--text);
+  font: 13px / 1.2 var(--sans);
+  cursor: pointer;
+}
+
+.panel-actions button.broken {
+  border-color: var(--glass-border);
+  background: none;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.panel-actions button.quiet {
+  border-color: var(--glass-border);
+  background: none;
+}

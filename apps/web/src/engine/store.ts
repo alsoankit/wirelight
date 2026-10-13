@@ -1,4 +1,5 @@
 import type { Batch, RoomStatus } from "@wirelight/engine";
+import { roomById } from "@wirelight/rooms";
 import type { CmdSource, SimEvent } from "@wirelight/sim";
 import { create } from "zustand";
 import { type Crossing, nextNetworkTime } from "./clock";
@@ -8,8 +9,14 @@ import { startEngine } from "./connect";
 // what's derived from them. Nothing here is set by hand: every field changes only by applying a batch
 // from the engine, or by the clock's own pause and speed.
 
+/** A reading panel open over the room (UI-03). */
+export type Panel = { kind: "plate"; device: string; iface: string };
+
 type Session = {
   roomId: string | null;
+  /** The machine whose room the player is standing in (CORE-10); commands run there (UI-11). */
+  here: string | null;
+  panel: Panel | null;
   events: SimEvent[];
   status: RoomStatus | null;
   /** Messages on a cable now (link.enter not yet followed by link.exit). */
@@ -17,6 +24,10 @@ type Session = {
   paused: boolean;
   speed: number;
   load(roomId: string): Promise<void>;
+  /** Walks through a door to the machine at the other end (the caller checks it can be entered). */
+  goTo(device: string): void;
+  openPanel(panel: Panel): void;
+  closePanel(): void;
   /** Runs a command line; resolves with its exec id and exit code (null while it keeps running). */
   exec(device: string, line: string, source: CmdSource): Promise<{ execId: number; exitCode: number | null }>;
   /** Ctrl+C on a command that keeps running. */
@@ -74,6 +85,8 @@ function apply(state: Session, batch: Batch): Partial<Session> {
 
 export const useSession = create<Session>((set, get) => ({
   roomId: null,
+  here: null,
+  panel: null,
   events: [],
   status: null,
   onCables: [],
@@ -83,7 +96,7 @@ export const useSession = create<Session>((set, get) => ({
   async load(roomId) {
     busy = true;
     const batch = await engine.loadRoom(roomId);
-    set({ roomId, events: [], onCables: [] });
+    set({ roomId, here: roomById(roomId)?.playerDevice ?? null, panel: null, events: [], onCables: [] });
     set((s) => apply(s, batch));
     busy = false;
   },
@@ -116,6 +129,10 @@ export const useSession = create<Session>((set, get) => ({
         busy = false;
       });
   },
+
+  goTo: (device) => set({ here: device, panel: null }),
+  openPanel: (panel) => set({ panel }),
+  closePanel: () => set({ panel: null }),
 
   setPaused: (paused) => set({ paused }),
   setSpeed: (speed) => set({ speed }),

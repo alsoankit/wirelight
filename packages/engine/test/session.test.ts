@@ -85,7 +85,8 @@ describe("what the room shows", () => {
   it("reports doors and corridors: down and broken, then up and lit", () => {
     const s = new Session();
     const start = s.loadRoom("f2.lights-out").status;
-    expect(start.doors["observatory:eth0"]).toEqual({ mac: "02:00:00:00:00:05", up: false });
+    expect(start.doors["observatory:eth0"]).toEqual({ mac: "02:00:00:00:00:05", adminUp: false, up: false });
+    expect(start.cableEnds).toEqual({ "observatory:eth0": "in", "lantern:eth0": "in" });
     expect(start.corridors).toEqual({ wire: "broken" });
     s.exec("observatory", "ip link set eth0 up", "typed");
     s.exec("observatory", `lab send-frame --to ${LANTERN}`, "typed");
@@ -107,5 +108,14 @@ describe("what the room shows", () => {
     const end = s.advanceTo(10_000, "cable");
     expect(end.status.now).toBe(10_000); // nothing more goes on a cable: runs to the end
     expect(end.status.won).toBe(true);
+  });
+});
+
+describe("cable ends", () => {
+  it("say which end of a cable is out (1.2: the observatory's)", () => {
+    const s = new Session();
+    expect(s.loadRoom("f1.loose-cable").status.cableEnds).toEqual({ "observatory:eth0": "out", "lantern:eth0": "in" });
+    const fixed = s.exec("observatory", "lab cable plug eth0", "click").status;
+    expect(fixed.cableEnds["observatory:eth0"]).toBe("in");
   });
 });

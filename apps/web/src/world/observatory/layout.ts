@@ -1,4 +1,6 @@
+import { makeEarth, makeFlagstones } from "../kit/floor";
 import type { Placement } from "../kit/StaticRoom";
+import type { RoomLayout } from "../room/layout";
 
 // B0 mock layout of the Observatory (the player's computer room, Region 1), built from the Ruins kit.
 // Mock data only: in B1 rooms come from packages/rooms and their layout files.
@@ -24,13 +26,18 @@ function backWall(): Placement[] {
   ];
 }
 
-// Left wall: full height at the back, broken in the middle, a low stub at the front.
-function leftWall(): Placement[] {
-  return [
+// Left wall: full height at the back, broken in the middle, a low stub at the front. With a second
+// door (Floor 2), its front half is an arch instead (centred at z = 2, clear of the runes).
+function leftWall(secondDoor: boolean): Placement[] {
+  const back: Placement[] = [
     { piece: "Wall", position: [-4, 0, -3], rotationY: QUARTER },
     { piece: "Window_Bars_Overgrown", position: [-4, 2, -3], rotationY: QUARTER },
     { piece: "Wall_Overgrown", position: [-4, 0, -1], rotationY: QUARTER },
     { piece: "Wall_Broken", position: [-4, 2, -1], rotationY: QUARTER },
+  ];
+  if (secondDoor) return [...back, { piece: "Wall_ArchRound_Overgrown", position: [-4, 0, 2], rotationY: QUARTER }];
+  return [
+    ...back,
     { piece: "Wall", position: [-4, 0, 1], rotationY: QUARTER },
     { piece: "Wall_Double_Broken", position: [-4, 0, 3], rotationY: QUARTER },
   ];
@@ -78,14 +85,39 @@ function knight(): Placement[] {
   return [{ piece: "Flag_Wall", position: [-3.95, 0.45, 1.3], rotationY: QUARTER }];
 }
 
-export const OBSERVATORY: Placement[] = [
-  ...backWall(),
-  ...leftWall(),
-  ...pillars(),
-  ...ruin(),
-  ...statues(),
-  ...knight(),
+function placements(secondDoor: boolean): Placement[] {
+  // The Knight's cloak hangs where the second arch would be; with two doors it isn't there.
+  return [
+    ...backWall(),
+    ...leftWall(secondDoor),
+    ...pillars(),
+    ...ruin(),
+    ...statues(),
+    ...(secondDoor ? [] : knight()),
+  ];
+}
+
+/** Every piece the Observatory can use (for preloading). */
+export const OBSERVATORY: Placement[] = [...placements(false), ...placements(true)];
+
+const FLOOR = [
+  { name: "Floor", geometry: makeFlagstones({ size: 8.4, seed: 1103 }) },
+  { name: "Earth", geometry: makeEarth(8.4) },
 ];
+
+/** The Observatory with one door (eth0, the back arch) or two (eth1, the left wall's arch). */
+export function observatoryLayout(doors: number): RoomLayout {
+  return {
+    placements: placements(doors > 1),
+    extras: FLOOR,
+    doorSlots: [
+      { wall: "back", at: 0 },
+      { wall: "left", at: 2 },
+    ],
+    keeper: [0, 0, -0.6],
+    air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] },
+  };
+}
 
 // Where things are, for the scene and the message paths.
 export const DOORWAY = { x: 0, z: -4 } as const;
