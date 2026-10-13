@@ -1,0 +1,89 @@
+{
+  "region": 4,
+  "about": "The Cathedral of Crossings: SigilsVault's Modular Cathedral Kit (walls, columns, vaults, doors, windows with their emission atlas, floors) plus lecterns, pews and candles from Fantasy Props (art brief region 4; decision 0072). The Ruins' gothic arches (region-1/ruins) are reused as they are.",
+  "kits": [
+    {
+      "id": "cathedral",
+      "source": "sigilsvault-modular-cathedral",
+      "scaleToRuins": 0.5,
+      "grid": "8 m grid: walls 8 m wide × 16 m tall × 1 m thick with the pivot at a corner (x 0..8, z 0..1), floors 8 × 8 × 1 m (top at y = 0), vault bays 8 m wide and 6–8 m high, columns 23 m (small 9 m). Scale 0.5 lands on the Ruins' 4 m module: a wall 4 × 8 m, a door 2 × 3.4 m (the Ruins' doors are 2.3 × 3 m), a column 11.5 m. One trim sheet for all stone; windows add a diffuse and an emission atlas.",
+      "textureReplace": {
+        "trim_sheet_512x512": {
+          "file": "sigilsvault-modular-cathedral/Modular Cathedral Kit/Modular Cathedral Pieces/Textures/1024x1024/trim_sheet_1024x1024.png",
+          "name": "trim_sheet"
+        },
+        "window_diffuse_512x512": {
+          "file": "sigilsvault-modular-cathedral/Modular Cathedral Kit/Modular Cathedral Pieces/Textures/1024x1024/window_diffuse_1024x1024.png",
+          "name": "window_diffuse"
+        },
+        "window_emission_512x512": {
+          "file": "sigilsvault-modular-cathedral/Modular Cathedral Kit/Modular Cathedral Pieces/Textures/1024x1024/window_emission_1024x1024.png",
+          "name": "window_emission"
+        },
+        "door_diffuse_256x256": {
+          "file": "sigilsvault-modular-cathedral/Modular Cathedral Kit/Props/Textures/1024x1024/door_diffuse_1024x1024.png",
+          "name": "door_diffuse"
+        },
+        "chandelier_diffuse_256x256": {
+          "file": "sigilsvault-modular-cathedral/Modular Cathedral Kit/Props/Textures/512x512/chandelier_diffuse_512x512.png",
+          "name": "chandelier_diffuse"
+        }
+      },
+      "pieces": {
+        "wall_01": "nave wall",
+        "wall_trim_01": "wall base / string course",
+        "wall_corner_01": "outside corner",
+        "wall_corner_02": "outside corner with buttress",
+        "wall_corner_inner_01": "inside corner",
+        "wall_window_01": "wall with a lancet window (stained glass lights from the emission atlas)",
+        "wall_window_large_01": "wall with a tall window",
+        "wall_rose_window_01": "wall with a rose window (the crossing hall's end wall)",
+        "doorway_01": "great doorway (one per town, crossing halls)",
+        "doorway_inner_01": "inner doorway between chapel and nave",
+        "door_01": "door leaf for the great doorway",
+        "column_01": "tall nave column",
+        "column_small_01": "short column (chapels, cloisters)",
+        "vault_large_01": "vaulted ceiling bay, long",
+        "vault_cross_junction_01": "crossing vault (centre of a crossing hall)",
+        "vault_small_front_01": "small vault bay (aisles, cloisters)",
+        "vault_small_corner_L_01": "small vault, left corner",
+        "vault_small_corner_R_01": "small vault, right corner",
+        "floor_01": "stone floor, plain",
+        "floor_02": "stone floor, patterned",
+        "floor_03": "stone floor, inlaid (the rune-line can run here)",
+        "platform_01": "raised dais",
+        "platform_stairs_01": "steps up to the dais",
+        "railing_01": "stone balustrade",
+        "railing_corner_01": "balustrade corner",
+        "pedestal_01": "plinth for the stone warden or the routing board",
+        "altar_01": "stone table (the routing board's base)",
+        "chandelier_01": "great hanging chandelier (candles catch when restored)",
+        "sanctum_doorway_01": "chapel doorway",
+        "sanctum_stairs_01": "wide stair to the crossing"
+      }
+    },
+    {
+      "id": "props",
+      "source": "quaternius-fantasy-props",
+      "scaleToRuins": 1,
+      "grid": "No grid; real-world scale, pivot at the base centre. Scale 1.",
+      "pieces": {
+        "BookStand": "the navigator's lectern (retint stone and brass)",
+        "Book_7": "great open book on the lectern",
+        "BookGroup_Medium_1": "books in a chapel study",
+        "Bookcase_2": "chapel study bookcase",
+        "Scroll_2": "route scroll",
+        "Bench": "pew",
+        "Table_Large": "study table",
+        "Chair_1": "study chair",
+        "CandleStick_Stand": "tall candle stand (heavy: a few per room)",
+        "CandleStick_Triple": "three-branched candlestick",
+        "Candle_1": "candle stub",
+        "Candle_2": "candle",
+        "Chest_Wood": "vestry chest",
+        "Banner_1": "hanging banner (crossing colours)",
+        "Vase_4": "urn"
+      }
+    }
+  ]
+}

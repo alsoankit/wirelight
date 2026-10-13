@@ -1,0 +1,91 @@
+{
+  "region": 2,
+  "about": "The Sorting Works: a workshop hall shell from Medieval Village, workbenches, cabinets, ledgers and chests from Fantasy Props, and turret parts for the sorter keeper (art brief region 2; decision 0072). Gears and pipes stay code-made (regions/works.ts).",
+  "kits": [
+    {
+      "id": "hall",
+      "source": "quaternius-medieval-village",
+      "scaleToRuins": 1,
+      "grid": "2 m grid like the Ruins: walls 2 m wide × 3.12 m tall (one storey is 3 m) × 0.41 m thick, pivot at the bottom centre, face at z ≈ +0.1, back at −0.31; floor tiles 2 × 2 m, top at y = 0; doors 1.1 × 2.1 m (human scale; the Ruins' doors are 2.3 × 3 m). Scale 1 keeps the 2 m grid; 1.28 would match the Ruins' 4 m arch walls but breaks the grid.",
+      "pieces": {
+        "Wall_UnevenBrick_Straight": "hall wall, plain brick (retint soot-dark)",
+        "Wall_UnevenBrick_Door_Round": "hall wall with a round-headed doorway",
+        "Wall_UnevenBrick_Door_Flat": "hall wall with a square doorway",
+        "Wall_UnevenBrick_Window_Wide_Round": "hall wall with a wide arched window",
+        "Wall_Plaster_WoodGrid": "timber-framed workshop wall",
+        "Wall_Plaster_Straight": "plain plastered wall, back rooms",
+        "Wall_Plaster_Door_Round": "plastered wall with a doorway",
+        "Wall_Arch": "open wooden arch between bays",
+        "Wall_BottomCover": "skirting beam along wall bases",
+        "Corner_Interior_Big": "inside corner post, big",
+        "Corner_Interior_Small": "inside corner post, small",
+        "Corner_Exterior_Wood": "outside corner post",
+        "Floor_WoodDark": "walnut plank floor",
+        "Floor_WoodDark_Half1": "half plank floor tile (edges)",
+        "Floor_Brick": "brick floor (retint slate)",
+        "Floor_UnevenBrick": "worn brick floor (retint slate)",
+        "DoorFrame_Round_WoodDark": "door frame for the many-door sorting hall",
+        "Door_4_Round": "riveted round hatch-door (brass straps)",
+        "Door_8_Flat": "riveted square hatch-door",
+        "Window_Wide_Round1": "arched window with glass",
+        "Stair_Interior_Simple": "open stair up to a gantry",
+        "Stair_Interior_Solid": "solid stair",
+        "Prop_Support": "angled wooden brace under beams",
+        "Roof_Log": "long ceiling beam (10.7 m)",
+        "Prop_Crate": "big shipping crate"
+      }
+    },
+    {
+      "id": "props",
+      "source": "quaternius-fantasy-props",
+      "scaleToRuins": 1,
+      "grid": "No grid; real-world scale (a table is 0.81 m high, a workbench 2 × 1 m), pivot at the base centre. Scale 1.",
+      "pieces": {
+        "Workbench": "clockmaker's workbench",
+        "Workbench_Drawers": "drawer block to stack into a cabinet of tiny drawers",
+        "Cabinet": "low cabinet with drawers",
+        "Shelf_Simple": "wall shelf",
+        "Shelf_Arch": "arched wall shelf",
+        "Bookcase_2": "ledger bookcase",
+        "Bench": "long bench",
+        "Stool": "workshop stool",
+        "Chair_1": "chair at a ledger desk",
+        "Table_Large": "big work table (the ledger table)",
+        "BookStand": "ledger stand",
+        "BookGroup_Medium_1": "row of ledgers on a shelf",
+        "BookGroup_Small_1": "few ledgers",
+        "Book_Stack_1": "stack of ledgers",
+        "Book_7": "open ledger with brass clasp",
+        "Scroll_1": "rolled drawing",
+        "Chest_Wood": "parts chest",
+        "Crate_Metal": "iron-bound parts crate",
+        "Crate_Wooden": "wooden parts crate",
+        "Barrel": "oil barrel",
+        "Anvil": "small anvil on the bench",
+        "Bucket_Metal": "oil bucket",
+        "Peg_Rack": "tool peg rack",
+        "Rope_2": "coiled cable on the floor",
+        "Lantern_Wall": "wall lamp (amber when restored)",
+        "Torch_Metal": "wall sconce",
+        "CandleStick": "candle holder on a bench"
+      }
+    },
+    {
+      "id": "turrets",
+      "source": "quaternius-turret-pack",
+      "scaleToRuins": 1,
+      "grid": "Each turret stands on the same 1.38 m geared base (y = 0 at its foot), 0.8–4.8 m tall; untextured, two flat materials (Dark, Light) to restyle brass and copper. Scale 1 gives a 2–2.5 m sorter keeper. Weapon turrets were left out (no guns in the game).",
+      "pieces": {
+        "Base": "geared base: the sorter keeper's foot",
+        "Teleporter1": "short geared drum (keeper body, low)",
+        "Teleporter2": "geared drum, medium",
+        "Teleporter3": "geared column (keeper body)",
+        "Teleporter4": "tall pylon with rings (sorting machine core)",
+        "Teleporter5": "very tall pylon (the hall's central machine)",
+        "Upwards_1": "crown-shaped head (keeper's turret head)",
+        "Upwards_2": "taller crown head",
+        "GearCannon_1": "gear-wheel head; the barrel must be cut off in Blender before use"
+      }
+    }
+  ]
+}

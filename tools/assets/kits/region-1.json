@@ -1,0 +1,42 @@
+{
+  "region": 1,
+  "about": "The Overgrown Halls: plants, mossy rocks and roots from Stylized Nature to dress the Ruins (art brief region 1: moss, roots, overgrowth). The Ruins pieces themselves come from convert-ruins.sh.",
+  "kits": [
+    {
+      "id": "nature",
+      "source": "quaternius-stylized-nature",
+      "scaleToRuins": 0.5,
+      "grid": "Organic props, no grid; pivot at the base centre, y = 0 at the ground (roots and rocks dip a little below). The kit is about twice the Ruins' size: at 0.5 a fern is ~1.4 m wide, grass 0.3–0.9 m, a medium rock ~1.6 m, a dead tree ~5 m tall (the Ruins' own Tree_1 is 2.8 m).",
+      "pieces": {
+        "Fern_1": "ferns in corners and along wall bases",
+        "Plant_1": "low leafy plant at wall bases and in cracks",
+        "Plant_1_Big": "large leafy plant, restored rooms",
+        "Plant_7": "flat ground leaves in floor gaps",
+        "Plant_7_Big": "flat ground leaves, larger patch",
+        "Clover_1": "clover tufts between flagstones",
+        "Clover_2": "clover tufts, taller",
+        "Grass_Common_Short": "short grass tuft",
+        "Grass_Common_Tall": "tall grass tuft beside walls",
+        "Grass_Wispy_Short": "wispy grass in broken corners",
+        "Grass_Wispy_Tall": "wispy tall grass under cracks in the wall",
+        "Bush_Common": "bush grown through a broken wall",
+        "Bush_Common_Flowers": "flowering bush, restored rooms only",
+        "Flower_3_Single": "single wildflower, restored rooms",
+        "Flower_4_Group": "wildflower patch, restored rooms",
+        "Mushroom_Common": "mushrooms on damp floors",
+        "Mushroom_Laetiporus": "bracket fungus on roots or wall bases (heavy: one per room)",
+        "Rock_Medium_1": "mossy boulder / fallen masonry",
+        "Rock_Medium_2": "mossy boulder, flatter",
+        "Rock_Medium_3": "mossy boulder, tall",
+        "Pebble_Round_1": "loose pebble",
+        "Pebble_Round_3": "loose pebble",
+        "Pebble_Square_1": "rubble chip",
+        "Pebble_Square_3": "rubble chip",
+        "RockPath_Square_Small_1": "broken paving cluster",
+        "RockPath_Round_Small_1": "stepping stones in root tunnels",
+        "DeadTree_1": "dead tree sunk into the floor so only roots and stump show (root tunnels)",
+        "DeadTree_3": "dead tree, the sealed rooms' root wall (sink deep; heavy)"
+      }
+    }
+  ]
+}

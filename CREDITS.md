@@ -2,6 +2,11 @@
 
 ## Art
 - **Ultimate Modular Ruins Pack** (Aug 2021) — by [Quaternius](https://quaternius.com/packs/ultimatemodularruins.html). The pack's own `License.txt` says CC0 1.0 Universal; Quaternius now also publishes the [Quaternius Asset License v1.0](https://quaternius.com/license.html). Records in `assets-src/licenses/`. Used for the Overgrown Halls (Region 1), restyled.
+- **Stylized Nature MegaKit** (Standard) — by [Quaternius](https://quaternius.com/packs/stylizednaturemegakit.html). The pack's `License_Standard.txt` says CC0 1.0 Universal; the [Quaternius Asset License v1.0](https://quaternius.com/license.html) also applies (decision 0072). Record in `assets-src/licenses/`. Plants, rocks and dead trees for the Overgrown Halls (Region 1).
+- **Medieval Village MegaKit** (Standard) — by [Quaternius](https://quaternius.com/packs/medievalvillagemegakit.html). CC0 1.0 Universal per the pack's `License_Standard.txt`; Quaternius Asset License v1.0 also applies (0072). Record in `assets-src/licenses/`. Hall shell for the Sorting Works (Region 2); houses, roofs, doors and windows for the Lantern Town (Region 3).
+- **Fantasy Props MegaKit** (Standard) — by [Quaternius](https://quaternius.com/packs/fantasypropsmegakit.html). CC0 1.0 Universal per the pack's `License_Standard.txt`; Quaternius Asset License v1.0 also applies (0072). Record in `assets-src/licenses/`. Furniture, books, lanterns and candles for Regions 2–4.
+- **Turret Pack** (March 2020) — by [Quaternius](https://quaternius.com/packs/turretpack.html). CC0 1.0 Universal per the pack's `License.txt`; Quaternius Asset License v1.0 also applies (0072). Record in `assets-src/licenses/`. Geared bases and drums for the sorter keeper (Region 2); no weapon models used.
+- **Modular Cathedral Kit** (V1.0, 2026) — by [SigilsVault](https://sigilsvault.itch.io/modular-cathedral-kit) (Kevin Barany). CC0 1.0 Universal per the kit's `LICENSE.txt`. Record in `assets-src/licenses/`. Walls, vaults, columns, windows and floors for the Cathedral of Crossings (Region 4).
 
 ## Music and voices
 (Added as tracks and voice models are plugged in.)
