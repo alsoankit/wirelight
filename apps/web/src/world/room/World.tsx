@@ -1,5 +1,5 @@
 import { roomById } from "@wirelight/rooms";
-import { useSession } from "../../engine/store";
+import { RoomWarmup, useShownRoom } from "../../render/RoomWarmup";
 import { HallScene } from "../hall/HallScene";
 import { HouseScene } from "../house/HouseScene";
 import { ObservatoryScene } from "../observatory/ObservatoryScene";
@@ -9,13 +9,15 @@ import { SecretDoor } from "./SecretDoor";
 // own room for any other. One room in view at a time; walking through a door swaps it.
 
 export function World({ arriving = false }: { arriving?: boolean }) {
-  const roomId = useSession((s) => s.roomId);
-  const here = useSession((s) => s.here);
+  // Walking to another machine swaps the room behind a brief veil, with its shaders compiled first
+  // (render/RoomWarmup.tsx).
+  const { roomId, here } = useShownRoom();
   const room = roomId ? roomById(roomId) : undefined;
   if (!room || !here) return null;
   return (
     <>
       <Scene roomId={room.id} here={here} arriving={arriving} />
+      <RoomWarmup key={`warm:${room.id}:${here}`} roomId={room.id} here={here} />
       {/* A secret room's door, once the floor's boss is cleared (0065; agent D). */}
       <SecretDoor key={`secret:${room.id}:${here}`} device={here} />
     </>

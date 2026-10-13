@@ -32,7 +32,8 @@
         "Stair_Interior_Solid": "solid stair",
         "Prop_Support": "angled wooden brace under beams",
         "Roof_Log": "long ceiling beam (10.7 m)",
-        "Prop_Crate": "big shipping crate"
+        "Prop_Crate": "big shipping crate",
+        "WindowShutters_Wide_Round_Closed": "closed shutters for the arched window (a shut workshop: no glass to glare)"
       }
     },
     {
@@ -67,7 +68,11 @@
         "Rope_2": "coiled cable on the floor",
         "Lantern_Wall": "wall lamp (amber when restored)",
         "Torch_Metal": "wall sconce",
-        "CandleStick": "candle holder on a bench"
+        "CandleStick": "candle holder on a bench",
+        "BookGroup_Medium_2": "row of ledgers (second binding)",
+        "BookGroup_Medium_3": "row of ledgers (third binding)",
+        "Book_Stack_2": "stack of ledgers, a second pile",
+        "Book_Simplified_Single": "one ledger, standing or leaning"
       }
     },
     {

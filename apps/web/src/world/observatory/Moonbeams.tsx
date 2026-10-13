@@ -8,7 +8,7 @@ import { ruinHere } from "../ruin";
 // Each shaft is a soft additive box aligned with the moon, fading at its edges and toward the floor.
 // Strongest in ruin; restored, the moon is still there but the room's own warmth outshines it.
 
-type Beam = { from: [number, number, number]; width: number; depth: number; colour?: string };
+type Beam = { from: [number, number, number]; width: number; depth: number; colour?: string; pool?: boolean };
 
 type Props = {
   beams: Beam[];
@@ -98,16 +98,20 @@ export function Moonbeams({
         </group>
       ))}
       {pools &&
-        placed.map((b) => (
-          <mesh
-            key={`pool:${b.from.join(",")}`}
-            position={b.land}
-            rotation={[-Math.PI / 2, 0, Math.atan2(direction[0], direction[2])]}
-            material={poolMaterials.get(b.colour ?? colour)}
-          >
-            <planeGeometry args={[b.width * 1.8, b.width * 2.6]} />
-          </mesh>
-        ))}
+        // A pool only where there is floor to catch it (a shaft through a collapsed corner lands outside),
+        // and not for a shaft that asks for none.
+        placed
+          .filter((b) => b.pool !== false && Math.abs(b.land[0]) < 4.1 && Math.abs(b.land[2]) < 4.1)
+          .map((b) => (
+            <mesh
+              key={`pool:${b.from.join(",")}`}
+              position={b.land}
+              rotation={[-Math.PI / 2, 0, Math.atan2(direction[0], direction[2])]}
+              material={poolMaterials.get(b.colour ?? colour)}
+            >
+              <planeGeometry args={[b.width * 1.8, b.width * 2.6]} />
+            </mesh>
+          ))}
     </>
   );
 }

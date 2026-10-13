@@ -3,10 +3,12 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { roomById } from "@wirelight/rooms";
 import {
   type Dispatch,
+  lazy,
   memo,
   type ReactNode,
   type SetStateAction,
   StrictMode,
+  Suspense,
   useEffect,
   useRef,
   useState,
@@ -18,13 +20,13 @@ import { ask, useSession } from "../engine/store";
 import { useHydrated, useProgress } from "../progress/progress";
 import { AutoQuality } from "../render/AutoQuality";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
+import { loadConsole, usePrefetchLater } from "../render/preload";
 import { QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
 import { HALL_PIECES } from "../world/hall/layout";
 import { HOUSE_PIECES } from "../world/house/layout";
 import { pieceUrl } from "../world/kit/Piece";
 import { OBSERVATORY } from "../world/observatory/layout";
 import { World } from "../world/room/World";
-import { Console } from "./Console";
 import { Gift } from "./Gift";
 import { Glass } from "./Glass";
 import { Keyboard } from "./Keyboard";
@@ -40,6 +42,10 @@ import { JarButton, ToolPanels } from "./ToolPanels";
 // B1 walking skeleton: the Prologue, played in the Observatory, driven by the engine in a worker.
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
 // Dev aids: ?ruin=0|1 pins the dial; ?tier=high|medium|low|simple, T cycles.
+
+// The console's terminal (xterm, ~80 kB gzipped) loads when a room first needs it, or a few seconds
+// after the game opens (render/preload.ts), never on the way in.
+const Console = lazy(() => loadConsole().then((m) => ({ default: m.Console })));
 
 // Dev aid for scripts and debugging: the stores on `window` (never in a production build).
 if (import.meta.env.DEV) (window as unknown as { __wirelight?: unknown }).__wirelight = { useSession, useProgress };
@@ -175,6 +181,7 @@ const WorldCanvas = memo(function WorldCanvas({
 /** `skipIntro`: the player chose Skip intro on the landing (ONB-07: no tour). */
 export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: boolean; skipIntro?: boolean }) {
   const hydrated = useHydrated();
+  usePrefetchLater();
   const tourDone = useProgress((s) => s.tourDone);
   const backend = backendFromUrl() === "webgl2" ? "webgl2" : "webgpu";
   const chosen = useProgress((s) => s.settings.quality);
@@ -259,7 +266,9 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <KeyFlight />
         <Ending />
         {room && room.controls.console === "typing" && voiceGiven && (
-          <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
+          <Suspense fallback={null}>
+            <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
+          </Suspense>
         )}
       </StrictMode>
       {arriving && <div className="arrival-veil" />}

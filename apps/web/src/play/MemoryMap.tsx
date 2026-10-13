@@ -152,23 +152,91 @@ export function geometry(t: Topology, start: string): Geometry {
     const u = 1 - t;
     return { x: u * u * a.x + 2 * u * t * c.x + t * t * b.x, y: u * u * a.y + 2 * u * t * c.y + t * t * b.y };
   };
+  // A busy machine's door names are staggered along their cables (near, far, near…) so neighbours
+  // at narrow angles don't print over each other.
+  const hubCache = new Map<string, Map<string, number>>();
+  const hubDistance = (device: string, link: string): number => {
+    if (degree(device) < 3) return 42;
+    let placed = hubCache.get(device);
+    if (!placed) {
+      const n = nodes.get(device) ?? { x: 0, y: 0 };
+      const mine = [...links.values()]
+        .filter((x) => x.a === device || x.b === device)
+        .map((x) => {
+          const q = nodes.get(x.a === device ? x.b : x.a) ?? n;
+          return { l: x, angle: Math.atan2(q.y - n.y, q.x - n.x) + x.bend / 1000 };
+        })
+        .sort((p, q) => p.angle - q.angle);
+      // Each name goes near or far along its cable: the choice that keeps the closest two names
+      // furthest apart wins (a busy machine has at most a handful of cables: try them all). Never
+      // past a third of the way (a short cable between two busy machines).
+      const opts = mine.map(({ l }) => {
+        const a = nodes.get(l.a) as MapNode;
+        const b = nodes.get(l.b) as MapNode;
+        const len = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+        const [nx, ny] = normalAt(l, device);
+        return [...new Set([60, 98].map((d) => Math.min(d, len * 0.34)))].map((d) => {
+          const pt = at(l, l.a === device ? d / len : 1 - d / len);
+          return { d, x: pt.x + nx * 12, y: pt.y + ny * 12 };
+        });
+      });
+      let bestPick: number[] = opts.map(() => 0);
+      let bestGap = -1;
+      for (let mask = 0; mask < 1 << opts.length; mask++) {
+        const pick = opts.map((o, i) => Math.min(o.length - 1, (mask >> i) & 1));
+        const pts = pick.map((k, i) => opts[i]?.[k] as { x: number; y: number });
+        let gap = 1e9;
+        for (let i = 0; i < pts.length; i++)
+          for (let j = i + 1; j < pts.length; j++)
+            gap = Math.min(
+              gap,
+              Math.hypot((pts[i]?.x ?? 0) - (pts[j]?.x ?? 0), ((pts[i]?.y ?? 0) - (pts[j]?.y ?? 0)) * 2),
+            );
+        if (gap > bestGap + 0.5) {
+          bestGap = gap;
+          bestPick = pick;
+        }
+      }
+      const done = new Map<string, number>();
+      mine.forEach(({ l }, i) => {
+        done.set(l.id, opts[i]?.[bestPick[i] ?? 0]?.d ?? 60);
+      });
+      placed = done;
+      hubCache.set(device, placed);
+    }
+    return placed.get(link) ?? 60;
+  };
   const degree = (device: string) => [...links.values()].filter((x) => x.a === device || x.b === device).length;
   // Where a machine's name goes: under it, unless a cable leaves downwards; then under and to the
   // side away from its cables.
   const nameAt = (device: string): { x: number; y: number; anchor: "start" | "middle" | "end" } => {
     const n = nodes.get(device) ?? { x: 0, y: 0 };
-    let down = false;
-    let dxSum = 0;
-    for (const x of links.values()) {
-      if (x.a !== device && x.b !== device) continue;
-      const q = nodes.get(x.a === device ? x.b : x.a);
-      if (!q) continue;
-      const len = Math.hypot(q.x - n.x, q.y - n.y) || 1;
-      if ((q.y - n.y) / len > 0.25) down = true;
-      dxSum += (q.x - n.x) / len;
-    }
-    if (!down) return { x: 0, y: 31, anchor: "middle" };
-    return dxSum >= 0 ? { x: -8, y: 32, anchor: "end" } : { x: 8, y: 32, anchor: "start" };
+    const w = (device.length * 9) / 2;
+    // The machine's own door names, as boxes.
+    const doors = [...links.values()]
+      .filter((x) => x.a === device || x.b === device)
+      .map((x) => {
+        const len =
+          Math.hypot(
+            (nodes.get(x.a)?.x ?? 0) - (nodes.get(x.b)?.x ?? 0),
+            (nodes.get(x.a)?.y ?? 0) - (nodes.get(x.b)?.y ?? 0),
+          ) || 1;
+        const d = hubDistance(device, x.id) / len;
+        const p = at(x, x.a === device ? d : 1 - d);
+        const [nx, ny] = normalAt(x, device);
+        return { x: p.x + nx * 12, y: p.y + ny * 12 + 4 };
+      });
+    const candidates: { x: number; y: number; anchor: "start" | "middle" | "end"; l: number; r: number }[] = [
+      { x: 0, y: 31, anchor: "middle", l: -w, r: w },
+      { x: -8, y: 32, anchor: "end", l: -8 - 2 * w, r: -8 },
+      { x: 8, y: 32, anchor: "start", l: 8, r: 8 + 2 * w },
+      { x: 0, y: -20, anchor: "middle", l: -w, r: w },
+    ];
+    const hits = (c: (typeof candidates)[number]) =>
+      doors.filter((d) => d.x + 16 > n.x + c.l && d.x - 16 < n.x + c.r && d.y > n.y + c.y - 16 && d.y - 12 < n.y + c.y)
+        .length;
+    const best = candidates.reduce((p, c) => (hits(c) < hits(p) ? c : p));
+    return { x: best.x, y: best.y, anchor: best.anchor };
   };
   // Up from the cable, unless that's where the machine's other cables go: then the other side.
   const normalAt = (l: MapLink, device: string): [number, number] => {
@@ -207,7 +275,7 @@ export function geometry(t: Topology, start: string): Geometry {
       const n = nodes.get(device) ?? { x: 0, y: 0 };
       if (!l) return { x: n.x + 30, y: n.y };
       const along =
-        (units ?? (degree(device) >= 3 ? 64 : 42)) /
+        (units ?? hubDistance(device, l.id)) /
         Math.max(
           40,
           Math.hypot(

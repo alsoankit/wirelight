@@ -14,6 +14,7 @@ import {
   vec3,
 } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
+import { bakedLightNodes, type Lightmaps } from "../bake/lightmap";
 import { LOOKS, type RegionId } from "../region";
 import { ruinHere as ruin } from "../ruin";
 import { TOWN_SWATCHES } from "../town/palette";
@@ -152,7 +153,9 @@ const bakedCache = new Map<string, Material>();
 
 // `baked`: the geometry carries an `ageing` attribute (bake.ts), so stone reads it instead of
 // computing noise per pixel. Used for merged static rooms; standalone meshes use the live version.
-function nodeMaterial(swatch: Swatch, region: RegionId, baked = false): Material {
+// `lightmaps`: the room has light baked in Blender (world/bake): it replaces the vertex moonlight and
+// darkens the ambient fill with contact occlusion.
+function nodeMaterial(swatch: Swatch, region: RegionId, baked = false, lightmaps: Lightmaps | null = null): Material {
   const look = LOOKS[region];
   const m = new MeshStandardNodeMaterial();
   const restoredness = float(1).sub(ruin);
@@ -205,6 +208,11 @@ function nodeMaterial(swatch: Swatch, region: RegionId, baked = false): Material
   if (swatch.glow) {
     // Out (a faint ember at most) in ruin, lit when restored: steady, never flickering.
     m.emissiveNode = color(swatch.restored).mul(restoredness.mul(swatch.glow).add(swatch.ember ?? 0.15));
+  } else if (lightmaps) {
+    // Baked in Blender: the moon's soft shadows, lamp pools and bounce, ruined and restored (world/bake).
+    const { light, ao } = bakedLightNodes(lightmaps);
+    m.emissiveNode = tint.mul(light);
+    m.aoNode = ao;
   } else if (baked) {
     // Baked light from outside (bake.ts): cold and strong in ruin, softer when restored. Added as light.
     const moonColour = mix(color(look.moon.restored), color(look.moon.ruined), ruin);
@@ -233,13 +241,18 @@ export function regionMaterial(name: string, region: RegionId = 1): Material {
 }
 
 // The same, for a merged static room whose geometry carries the baked `ageing` and `moon` attributes.
-export function bakedRegionMaterial(name: string, region: RegionId = 1): Material | undefined {
+// With `lightmaps`, the room's own copy reads them instead (one set per baked layout).
+export function bakedRegionMaterial(
+  name: string,
+  region: RegionId = 1,
+  lightmaps: Lightmaps | null = null,
+): Material | undefined {
   const swatch = swatchFor(name, region);
   if (!swatch) return undefined;
-  const key = `${region}:${name}`;
+  const key = lightmaps ? `${region}:${name}:${lightmaps.id}` : `${region}:${name}`;
   let shared = bakedCache.get(key);
   if (!shared) {
-    shared = nodeMaterial(swatch, region, true);
+    shared = nodeMaterial(swatch, region, true, lightmaps);
     shared.name = name;
     bakedCache.set(key, shared);
   }
@@ -251,6 +264,15 @@ export function ownRegionMaterial(name: string, region: RegionId = 1): MeshStand
   const swatch = swatchFor(name, region);
   if (!swatch) throw new Error(`No swatch called ${name}`);
   return nodeMaterial(swatch, region) as MeshStandardNodeMaterial;
+}
+
+/** A swatch's colours and glow, for the lightmap exporter (tools/bake): what the light bounces off. */
+export function swatchColours(
+  name: string,
+  region: RegionId = 1,
+): { ruined: string; restored: string; glow?: number; ember?: number } | undefined {
+  const s = swatchFor(name, region);
+  return s && { ruined: s.ruined, restored: s.restored, glow: s.glow, ember: s.ember };
 }
 
 /** Whether a swatch needs the baked `ageing` attribute. */

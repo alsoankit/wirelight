@@ -32,3 +32,6 @@ assets-src/voices/takes/
 .DS_Store
 Thumbs.db
 tools/audio/lines.csv
+dist-bake/
+assets-src/bake/in/
+assets-src/bake/out/

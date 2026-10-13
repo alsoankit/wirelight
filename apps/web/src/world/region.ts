@@ -37,6 +37,8 @@ export type RegionLook = {
   /** Ambient life in the air, always in the background: fireflies, warm motes, or none. */
   fireflies: string | null;
   dust: string;
+  /** Multiplies the textured kit pieces' restored colour (kits/kitMaterials.ts); default a gentle warm. */
+  kitRestored?: string;
 };
 
 export const LOOKS: Record<RegionId, RegionLook> = {
@@ -84,5 +86,8 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     moss: { ruined: "#45474c", restored: "#8c7a5c", amount: 0.45 },
     fireflies: null,
     dust: "#d8ccb0",
+    // The cathedral kit's grey trim-sheet stone, warmed toward sandstone when restored (multiplied in
+    // linear space, so as light as it can be: it can only darken).
+    kitRestored: "#FFE6C0",
   },
 };

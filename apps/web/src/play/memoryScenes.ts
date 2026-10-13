@@ -37,7 +37,7 @@ export type Beat =
   | { at: number; glow: string[] }
   | { at: number; dim: string[] }
   | { at: number; call: string; repeat?: number }
-  | { at: number; tag: string; label: Tag; below?: boolean };
+  | { at: number; tag: string; label: Tag; below?: boolean; lift?: number };
 
 export type Scene = {
   /** Machines and cables never shown in this chapter. */
@@ -372,7 +372,7 @@ export const scenes: Record<string, Scene> = {
     beats: [
       { at: 0, lay: ["span-2"], ms: 0 },
       { at: 900, lay: ["span-2"], ms: 2600, drawn: true },
-      { at: 3600, tag: "hall-b", label: "secondSpan" },
+      { at: 3600, tag: "hall-a|hall-b", label: "secondSpan", lift: 62 },
     ],
   },
   "F4-FM-01": {
@@ -383,7 +383,7 @@ export const scenes: Record<string, Scene> = {
       { at: 1600, show: ["hall-b", "anvil", "bell", "wren"] },
       { at: 1600, lay: ["span"], ms: 1400 },
       { at: 3600, lay: ["span-2"], ms: 1800, drawn: true },
-      { at: 5000, tag: "hall-b", label: "secondSpan" },
+      { at: 5000, tag: "hall-a|hall-b", label: "secondSpan", lift: 62 },
     ],
   },
   "F4-FM-02": {
@@ -480,7 +480,7 @@ export const scenes: Record<string, Scene> = {
         repeat: 4000,
         tag: ["houseLetter", { ip: "@addr:lantern" }],
       },
-      { at: 2300, tag: "square", label: "understood" },
+      { at: 2300, tag: "observatory|square", label: "understood" },
     ],
   },
   "F6-FM-02": {
@@ -555,7 +555,7 @@ export const scenes: Record<string, Scene> = {
         fate: "in",
         repeat: 2400,
       },
-      { at: 3000, tag: "square", label: "asking" },
+      { at: 3000, tag: "observatory|square", label: "asking" },
     ],
   },
   "F7-FM-02": {

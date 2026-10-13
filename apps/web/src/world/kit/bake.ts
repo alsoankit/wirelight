@@ -102,23 +102,33 @@ export function bakeMoonlight(
       .normalize(),
   );
   let rays = 0;
+  // Merged rooms are unindexed: a corner shared by six triangles appears six times with the same
+  // position and normal, and would cast the same rays six times. Each distinct (position, normal)
+  // casts once; the result is identical, at a fraction of the cost (load-time stalls, 2026-10-13).
+  const shared = new Map<string, number>();
   for (const geometry of receivers) {
     const position = geometry.getAttribute("position");
     const normal = geometry.getAttribute("normal");
     const out = new Float32Array(position.count);
     for (let i = 0; i < position.count; i++) {
+      const px = position.getX(i);
+      const py = position.getY(i);
+      const pz = position.getZ(i);
       n.set(normal.getX(i), normal.getY(i), normal.getZ(i)).normalize();
       const facing = n.dot(toMoon);
       if (facing <= 0) continue;
-      if (Math.hypot(position.getX(i), position.getZ(i)) > shadowsWithin) {
+      if (Math.hypot(px, pz) > shadowsWithin) {
         out[i] = facing;
         continue;
       }
+      const key = `${px},${py},${pz},${n.x},${n.y},${n.z}`;
+      const known = shared.get(key);
+      if (known !== undefined) {
+        out[i] = facing * known;
+        continue;
+      }
       // Start just off the surface so the rays don't hit the face they start on.
-      origin
-        .set(position.getX(i), position.getY(i), position.getZ(i))
-        .addScaledVector(n, 0.03)
-        .addScaledVector(toMoon, 0.02);
+      origin.set(px, py, pz).addScaledVector(n, 0.03).addScaledVector(toMoon, 0.02);
       // Adaptive: three rays first (centre and two opposite edges of the cone). If they agree, the
       // vertex is fully lit or fully shadowed (most are); only penumbra vertices get all the rays.
       const cast = (direction: Vector3): number => {
@@ -134,6 +144,7 @@ export function bakeMoonlight(
         for (let k = 3; k < directions.length; k++) through += cast(directions[k] as Vector3);
         share = through / directions.length;
       }
+      shared.set(key, share);
       out[i] = facing * share;
     }
     geometry.setAttribute("moon", new BufferAttribute(out, 1));

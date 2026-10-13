@@ -9,6 +9,7 @@ import { useQuality } from "../../render/quality";
 import { Dust } from "../Dust";
 import { Fireflies } from "../Fireflies";
 import { StaticRoom } from "../kit/StaticRoom";
+import { KitRoom } from "../kits/KitRoom";
 import { Keeper } from "../observatory/Keeper";
 import type { KeeperCue } from "../observatory/Messages";
 import { Moonbeams } from "../observatory/Moonbeams";
@@ -106,6 +107,9 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
       <Suspense fallback={null}>
         <StaticRoom region={region} placements={layout.placements} extras={layout.extras} toCamera={VIEW_DIRECTION} />
       </Suspense>
+      <Suspense fallback={null}>
+        <KitRoom pieces={layout.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
+      </Suspense>
       {layout.gears && <Gears gears={layout.gears} region={region} />}
       {quality.moonbeams && layout.beams && (
         <Moonbeams
@@ -118,7 +122,7 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
         />
       )}
       <WindDriver />
-      {region === 4 && quality.moonbeams && <Haze />}
+      {region === 4 && <Haze haze={quality.moonbeams} glass={layout.stainedGlass} />}
       {quality.fireflies && look.fireflies && <Fireflies bounds={layout.air} colour={look.fireflies} />}
       {quality.dust && <Dust bounds={layout.air} colour={look.dust} />}
       <Keeper

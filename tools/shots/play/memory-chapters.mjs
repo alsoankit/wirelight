@@ -22,7 +22,7 @@ const checkLabels = async (name) => {
       return true;
     };
     const boxes = [...document.querySelectorAll(".mem-map text, .world-map text")]
-      .filter((t) => t.textContent.trim() && seen(t))
+      .filter((t) => t.textContent.trim() && seen(t) && !t.classList.contains("mem-msg-mark"))
       .map((t) => ({ t: t.textContent.trim(), r: t.getBoundingClientRect() }));
     const out = [];
     for (let i = 0; i < boxes.length; i++)
@@ -31,7 +31,8 @@ const checkLabels = async (name) => {
         const b = boxes[j].r;
         const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
         const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
-        if (w > 3 && h > 3) out.push(`${boxes[i].t} × ${boxes[j].t}`);
+        // A plate's name written over the door's own name is the same word, on purpose.
+        if (w > 3 && h > 3 && boxes[i].t !== boxes[j].t) out.push(`${boxes[i].t} × ${boxes[j].t}`);
       }
     return out;
   });

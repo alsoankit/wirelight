@@ -1,6 +1,6 @@
-import { type BufferGeometry, ExtrudeGeometry } from "three";
-import { FLOORS, makeEarth, makeFlagstones } from "../kit/floor";
-import type { Extra, Placement } from "../kit/StaticRoom";
+import { BufferAttribute, type BufferGeometry, CircleGeometry, ExtrudeGeometry, ShapeGeometry } from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import type { Placement } from "../kit/StaticRoom";
 import {
   addTo,
   ball,
@@ -15,18 +15,35 @@ import {
   type V3,
   wallWithDoor,
 } from "../kit/shapes";
+import type { KitPlacement } from "../kits/placement";
 import type { Beams, Glow, Wall } from "../room/layout";
 
 // Region 4, the Cathedral of Crossings (world/art-briefs/region-4-cathedral-of-crossings.md): vaulted
-// sandstone, tall pointed arches, stained glass in jewel tones (kept away from cyan), polished brass.
-// Stand-ins until the region's own kit: the Ruins kit's gothic arches and walls recoloured, and pieces
-// made in code (lancet windows with leaded glass, pointed doorways with moulded frames, string
-// courses, a broken winged statue). Ruin: cold grey stone, dark glass, grey-blue shafts. Restored:
-// warm sandstone, the windows lit, golden and coloured light falling across the floor.
-// A left world (0052): no candles burning; the light is the glass.
+// stone, tall pointed arches, stained glass in jewel tones (kept away from cyan), polished brass.
+//
+// Built from SigilsVault's Modular Cathedral kit (region-4/cathedral; kits/catalog.ts) where it fits
+// the 8 × 8 m cutaway: its walls at a quarter scale make 2 × 4 m bays on the rooms' 2 m grid (the
+// kit's half scale, its "4 m module", stands 8 m tall: above the camera's frame), dressed-stone bays
+// with lancet, tall and rose windows whose own emission atlas lights the glass; its floors (flagstone
+// courses in the chapels, the marble chequer in the crossing halls); its columns as piers at the
+// corners and, fallen, as the ruin. Fantasy Props (region-4/props) gives one candle stand per room
+// (dark in ruin, lit restored) and a chapel's bookcase.
+// Made in code still, where no kit piece fits: the stained glass laid over the kit's windows
+// (coloured in regions/Haze.tsx), the doorways (the kit's doors are 2 × 3.4 m only at the 8 m-tall
+// scale; the chapels keep the Ruins kit's gothic arch, the crossing halls a pointed doorway for every
+// town), the warden's statue, the coloured shafts and pools, the haze.
+// Ruin: cold grey stone, dark glass, grey-blue shafts. Restored: the windows lit, golden and coloured
+// light falling across the floor, the candles caught.
 
 const QUARTER = Math.PI / 2;
 const GOLD = "#F2CF8A";
+const CANDLE = "#FFC46B";
+const CATH = "region-4/cathedral";
+const PROPS = "region-4/props";
+/** Metres per kit unit for the walls: a bay is 8 × 16 units, so 2 × 4 m. */
+const E = 0.25;
+const BAY = 8 * E;
+const HEIGHT = 16 * E;
 
 type Bag = Record<string, BufferGeometry[]>;
 
@@ -35,47 +52,106 @@ const SHAFT: V3 = [0.55, -0.85, 0.55];
 // Jewel-tinted shafts (ruby, sapphire, gold; kept away from cyan), strong enough to colour the floor.
 const SHAFT_TINTS = [GOLD, "#E0707E", "#7E9CE6"];
 
-function floor(seed: number): Extra[] {
-  return [
-    { name: "Floor", geometry: makeFlagstones({ size: 8.4, seed, ...FLOORS[4] }) },
-    { name: "Earth", geometry: makeEarth(8.4) },
-  ];
+/** What a room's dressing collects: kit pieces, code-made pieces, lights, shafts and glass. */
+type Room = { kit: KitPlacement[]; bag: Bag; glows: Glow[]; beams: Beams["list"]; glass: BufferGeometry[] };
+
+function newRoom(): Room {
+  return { kit: [], bag: {}, glows: [], beams: [], glass: [] };
+}
+
+/** A kit wall bay along a wall, covering [from, from + 2] with its inner face on the wall's plane. */
+function bay(piece: string, wall: Wall, from: number, glow?: boolean): KitPlacement {
+  const scale = E / 0.5;
+  return wall === "back"
+    ? { kit: CATH, piece, position: [from, 0, -4 - E], scale, glow }
+    : { kit: CATH, piece, position: [-4 - E, 0, from + BAY], rotationY: QUARTER, scale, glow };
+}
+
+/** Where, along a wall and out from it, a point in the room is. */
+function inside(wall: Wall, along: number, out: number, y: number): V3 {
+  return wall === "back" ? [along, y, -4 + out] : [-4 + out, y, along];
+}
+
+// The glass in each kit window, measured from its emission atlas (metres at E, from the bay's sill
+// line): the lancet, the tall triple lancet, the rose.
+const WINDOWS = {
+  lancet: { piece: "wall_window_01", width: 0.84, sill: 1.24, height: 1.98 },
+  tall: { piece: "wall_window_large_01", width: 0.82, sill: 0.6, height: 2.64 },
+  rose: { piece: "wall_rose_window_01", width: 1.48, sill: 1.26, height: 1.48 },
+} as const;
+type WindowKind = keyof typeof WINDOWS;
+
+/** A pane of stained glass over a kit window: `pane` = (u, v, kind) for Haze.tsx's shader. */
+function pane(kind: WindowKind, wall: Wall, along: number): BufferGeometry {
+  const w = WINDOWS[kind];
+  const source =
+    kind === "rose"
+      ? new CircleGeometry(w.width / 2, 40).translate(0, w.height / 2, 0)
+      : new ShapeGeometry(lancetShape(w.width, w.height), 8);
+  const g = source.toNonIndexed();
+  const position = g.getAttribute("position");
+  const values = new Float32Array(position.count * 3);
+  for (let i = 0; i < position.count; i++) {
+    values[i * 3] = position.getX(i) / w.width + 0.5;
+    values[i * 3 + 1] = position.getY(i) / w.height;
+    values[i * 3 + 2] = kind === "rose" ? 1 : 0;
+  }
+  const out = prep(g);
+  out.setAttribute("pane", new BufferAttribute(values, 3));
+  // Just in front of the kit's glass card (which stands 1.3 cm proud of the wall), behind its mouldings.
+  return onWall(out, wall, along, w.sill, 0.028);
 }
 
 /**
- * A tall lancet window on a wall: a moulded sandstone frame, leaded glass in three bands (ruby low,
- * sapphire, a gold head), its light, and a shaft of coloured light falling into the room.
+ * A lit window bay: the kit's window wall (its glass glows from the emission atlas when restored),
+ * stained glass over it, its light, and a shaft of coloured light falling into the room.
  */
-function stainedWindow(
-  bag: Bag,
-  glows: Glow[],
-  beams: Beams["list"],
-  wall: Wall,
-  along: number,
-  sill = 1.5,
-  width = 0.8,
-  height = 2.2,
-) {
-  const head = height - 0.95; // where the gold head begins
-  addTo(bag, "GlassRuby", onWall(box([width, 0.6, 0.02], [0, 0.3, 0]), wall, along, sill, 0.03));
-  addTo(
-    bag,
-    "GlassSapphire",
-    onWall(box([width, head - 0.6, 0.02], [0, 0.6 + (head - 0.6) / 2, 0]), wall, along, sill, 0.03),
-  );
-  const top = prep(new ExtrudeGeometry(lancetShape(width, height - head), { depth: 0.02, bevelEnabled: false }));
-  addTo(bag, "GlassGold", onWall(top.translate(0, head, 0), wall, along, sill, 0.02));
-  // Lead: a mullion and the bars between the bands.
-  addTo(bag, "Lead", onWall(box([0.035, height - 0.25, 0.03], [0, (height - 0.25) / 2, 0]), wall, along, sill, 0.05));
-  for (const y of [0.6, head, 0.3, (0.6 + head) / 2])
-    addTo(bag, "Lead", onWall(box([width, 0.03, 0.03], [0, y, 0]), wall, along, sill, 0.05));
-  addTo(bag, "Stone", onWall(doorFrame(width, height, 0.12, 0.12, true), wall, along, sill, 0));
-  addTo(bag, "Stone", onWall(box([width + 0.4, 0.1, 0.22], [0, -0.05, 0.08]), wall, along, sill, 0));
-  const inside = (out: number, y: number): V3 => (wall === "back" ? [along, y, -4 + out] : [-4 + out, y, along]);
-  glows.push({ position: inside(0.9, sill + height * 0.55), colour: GOLD, strength: 2.0 });
+function windowBay(room: Room, wall: Wall, from: number, kind: WindowKind, light = true) {
+  const w = WINDOWS[kind];
+  const along = from + BAY / 2;
+  room.kit.push(bay(w.piece, wall, from, true));
+  room.glass.push(pane(kind, wall, along));
+  if (light)
+    room.glows.push({
+      position: inside(wall, along, 0.9, w.sill + w.height * 0.55),
+      colour: GOLD,
+      strength: kind === "rose" ? 1.6 : 2.0,
+    });
   // Each window's shaft takes a tint from its glass: gold, rose, pale sapphire in turn.
-  const tint = SHAFT_TINTS[beams.length % SHAFT_TINTS.length];
-  beams.push({ from: inside(0.15, sill + height * 0.5), width: width * 0.9, depth: 0.5, colour: tint });
+  const tint = SHAFT_TINTS[room.beams.length % SHAFT_TINTS.length];
+  room.beams.push({
+    from: inside(wall, along, 0.15, w.sill + w.height * 0.5),
+    width: w.width * 0.9,
+    depth: 0.5,
+    colour: tint,
+  });
+}
+
+/** The floor: kit slabs (flagstone courses in the chapels, marble chequer in the halls), 4 × 4 m each. */
+function floor(piece: "floor_01" | "floor_02" | "floor_03"): KitPlacement[] {
+  return [-2, 2].flatMap((x) => [-2, 2].map((z): KitPlacement => ({ kit: CATH, piece, position: [x, 0, z] })));
+}
+
+/** Piers at the cutaway's corners: where the walls meet, and where each ends at the front. */
+function piers(): KitPlacement[] {
+  const scale = 0.88; // 4 m tall, like the walls
+  return [
+    { kit: CATH, piece: "column_small_01", position: [-4.1, 0, -4.1], scale },
+    { kit: CATH, piece: "column_small_01", position: [4, 0, -4.1], scale },
+    { kit: CATH, piece: "column_small_01", position: [-4.1, 0, 4], scale },
+  ];
+}
+
+/** A column fallen across the floor (the ruin): lying along +z from `at`, or turned by `turn`. */
+function fallenColumn(at: [number, number], turn = 0, scale = 0.5): KitPlacement {
+  const radius = 0.872 * 0.5 * scale;
+  return { kit: CATH, piece: "column_small_01", position: [at[0], radius, at[1]], rotation: [QUARTER, turn, 0], scale };
+}
+
+/** One tall candle stand (dark in ruin, its candles caught when restored) and its light. */
+function candles(room: Room, at: [number, number]) {
+  room.kit.push({ kit: PROPS, piece: "CandleStick_Stand", position: [at[0], 0, at[1]], rotationY: 0.4, glow: true });
+  room.glows.push({ position: [at[0], 1.45, at[1]], colour: CANDLE, strength: 1.3 });
 }
 
 /** A string course (a moulded band) along a wall at height y. */
@@ -113,128 +189,122 @@ function wardenStatue(bag: Bag, at: V3, turn: number) {
   for (const side of [-1, 1]) addTo(bag, "GlassGold", r(ball([side * 0.055, 1.88, 0.18], 0.018, 6)));
 }
 
+/**
+ * At most three room lights (`glows`): a fourth point light blanked the whole static room on WebGPU
+ * (measured 2026-10-13, the crossing hall with a rose, two lancets and candles). Windows beyond the
+ * third glow by their own emission and shafts only.
+ */
+const MAX_GLOWS = 3;
+
+function finish(room: Room) {
+  if (import.meta.env.DEV && room.glows.length > MAX_GLOWS) console.warn("[wirelight] cathedral: too many glows");
+  const glass = room.glass.length > 0 ? mergeGeometries(room.glass) : null;
+  return {
+    kitPieces: room.kit,
+    extras: extras(room.bag),
+    glows: room.glows.slice(0, MAX_GLOWS),
+    beams: { list: room.beams, direction: SHAFT, colour: GOLD, ruined: 0.1, restored: 0.7, pools: true },
+    ...(glass ? { stainedGlass: glass } : {}),
+  };
+}
+
 // ---------------------------------------------------------------------------------------------------
-// The Observatory: a side chapel of the Cathedral.
+// The Observatory: a side chapel of the Cathedral. A lancet in the back wall, a tall window in the
+// left, the gothic arch to the nave (and a second to the left with two doors), the warden's statue in
+// the far corner, a column fallen along the left wall, candles in the back corner.
 
 export function cathedralObservatoryPieces(secondDoor: boolean): Placement[] {
-  const left: Placement[] = secondDoor
-    ? [{ piece: "Wall_ArchGothic", position: [-4, 0, 2], rotationY: QUARTER }]
-    : [
-        { piece: "Wall", position: [-4, 0, 1], rotationY: QUARTER },
-        { piece: "Wall_Double_Broken", position: [-4, 0, 3], rotationY: QUARTER },
-      ];
   return [
-    { piece: "Wall", position: [-3, 0, -4] },
-    { piece: "Wall", position: [-3, 2, -4] },
     { piece: "Wall_ArchGothic", position: [0, 0, -4] },
-    { piece: "Wall", position: [3, 0, -4] },
-    { piece: "Wall_Broken", position: [3, 2, -4] },
-    { piece: "Wall", position: [-4, 0, -3], rotationY: QUARTER },
-    { piece: "Wall", position: [-4, 2, -3], rotationY: QUARTER },
-    { piece: "Wall", position: [-4, 0, -1], rotationY: QUARTER },
-    { piece: "Wall_Broken", position: [-4, 2, -1], rotationY: QUARTER },
-    ...left,
-    { piece: "Column_Round", position: [-4, 0, -4] },
-    { piece: "Column_Round_Short", position: [4, 0, -4] },
-    { piece: "Bricks", position: [-3.2, 0, 3.4], rotationY: 2.1 },
-    { piece: "Brick", position: [1.9, 0, 2.2], rotationY: 0.7 },
+    ...(secondDoor ? [{ piece: "Wall_ArchGothic", position: [-4, 0, 2], rotationY: QUARTER } as Placement] : []),
+    { piece: "Bricks", position: [-2.9, 0, 3.5], rotationY: 2.1, scale: 0.7 },
+    { piece: "Brick", position: [-2.2, 0, 2.6], rotationY: 0.7 },
     { piece: "Brick", position: [1.75, 0, 2.55], rotationY: 2.0 }, // weighs down the Knight's letter
   ];
 }
 
 export function cathedralObservatory(secondDoor: boolean) {
-  const bag: Bag = {};
-  const glows: Glow[] = [];
-  const list: Beams["list"] = [];
-  stainedWindow(bag, glows, list, "back", -3.0, 1.4);
-  stainedWindow(bag, glows, list, "left", -2.0, 1.4);
-  course(bag, "back", -3.95, -2.0, 1.0);
-  course(bag, "left", -3.95, secondDoor ? -0.05 : 2.0, 1.0);
-  wardenStatue(bag, [3.0, 0, -2.9], -0.5);
-  return {
-    placements: cathedralObservatoryPieces(secondDoor),
-    extras: [...floor(1103), ...extras(bag)],
-    glows,
-    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.1, restored: 0.7, pools: true },
-  };
+  const room = newRoom();
+  windowBay(room, "back", -4, "lancet");
+  room.kit.push(bay("wall_01", "back", 2));
+  room.kit.push(bay("wall_01", "left", -4));
+  windowBay(room, "left", -2, "tall");
+  if (!secondDoor) room.kit.push(bay("wall_01", "left", 0), bay("wall_01", "left", 2));
+  room.kit.push(...floor("floor_01"), ...piers(), fallenColumn([-3.25, 0.4]));
+  candles(room, [-3.1, -3.15]);
+  wardenStatue(room.bag, [3.0, 0, -2.9], -0.5);
+  return { placements: cathedralObservatoryPieces(secondDoor), ...finish(room) };
 }
 
 // ---------------------------------------------------------------------------------------------------
-// Another computer's room: a small chapel-like study.
+// Another computer's room: a small chapel-like study. A lancet and a tall window, a bookcase on the
+// left wall, candles by the back wall where the other regions keep their lamp.
 
 export const CATHEDRAL_HOUSE_PIECES: Placement[] = [
   { piece: "Wall_ArchGothic", position: [0, 0, -4] },
-  { piece: "Wall", position: [-3, 0, -4] },
-  { piece: "Wall", position: [-3, 2, -4] },
-  { piece: "Wall", position: [3, 0, -4] },
-  { piece: "Wall", position: [-4, 0, -3], rotationY: QUARTER },
-  { piece: "Wall", position: [-4, 2, -3], rotationY: QUARTER },
-  { piece: "Wall", position: [-4, 0, -1], rotationY: QUARTER },
-  { piece: "Wall_Broken", position: [-4, 2, -1], rotationY: QUARTER },
-  { piece: "Wall_Half", position: [-4, 0, 1], rotationY: QUARTER },
-  { piece: "Wall_Double_Broken", position: [-4, 0, 3], rotationY: QUARTER },
-  { piece: "Column_Round", position: [-4, 0, -4] },
-  { piece: "Column_Round_Short", position: [4, 0, -4] },
-  { piece: "Bricks", position: [2.9, 0, 1.9], rotationY: 0.9 },
+  { piece: "Bricks", position: [2.9, 0, 2.0], rotationY: 0.9, scale: 0.7 },
   { piece: "Brick", position: [-1.6, 0, 2.6], rotationY: 0.4 },
 ];
 
 export function cathedralHouse() {
-  const bag: Bag = {};
-  const glows: Glow[] = [];
-  const list: Beams["list"] = [];
-  stainedWindow(bag, glows, list, "left", -2.0, 1.4);
-  course(bag, "back", -3.95, -2.0, 1.0);
-  course(bag, "left", -3.95, 0.5, 1.0);
-  return {
-    placements: CATHEDRAL_HOUSE_PIECES,
-    extras: [...floor(2207), ...extras(bag)],
-    glows,
-    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.1, restored: 0.7, pools: true },
-  };
+  const room = newRoom();
+  windowBay(room, "back", -4, "lancet");
+  room.kit.push(bay("wall_01", "back", 2));
+  windowBay(room, "left", -4, "tall");
+  room.kit.push(bay("wall_01", "left", -2), bay("wall_01", "left", 0), bay("wall_01", "left", 2));
+  room.kit.push(...floor("floor_01"), ...piers());
+  room.kit.push({ kit: PROPS, piece: "Bookcase_2", position: [-3.72, 0, -0.9], rotationY: QUARTER });
+  candles(room, [-2.5, -3.3]);
+  return { placements: CATHEDRAL_HOUSE_PIECES, ...finish(room) };
 }
 
 // ---------------------------------------------------------------------------------------------------
-// A crossing hall (a router): a great pointed door for every town it joins, tall windows between.
+// A crossing hall (a router): a great pointed door for every town it joins, a rose window and tall
+// lancets between, the marble chequer of the crossing underfoot.
 
-export const CATHEDRAL_HALL_PIECES: Placement[] = [
-  { piece: "Column_Round", position: [-4, 0, -4] },
-  { piece: "Column_Round_Short", position: [4, 0, -4] },
-  { piece: "Column_Round_Short", position: [-4, 0, 4] },
-  { piece: "Bricks", position: [2.9, 0, 2.6], rotationY: 0.8 },
+export const CATHEDRAL_HALL_PIECES: Placement[] = [{ piece: "Bricks", position: [2.9, 0, 2.6], rotationY: 0.8 }];
+
+/** Which free bays get windows, in order of preference: the rose first, then two lancets. */
+const ROSE_BAYS: { wall: Wall; at: number }[] = [
+  { wall: "back", at: -1 },
+  { wall: "left", at: -1 },
+  { wall: "back", at: 1 },
+  { wall: "left", at: 1 },
+];
+const LANCET_BAYS: { wall: Wall; at: number }[] = [
+  { wall: "left", at: -3 },
+  { wall: "back", at: -3 },
+  { wall: "left", at: -1 },
+  { wall: "back", at: -1 },
+  { wall: "left", at: 1 },
+  { wall: "back", at: 1 },
 ];
 
 export function cathedralHall(used: { wall: Wall; at: number }[]) {
-  const bag: Bag = {};
-  const glows: Glow[] = [];
-  const list: Beams["list"] = [];
-  const height = 4.2;
-  let windows = 0;
+  const room = newRoom();
+  const taken = (wall: Wall, at: number) => used.some((s) => s.wall === wall && s.at === at);
+  const rose = ROSE_BAYS.find((b) => !taken(b.wall, b.at));
+  const lancets = LANCET_BAYS.filter(
+    (b) => !taken(b.wall, b.at) && !(rose && b.wall === rose.wall && b.at === rose.at),
+  );
+  const lit = lancets.slice(0, 2);
   for (const wall of ["back", "left"] as const) {
     for (const at of [-3, -1, 1, 3]) {
-      const door = used.some((s) => s.wall === wall && s.at === at);
-      if (door) {
-        addTo(bag, "Sandstone", onWall(wallWithDoor(2, height, 0.35, 1.8, 2.9, true), wall, at, 0));
-        addTo(bag, "Stone", onWall(doorFrame(1.8, 2.9, 0.16, 0.14, true), wall, at, 0));
-        // The dark beyond the doorway, in the arch's own shape.
+      if (taken(wall, at)) {
+        // A pointed doorway: the wall around it, a moulded frame, the dark beyond in the arch's shape.
+        addTo(room.bag, "Sandstone", onWall(wallWithDoor(2, HEIGHT, 0.3, 1.8, 2.9, true), wall, at, 0));
+        addTo(room.bag, "Stone", onWall(doorFrame(1.8, 2.9, 0.16, 0.14, true), wall, at, 0));
         const dark = prep(new ExtrudeGeometry(lancetShape(1.8, 2.9), { depth: 0.02, bevelEnabled: false }));
-        addTo(bag, "Void", onWall(dark, wall, at, 0, -0.3));
-      } else {
-        addTo(bag, "Sandstone", onWall(box([2, height, 0.35], [0, height / 2, -0.175]), wall, at, 0));
-        if (windows < 2 && at !== 3) {
-          stainedWindow(bag, glows, list, wall, at, 1.3, 0.8, 2.3);
-          windows++;
-        } else {
-          // A blind arch: the frame of a window that was never glazed.
-          addTo(bag, "Stone", onWall(doorFrame(0.8, 2.1, 0.1, 0.08, true), wall, at, 1.3));
-        }
-      }
+        addTo(room.bag, "Void", onWall(dark, wall, at, 0, -0.3));
+      } else if (rose && rose.wall === wall && rose.at === at) windowBay(room, wall, at - 1, "rose");
+      else if (lit.some((b) => b.wall === wall && b.at === at))
+        windowBay(room, wall, at - 1, "lancet", lit[0]?.wall === wall && lit[0]?.at === at);
+      else room.kit.push(bay("wall_01", wall, at - 1));
     }
-    course(bag, wall, -4, 4, height - 0.07, 0.2);
+    // A cornice along the top, tying the kit's bays and the doorways together.
+    course(room.bag, wall, -4, 4, HEIGHT + 0.07, 0.2);
   }
-  return {
-    extras: [...floor(3301), ...extras(bag)],
-    glows,
-    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.1, restored: 0.7, pools: true },
-  };
+  room.kit.push(...floor("floor_02"), ...piers());
+  candles(room, [3.15, 2.7]);
+  return finish(room); // its placements: CATHEDRAL_HALL_PIECES (hall/layout.ts)
 }

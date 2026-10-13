@@ -1,6 +1,5 @@
-import { landing, roomTexts } from "@wirelight/content";
-import { roomById } from "@wirelight/rooms";
-import { lazy, StrictMode, Suspense, useCallback, useState } from "react";
+import { landing } from "@wirelight/content/intro";
+import { lazy, StrictMode, Suspense, useCallback, useEffect, useState } from "react";
 import { LandingPage } from "./landing/LandingPage";
 import { reducedMotion } from "./progress/motion";
 import { useProgress } from "./progress/progress";
@@ -16,21 +15,22 @@ const PlayPage = lazy(() => loadPlay().then((m) => ({ default: m.PlayPage })));
 // ONB-06: with reduced motion (Settings, or the system when Settings follows it) the descent is a short fade.
 const REDUCED_FADE_MS = 350;
 
-function linkedRoom(): string | undefined {
-  const match = window.location.pathname.match(/^\/play\/(.+)$/);
-  const id = match?.[1] ? decodeURIComponent(match[1]) : undefined;
-  return id && roomById(id) ? id : undefined;
-}
+// The rooms and their titles (for the main button) load just after the landing's first paint.
+const loadTitles = () => import("./landing/roomTitle");
 
 export function App() {
   const [stage, setStage] = useState<"landing" | "descending" | "fading" | "game">(() =>
     import.meta.env.DEV && window.location.pathname.startsWith("/play") ? "game" : "landing",
   );
   const [quick, setQuick] = useState(false);
-  const room = linkedRoom();
+  const [titles, setTitles] = useState<Awaited<ReturnType<typeof loadTitles>> | null>(null);
+  useEffect(() => {
+    void loadTitles().then(setTitles);
+  }, []);
+  const room = titles?.linkedRoom(window.location.pathname);
   // Returning players continue where they left off (ONB-20); a link to a room plays that room (0044).
   const current = useProgress((s) => s.current);
-  const titleOf = (id: string | null | undefined) => (id ? roomTexts[roomById(id)?.content ?? ""]?.title : undefined);
+  const titleOf = (id: string | null | undefined) => titles?.roomTitle(id);
   const main = room
     ? `${landing.playPrefix} ${titleOf(room)}`
     : titleOf(current)

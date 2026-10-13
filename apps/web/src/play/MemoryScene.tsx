@@ -103,14 +103,16 @@ export function MapText({
   children,
   kind = "tag",
   anchor = "middle",
+  opacity,
 }: {
   at: Pt;
   children: ReactNode;
   kind?: string;
   anchor?: "start" | "middle" | "end";
+  opacity?: number;
 }) {
   return (
-    <text x={at.x} y={at.y} textAnchor={anchor} className={`mem-text ${kind}`}>
+    <text x={at.x} y={at.y} textAnchor={anchor} className={`mem-text ${kind}`} opacity={opacity}>
       {children}
     </text>
   );
@@ -135,12 +137,12 @@ function drawSend(b: Sends, t: number, geo: Geometry, room: RoomDef, key: string
     <g key={key}>
       {ways.map((segs, wi) => {
         const total = segs.length * hop;
-        const lastEnd = b.fate === "fell" ? 0.8 : 1;
+        const lastEnd = b.fate === "fell" ? 0.65 : 1;
         let i: number;
         let f: number;
         if (still) {
           i = segs.length - 1;
-          f = b.fate === "fell" ? 0.8 : 0.55;
+          f = b.fate === "fell" ? 0.65 : 0.55;
         } else {
           const l = Math.min(local, total);
           i = Math.min(segs.length - 1, Math.floor(l / hop));
@@ -157,12 +159,22 @@ function drawSend(b: Sends, t: number, geo: Geometry, room: RoomDef, key: string
             : 1 - ease((local - total) / 500)
           : 1;
         const hopTag = b.tags?.[i];
+        // The words on a moving message fade as it nears a machine, so they never sit on its name or
+        // its doors' names.
+        const near = Math.min(...[...geo.nodes.values()].map((q) => Math.hypot(q.x - p.x, q.y - p.y)));
+        // …and as it passes a door's name.
+        const nearDoor = Math.min(
+          ...[...geo.links.values()].flatMap((l) =>
+            [geo.door(l.a, l.ai), geo.door(l.b, l.bi)].map((d) => Math.hypot(d.x - p.x, d.y - p.y + 22)),
+          ),
+        );
+        const tagOpacity = still ? 1 : Math.min(opacity, ease((near - 48) / 40), ease((nearDoor - 30) / 30));
         return (
           // biome-ignore lint/suspicious/noArrayIndexKey: ways are fixed per beat
           <g key={wi}>
             <Envelope look={b.look ?? "dot"} at={p} opacity={opacity} />
             {wi === 0 && (words || (hopTag && (latest || !still))) && (
-              <MapText at={{ x: p.x, y: p.y + 30 }} kind="msg-tag">
+              <MapText at={{ x: p.x, y: p.y - 22 }} kind="msg-tag" opacity={tagOpacity}>
                 {[hopTag ? fill(memoryText.scene.countdown, { n: hopTag }) : "", words ?? ""]
                   .filter(Boolean)
                   .join(" · ")}
@@ -178,7 +190,7 @@ function drawSend(b: Sends, t: number, geo: Geometry, room: RoomDef, key: string
               />
             )}
             {(done || (still && latest)) && b.fate === "fell" && wi === 0 && (
-              <MapText at={{ x: p.x, y: p.y - 19 }} kind="fate">
+              <MapText at={{ x: p.x, y: p.y - 22 }} kind="fate">
                 {memoryText.scene.letFall}
               </MapText>
             )}
@@ -272,13 +284,19 @@ function drawGlyph(
     }
     case "address": {
       const addr = room.topology.devices.find((d) => d.id === m.mark)?.addrs?.[0]?.cidr.split("/")[0] ?? "";
+      // A house at the edge, its cables all to the left: the address goes to its right, clear of the
+      // next house's cable; otherwise under its name.
+      const edge = ![...geo.links.values()].some(
+        (l) => (l.a === m.mark || l.b === m.mark) && (geo.nodes.get(l.a === m.mark ? l.b : l.a)?.x ?? 0) >= n.x,
+      );
+      const a = edge ? { x: n.x + 20, y: n.y + 5 } : { x: n.x, y: n.y + 47 };
       return (
         <g key={key} opacity={o}>
-          <MapText at={{ x: n.x, y: n.y + 47 }} kind="address">
+          <MapText at={a} kind="address" anchor={edge ? "start" : "middle"}>
             {addr}
           </MapText>
           {label && (
-            <MapText at={{ x: n.x, y: n.y + 62 }} kind="glyph-label">
+            <MapText at={{ x: a.x, y: a.y + 15 }} kind="glyph-label" anchor={edge ? "start" : "middle"}>
               {label}
             </MapText>
           )}
@@ -400,7 +418,7 @@ export function MemoryScene({ room, scene, label }: { room: RoomDef; scene: Scen
               <circle r={14} className="mem-weaver-glow" />
               <circle cx={-6} cy={-8} r={3} className="mem-weaver" />
               <circle cx={6} cy={-8} r={3} className="mem-weaver" />
-              <MapText at={{ x: 0, y: -18 }} kind="glyph-label">
+              <MapText at={{ x: 0, y: -18 }} kind="glyph-label" opacity={1 - ease((f - 0.7) / 0.25)}>
                 {memoryText.scene.weavers}
               </MapText>
             </g>
@@ -464,7 +482,7 @@ export function MemoryScene({ room, scene, label }: { room: RoomDef; scene: Scen
         return (
           // biome-ignore lint/suspicious/noArrayIndexKey: beats are fixed
           <g key={`t${i}`} opacity={fadeIn(t, b.at, 700)}>
-            <MapText at={{ x: n.x, y: b.below ? n.y + 66 : n.y - 40 }} kind="caption">
+            <MapText at={{ x: n.x, y: b.below ? n.y + 78 : n.y - (b.lift ?? 40) }} kind="caption">
               {tagText(b.label, room)}
             </MapText>
           </g>

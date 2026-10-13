@@ -55,7 +55,11 @@
         "Prop_Vine5": "ivy over a corner",
         "Prop_WoodenFence_Single": "garden fence",
         "Prop_ExteriorBorder_Straight1": "kerb stone along a street",
-        "Prop_Crate": "crate in the street"
+        "Prop_Crate": "crate in the street",
+        "Roof_Front_Brick2": "gable end for a 2 m house front (the square's houses)",
+        "Roof_2x4_RoundTile": "roof for a 2 m wide house, running back 4 m",
+        "Prop_Brick1": "loose brick",
+        "Prop_Brick2": "loose brick"
       }
     },
     {
@@ -82,7 +86,14 @@
         "Book_7": "open registry ledger",
         "Chest_Wood": "mail chest",
         "CandleStick": "candle on a table",
-        "Vase_4": "flower pot on a step"
+        "Vase_4": "flower pot on a step",
+        "Vase_2": "clay pot by a door",
+        "Vase_Rubble_Medium": "a broken pot",
+        "Bucket_Wooden_1": "bucket",
+        "Shelf_Simple": "wall shelf in a house",
+        "Peg_Rack": "peg rack by a house door",
+        "Bag": "sack",
+        "Mug": "mug on a table"
       }
     }
   ]

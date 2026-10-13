@@ -1,9 +1,10 @@
-import { Canvas } from "@react-three/fiber";
-import { landing } from "@wirelight/content";
-import { useEffect, useMemo, useRef } from "react";
-import { backendFromUrl, nodeRendererFactory } from "../render/backend";
-import { QUALITY, QualityContext } from "../render/quality";
-import { type Descent, GateScene } from "./GateScene";
+import { landing } from "@wirelight/content/intro";
+import { lazy, Suspense, useEffect, useMemo, useRef } from "react";
+import type { Descent } from "./GateScene";
+
+// The landing's text comes from content's small `intro` entry (not every room's text), and the 3D
+// gate loads after it, in its own chunk with three.js and the renderer: the text shows first.
+const GateCanvas = lazy(() => import("./GateCanvas").then((m) => ({ default: m.GateCanvas })));
 
 // The landing page (ONB-01..04, 0010, 0044): every visit starts here. The 3D gate scene fills the
 // screen; over it, on the left, the name, what Wirelight is, and the way in. Below the fold, how it
@@ -47,11 +48,9 @@ export function LandingPage({ main, onStart, descending, onArrived, fading = fal
   return (
     <div className="landing" data-descending={descending ? "yes" : "no"} data-fading={fading ? "yes" : "no"}>
       <div className="landing-scene" aria-hidden="true">
-        <QualityContext.Provider value={QUALITY.high}>
-          <Canvas gl={nodeRendererFactory(backendFromUrl() === "webgl2" ? "webgl2" : "webgpu")}>
-            <GateScene descent={descent} />
-          </Canvas>
-        </QualityContext.Provider>
+        <Suspense fallback={null}>
+          <GateCanvas descent={descent} />
+        </Suspense>
       </div>
 
       <section className="landing-hero">

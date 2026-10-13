@@ -1,0 +1,6 @@
+# Cloudflare static asset headers (wrangler.jsonc serves apps/web/dist).
+# Built code and styles carry a content hash in their names (vite.config.ts: build.assetsDir), so a
+# browser may keep them forever; a new build has new names. Models and audio (public/assets, public/audio)
+# keep their names and use the default revalidation.
+/static/*
+  Cache-Control: public, max-age=31536000, immutable

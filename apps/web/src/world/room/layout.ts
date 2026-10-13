@@ -1,4 +1,6 @@
+import type { BufferGeometry } from "three";
 import type { Extra, Placement } from "../kit/StaticRoom";
+import type { KitPlacement } from "../kits/placement";
 
 // What every machine's room needs to know about its own shape (CORE-06): where its doorways are, where
 // the keeper stands, where the air is. One layout per kind of room; the doors come from the machine's
@@ -38,7 +40,8 @@ export type Gear = {
 
 /** Shafts of light from where the outside gets in (moonbeams; stained glass in the Cathedral). */
 export type Beams = {
-  list: { from: Vec3; width: number; depth: number; colour?: string }[];
+  /** `pool: false`: no pool for this shaft (too wide for the floor to hold it). */
+  list: { from: Vec3; width: number; depth: number; colour?: string; pool?: boolean }[];
   direction: Vec3;
   colour: string;
   /** Strength in ruin and restored. */
@@ -50,11 +53,18 @@ export type Beams = {
 
 export type RoomLayout = {
   placements: Placement[];
+  /** Textured pieces from the region kits (`kits/catalog.ts`), drawn by `KitRoom`. */
+  kitPieces?: KitPlacement[];
   extras: Extra[];
   /** The room's own lights (when not given, the scene's). */
   glows?: Glow[];
   gears?: Gear[];
   beams?: Beams;
+  /**
+   * Stained glass over the lit kit windows (Region 4, regions/Haze.tsx): panes whose `pane` attribute
+   * holds (u, v, kind), coloured in the shader and multiplied over the window's own glow.
+   */
+  stainedGlass?: BufferGeometry;
   doorSlots: DoorSlot[];
   keeper: Vec3;
   /** The room's air (fireflies, dust). */
