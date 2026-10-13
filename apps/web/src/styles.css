@@ -1342,3 +1342,15 @@ button.link.inline {
 .glass-region li[data-state="open"] {
   color: var(--text);
 }
+
+/* What hovering a message says (CORE-16): one line, like tcpdump's. */
+.message-summary {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--glass);
+  border: 1px solid rgba(94, 224, 232, 0.5);
+  color: var(--text);
+  font: 12px / 1.3 var(--mono);
+  white-space: nowrap;
+  pointer-events: none;
+}

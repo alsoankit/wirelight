@@ -18,6 +18,8 @@ export type Crossing = {
   enter: number; // network ms
   arriveAt: number; // network ms
   summary: string;
+  /** Its real bytes: for its shape and size (CORE-15) and what hovering it says (CORE-16). */
+  bytes: Uint8Array;
 };
 
 /** Where network time should be after `screenMs` of screen time. */

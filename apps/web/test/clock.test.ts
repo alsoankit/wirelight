@@ -7,6 +7,7 @@ const crossing = (enter: number, arriveAt: number): Crossing => ({
   dir: 0,
   from: "observatory",
   to: "lantern",
+  bytes: new Uint8Array(),
   enter,
   arriveAt,
   summary: "",

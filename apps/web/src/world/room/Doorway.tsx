@@ -2,10 +2,10 @@ import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
 import { type RefObject, useMemo } from "react";
-import type { Object3D } from "three";
+import { MeshBasicMaterial, type Object3D } from "three";
 import { positionLocal, smoothstep, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
-import { useSession } from "../../engine/store";
+import { MARK_MS, useSession } from "../../engine/store";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
@@ -28,6 +28,8 @@ export type DoorInfo = {
   /** …its house addresses (Floor 5 on), and streets apart from house numbers (Floor 7 on). */
   showAddrs: boolean;
   streets: boolean;
+  /** The room's floor (what hovering a message may show). */
+  floor: number;
   /** Messages crossing here can be caught by hand (the room has catching). */
   catchable: boolean;
   /** Loose cable ends here can be plugged in by clicking (0040). */
@@ -56,6 +58,26 @@ function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broke
     <mesh position={span.centre} rotation={[0, rotationY, 0]} material={material}>
       <boxGeometry args={[0.12, 0.02, span.length]} />
     </mesh>
+  );
+}
+
+// Where a message died at this door (CORE-17): a faded mark on the floor for about ten seconds. It
+// never says why: that's for the player to find out.
+function LostMark({ at, since }: { at: Vec3; since: number }) {
+  const material = useMemo(() => new MeshBasicMaterial({ color: "#b9ad9c", transparent: true, opacity: 0.5 }), []);
+  useFrame(() => {
+    const age = performance.now() - since;
+    material.opacity = Math.max(0, 0.5 * (1 - age / MARK_MS));
+  });
+  return (
+    <group position={[at[0], 0.04, at[2]]} rotation={[-Math.PI / 2, 0, Math.PI / 4]}>
+      <mesh material={material}>
+        <planeGeometry args={[0.5, 0.07]} />
+      </mesh>
+      <mesh material={material} rotation={[0, 0, Math.PI / 2]}>
+        <planeGeometry args={[0.5, 0.07]} />
+      </mesh>
+    </group>
   );
 }
 
@@ -102,6 +124,8 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
   const door = useSession((s) => s.status?.doors[key]);
   const corridor = useSession((s) => s.status?.corridors[info.link] ?? "dark");
   const end = useSession((s) => s.status?.cableEnds[key]);
+  // The latest mark here, if any (a number, so the selector is stable).
+  const lostAt = useSession((s) => s.marks.reduce((t, m) => (m.door === key ? Math.max(t, m.at) : t), 0));
   const exec = useSession((s) => s.exec);
   const goTo = useSession((s) => s.goTo);
   const openPanel = useSession((s) => s.openPanel);
@@ -125,6 +149,7 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
         watch={watch}
         cue={cue}
         catchable={info.catchable}
+        floor={info.floor}
       />
       {door && (
         <Plate
@@ -135,6 +160,13 @@ export function Doorway({ info, slot, keeper, watch, cue }: Props) {
           streets={info.streets}
           linkUp={door.up}
           onOpen={readPlate}
+        />
+      )}
+      {lostAt > 0 && performance.now() - lostAt < MARK_MS && (
+        <LostMark
+          key={lostAt}
+          at={[(g.doorway[0] + g.looseEnd[0]) / 2, 0, (g.doorway[2] + g.looseEnd[2]) / 2]}
+          since={lostAt}
         />
       )}
       {end === "out" && (

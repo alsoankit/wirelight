@@ -42,6 +42,8 @@ type Session = {
   status: RoomStatus | null;
   /** Messages on a cable now (link.enter not yet followed by link.exit). */
   onCables: Crossing[];
+  /** Where messages died lately (CORE-17): a faded mark at that door for about ten seconds of screen time. */
+  marks: { door: string; at: number }[];
   paused: boolean;
   speed: number;
   load(roomId: string): Promise<void>;
@@ -68,6 +70,9 @@ type Session = {
 };
 
 const { engine } = startEngine();
+/** How long a lost message's mark stays (CORE-17), screen ms. */
+export const MARK_MS = 10_000;
+
 let busy = false; // one request to the worker at a time; frames in between just wait
 
 /** The room of the gift of the voice: the first whose console can be typed in (0032). */
@@ -118,12 +123,18 @@ function apply(state: Session, batch: Batch): Partial<Session> {
           enter: e.t,
           arriveAt: e.arriveAt,
           summary: e.summary,
+          bytes: e.bytes,
         },
       ];
     else if (e.kind === "link.exit") onCables = onCables.filter((c) => c.frameId !== e.frameId);
     else if (e.kind === "world.reset") onCables = [];
   }
-  return { events: [...state.events, ...batch.events], status: batch.status, onCables };
+  // A message that died at a door leaves a mark there (it never says why).
+  const now = performance.now();
+  let marks = state.marks.filter((m) => now - m.at < MARK_MS);
+  for (const e of batch.events)
+    if (e.kind === "frame.drop" && e.iface) marks = [...marks, { door: `${e.device}:${e.iface}`, at: now }];
+  return { events: [...state.events, ...batch.events], status: batch.status, onCables, marks };
 }
 
 export const useSession = create<Session>((set, get) => ({
@@ -141,6 +152,7 @@ export const useSession = create<Session>((set, get) => ({
   events: [],
   status: null,
   onCables: [],
+  marks: [],
   paused: false,
   speed: 1,
 

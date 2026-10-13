@@ -44,6 +44,7 @@ export function doorsOf(room: RoomDef, device: string, barred: (peer: string) =>
       showAddrs: room.floor >= 5,
       streets: room.floor >= 7,
       catchable: !!room.controls.catching,
+      floor: room.floor,
       cableControl: room.controls.cableEnds?.[`${device}:${i.name}`],
     });
   }
