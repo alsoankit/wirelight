@@ -61,6 +61,10 @@ export interface BridgeSpec {
   /** Default 300 000 ms (Linux `ageing_time` 30000 centiseconds). */
   ageingMs?: number;
   adminUp?: boolean;
+  /** Spanning tree on from the start (`stp_state 1`). Default off, as Linux creates a bridge. */
+  stp?: boolean;
+  /** Bridge priority (`priority`, 0–65535). Default 32768; the lowest bridge id becomes the root. */
+  priority?: number;
 }
 
 export interface AddrSpec {
@@ -188,8 +192,73 @@ export interface FdbEntry {
 
 export interface BridgeState {
   name: IfaceName;
+  /** The configured ageing time (`ageing_time`; the kernel's bridge_ageing_time). */
   ageingMs: number;
   fdb: FdbEntry[];
+  /** The forwarding database's clean-up work (br_fdb_cleanup): when it next runs. */
+  gc: StpTimer | null;
+  /** The spanning tree (stp.ts): kept even with STP off, since port states outlive it. */
+  stp: StpBridge;
+}
+
+/** A bridge port's state (`bridge link show`: "state …"). */
+export type StpPortState = "disabled" | "blocking" | "listening" | "learning" | "forwarding";
+
+/** A pending kernel timer: when it fires, and a stamp so a re-armed or deleted one is ignored. */
+export interface StpTimer {
+  at: number;
+  stamp: number;
+}
+
+/** One bridge port's spanning-tree fields (the kernel's net_bridge_port). Times are network ms. */
+export interface StpPort {
+  name: IfaceName;
+  /** 1, 2, 3… in the order the ports were added. */
+  portNo: number;
+  /** Port priority, 0–63 (shown "priority 32"). */
+  priority: number;
+  /** Path cost (shown "cost 2"). */
+  cost: number;
+  state: StpPortState;
+  /** priority << 10 | port number (0x8001 for port 1). */
+  portId: number;
+  designatedRoot: string;
+  designatedCost: number;
+  designatedBridge: string;
+  designatedPort: number;
+  /** When the stored root information was born (now − its message age). */
+  designatedAge: number;
+  topologyChangeAck: boolean;
+  configPending: boolean;
+}
+
+/** A bridge's spanning tree (the kernel's net_bridge STP fields, br_stp*.c). Times are network ms. */
+export interface StpBridge {
+  /** `stp_state`: kernel STP running. */
+  enabled: boolean;
+  priority: number;
+  /** Bridge ids are 16 hex digits (priority, then MAC): string order is the kernel's memcmp. */
+  bridgeId: string;
+  designatedRoot: string;
+  rootPathCost: number;
+  /** Port number of the root port; 0 when this bridge is the root. */
+  rootPort: number;
+  /** The timers in use (learned from the root); bridge* are this bridge's own settings. */
+  maxAge: number;
+  helloTime: number;
+  forwardDelay: number;
+  bridgeMaxAge: number;
+  bridgeHelloTime: number;
+  bridgeForwardDelay: number;
+  /** The ageing time in use: 2 × forward delay during a topology change (shown as ageing_time). */
+  ageingNow: number;
+  topologyChange: boolean;
+  topologyChangeDetected: boolean;
+  /** Pending timers: "hello", "tcn", "tc", and per port "<port>:age", "<port>:fwd", "<port>:hold". */
+  timers: Record<string, StpTimer>;
+  stamp: number;
+  /** In the order they were added (the kernel walks its list newest first). */
+  ports: StpPort[];
 }
 
 export interface AddrState {
@@ -463,7 +532,10 @@ export type Scheduled =
   | { t: number; seq: number; kind: "arrive"; link: string; dir: 0 | 1; frameId: number; hex: string }
   | { t: number; seq: number; kind: "lab-reply"; device: DeviceId; iface: IfaceName; to: Mac; text: string }
   | { t: number; seq: number; kind: "timer"; device: DeviceId; service: "messenger" | "announcer"; index?: number }
-  | { t: number; seq: number; kind: "fdb-age"; device: DeviceId; bridge: IfaceName; mac: Mac; updated: number }
+  /** The forwarding database's clean-up work (br_fdb_cleanup). */
+  | { t: number; seq: number; kind: "fdb-gc"; device: DeviceId; bridge: IfaceName; stamp: number }
+  /** A spanning-tree timer (stp.ts): hello, tcn, tc, or a port's age, fwd or hold. */
+  | { t: number; seq: number; kind: "stp"; device: DeviceId; bridge: IfaceName; timer: string; stamp: number }
   | { t: number; seq: number; kind: "neigh"; device: DeviceId; dev: IfaceName; ip: Ip; stamp: number }
   /** ping's timers; "read": it wakes to read what's waiting on its socket. */
   | { t: number; seq: number; kind: "ping"; device: DeviceId; execId: number; what: "send" | "finish" | "read" }
@@ -527,6 +599,8 @@ export type DropReason =
   | "forwarding-disabled"
   | "queue-full"
   | "fdb-filter"
+  /** A bridge port that isn't forwarding (spanning tree: blocking, listening or learning). */
+  | "port-blocked"
   | "no-listener"
   | "bad-checksum";
 
@@ -595,7 +669,7 @@ export type SimEvent =
       kind: "table.change";
       t: number;
       device: DeviceId;
-      table: "fdb" | "neigh" | "route" | "addr" | "link" | "sysctl" | "lab";
+      table: "fdb" | "neigh" | "route" | "addr" | "link" | "sysctl" | "lab" | "stp";
       op: "set" | "add" | "del";
       key: string;
       before: unknown;

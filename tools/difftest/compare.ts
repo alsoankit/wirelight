@@ -4,7 +4,7 @@
  * command printed (timings and random ids normalised), and the final neighbour, route and
  * forwarding tables.
  */
-import { keyFromBytes, keyFromTcpdump } from "./keys";
+import { keyFromBytes, keyFromTcpdump, stpKeyFromBytes, stpKeyFromTcpdump } from "./keys";
 import type { LinuxRun } from "./linux";
 import type { SimRun } from "./simrun";
 
@@ -70,6 +70,14 @@ export function compare(linux: LinuxRun, sim: SimRun, devices: string[]): string
       }
     }
   }
+  // Spanning tree: which BPDUs each door saw (who sent them, with which flags), not when.
+  for (const door of [...doors].sort()) {
+    const set = (keys: (string | null)[]) => [...new Set(keys.filter((x): x is string => x !== null))].sort();
+    const real = set((linux.captures[door] ?? []).map(stpKeyFromTcpdump));
+    const ours = set((sim.captures[door] ?? []).map(stpKeyFromBytes));
+    if (JSON.stringify(real) !== JSON.stringify(ours))
+      diffs.push(`${door} BPDUs:\n    linux: ${JSON.stringify(real)}\n    sim:   ${JSON.stringify(ours)}`);
+  }
   // Commands.
   linux.outputs.forEach((real, n) => {
     const ours = sim.outputs[n];
@@ -80,10 +88,22 @@ export function compare(linux: LinuxRun, sim: SimRun, devices: string[]): string
         `step ${n + 1} output:\n    linux (exit ${real.exit}): ${JSON.stringify(a)}\n    sim   (exit ${ours?.exit}): ${JSON.stringify(b)}`,
       );
   });
-  // Tables.
+  // Tables. A bridge's own address (its br0) shows up in other switches' tables only through its
+  // IGMP reports (multicast noise the game doesn't model, docs/sim-deviations.md), so it's left out.
+  const bridgeMacs = new Set(
+    sim.backend.world
+      .devices()
+      .flatMap((d) => d.ifaces)
+      .filter((i) => i.kind === "bridge")
+      .map((i) => i.mac),
+  );
+  const noBridgeMacs = (t: Table): Table => ({
+    ...t,
+    fdb: t.fdb.filter((l) => !bridgeMacs.has(l.split(" ")[0] ?? "")),
+  });
   for (const d of devices) {
-    const a = linuxTables(linux, d);
-    const b = simTables(sim, d);
+    const a = noBridgeMacs(linuxTables(linux, d));
+    const b = noBridgeMacs(simTables(sim, d));
     for (const t of ["neigh", "route", "fdb"] as const)
       if (JSON.stringify(a[t]) !== JSON.stringify(b[t]))
         diffs.push(`${d} ${t}:\n    linux: ${JSON.stringify(a[t])}\n    sim:   ${JSON.stringify(b[t])}`);

@@ -1,7 +1,7 @@
 /** The difftest's scenarios: each one a behaviour the rooms rely on, checked against real Linux. */
 
 import type { DhcpServerSpec, Topology } from "@wirelight/sim";
-import { cathedral, lan, routed, switchNet } from "../../packages/sim/test/fixtures";
+import { cathedral, halls, lan, routed, switchNet } from "../../packages/sim/test/fixtures";
 import type { Scenario } from "./scenario";
 
 export const SCENARIOS: Scenario[] = [
@@ -152,6 +152,28 @@ export const SCENARIOS: Scenario[] = [
     steps: [
       { device: "observatory", run: "dhclient eth0", settleMs: 0 },
       { device: "observatory", run: "dhclient -r -v eth0", settleMs: 6500 },
+    ],
+  },
+  {
+    name: "halls (STP on): nothing passes while listening, one port blocks, traffic once forwarding; failover after unplugging the active span",
+    topology: halls(true),
+    steps: [
+      { device: "a", ping: { dst: "10.0.0.2", count: 1, waitS: 1 }, settleMs: 34_000 },
+      { device: "a", ping: { dst: "10.0.0.2", count: 2 }, settleMs: 500 },
+      { device: "hall-a", run: "ip link set eth2 down", settleMs: 2000 },
+      { device: "a", ping: { dst: "10.0.0.2", count: 1, waitS: 1 }, settleMs: 33_000 },
+      // Linux picks a's reachable time at random (15–45 s): start the last ping from a fresh ARP.
+      { device: "a", run: "ip neigh flush dev eth0", settleMs: 0 },
+      { device: "a", ping: { dst: "10.0.0.2", count: 2 }, settleMs: 300 },
+    ],
+  },
+  {
+    name: "halls (STP off, loop closed): STP turned on at hall-a, then hall-b; hall-a blocks its own loop, traffic flows",
+    topology: halls(false),
+    steps: [
+      { device: "hall-a", run: "ip link set br0 type bridge stp_state 1", settleMs: 5000 },
+      { device: "hall-b", run: "ip link set br0 type bridge stp_state 1", settleMs: 4000 },
+      { device: "a", ping: { dst: "10.0.0.2", count: 2 }, settleMs: 300 },
     ],
   },
 ];

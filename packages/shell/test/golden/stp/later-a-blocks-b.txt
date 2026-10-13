@@ -1,0 +1,6 @@
+# halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off | setup: hall-a: ip link set br0 type bridge stp_state 1; wait 3s; hall-b: ip link set br0 type bridge stp_state 1; wait 6s | runs on: hall-b
+$ bridge link show
+2: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br0 state forwarding priority 32 cost 2 
+3: eth2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br0 state forwarding priority 32 cost 2 
+4: eth3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br0 state forwarding priority 32 cost 2 
+[exit 0]

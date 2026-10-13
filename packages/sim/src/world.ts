@@ -15,8 +15,9 @@ import {
   DEFAULT_AGEING_MS,
   type FdbResult,
   fdbAdd,
-  fdbAge,
   fdbDel,
+  fdbGc,
+  fdbGcArm,
   fdbPortDown,
   isGroup,
 } from "./bridge";
@@ -74,6 +75,19 @@ import {
   slateSees,
   slateTraceNext,
 } from "./slate";
+import {
+  newBridgeStp,
+  type StpTimes,
+  stpBridgeDown,
+  stpBridgeUp,
+  stpSetBridgePriority,
+  stpSetEnabled,
+  stpSetPortCost,
+  stpSetPortPriority,
+  stpSetTimes,
+  stpSyncPorts,
+  stpTimer,
+} from "./stp";
 import { type SysctlWrite, sysctlList, sysctlRead, sysctlWrite } from "./sysctl";
 import { interruptTcpdump, startTcpdump, type TcpdumpStart, tcpdumpHears } from "./tcpdump";
 import type {
@@ -126,9 +140,13 @@ export class Simulator implements WorldView {
   constructor(topology: Topology, faults: Fault[] = [], seed = 1) {
     this.s = build(topology, seed);
     this.k = this.kernel();
+    // Bridges come up as `ip link set br0 up` brings them: ports with carrier are enabled, and with
+    // STP on they start listening (no trace before the room starts).
+    this.muted = true;
+    for (const d of Object.values(this.s.devices))
+      for (const br of Object.values(d.bridges)) if (this.iface(d.id, br.name)?.adminUp) stpBridgeUp(this.k, d.id, br);
     this.correct = clone(this.s);
     // Faults go through the same actions as commands, but quietly (no trace before the room starts).
-    this.muted = true;
     for (const f of faults) this.applyFault(f);
     this.muted = false;
     this.initial = clone(this.s);
@@ -252,7 +270,12 @@ export class Simulator implements WorldView {
     for (const q of this.s.queue) q.t += t;
     for (const l of Object.values(this.s.links)) l.busyUntil = [l.busyUntil[0] + t, l.busyUntil[1] + t];
     for (const d of Object.values(this.s.devices)) {
-      for (const br of Object.values(d.bridges)) for (const e of br.fdb) e.updated += t;
+      for (const br of Object.values(d.bridges)) {
+        for (const e of br.fdb) e.updated += t;
+        if (br.gc) br.gc.at += t;
+        for (const tm of Object.values(br.stp.timers)) tm.at += t;
+        for (const p of br.stp.ports) p.designatedAge += t;
+      }
       for (const n of d.neigh) {
         n.updated += t;
         n.confirmed += t;
@@ -260,7 +283,6 @@ export class Simulator implements WorldView {
       for (const b of Object.values(d.icmpTokens)) b.at += t;
       for (const e of d.exceptions ?? []) e.expires += t;
     }
-    for (const q of this.s.queue) if (q.kind === "fdb-age") q.updated += t;
     this.emit({ kind: "world.reset", t });
   }
 
@@ -295,9 +317,10 @@ export class Simulator implements WorldView {
     if (!i) return { adminUp: false, carrier: false, up: false };
     if (i.kind === "loopback") return { adminUp: i.adminUp, carrier: i.adminUp, up: i.adminUp };
     if (i.kind === "bridge") {
-      // A bridge has carrier while at least one of its ports does (Linux br_port_carrier_check).
-      const d = this.s.devices[device];
-      const carrier = i.adminUp && !!d?.ifaces.some((p) => p.master === name && this.oper(device, p.name).up);
+      // A bridge has carrier while at least one of its ports forwards (br_port_state_selection):
+      // with STP off, any port that's up; with STP on, not until a port has listened and learned.
+      const br = this.s.devices[device]?.bridges[name];
+      const carrier = i.adminUp && !!br?.stp.ports.some((p) => p.state === "forwarding");
       return { adminUp: i.adminUp, carrier, up: carrier };
     }
     const l = i.link ? this.s.links[i.link] : undefined;
@@ -319,11 +342,17 @@ export class Simulator implements WorldView {
     i.adminUp = up;
     if (up) i.everUp = true;
     this.emit({ kind: "table.change", t: this.s.t, device, table: "link", op: "set", key: name, before, after: up });
+    const br = i.kind === "bridge" ? this.s.devices[device]?.bridges[name] : undefined;
+    if (br) {
+      if (up) stpBridgeUp(this.k, device, br);
+      else stpBridgeDown(this.k, device, br);
+    }
     if (up) onIfaceUp(this.k, device, name);
     else {
       onIfaceDown(this.k, device, name);
       fdbPortDown(this.k, device, name);
     }
+    this.syncBridgePorts();
     this.carrierChanges(carriers, { device, iface: name });
     return true;
   }
@@ -353,8 +382,15 @@ export class Simulator implements WorldView {
       });
     }
     l.plugged = l.out.length === 0;
+    this.syncBridgePorts();
     this.carrierChanges(carriers);
     return true;
+  }
+
+  /** Every bridge port's spanning-tree state follows its carrier (br_port_carrier_check). */
+  private syncBridgePorts(): void {
+    for (const d of Object.values(this.s.devices))
+      for (const br of Object.values(d.bridges)) stpSyncPorts(this.k, d.id, br);
   }
 
   /** Every door's carrier now, to see which ones a change took down. */
@@ -421,16 +457,52 @@ export class Simulator implements WorldView {
     return addrDel(this.k, device, cidr, dev);
   }
 
-  /** A bridge's ageing time (`ip link set br0 type bridge ageing_time <cs>`). */
+  /** A bridge's ageing time (`ip link set br0 type bridge ageing_time <cs>`): the clean-up runs at once. */
   setBridgeAgeing(device: DeviceId, bridge: IfaceName, ms: number): boolean {
     const br = this.s.devices[device]?.bridges[bridge];
     if (!br) return false;
     br.ageingMs = ms;
-    // Entries learned before the change age by the new time (the kernel checks on its next pass).
-    for (const e of br.fdb)
-      if (!e.local && !e.static)
-        this.schedule({ t: e.updated + ms, kind: "fdb-age", device, bridge, mac: e.mac, updated: e.updated });
+    br.stp.ageingNow = ms;
+    if (this.iface(device, bridge)?.adminUp) fdbGcArm(this.k, device, br, 0);
     return true;
+  }
+
+  /** `ip link set <br> type bridge stp_state 0|1`: the spanning tree on or off (stp.ts). */
+  setBridgeStp(device: DeviceId, bridge: IfaceName, on: boolean): boolean {
+    const br = this.s.devices[device]?.bridges[bridge];
+    if (!br) return false;
+    stpSetEnabled(this.k, device, br, on);
+    return true;
+  }
+
+  /** `ip link set <br> type bridge priority N` (the lowest bridge id becomes the root). */
+  setBridgePriority(device: DeviceId, bridge: IfaceName, priority: number): boolean {
+    const br = this.s.devices[device]?.bridges[bridge];
+    if (!br) return false;
+    stpSetBridgePriority(this.k, device, br, priority);
+    return true;
+  }
+
+  /** `ip link set <br> type bridge forward_delay|hello_time|max_age` (ms). "range": the kernel refused it. */
+  setBridgeTimes(device: DeviceId, bridge: IfaceName, times: StpTimes): "ok" | "range" | "no-bridge" {
+    const br = this.s.devices[device]?.bridges[bridge];
+    if (!br) return "no-bridge";
+    return stpSetTimes(this.k, device, br, times);
+  }
+
+  /** `bridge link set dev <port> cost N | priority N`. */
+  setPortStp(
+    device: DeviceId,
+    port: IfaceName,
+    opts: { cost?: number; priority?: number },
+  ): "ok" | "range" | "not-a-port" {
+    const master = this.iface(device, port)?.master;
+    const br = master ? this.s.devices[device]?.bridges[master] : undefined;
+    if (!br) return "not-a-port";
+    if (opts.cost !== undefined && stpSetPortCost(this.k, device, br, port, opts.cost) !== "ok") return "range";
+    if (opts.priority !== undefined && stpSetPortPriority(this.k, device, br, port, opts.priority) !== "ok")
+      return "range";
+    return "ok";
   }
 
   /** A program sends one UDP datagram (bash's `echo … > /dev/udp/<ip>/<port>`). */
@@ -786,8 +858,11 @@ export class Simulator implements WorldView {
         if (ev.service === "messenger") this.messengerTick(ev.device, ev.index ?? 0);
         else this.announcerTick(ev.device);
         return;
-      case "fdb-age":
-        fdbAge(this.k, ev.device, ev.bridge, ev.mac, ev.updated);
+      case "fdb-gc":
+        fdbGc(this.k, ev.device, ev.bridge, ev.stamp);
+        return;
+      case "stp":
+        stpTimer(this.k, ev);
         return;
       case "neigh":
         neighTimer(this.k, ev.device, ev.dev, ev.ip, ev.stamp, (device, q) => queuedFailed(this.k, device, q));
@@ -994,6 +1069,8 @@ function build(topology: Topology, seed: number): WorldState {
         ageingMs: b.ageingMs ?? DEFAULT_AGEING_MS,
         // Each port's own address is a permanent local entry.
         fdb: ports.map((p) => ({ mac: p.mac, port: p.name, local: true, static: true, sticky: false, updated: 0 })),
+        gc: null,
+        stp: newBridgeStp(mac, b.ports, { ...b, ageingMs: b.ageingMs ?? DEFAULT_AGEING_MS }),
       };
     }
     devices[spec.id] = {

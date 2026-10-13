@@ -176,3 +176,40 @@ export function cathedral(): Topology {
     ],
   };
 }
+
+/**
+ * The Peacekeeper's halls (tools/golden/capture-stp.sh, topo_halls): hall-a and hall-b, each br0
+ * over eth1..eth3, joined twice (span: eth2—eth2, span-2: eth3—eth3), so a loop; a (10.0.0.1) on
+ * hall-a eth1, b (10.0.0.2) on hall-b eth1. `slow` spans keep a storm watchable.
+ */
+export function halls(stp: boolean, slow = false): Topology {
+  const hall = (id: string, x: string) => ({
+    id,
+    hostname: id,
+    kind: "host" as const,
+    interfaces: [1, 2, 3].map((n) => ({ name: `eth${n}`, mac: `02:00:00:00:${x}:0${n}` })),
+    bridges: [{ name: "br0", ports: ["eth1", "eth2", "eth3"], stp }],
+  });
+  const host = (id: string, mac: string, cidr: string) => ({
+    id,
+    hostname: id,
+    kind: "host" as const,
+    interfaces: [{ name: "eth0", mac }],
+    addrs: [{ dev: "eth0", cidr }],
+  });
+  const span = slow ? { bandwidthBps: 64_000, queueLimit: 16 } : {};
+  return {
+    devices: [
+      hall("hall-a", "0a"),
+      hall("hall-b", "0b"),
+      host("a", "02:00:00:00:00:0a", "10.0.0.1/24"),
+      host("b", "02:00:00:00:00:0b", "10.0.0.2/24"),
+    ],
+    links: [
+      { id: "la", a: { device: "hall-a", iface: "eth1" }, b: { device: "a", iface: "eth0" } },
+      { id: "lb", a: { device: "hall-b", iface: "eth1" }, b: { device: "b", iface: "eth0" } },
+      { id: "span", a: { device: "hall-a", iface: "eth2" }, b: { device: "hall-b", iface: "eth2" }, ...span },
+      { id: "span-2", a: { device: "hall-a", iface: "eth3" }, b: { device: "hall-b", iface: "eth3" }, ...span },
+    ],
+  };
+}

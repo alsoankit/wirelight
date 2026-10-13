@@ -16,12 +16,13 @@ import { decodeDhcp } from "./proto/dhcp";
 import { decodeEth, ETHERTYPE } from "./proto/ethernet";
 import { decodeIcmp, ICMP, UNREACH } from "./proto/icmp";
 import { decodeIPv4, decodeUDP, IPPROTO } from "./proto/ipv4";
+import { isStpFrame, llcText, stpText } from "./proto/stp";
 import type { DeviceId, DeviceState, IfaceName, Ip, TcpdumpProc } from "./types";
 
 // ── Filters (a small part of pcap's language: what the rooms use) ─────────────────────────
 
 export type Filter =
-  | { kind: "proto"; proto: "arp" | "icmp" | "udp" | "tcp" | "ip" }
+  | { kind: "proto"; proto: "arp" | "icmp" | "udp" | "tcp" | "ip" | "stp" }
   | { kind: "host"; ip: Ip; dir: "any" | "src" | "dst" }
   | { kind: "port"; port: number }
   | { kind: "and" | "or"; a: Filter; b: Filter }
@@ -45,7 +46,8 @@ export function parseFilter(words: string[]): Filter | null {
       const a = primary();
       return a && { kind: "not", a };
     }
-    if (w === "arp" || w === "icmp" || w === "udp" || w === "tcp" || w === "ip") return { kind: "proto", proto: w };
+    if (w === "arp" || w === "icmp" || w === "udp" || w === "tcp" || w === "ip" || w === "stp")
+      return { kind: "proto", proto: w };
     if (w === "host" || w === "src" || w === "dst") {
       let dir: "any" | "src" | "dst" = "any";
       let next = w;
@@ -101,6 +103,7 @@ function matches(f: Filter, bytes: Uint8Array): boolean {
     case "not":
       return !matches(f.a, bytes);
     case "proto":
+      if (f.proto === "stp") return isStpFrame(bytes);
       if (f.proto === "arp") return e.type === ETHERTYPE.arp;
       if (e.type !== ETHERTYPE.ipv4) return false;
       if (f.proto === "ip") return true;
@@ -226,7 +229,12 @@ export function tcpdumpLines(bytes: Uint8Array, p: TcpdumpProc, d: DeviceState, 
   const e = decodeEth(bytes);
   const b = body(bytes, p, d);
   let line: string;
-  if (p.ether || (e.type !== ETHERTYPE.arp && e.type !== ETHERTYPE.ipv4)) {
+  if (isStpFrame(bytes)) {
+    // An 802.3 frame (a length where the EtherType would be) carrying a spanning-tree BPDU.
+    line = p.ether
+      ? `${stamp(t)} ${e.src} > ${e.dst}, ${llcText(bytes)}: ${stpText(bytes)}`
+      : `${stamp(t)} ${stpText(bytes)}`;
+  } else if (p.ether || (e.type !== ETHERTYPE.arp && e.type !== ETHERTYPE.ipv4)) {
     const dst = e.dst === BROADCAST ? "Broadcast" : e.dst;
     line = `${stamp(t)} ${e.src} > ${dst}, ethertype ${protoName(e.type)}, length ${bytes.length}: ${b}`;
   } else line = `${stamp(t)} ${e.type === ETHERTYPE.arp ? "ARP" : "IP"}, ${b}`.replace(/^(\S+ IP), /, "$1 ");

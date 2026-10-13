@@ -13,6 +13,8 @@ export type ToolId =
   | "lab slate trace"
   | "workbench"
   | "bridge fdb"
+  /** `bridge link`: each switch door's spanning-tree state (the Peacekeeper, Region 2). */
+  | "bridge link"
   | "ip addr"
   | "ping"
   | "ip neigh"

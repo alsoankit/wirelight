@@ -4,7 +4,18 @@
  * answer, ICMP type and sequence, addresses). Ignored: lengths (veth doesn't pad short frames as a
  * physical wire does), ICMP ids, IP ids and timestamps.
  */
-import { decodeArp, decodeEth, decodeIcmp, decodeIPv4, decodeUDP, ETHERTYPE, ICMP, IPPROTO } from "@wirelight/sim";
+import {
+  decodeArp,
+  decodeBpdu,
+  decodeEth,
+  decodeIcmp,
+  decodeIPv4,
+  decodeUDP,
+  ETHERTYPE,
+  ICMP,
+  IPPROTO,
+  isStpFrame,
+} from "@wirelight/sim";
 
 const ICMP_TEXT: Record<string, string> = {
   "0:0": "echo reply",
@@ -25,7 +36,7 @@ export function isMulticastNoise(dst: string): boolean {
 
 export function keyFromBytes(bytes: Uint8Array): string | null {
   const f = decodeEth(bytes);
-  if (isMulticastNoise(f.dst)) return null;
+  if (isMulticastNoise(f.dst) || isStpFrame(bytes)) return null;
   const head = `${f.src} > ${f.dst}`;
   if (f.type === ETHERTYPE.arp) {
     const a = decodeArp(f.payload);
@@ -105,4 +116,38 @@ export function keyFromTcpdump(line: string): string | null {
   }
   if (type === "88b5" || type === "88b6") return `${head} lab`;
   return `${head} type 0x${type}`;
+}
+
+/**
+ * Spanning-tree BPDUs are compared on their own (compare.ts): their send times follow kernel timers
+ * whose phase differs per run, so where they fall between other frames isn't comparable. A key holds
+ * what tcpdump -n -e prints without -v: sender, kind, flags, bridge id and port.
+ */
+export function stpKeyFromBytes(bytes: Uint8Array): string | null {
+  if (!isStpFrame(bytes)) return null;
+  const src = decodeEth(bytes).src;
+  const b = decodeBpdu(bytes);
+  if (!b) return `${src} STP ?`;
+  if (b.type === "tcn") return `${src} STP TCN`;
+  const flags = [b.topologyChange ? "TC" : "", b.topologyChangeAck ? "TC-ACK" : ""].filter(Boolean).join("+") || "none";
+  const id = `${b.bridgeId.slice(0, 4)}.${b.bridgeId.slice(4).replace(/(..)(?!$)/g, "$1:")}`;
+  return `${src} STP config ${flags} ${id}.${b.portId.toString(16).padStart(4, "0")}`;
+}
+
+export function stpKeyFromTcpdump(line: string): string | null {
+  const m = line.match(
+    /^\d+\.\d+ ([0-9a-f:]{17}) > 01:80:c2:00:00:00, 802\.3, length \d+: LLC, .*?: STP 802\.1d, (.*)$/,
+  );
+  if (!m) return null;
+  const [, src, rest = ""] = m;
+  if (rest.startsWith("Topology Change")) return `${src} STP TCN`;
+  const c = rest.match(/^Config, Flags \[(.*?)\], bridge-id (\S+)\.([0-9a-f]{4}), length/);
+  if (!c) return `${src} STP ?`;
+  const flags =
+    (c[1] ?? "")
+      .split(", ")
+      .map((f) => (f === "Topology change" ? "TC" : f === "Topology change ACK" ? "TC-ACK" : ""))
+      .filter(Boolean)
+      .join("+") || "none";
+  return `${src} STP config ${flags} ${c[2]}.${c[3]}`;
 }

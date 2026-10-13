@@ -118,7 +118,10 @@ export function buildScript(sc: Scenario, dir: string): string {
   }
   for (const d of devices) {
     for (const b of d.bridges ?? []) {
-      L.push(`ip -n ${d.id} link add ${b.name} type bridge vlan_default_pvid 0${b.mac ? ` address ${b.mac}` : ""}`);
+      const stp = `${b.stp ? " stp_state 1" : ""}${b.priority !== undefined ? ` priority ${b.priority}` : ""}`;
+      L.push(
+        `ip -n ${d.id} link add ${b.name} type bridge vlan_default_pvid 0${stp}${b.mac ? ` address ${b.mac}` : ""}`,
+      );
       for (const p of b.ports) L.push(`ip -n ${d.id} link set ${p} master ${b.name}`);
     }
     for (const [k, v] of Object.entries(d.sysctl ?? {})) L.push(`ip netns exec ${d.id} sysctl -qw ${k}=${v}`);

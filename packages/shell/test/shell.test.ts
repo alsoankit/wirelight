@@ -85,6 +85,9 @@ describe("the shell", () => {
     const { run } = setup(["ip link"]);
     expect(run("ping 10.0.0.1")).toEqual({ code: 127, out: ["note: You haven't found this tool yet."] });
     expect(run("ip addr")).toEqual({ code: 127, out: ["note: You haven't found this tool yet."] });
+    // `bridge link` and `bridge fdb` are separate tools (the Peacekeeper unlocks `bridge link`).
+    expect(run("bridge link show")).toEqual({ code: 127, out: ["note: You haven't found this tool yet."] });
+    expect(run("bridge l")).toEqual({ code: 127, out: ["note: You haven't found this tool yet."] });
     expect(run("lab send-frame --to 02:00:00:00:00:07").out.at(-1)).toBe("note: You haven't found this tool yet.");
   });
 

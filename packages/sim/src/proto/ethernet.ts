@@ -1,5 +1,6 @@
 import { bytesToMac, type Mac, macToBytes } from "../mac";
 import { decodeIPv4, decodeUDP, IPPROTO } from "./ipv4";
+import { isStpFrame, llcText, stpText } from "./stp";
 
 /**
  * Ethernet II without FCS, at the length Linux builds it (an ARP frame is 42 bytes). The 60-byte
@@ -50,6 +51,7 @@ export function fromHex(h: string): Uint8Array {
 /** One-line summary in `tcpdump -e -n` style, without the timestamp. */
 export function summarizeEth(b: Uint8Array): string {
   const f = decodeEth(b);
+  if (isStpFrame(b)) return `${f.src} > ${f.dst}, ${llcText(b)}: ${stpText(b)}`;
   if (f.type === ETHERTYPE.ipv4) {
     const ip = decodeIPv4(f.payload);
     const head = `${f.src} > ${f.dst}, ethertype IPv4 (0x0800), length ${b.length}`;

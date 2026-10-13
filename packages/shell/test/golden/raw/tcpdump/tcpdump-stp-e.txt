@@ -1,0 +1,10 @@
+# halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off | setup: wait 40s | runs on: b
+$ timeout -s INT 8 stdbuf -oL tcpdump -Z root -n -e -c 2 -i eth0
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+13:08:11.364221 02:00:00:00:0b:01 > 01:80:c2:00:00:00, 802.3, length 38: LLC, dsap STP (0x42) Individual, ssap STP (0x42) Command, ctrl 0x03: STP 802.1d, Config, Flags [Topology change], bridge-id 8000.02:00:00:00:0b:01.8001, length 35
+13:08:13.412363 02:00:00:00:0b:01 > 01:80:c2:00:00:00, 802.3, length 38: LLC, dsap STP (0x42) Individual, ssap STP (0x42) Command, ctrl 0x03: STP 802.1d, Config, Flags [Topology change], bridge-id 8000.02:00:00:00:0b:01.8001, length 35
+2 packets captured
+2 packets received by filter
+0 packets dropped by kernel
+[exit 0]

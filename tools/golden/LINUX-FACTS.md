@@ -215,7 +215,7 @@ entry that is already REACHABLE keeps the timer it had.
   permanent`): pings vanish (no errors, `100% packet loss`), the entry stays PERMANENT; after
   `ip neigh del` the next ping ARPs and works.
 
-## Switching loop (measured qualitatively, 1 s only)
+## Switching loop (measured qualitatively, 1 s only; with STP see "Spanning tree")
 - Two bridges joined by two veth cables, STP off: one ARP request from a host circled at about
   **1 M frames/s per link**; each host received ~1,500–2,000 copies a second; the hosts' MACs jumped
   between the bridges' ports (a's own MAC learned on the loop ports of its own switch); a unicast
@@ -223,6 +223,78 @@ entry that is already REACHABLE keeps the timer it had.
   frozen); learned entries settle on the right ports with the next traffic, and pings work again.
   Not captured as goldens (rates depend on the CPU); see `packages/sim/test/storm.test.ts` and
   `docs/sim-deviations.md`.
+
+## Spanning tree (kernel STP, 802.1D; measured 2026-10-13, `capture-stp.sh`, goldens in `stp/`, `tcpdump/tcpdump-stp*`, `bytes/stp-*`)
+Topology "halls": hall-a and hall-b, each `br0` over eth1..eth3, joined twice (eth2—eth2, eth3—eth3),
+host a on hall-a eth1, host b on hall-b eth1. Kernel STP works in an unprivileged namespace (no
+userspace `bridge-stp` helper is tried outside init_net).
+- **Defaults:** `stp_state 0`; bridge priority 32768 (`8000`); `forward_delay` 1500, `hello_time`
+  200, `max_age` 2000 centiseconds; port priority 32, port path cost **2** (veth reports 10 Gbit/s;
+  a 1 Gbit NIC would get 4). Port ids are `priority << 10 | port number` (0x8001, 0x8002…), port
+  numbers 1, 2, 3 in the order ports were added. Bridge id = priority + br0's MAC (its lowest port MAC).
+- **`bridge link show`**: one line per bridge port, ifindex order, trailing space:
+  `3: eth2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 master br0 state forwarding priority 32 cost 2 `.
+  States: `disabled` (no carrier, port down, or br0 down), `blocking`, `listening`, `learning`,
+  `forwarding`. With STP off every port with carrier is `forwarding`. Nothing for br0 itself or on a
+  machine without bridges (exit 0). `bridge l`, `bridge link`, `bridge link list` are the same; a
+  stray word (`bridge link show eth2`) is ignored; `dev eth9` → `Cannot find device "eth9"` (255).
+- **Root election**: hall-a (8000.02:00:00:00:0a:01) is root; hall-b's root port is eth2 (equal
+  cost 2, hall-a's port 8002 beats 8003) and **hall-b eth3 blocks**. hall-a's ports are all designated.
+- **Timeline from creation with `stp_state 1`:** ports enabled → `listening`; **`blocking` at the
+  first hello** (~2 s after br0 came up); `learning` 15.0–15.5 s after the port was enabled,
+  `forwarding` 15.0–15.5 s later (a 15 s kernel timer, 512 ms wheel granularity: the sim's
+  15.36 s and 30.72 s). A port that becomes root port while listening keeps its timer (no restart).
+- **br0 has no carrier until a port forwards**: `5: br0: <NO-CARRIER,BROADCAST,MULTICAST,UP> … state DOWN`
+  for the first ~30 s with STP on. Nothing passes while listening (a ping fails, exit 1).
+- **BPDUs**: the root sends a config BPDU out of every designated port every hello: first 2 s after
+  br0 comes up, then `round_jiffies(now + 2 s)` + wheel rounding, so 1.984, 1.984, 2.048 s apart.
+  Newest port first. Non-root bridges send no hellos of their own: they relay on receipt on their
+  root port (message age 1 tick = 4 jiffies, `MESSAGE_AGE_INCR`). A designated port that hears an
+  inferior BPDU replies, but at most once a second per port (hold timer, `round_jiffies(+1 s)`).
+  tcpdump: `STP 802.1d, Config, Flags [none], bridge-id 8000.02:00:00:00:0a:01.8002, length 35`;
+  with -e `02:00:00:00:0a:02 > 01:80:c2:00:00:00, 802.3, length 38: LLC, dsap STP (0x42) Individual,
+  ssap STP (0x42) Command, ctrl 0x03: …`; flags `[Topology change]`, `[Topology change, Topology
+  change ACK]`; a TCN is `STP 802.1d, Topology Change` (`802.3, length 7`). Frame: 52 bytes (14 +
+  LLC 42 42 03 + 35); times in 1/256 s (max age 0x1400, hello 0x0200, forward delay 0x0f00).
+  The pcap filter `stp` selects them.
+- **Learning from BPDUs:** a port in learning/forwarding state learns a BPDU's source MAC (hall-b's
+  fdb shows `02:00:00:00:0a:02 dev eth2 master br0`; hall-a learns hall-b's TCN source on eth2).
+- **Topology change:** a port going forwarding on a bridge that is designated for some port is a
+  topology change. The root sets the TC flag for forward delay + max age (35 s, rounded up to 4.096 s
+  by the wheel); a non-root bridge sends a TCN on its root port (again every 2 s until the root's
+  TC-ACK). During TC, learned entries expire after **forward delay (15 s)** (`ip -d` shows
+  `ageing_time 3000`, i.e. 2 × forward delay) — but they are only removed when the fdb clean-up next
+  runs (every ≤ 300 s; `gc_timer`), and until then `bridge fdb show` prints them **`stale`**:
+  `02:00:00:00:0b:02 dev eth2 master br0 stale`.
+- **Failover** (`ip link set eth2 down` at hall-a: both ends of the active span lose carrier): both
+  eth2 ports go `disabled` at once and their learned entries go; hall-b eth3 becomes root port and
+  goes `listening` **at once** (direct failure: no max-age wait), `learning` ~15 s and `forwarding`
+  ~30 s later; meanwhile pings fail; after that they work. Going forwarding sends a TCN to the root.
+- **Turning STP on with the loop closed** (`ip link set br0 type bridge stp_state 1`, no output,
+  exit 0): ports already forwarding **stay forwarding** (br_make_forwarding only acts on blocking
+  ports). The first hello comes 2 s later. If the other switch doesn't run STP yet it floods the BPDU
+  back round the loop, the sender hears its own better port's BPDU on its other span and **blocks
+  that port within one hello**: a raging storm (~650,000 frames in 3 s) stopped at once. Once the
+  second switch runs STP too, nothing refreshes that stored BPDU: it ages out after max age (20 s),
+  the port goes listening, the other switch's span port blocks instead, and ~30 s later the first
+  port forwards (`later-*` goldens). Any value but 0 turns it on (`stp_state 2` too).
+- **Turning it off again** (`stp_state 0`): states freeze. A blocked port stays `blocking` until its
+  stored BPDU ages out (≤ 20 s after the last one), then goes straight to `forwarding` and the loop
+  is back (`off-again-*`).
+- **Election settings:** `bridge link set dev eth3 cost 1` on hall-b makes eth3 its root port and
+  blocks eth2; `ip link set br0 type bridge priority 4096` on hall-b makes it the root (hall-a eth3
+  blocks). Errors: port priority > 63 or cost > 65535 → `RTNETLINK answers: Numerical result out of
+  range` (255); cost 0 or a word → silently nothing (iproute2 sends a cost only if > 0); a non-port
+  or br0 → `RTNETLINK answers: Operation not supported` (255); `dev eth9` → `Cannot find bridge
+  device "eth9"`; no `dev` → the long `bridge link set` usage (255).
+- **`ip link set <dev> type bridge …` errors:** `stp_state x` → `Error: argument "x" is wrong:
+  invalid stp_state` (255); `priority 70000` → `… invalid priority`; an unknown option → `bridge:
+  unknown command "frob"?` and the bridge usage (exit 1; `… stp_state 1 up` too: everything after
+  `type bridge` is a bridge option); a non-bridge → `RTNETLINK answers: Operation not supported`
+  (exit 2); `type frob stp_state 1` → `Garbage instead of arguments "stp_state ...". Try "ip link
+  help".` (1); `type frob` alone → nothing (0). `forward_delay` below 2 s or above 30 s is refused
+  only while STP is on; `hello_time` (1–10 s) and `max_age` (6–40 s) always (`Numerical result out
+  of range`, exit 2).
 
 ## Output details the shell must reproduce
 - `tcpdump -e` prints the broadcast destination as the word **`Broadcast`**; other MACs in full.

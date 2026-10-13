@@ -11,7 +11,7 @@ const BUILTINS = ["clear", "exit", "help", "history", "hostname", "man"];
 const PROGRAMS: Record<string, ToolId[]> = {
   ip: ["ip link", "ip addr", "ip route", "ip neigh"],
   lab: ["lab send-frame", "lab card", "lab cable", "lab keeper", "lab slate"],
-  bridge: ["bridge fdb"],
+  bridge: ["bridge fdb", "bridge link"],
   ping: ["ping"],
   tcpdump: ["tcpdump"],
   sysctl: ["sysctl"],
@@ -81,7 +81,14 @@ const NEXT: Record<string, [string, ToolId | null][]> = {
     ["--to", null],
     ["--messenger", null],
   ],
-  bridge: [["fdb", "bridge fdb"]],
+  bridge: [
+    ["fdb", "bridge fdb"],
+    ["link", "bridge link"],
+  ],
+  "bridge link": [
+    ["show", null],
+    ["set", null],
+  ],
   "bridge fdb": [
     ["show", null],
     ["add", null],

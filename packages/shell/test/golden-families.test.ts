@@ -72,6 +72,7 @@ function topology(name: string): Topology {
     };
   }
   if (name === "cathedral") return cathedral();
+  if (name === "halls" || name === "halls-stp") return halls(name === "halls-stp");
   if (name.startsWith("square-")) return square(name.slice("square-".length));
   const m = name.match(/^routed-fwd-(on|off)(-nogw)?$/);
   if (!m) throw new Error(`unknown golden topology ${name}`);
@@ -169,6 +170,34 @@ function cathedral(): Topology {
 }
 
 /**
+ * Two switches joined twice (tools/golden/capture-stp.sh, topo_halls): hall-a and hall-b, each br0
+ * over eth1..eth3; span (eth2—eth2) and span-2 (eth3—eth3) make a loop; a on hall-a, b on hall-b.
+ */
+function halls(stp: boolean): Topology {
+  const hall = (id: string, x: string) => ({
+    id,
+    hostname: id,
+    kind: "host" as const,
+    interfaces: [1, 2, 3].map((n) => ({ name: `eth${n}`, mac: `02:00:00:00:${x}:0${n}` })),
+    bridges: [{ name: "br0", ports: ["eth1", "eth2", "eth3"], stp }],
+  });
+  return {
+    devices: [
+      hall("hall-a", "0a"),
+      hall("hall-b", "0b"),
+      host("a", "eth0", "02:00:00:00:00:0a", "10.0.0.1/24"),
+      host("b", "eth0", "02:00:00:00:00:0b", "10.0.0.2/24"),
+    ],
+    links: [
+      { id: "la", a: { device: "hall-a", iface: "eth1" }, b: { device: "a", iface: "eth0" } },
+      { id: "lb", a: { device: "hall-b", iface: "eth1" }, b: { device: "b", iface: "eth0" } },
+      { id: "span", a: { device: "hall-a", iface: "eth2" }, b: { device: "hall-b", iface: "eth2" } },
+      { id: "span-2", a: { device: "hall-a", iface: "eth3" }, b: { device: "hall-b", iface: "eth3" } },
+    ],
+  };
+}
+
+/**
  * Floor 7's square (tools/golden/capture-dhcp.sh): hall's br0 joins observatory (no address),
  * registry (10.0.1.2, the DHCP server, as dnsmasq: range .100-.150, 1 h) and lantern (10.0.1.7).
  */
@@ -215,6 +244,7 @@ const ALL: ToolId[] = [
   "ip route",
   "ip neigh",
   "bridge fdb",
+  "bridge link",
   "ping",
   "sysctl",
   "tcpdump",
@@ -283,6 +313,8 @@ function runCase(c: Case): { lines: string[]; exit: number | null } {
   b.loadSync(topology(c.topology), [], 1);
   // The switch topology waits 2.5 s for the bridge's own IGMP reports to pass before anything runs.
   if (c.topology.startsWith("switch") || c.topology.startsWith("square") || c.topology === "cathedral") b.advance(2500);
+  // The halls are ready about half a second after their bridges come up (veth carrier settling).
+  if (c.topology.startsWith("halls")) b.advance(500);
   const during = c.setup.filter((s) => s.startsWith("during capture, ")).map((s) => s.slice("during capture, ".length));
   for (const s of c.setup.filter((x) => !x.startsWith("during capture, "))) setupStep(b, s);
   const interrupt = c.actualCommand.match(/timeout -s INT ([0-9.]+) /);

@@ -1206,6 +1206,36 @@
     },
     {
       "family": "bytes",
+      "case": "stp-config",
+      "file": "bytes/stp-config.txt",
+      "raw": "raw/bytes/stp-config.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 40s"
+      ],
+      "command": "tcpdump -n -e -xx -c 1 -i eth2",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -e -xx -c 1 -i eth2",
+      "exit": 0
+    },
+    {
+      "family": "bytes",
+      "case": "stp-config-relay",
+      "file": "bytes/stp-config-relay.txt",
+      "raw": "raw/bytes/stp-config-relay.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "b",
+      "setup": [
+        "wait 40s"
+      ],
+      "command": "tcpdump -n -e -xx -c 1 -i eth0",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -e -xx -c 1 -i eth0",
+      "exit": 0
+    },
+    {
+      "family": "bytes",
       "case": "udp-port-unreachable",
       "file": "bytes/udp-port-unreachable.txt",
       "raw": "raw/bytes/udp-port-unreachable.txt",
@@ -4118,6 +4148,1311 @@
       "exit": 0
     },
     {
+      "family": "stp",
+      "case": "ageing-time",
+      "file": "stp/ageing-time.txt",
+      "raw": "raw/stp/ageing-time.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge ageing_time 1000",
+      "actualCommand": "ip link set br0 type bridge ageing_time 1000",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "bridge-priority",
+      "file": "stp/bridge-priority.txt",
+      "raw": "raw/stp/bridge-priority.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge priority 4096",
+      "actualCommand": "ip link set br0 type bridge priority 4096",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "bridge-priority-bad",
+      "file": "stp/bridge-priority-bad.txt",
+      "raw": "raw/stp/bridge-priority-bad.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge priority x",
+      "actualCommand": "ip link set br0 type bridge priority x",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "bridge-priority-big",
+      "file": "stp/bridge-priority-big.txt",
+      "raw": "raw/stp/bridge-priority-big.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge priority 70000",
+      "actualCommand": "ip link set br0 type bridge priority 70000",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "cost-a",
+      "file": "stp/cost-a.txt",
+      "raw": "raw/stp/cost-a.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-b: bridge link set dev eth3 cost 1",
+        "wait 40s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "cost-b",
+      "file": "stp/cost-b.txt",
+      "raw": "raw/stp/cost-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "hall-b: bridge link set dev eth3 cost 1",
+        "wait 40s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "failover-fdb-b",
+      "file": "stp/failover-fdb-b.txt",
+      "raw": "raw/stp/failover-fdb-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s",
+        "hall-a: ip link set eth2 down",
+        "wait 2s"
+      ],
+      "command": "bridge fdb show br br0",
+      "actualCommand": "bridge fdb show br br0",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "failover-forwarding-a",
+      "file": "stp/failover-forwarding-a.txt",
+      "raw": "raw/stp/failover-forwarding-a.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s",
+        "hall-a: ip link set eth2 down",
+        "wait 2s",
+        "wait 20s",
+        "wait 18s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "failover-forwarding-b",
+      "file": "stp/failover-forwarding-b.txt",
+      "raw": "raw/stp/failover-forwarding-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s",
+        "hall-a: ip link set eth2 down",
+        "wait 2s",
+        "wait 20s",
+        "wait 18s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "failover-learning-b",
+      "file": "stp/failover-learning-b.txt",
+      "raw": "raw/stp/failover-learning-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s",
+        "hall-a: ip link set eth2 down",
+        "wait 2s",
+        "wait 20s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "failover-listening-a",
+      "file": "stp/failover-listening-a.txt",
+      "raw": "raw/stp/failover-listening-a.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s",
+        "hall-a: ip link set eth2 down",
+        "wait 2s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "failover-listening-b",
+      "file": "stp/failover-listening-b.txt",
+      "raw": "raw/stp/failover-listening-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s",
+        "hall-a: ip link set eth2 down",
+        "wait 2s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "forward-delay-off",
+      "file": "stp/forward-delay-off.txt",
+      "raw": "raw/stp/forward-delay-off.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge forward_delay 100",
+      "actualCommand": "ip link set br0 type bridge forward_delay 100",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "forward-delay-on",
+      "file": "stp/forward-delay-on.txt",
+      "raw": "raw/stp/forward-delay-on.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1"
+      ],
+      "command": "ip link set br0 type bridge forward_delay 400",
+      "actualCommand": "ip link set br0 type bridge forward_delay 400",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "forward-delay-on-short",
+      "file": "stp/forward-delay-on-short.txt",
+      "raw": "raw/stp/forward-delay-on-short.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1"
+      ],
+      "command": "ip link set br0 type bridge forward_delay 100",
+      "actualCommand": "ip link set br0 type bridge forward_delay 100",
+      "exit": 2
+    },
+    {
+      "family": "stp",
+      "case": "hello-time-short",
+      "file": "stp/hello-time-short.txt",
+      "raw": "raw/stp/hello-time-short.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge hello_time 50",
+      "actualCommand": "ip link set br0 type bridge hello_time 50",
+      "exit": 2
+    },
+    {
+      "family": "stp",
+      "case": "later-a-blocks-a",
+      "file": "stp/later-a-blocks-a.txt",
+      "raw": "raw/stp/later-a-blocks-a.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1",
+        "wait 3s",
+        "hall-b: ip link set br0 type bridge stp_state 1",
+        "wait 6s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "later-a-blocks-b",
+      "file": "stp/later-a-blocks-b.txt",
+      "raw": "raw/stp/later-a-blocks-b.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1",
+        "wait 3s",
+        "hall-b: ip link set br0 type bridge stp_state 1",
+        "wait 6s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "later-ages-out-a",
+      "file": "stp/later-ages-out-a.txt",
+      "raw": "raw/stp/later-ages-out-a.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1",
+        "wait 3s",
+        "hall-b: ip link set br0 type bridge stp_state 1",
+        "wait 6s",
+        "wait 21s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "later-ages-out-b",
+      "file": "stp/later-ages-out-b.txt",
+      "raw": "raw/stp/later-ages-out-b.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1",
+        "wait 3s",
+        "hall-b: ip link set br0 type bridge stp_state 1",
+        "wait 6s",
+        "wait 21s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "later-settled-a",
+      "file": "stp/later-settled-a.txt",
+      "raw": "raw/stp/later-settled-a.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1",
+        "wait 3s",
+        "hall-b: ip link set br0 type bridge stp_state 1",
+        "wait 6s",
+        "wait 21s",
+        "wait 32s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "later-settled-b",
+      "file": "stp/later-settled-b.txt",
+      "raw": "raw/stp/later-settled-b.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1",
+        "wait 3s",
+        "hall-b: ip link set br0 type bridge stp_state 1",
+        "wait 6s",
+        "wait 21s",
+        "wait 32s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link",
+      "file": "stp/link.txt",
+      "raw": "raw/stp/link.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link",
+      "actualCommand": "bridge link",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-l",
+      "file": "stp/link-l.txt",
+      "raw": "raw/stp/link-l.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge l",
+      "actualCommand": "bridge l",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-list",
+      "file": "stp/link-list.txt",
+      "raw": "raw/stp/link-list.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [],
+      "command": "bridge link list",
+      "actualCommand": "bridge link list",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-set-both-show",
+      "file": "stp/link-set-both-show.txt",
+      "raw": "raw/stp/link-set-both-show.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: bridge link set dev eth3 cost 7 priority 5"
+      ],
+      "command": "bridge link show dev eth3",
+      "actualCommand": "bridge link show dev eth3",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-set-bridge",
+      "file": "stp/link-set-bridge.txt",
+      "raw": "raw/stp/link-set-bridge.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link set dev br0 cost 3",
+      "actualCommand": "bridge link set dev br0 cost 3",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-set-cost",
+      "file": "stp/link-set-cost.txt",
+      "raw": "raw/stp/link-set-cost.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link set dev eth3 cost 10",
+      "actualCommand": "bridge link set dev eth3 cost 10",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-set-cost-incomplete",
+      "file": "stp/link-set-cost-incomplete.txt",
+      "raw": "raw/stp/link-set-cost-incomplete.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link set dev eth3 cost",
+      "actualCommand": "bridge link set dev eth3 cost",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-set-cost-range",
+      "file": "stp/link-set-cost-range.txt",
+      "raw": "raw/stp/link-set-cost-range.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link set dev eth3 cost 70000",
+      "actualCommand": "bridge link set dev eth3 cost 70000",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-set-cost-show",
+      "file": "stp/link-set-cost-show.txt",
+      "raw": "raw/stp/link-set-cost-show.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: bridge link set dev eth3 cost 10"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-set-cost-word",
+      "file": "stp/link-set-cost-word.txt",
+      "raw": "raw/stp/link-set-cost-word.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: bridge link set dev eth3 cost x"
+      ],
+      "command": "bridge link show dev eth3",
+      "actualCommand": "bridge link show dev eth3",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-set-cost-zero",
+      "file": "stp/link-set-cost-zero.txt",
+      "raw": "raw/stp/link-set-cost-zero.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: bridge link set dev eth3 cost 0"
+      ],
+      "command": "bridge link show dev eth3",
+      "actualCommand": "bridge link show dev eth3",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-set-missing-dev",
+      "file": "stp/link-set-missing-dev.txt",
+      "raw": "raw/stp/link-set-missing-dev.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link set dev eth9 cost 3",
+      "actualCommand": "bridge link set dev eth9 cost 3",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-set-no-dev",
+      "file": "stp/link-set-no-dev.txt",
+      "raw": "raw/stp/link-set-no-dev.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link set eth3 cost 3",
+      "actualCommand": "bridge link set eth3 cost 3",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-set-not-port",
+      "file": "stp/link-set-not-port.txt",
+      "raw": "raw/stp/link-set-not-port.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "a",
+      "setup": [],
+      "command": "bridge link set dev eth0 cost 3",
+      "actualCommand": "bridge link set dev eth0 cost 3",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-set-nothing",
+      "file": "stp/link-set-nothing.txt",
+      "raw": "raw/stp/link-set-nothing.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link set dev eth3",
+      "actualCommand": "bridge link set dev eth3",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-set-priority-range",
+      "file": "stp/link-set-priority-range.txt",
+      "raw": "raw/stp/link-set-priority-range.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link set dev eth3 priority 64",
+      "actualCommand": "bridge link set dev eth3 priority 64",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-set-priority-show",
+      "file": "stp/link-set-priority-show.txt",
+      "raw": "raw/stp/link-set-priority-show.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: bridge link set dev eth3 priority 10"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-show-br-down",
+      "file": "stp/link-show-br-down.txt",
+      "raw": "raw/stp/link-show-br-down.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set br0 down"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-show-dev",
+      "file": "stp/link-show-dev.txt",
+      "raw": "raw/stp/link-show-dev.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link show dev eth2",
+      "actualCommand": "bridge link show dev eth2",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-show-dev-br0",
+      "file": "stp/link-show-dev-br0.txt",
+      "raw": "raw/stp/link-show-dev-br0.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link show dev br0",
+      "actualCommand": "bridge link show dev br0",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-show-dev-incomplete",
+      "file": "stp/link-show-dev-incomplete.txt",
+      "raw": "raw/stp/link-show-dev-incomplete.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link show dev",
+      "actualCommand": "bridge link show dev",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-show-extra-word",
+      "file": "stp/link-show-extra-word.txt",
+      "raw": "raw/stp/link-show-extra-word.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link show eth2",
+      "actualCommand": "bridge link show eth2",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-show-host",
+      "file": "stp/link-show-host.txt",
+      "raw": "raw/stp/link-show-host.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "a",
+      "setup": [],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-show-missing-dev",
+      "file": "stp/link-show-missing-dev.txt",
+      "raw": "raw/stp/link-show-missing-dev.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link show dev eth9",
+      "actualCommand": "bridge link show dev eth9",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "link-show-off",
+      "file": "stp/link-show-off.txt",
+      "raw": "raw/stp/link-show-off.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-show-peer-down",
+      "file": "stp/link-show-peer-down.txt",
+      "raw": "raw/stp/link-show-peer-down.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "hall-a: ip link set eth3 down"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-show-port-down",
+      "file": "stp/link-show-port-down.txt",
+      "raw": "raw/stp/link-show-port-down.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set eth3 down"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "link-unknown-cmd",
+      "file": "stp/link-unknown-cmd.txt",
+      "raw": "raw/stp/link-unknown-cmd.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "bridge link frob",
+      "actualCommand": "bridge link frob",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "max-age-short",
+      "file": "stp/max-age-short.txt",
+      "raw": "raw/stp/max-age-short.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge max_age 100",
+      "actualCommand": "ip link set br0 type bridge max_age 100",
+      "exit": 2
+    },
+    {
+      "family": "stp",
+      "case": "off-again-aged-b",
+      "file": "stp/off-again-aged-b.txt",
+      "raw": "raw/stp/off-again-aged-b.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1",
+        "wait 3s",
+        "hall-b: ip link set br0 type bridge stp_state 1",
+        "wait 6s",
+        "wait 21s",
+        "wait 32s",
+        "hall-a: ip link set br0 type bridge stp_state 0",
+        "hall-b: ip link set br0 type bridge stp_state 0",
+        "wait 25s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "off-again-b",
+      "file": "stp/off-again-b.txt",
+      "raw": "raw/stp/off-again-b.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1",
+        "wait 3s",
+        "hall-b: ip link set br0 type bridge stp_state 1",
+        "wait 6s",
+        "wait 21s",
+        "wait 32s",
+        "hall-a: ip link set br0 type bridge stp_state 0",
+        "hall-b: ip link set br0 type bridge stp_state 0"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "ping-failover-forwarding",
+      "file": "stp/ping-failover-forwarding.txt",
+      "raw": "raw/stp/ping-failover-forwarding.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "a",
+      "setup": [
+        "wait 5s",
+        "a: ping -c 1 -W 1 10.0.0.2",
+        "wait 35s",
+        "a: ping -c 2 10.0.0.2",
+        "hall-a: ip link set eth2 down",
+        "wait 2s",
+        "a: ping -c 1 -W 1 10.0.0.2",
+        "wait 33s"
+      ],
+      "command": "ping -c 1 10.0.0.2",
+      "actualCommand": "ping -c 1 10.0.0.2",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "ping-failover-listening",
+      "file": "stp/ping-failover-listening.txt",
+      "raw": "raw/stp/ping-failover-listening.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "a",
+      "setup": [
+        "wait 5s",
+        "a: ping -c 1 -W 1 10.0.0.2",
+        "wait 35s",
+        "a: ping -c 2 10.0.0.2",
+        "hall-a: ip link set eth2 down",
+        "wait 2s"
+      ],
+      "command": "ping -c 1 -W 1 10.0.0.2",
+      "actualCommand": "ping -c 1 -W 1 10.0.0.2",
+      "exit": 1
+    },
+    {
+      "family": "stp",
+      "case": "ping-forwarding",
+      "file": "stp/ping-forwarding.txt",
+      "raw": "raw/stp/ping-forwarding.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "a",
+      "setup": [
+        "wait 5s",
+        "a: ping -c 1 -W 1 10.0.0.2",
+        "wait 35s"
+      ],
+      "command": "ping -c 2 10.0.0.2",
+      "actualCommand": "ping -c 2 10.0.0.2",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "ping-forwarding-fdb-a",
+      "file": "stp/ping-forwarding-fdb-a.txt",
+      "raw": "raw/stp/ping-forwarding-fdb-a.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 5s",
+        "a: ping -c 1 -W 1 10.0.0.2",
+        "wait 35s",
+        "a: ping -c 2 10.0.0.2"
+      ],
+      "command": "bridge fdb show br br0",
+      "actualCommand": "bridge fdb show br br0",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "ping-listening",
+      "file": "stp/ping-listening.txt",
+      "raw": "raw/stp/ping-listening.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "a",
+      "setup": [
+        "wait 5s"
+      ],
+      "command": "ping -c 1 -W 1 10.0.0.2",
+      "actualCommand": "ping -c 1 -W 1 10.0.0.2",
+      "exit": 1
+    },
+    {
+      "family": "stp",
+      "case": "priority-a",
+      "file": "stp/priority-a.txt",
+      "raw": "raw/stp/priority-a.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-b: ip link set br0 type bridge priority 4096",
+        "wait 40s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "priority-b",
+      "file": "stp/priority-b.txt",
+      "raw": "raw/stp/priority-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "hall-b: ip link set br0 type bridge priority 4096",
+        "wait 40s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-forwarding-a",
+      "file": "stp/start-forwarding-a.txt",
+      "raw": "raw/stp/start-forwarding-a.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-forwarding-b",
+      "file": "stp/start-forwarding-b.txt",
+      "raw": "raw/stp/start-forwarding-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-forwarding-br0",
+      "file": "stp/start-forwarding-br0.txt",
+      "raw": "raw/stp/start-forwarding-br0.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s"
+      ],
+      "command": "ip link show br0",
+      "actualCommand": "ip link show br0",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-forwarding-fdb-b",
+      "file": "stp/start-forwarding-fdb-b.txt",
+      "raw": "raw/stp/start-forwarding-fdb-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "wait 5s",
+        "wait 17s",
+        "wait 18s"
+      ],
+      "command": "bridge fdb show br br0",
+      "actualCommand": "bridge fdb show br br0",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-learning-a",
+      "file": "stp/start-learning-a.txt",
+      "raw": "raw/stp/start-learning-a.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 5s",
+        "wait 17s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-learning-b",
+      "file": "stp/start-learning-b.txt",
+      "raw": "raw/stp/start-learning-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "wait 5s",
+        "wait 17s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-listening-a",
+      "file": "stp/start-listening-a.txt",
+      "raw": "raw/stp/start-listening-a.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 5s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-listening-b",
+      "file": "stp/start-listening-b.txt",
+      "raw": "raw/stp/start-listening-b.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-b",
+      "setup": [
+        "wait 5s"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "start-listening-br0",
+      "file": "stp/start-listening-br0.txt",
+      "raw": "raw/stp/start-listening-br0.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 5s"
+      ],
+      "command": "ip link show br0",
+      "actualCommand": "ip link show br0",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "stp-bad-value",
+      "file": "stp/stp-bad-value.txt",
+      "raw": "raw/stp/stp-bad-value.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge stp_state x",
+      "actualCommand": "ip link set br0 type bridge stp_state x",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "stp-incomplete",
+      "file": "stp/stp-incomplete.txt",
+      "raw": "raw/stp/stp-incomplete.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge stp_state",
+      "actualCommand": "ip link set br0 type bridge stp_state",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "stp-missing-dev",
+      "file": "stp/stp-missing-dev.txt",
+      "raw": "raw/stp/stp-missing-dev.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br9 type bridge stp_state 1",
+      "actualCommand": "ip link set br9 type bridge stp_state 1",
+      "exit": 1
+    },
+    {
+      "family": "stp",
+      "case": "stp-not-bridge",
+      "file": "stp/stp-not-bridge.txt",
+      "raw": "raw/stp/stp-not-bridge.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set eth1 type bridge stp_state 1",
+      "actualCommand": "ip link set eth1 type bridge stp_state 1",
+      "exit": 2
+    },
+    {
+      "family": "stp",
+      "case": "stp-off",
+      "file": "stp/stp-off.txt",
+      "raw": "raw/stp/stp-off.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge stp_state 0",
+      "actualCommand": "ip link set br0 type bridge stp_state 0",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "stp-on",
+      "file": "stp/stp-on.txt",
+      "raw": "raw/stp/stp-on.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge stp_state 1",
+      "actualCommand": "ip link set br0 type bridge stp_state 1",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "stp-on-dev",
+      "file": "stp/stp-on-dev.txt",
+      "raw": "raw/stp/stp-on-dev.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set dev br0 type bridge stp_state 1",
+      "actualCommand": "ip link set dev br0 type bridge stp_state 1",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "stp-on-host",
+      "file": "stp/stp-on-host.txt",
+      "raw": "raw/stp/stp-on-host.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "a",
+      "setup": [],
+      "command": "ip link set eth0 type bridge stp_state 1",
+      "actualCommand": "ip link set eth0 type bridge stp_state 1",
+      "exit": 2
+    },
+    {
+      "family": "stp",
+      "case": "stp-on-show",
+      "file": "stp/stp-on-show.txt",
+      "raw": "raw/stp/stp-on-show.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1"
+      ],
+      "command": "bridge link show",
+      "actualCommand": "bridge link show",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "stp-on-twice",
+      "file": "stp/stp-on-twice.txt",
+      "raw": "raw/stp/stp-on-twice.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "hall-a: ip link set br0 type bridge stp_state 1"
+      ],
+      "command": "ip link set br0 type bridge stp_state 1",
+      "actualCommand": "ip link set br0 type bridge stp_state 1",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "stp-two",
+      "file": "stp/stp-two.txt",
+      "raw": "raw/stp/stp-two.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge stp_state 2",
+      "actualCommand": "ip link set br0 type bridge stp_state 2",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "type-bridge-and-up",
+      "file": "stp/type-bridge-and-up.txt",
+      "raw": "raw/stp/type-bridge-and-up.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge stp_state 1 up",
+      "actualCommand": "ip link set br0 type bridge stp_state 1 up",
+      "exit": 1
+    },
+    {
+      "family": "stp",
+      "case": "type-bridge-nothing",
+      "file": "stp/type-bridge-nothing.txt",
+      "raw": "raw/stp/type-bridge-nothing.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge",
+      "actualCommand": "ip link set br0 type bridge",
+      "exit": 0
+    },
+    {
+      "family": "stp",
+      "case": "type-bridge-unknown",
+      "file": "stp/type-bridge-unknown.txt",
+      "raw": "raw/stp/type-bridge-unknown.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type bridge frob 1",
+      "actualCommand": "ip link set br0 type bridge frob 1",
+      "exit": 1
+    },
+    {
+      "family": "stp",
+      "case": "type-incomplete",
+      "file": "stp/type-incomplete.txt",
+      "raw": "raw/stp/type-incomplete.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type",
+      "actualCommand": "ip link set br0 type",
+      "exit": 255
+    },
+    {
+      "family": "stp",
+      "case": "type-unknown",
+      "file": "stp/type-unknown.txt",
+      "raw": "raw/stp/type-unknown.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type frob stp_state 1",
+      "actualCommand": "ip link set br0 type frob stp_state 1",
+      "exit": 1
+    },
+    {
+      "family": "stp",
+      "case": "type-unknown-bare",
+      "file": "stp/type-unknown-bare.txt",
+      "raw": "raw/stp/type-unknown-bare.txt",
+      "topology": "halls",
+      "topologyDesc": "halls: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 0) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [],
+      "command": "ip link set br0 type frob",
+      "actualCommand": "ip link set br0 type frob",
+      "exit": 0
+    },
+    {
       "family": "sysctl",
       "case": "sysctl-a-grep",
       "file": "sysctl/sysctl-a-grep.txt",
@@ -4952,6 +6287,67 @@
       ],
       "command": "tcpdump -n -c 4 -i eth0",
       "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -c 4 -i eth0",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
+      "case": "tcpdump-stp",
+      "file": "tcpdump/tcpdump-stp.txt",
+      "raw": "raw/tcpdump/tcpdump-stp.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 40s"
+      ],
+      "command": "tcpdump -n -c 2 -i eth2",
+      "actualCommand": "timeout -s INT 8 stdbuf -oL tcpdump -Z root -n -c 2 -i eth2",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
+      "case": "tcpdump-stp-e",
+      "file": "tcpdump/tcpdump-stp-e.txt",
+      "raw": "raw/tcpdump/tcpdump-stp-e.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "b",
+      "setup": [
+        "wait 40s"
+      ],
+      "command": "tcpdump -n -e -c 2 -i eth0",
+      "actualCommand": "timeout -s INT 8 stdbuf -oL tcpdump -Z root -n -e -c 2 -i eth0",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
+      "case": "tcpdump-stp-filter",
+      "file": "tcpdump/tcpdump-stp-filter.txt",
+      "raw": "raw/tcpdump/tcpdump-stp-filter.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "hall-a",
+      "setup": [
+        "wait 40s"
+      ],
+      "command": "tcpdump -n -c 1 -i eth1 stp",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -c 1 -i eth1 stp",
+      "exit": 0
+    },
+    {
+      "family": "tcpdump",
+      "case": "tcpdump-stp-icmp",
+      "file": "tcpdump/tcpdump-stp-icmp.txt",
+      "raw": "raw/tcpdump/tcpdump-stp-icmp.txt",
+      "topology": "halls-stp",
+      "topologyDesc": "halls-stp: hall-a (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0, stp_state 1) over eth1 02:00:00:00:0a:01, eth2 02:00:00:00:0a:02, eth3 02:00:00:00:0a:03; hall-b the same with 02:00:00:00:0b:01..03; hall-a eth1<->a eth0 02:00:00:00:00:0a 10.0.0.1/24, hall-b eth1<->b eth0 02:00:00:00:00:0b 10.0.0.2/24, span hall-a eth2<->hall-b eth2, span-2 hall-a eth3<->hall-b eth3; all up; IPv6 off",
+      "device": "a",
+      "setup": [
+        "wait 40s",
+        "during capture, a: ping -c 1 10.0.0.2"
+      ],
+      "command": "tcpdump -n -c 2 -i eth0 icmp",
+      "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -c 2 -i eth0 icmp",
       "exit": 0
     },
     {
