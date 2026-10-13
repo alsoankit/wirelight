@@ -177,10 +177,9 @@ function JarPanel({ open }: { open?: number }) {
         ))}
       </ol>
       {shown?.ok &&
-        shown.layers.map((l, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: layers are in order, outside in
+        shown.layers.map((l) => (
           <Layer
-            key={i}
+            key={l.layer}
             l={l}
             sealed={beforeSlate && l.layer !== "frame" && !(l.layer === "message" && l.kind === "lab")}
           />

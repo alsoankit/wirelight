@@ -9,7 +9,7 @@ function Marked({ text, marks }: { text: string; marks: Memory["output"]["marks"
   // Longest first, so "link/ether 02:…" wins over a shorter piece inside it; whole words only for short ones.
   const pieces = [...marks].sort((a, b) => b.match.length - a.match.length);
   const pattern = new RegExp(
-    pieces.map((m) => (m.match.length <= 4 ? `\\b${escape(m.match)}\\b` : escape(m.match))).join("|"),
+    pieces.map((m) => (m.match.length <= 4 ? `\\b${escapeRegExp(m.match)}\\b` : escapeRegExp(m.match))).join("|"),
     "g",
   );
   return (
@@ -56,7 +56,7 @@ function Marked({ text, marks }: { text: string; marks: Memory["output"]["marks"
   );
 }
 
-function escape(s: string): string {
+function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 

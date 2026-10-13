@@ -102,6 +102,7 @@ export function Messages({ device, link, corridorEnd, doorway, keeper, watch, cu
   return (
     <>
       {Array.from({ length: POOL }, (_, i) => (
+        // biome-ignore lint/a11y/noStaticElementInteractions: 3D messages are caught by pointing (raycast); the jar is the keyboard way
         <mesh
           // biome-ignore lint/suspicious/noArrayIndexKey: a fixed pool of meshes, reused by slot
           key={i}
