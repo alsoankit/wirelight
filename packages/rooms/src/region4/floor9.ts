@@ -51,6 +51,9 @@ const raiseTheTtl: Misconception = { id: "raise-the-ttl", detect: pingWithTtl("o
 
 const envelopesId = "f9.two-envelopes";
 const envelopesTopo = cathedral({ tower: true });
+const newFrameSamePacket = compared(
+  (c) => c.samePacket && !c.sameStreet && c.changed.includes("frame.to") && c.changed.includes("frame.from"),
+);
 export const twoEnvelopes = defineRoom({
   id: envelopesId,
   region: 4,
@@ -69,11 +72,16 @@ export const twoEnvelopes = defineRoom({
   tools: { unlock: ["lab slate trace"] },
   glow: "symptoms",
   // Arch's lock opens on a compare showing a new frame around the same packet.
-  winCondition: compared(
-    (c) => c.samePacket && !c.sameStreet && c.changed.includes("frame.to") && c.changed.includes("frame.from"),
-  ),
+  winCondition: newFrameSamePacket,
   key: { word: keyFor(envelopesId), via: "mark" },
-  healthChecks: [],
+  // Nothing is broken: the room comes back to life once the player has seen the frame change and the packet stay.
+  healthChecks: [
+    {
+      id: "compared-streets",
+      object: { kind: "door", device: "observatory", iface: "eth0" },
+      check: newFrameSamePacket,
+    },
+  ],
   teaches: ["hop"],
   uses: ["frame", "packet", "encapsulation", "router", "routing-table", "mac-address", "ip-address"],
   cards: ["tracer", "compare", "hop"],
@@ -182,8 +190,6 @@ export const oneStepOnly = defineRoom({
   controls: controls(oneStepTopo),
   tools: {},
   glow: "symptoms",
-  // `Time to live exceeded` and the `-t` errors are new here.
-  subtitles: true,
   winCondition: (f) => crossingLock(f) && archLock(f),
   key: { word: keyFor(oneStepId), via: "mark" },
   healthChecks: [

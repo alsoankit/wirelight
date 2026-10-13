@@ -67,7 +67,7 @@ const FACE = -4;
 export function doorGeometry(slot: DoorSlot) {
   const out: Vec3 = slot.wall === "back" ? [0, 0, -1] : [-1, 0, 0];
   const doorway: Vec3 = slot.wall === "back" ? [slot.at, 0.9, FACE] : [FACE, 0.9, slot.at];
-  const corridorEnd: Vec3 = [doorway[0] + out[0] * 2.5, 0.35, doorway[2] + out[2] * 2.5];
+  const corridorEnd: Vec3 = [doorway[0] + out[0] * 1.8, 0.35, doorway[2] + out[2] * 1.8];
   // The plate hangs on the wall to the right of the arch, as seen from inside.
   const beside = slot.plate === "above" ? 0 : 1.6;
   const height = slot.plate === "above" ? 2.2 : 2.35;
@@ -78,10 +78,16 @@ export function doorGeometry(slot: DoorSlot) {
   return { out, doorway, corridorEnd, plate, looseEnd };
 }
 
-/** The room-side end of the cable: from the doorway, a little way into the corridor (it fades into the dark). */
+/**
+ * The room-side end of the cable: from just inside the doorway a short way into the corridor, where it
+ * fades into the dark. Kept short so it stays inside the arch as seen from the camera (a longer line
+ * showed through the broken wall beside the arch, as if the cable left by another gap).
+ */
 export function cableSpan(slot: DoorSlot): { centre: Vec3; length: number; along: "x" | "z" } {
-  const length = 2.5;
+  const inside = 0.5;
+  const length = 1.7;
+  const mid = FACE + inside - length / 2;
   return slot.wall === "back"
-    ? { centre: [slot.at, 0.05, FACE - length / 2], length, along: "z" }
-    : { centre: [FACE - length / 2, 0.05, slot.at], length, along: "x" };
+    ? { centre: [slot.at, 0.05, mid], length, along: "z" }
+    : { centre: [mid, 0.05, slot.at], length, along: "x" };
 }

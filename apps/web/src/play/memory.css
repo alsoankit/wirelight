@@ -1,0 +1,701 @@
+/* Agent E: Guardian memories, ride-alongs (0036, 0037, 0066) and the world map (0039).
+   Back in time: a warm sepia-gold grade and a soft vignette; the panel is sized to its picture. */
+
+section.glass.memory {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(1060px, calc(100vw - 32px));
+  max-height: calc(100vh - 24px);
+  z-index: 58;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%, rgba(74, 52, 24, 0.55), rgba(18, 12, 6, 0.2) 70%), #140e08;
+  border-color: rgba(232, 201, 138, 0.35);
+  color: #f3e3c3;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+section.glass.memory::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 90px 24px rgba(0, 0, 0, 0.55);
+}
+
+.memory-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 12px 18px 0;
+}
+
+.memory-speaker {
+  font: 13px var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d9b878;
+}
+
+.memory-title {
+  flex: 1;
+  font: 22px var(--display);
+  color: #f6e6c4;
+}
+
+.memory-head .panel-note {
+  color: #cdb58a;
+}
+
+.memory-stage {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  padding: 4px 18px 0;
+}
+
+.memory-caption {
+  position: relative;
+  z-index: 1;
+  margin: 8px 18px 14px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(30, 21, 11, 0.85);
+  border: 1px solid rgba(232, 201, 138, 0.25);
+}
+
+.memory-caption .lines-speaker {
+  color: #e2bd76;
+}
+
+.memory-caption .lines-text {
+  margin: 4px 0 8px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #f6ead2;
+}
+
+.memory-head button,
+.memory-caption button,
+.ride-bar button {
+  padding: 5px 14px;
+  border: 1px solid rgba(232, 201, 138, 0.4);
+  border-radius: 8px;
+  background: transparent;
+  color: #f3e3c3;
+  font: 14px / 1.2 var(--sans);
+  cursor: pointer;
+}
+
+.memory-caption button:not(.quiet) {
+  background: rgba(232, 201, 138, 0.16);
+  border-color: rgba(232, 201, 138, 0.7);
+}
+
+.memory-wait {
+  margin: 40px auto;
+}
+
+/* The memory's map: sized to its picture, never larger than the screen allows. */
+.mem-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 300px);
+  min-height: 180px;
+  overflow: visible;
+}
+
+.memory-stage[data-kind="scene"] .mem-map {
+  max-width: 900px;
+}
+
+.mem-cable {
+  fill: none;
+  stroke: #d9b878;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.mem-cable.drawn {
+  stroke: #f0dcae;
+  stroke-width: 1.6;
+  stroke-dasharray: 0.02 0.012;
+  opacity: 0.9;
+}
+
+.mem-link[data-active="yes"] .mem-cable {
+  stroke: #fff1c9;
+  stroke-width: 4;
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(255, 228, 160, 0.7));
+}
+
+.mem-node circle,
+.mem-node rect,
+.mem-node polygon {
+  fill: #3a2a16;
+  stroke: #e8c98a;
+  stroke-width: 2;
+  transition: opacity 0.6s ease;
+}
+
+.mem-node.junction circle {
+  fill: #e8c98a;
+}
+
+.mem-node[data-state="dim"] {
+  opacity: 0.4;
+}
+
+.mem-node[data-state="lit"] circle:not(.mem-lit),
+.mem-node[data-state="lit"] rect,
+.mem-node[data-state="lit"] polygon {
+  fill: #6b4e22;
+  stroke: #fff1c9;
+}
+
+.mem-node .mem-lit {
+  stroke: none;
+}
+
+.mem-name,
+.mem-door,
+.mem-text {
+  paint-order: stroke;
+  stroke: #140e08;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.mem-name {
+  fill: #f6e6c4;
+  font: 15px var(--mono);
+}
+
+.mem-door {
+  fill: #c9ad7c;
+  font: 12px var(--mono);
+}
+
+.mem-text {
+  font: 13px var(--sans);
+  fill: #f3e3c3;
+}
+
+.mem-text.msg-tag {
+  font: 600 13px var(--sans);
+  fill: #fff1c9;
+}
+
+.mem-text.caption {
+  font: italic 15px var(--sans);
+  fill: #f0d9a8;
+}
+
+.mem-text.glyph-label {
+  font: italic 12px var(--sans);
+  fill: #e2c48e;
+}
+
+.mem-text.fate {
+  font: italic 12px var(--sans);
+  fill: #cdb58a;
+}
+
+.mem-text.plate-text {
+  font: 12px var(--mono);
+  fill: #1e150b;
+  stroke: none;
+}
+
+.mem-text.address {
+  font: 600 13px var(--mono);
+  fill: #ffe7b0;
+}
+
+.mem-text.ledger {
+  font: 12px var(--mono);
+  fill: #f3e3c3;
+}
+
+.mem-text.ledger.brass {
+  fill: #ffd27a;
+  font-weight: 700;
+}
+
+.mem-plate {
+  fill: #e8c98a;
+  stroke: #fff1c9;
+  stroke-width: 1;
+}
+
+.mem-light {
+  fill: #4a3a24;
+  stroke: #8a7350;
+}
+
+.mem-light.on {
+  fill: #fff6dc;
+  stroke: #ffe7b0;
+}
+
+.mem-light-glow {
+  fill: rgba(255, 231, 176, 0.3);
+}
+
+.mem-switch {
+  fill: #3a2a16;
+  stroke: #8a7350;
+}
+
+.mem-switch.on {
+  fill: #b8924f;
+  stroke: #fff1c9;
+}
+
+.mem-switch-knob {
+  fill: #f6e6c4;
+}
+
+.mem-dust,
+.mem-post {
+  stroke: #8a7350;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.mem-book {
+  fill: #e8c98a;
+  stroke: #fff1c9;
+}
+
+.mem-runes {
+  stroke: #6b4e22;
+  stroke-width: 1.6;
+  fill: none;
+}
+
+.mem-msg-glow {
+  fill: rgba(255, 228, 160, 0.22);
+}
+
+.mem-msg-body {
+  fill: #fff6dc;
+  stroke: #b8924f;
+  stroke-width: 1;
+}
+
+.mem-msg-flap,
+.mem-msg-rays {
+  fill: none;
+  stroke: #b8924f;
+  stroke-width: 1.3;
+}
+
+.mem-msg.broadcast .mem-msg-rays {
+  stroke: #fff1c9;
+}
+
+.mem-msg-seal {
+  fill: #c0762a;
+}
+
+.mem-msg-mark {
+  font: 700 12px var(--sans);
+  fill: #6b4e22;
+}
+
+.mem-taken {
+  fill: none;
+  stroke: #fff1c9;
+  stroke-width: 2;
+}
+
+.mem-call {
+  fill: none;
+  stroke: #e8c98a;
+  stroke-width: 1.5;
+}
+
+.mem-weaver {
+  fill: #fff1c9;
+}
+
+.mem-weaver-glow {
+  fill: rgba(255, 228, 160, 0.3);
+}
+
+/* The ride-along: the map, the header card docked beside it (never over a label), the controls. */
+.ride {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 336px;
+  grid-template-rows: auto auto;
+  gap: 4px 16px;
+  width: 100%;
+}
+
+.ride-stage {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.ride .mem-map {
+  max-height: calc(100vh - 330px);
+}
+
+.ride-side {
+  align-self: start;
+  max-height: calc(100vh - 330px);
+  overflow: auto;
+  font: 13px / 1.4 var(--sans);
+}
+
+.ride-leg-count,
+.ride-step {
+  margin: 0;
+  color: #cdb58a;
+  font-size: 12px;
+}
+
+.ride-leg-title {
+  margin: 2px 0 6px;
+  font: 17px var(--display);
+  color: #f6e6c4;
+}
+
+.ride-streets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ride-streets li {
+  padding: 1px 7px;
+  border: 1px solid rgba(232, 201, 138, 0.3);
+  border-radius: 10px;
+  font-size: 11px;
+  color: #b89a68;
+}
+
+.ride-streets li[data-on="past"] {
+  color: #e2c48e;
+}
+
+.ride-streets li[data-on="yes"] {
+  background: rgba(232, 201, 138, 0.2);
+  border-color: #fff1c9;
+  color: #fff1c9;
+}
+
+.ride-card {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(28, 20, 10, 0.94);
+  border: 1px solid rgba(232, 201, 138, 0.45);
+  color: #f3e3c3;
+  font: 13px / 1.4 var(--sans);
+}
+
+.ride-layer + .ride-layer {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(232, 201, 138, 0.3);
+}
+
+.ride-layer strong,
+.ride-desk strong {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e2bd76;
+}
+
+.ride-layer {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) auto;
+  column-gap: 10px;
+  align-items: baseline;
+}
+
+.ride-layer > strong,
+.ride-layer > .ride-plain {
+  grid-column: 1 / -1;
+}
+
+.ride-row {
+  display: contents;
+}
+
+.ride-row:not([data-changed="yes"])::after {
+  content: "";
+}
+
+.ride-label {
+  color: #c9ad7c;
+}
+
+.ride-value {
+  font-family: var(--mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.ride-value small {
+  display: block;
+  color: #b89a68;
+}
+
+.ride-row[data-changed="yes"] .ride-value {
+  color: #fff1c9;
+  font-weight: 600;
+}
+
+.ride-new {
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid rgba(255, 241, 201, 0.6);
+  border-radius: 4px;
+  font-size: 10px;
+  font-style: normal;
+}
+
+.ride-plain {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.ride-note {
+  margin: 8px 0 0;
+  font-style: italic;
+  color: #f6ead2;
+}
+
+.ride-desk {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-left: 2px solid rgba(232, 201, 138, 0.5);
+}
+
+.ride-desk p {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.ride-fates {
+  margin: 6px 0 0;
+  padding: 0 0 0 16px;
+  color: #e2c48e;
+  font-size: 12px;
+}
+
+.ride-bar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ride-bar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (max-width: 760px) {
+  .ride {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The world map (0039): the way down. Readable everywhere: fog sits behind the words. */
+.glass-world {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px;
+}
+
+.world-map {
+  width: 100%;
+  max-width: 1100px;
+  height: auto;
+}
+
+.glass-world .world-map {
+  max-height: none;
+}
+
+.world-title {
+  font: 22px var(--display);
+  fill: #f3e9dc;
+}
+
+.world-place {
+  fill: rgba(255, 220, 170, 0.04);
+  stroke: rgba(255, 220, 170, 0.16);
+}
+
+.world-region[data-state="restored"] .world-place {
+  fill: rgba(94, 224, 232, 0.07);
+  stroke: rgba(94, 224, 232, 0.45);
+}
+
+.world-region-name {
+  font: 19px var(--display);
+  fill: #f3e9dc;
+}
+
+.world-region[data-state="fog"] .world-region-name,
+.world-region[data-state="mist"] .world-region-name {
+  fill: #c4b8a6;
+}
+
+.world-fog ellipse,
+.world-fog-deep {
+  fill: rgba(150, 160, 175, 0.18);
+}
+
+.world-way {
+  fill: none;
+  stroke: rgba(255, 220, 170, 0.25);
+  stroke-width: 2;
+  stroke-dasharray: 4 6;
+}
+
+.world-way.lit {
+  stroke: rgba(94, 224, 232, 0.7);
+  stroke-dasharray: none;
+}
+
+.world-step {
+  fill: #23262d;
+  stroke: #7d7466;
+  stroke-width: 2;
+}
+
+.world-floor[data-state="restored"] .world-step,
+.world-floor[data-state="here"] .world-step {
+  fill: #5ee0e8;
+  stroke: #d8fbff;
+}
+
+.world-floor[data-state="open"] .world-step {
+  fill: #3a2a16;
+  stroke: var(--amber);
+}
+
+.world-glow-in {
+  stop-color: #5ee0e8;
+  stop-opacity: 0.5;
+}
+
+.world-glow-out {
+  stop-color: #5ee0e8;
+  stop-opacity: 0;
+}
+
+.world-here {
+  fill: none;
+  stroke: #f3e9dc;
+  stroke-width: 2;
+}
+
+.world-mist {
+  fill: rgba(220, 225, 235, 0.35);
+}
+
+.world-floor-name {
+  font: 16px var(--sans);
+  fill: #f3e9dc;
+}
+
+.world-floor-state {
+  font: italic 13px var(--sans);
+  fill: #c4b8a6;
+}
+
+.world-floor[data-state="fog"] .world-floor-name {
+  fill: #b3a897;
+}
+
+.world-floor[data-state="restored"] .world-floor-state {
+  fill: #9debf0;
+}
+
+.world-floor[data-state="open"] .world-floor-state {
+  fill: var(--amber);
+}
+
+.world-deeper-name {
+  font: italic 13px var(--sans);
+  fill: #b3a897;
+}
+
+/* In a memory: the same map, in the memory's grade. */
+.world-map[data-variant="memory"] {
+  max-height: calc(100vh - 250px);
+}
+
+.world-map[data-variant="memory"] .world-title {
+  fill: #f6e6c4;
+}
+
+.world-map[data-variant="memory"] .world-region[data-state="restored"] .world-place {
+  fill: rgba(232, 201, 138, 0.08);
+  stroke: rgba(255, 231, 176, 0.5);
+}
+
+.world-map[data-variant="memory"] .world-way.lit {
+  stroke: rgba(255, 231, 176, 0.75);
+}
+
+.world-map[data-variant="memory"] .world-floor[data-state="restored"] .world-step {
+  fill: #ffe7b0;
+  stroke: #fff6dc;
+}
+
+.world-map[data-variant="memory"] .world-glow-in,
+.world-map[data-variant="memory"] .world-glow-out {
+  stop-color: #ffe7b0;
+}
+
+.world-map[data-variant="memory"] .world-floor[data-state="restored"] .world-floor-state {
+  fill: #ffe7b0;
+}
+
+/* The ending's backdrop (END1): the whole map, full screen, behind the ending card. */
+.world-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at 50% 60%, #12222a, #07090d 75%);
+}
+
+.world-backdrop .world-map {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+}
+
+.world-map[data-variant="ending"] .world-fog-deep {
+  fill: rgba(94, 224, 232, 0.16);
+}

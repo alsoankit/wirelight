@@ -20,6 +20,8 @@ export async function launch() {
 export async function tidy(p) {
   for (let k = 0; k < 12; k++) {
     if (await p.$(".lines")) await p.click(".lines button");
+    // A room's command memory (CMD-02…11): read through to its end.
+    else if (await p.$(".cmd-memory")) await p.click(".cmd-memory .panel-actions button");
     else if (await p.$(".discovery")) await p.click(".discovery .panel-actions button:not(.quiet)");
     else return;
     await p.waitForTimeout(120);
@@ -28,9 +30,12 @@ export async function tidy(p) {
 
 export async function open(p, base, room, ready = ".plate") {
   await p.goto(`${base}?room=${room}&onboarded=1`);
-  await p.waitForSelector(ready, { timeout: 20000 });
+  // Attached, not visible: the room's labels step aside while something holds the centre (a memory).
+  await p.waitForSelector(ready, { state: "attached", timeout: 20000 });
   await p.waitForTimeout(2000);
   await tidy(p);
+  // A command memory plays once the room has settled (CommandMemory.tsx): take it too.
+  if (await p.waitForSelector(".cmd-memory", { timeout: 4000 }).catch(() => null)) await tidy(p);
 }
 
 export async function won(p, name) {

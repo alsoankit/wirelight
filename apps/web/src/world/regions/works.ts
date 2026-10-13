@@ -75,6 +75,67 @@ function pipes(bag: Bag, runs: V3[][], radius = 0.06) {
   for (const run of runs) addTo(bag, "Copper", ...pipe(run, radius));
 }
 
+/**
+ * A cabinet of tiny drawers (the sorters' card index), standing on the floor against a wall: walnut,
+ * a grid of drawer fronts with brass pulls and label frames.
+ */
+function drawerCabinet(bag: Bag, wall: Wall, along: number, width = 1.2, height = 1.7, cols = 4, rows = 7) {
+  const depth = 0.42;
+  addTo(bag, "Walnut", onWall(box([width, height, depth], [0, height / 2, depth / 2]), wall, along, 0, 0.02));
+  addTo(
+    bag,
+    "DarkWood",
+    onWall(box([width + 0.08, 0.06, depth + 0.06], [0, height + 0.03, depth / 2]), wall, along, 0, 0.02),
+  );
+  const w = (width - 0.1) / cols;
+  const h = (height - 0.25) / rows;
+  for (let c = 0; c < cols; c++)
+    for (let r = 0; r < rows; r++) {
+      const x = -width / 2 + 0.05 + w * (c + 0.5);
+      const y = 0.15 + h * (r + 0.5);
+      addTo(bag, "Walnut", onWall(box([w - 0.03, h - 0.03, 0.02], [x, y, depth + 0.01]), wall, along, 0, 0.02));
+      addTo(
+        bag,
+        "Brass",
+        onWall(box([w * 0.45, h * 0.22, 0.008], [x, y + h * 0.18, depth + 0.024]), wall, along, 0, 0.02),
+      );
+      addTo(bag, "Brass", onWall(ball([x, y - h * 0.15, depth + 0.035], 0.016, 6), wall, along, 0, 0.02));
+    }
+}
+
+/** A round riveted hatch in a wall (an inspection door into the machinery). */
+function hatch(bag: Bag, wall: Wall, along: number, y: number, radius = 0.32) {
+  addTo(bag, "DarkMetal", onWall(rod([0, 0, 0], [0, 0, 0.05], radius, 20), wall, along, y, 0.0));
+  addTo(bag, "Brass", onWall(ring([0, 0, 0.05], radius, 0.025, "z", 24), wall, along, y, 0.0));
+  for (let k = 0; k < 10; k++) {
+    const a = (k / 10) * Math.PI * 2;
+    addTo(
+      bag,
+      "Brass",
+      onWall(ball([Math.cos(a) * radius * 0.85, Math.sin(a) * radius * 0.85, 0.06], 0.016, 5), wall, along, y, 0),
+    );
+  }
+  addTo(bag, "Brass", onWall(box([radius * 1.1, 0.05, 0.04], [0, 0, 0.08]), wall, along, y, 0));
+}
+
+/** Pneumatic message tubes: thin brass-collared tubes with junction boxes where they turn. */
+function tubes(bag: Bag, runs: V3[][]) {
+  for (const run of runs) {
+    for (let i = 0; i < run.length - 1; i++) addTo(bag, "Copper", rod(run[i] as V3, run[i + 1] as V3, 0.04, 8));
+    for (let i = 1; i < run.length - 1; i++) addTo(bag, "Brass", box([0.14, 0.14, 0.14], run[i] as V3));
+    const end = run[run.length - 1] as V3;
+    addTo(bag, "Brass", ball(end, 0.07, 8));
+  }
+}
+
+/** A dial-style link light beside a hall door (region-2 brief): an enamel dial with a lamp eye. */
+function doorDial(bag: Bag, wall: Wall, at: number) {
+  addTo(bag, "Brass", onWall(rod([0, 0, 0], [0, 0, 0.05], 0.13, 16), wall, at + 1.25, 2.1, 0));
+  addTo(bag, "Enamel", onWall(rod([0, 0, 0.05], [0, 0, 0.06], 0.1, 16), wall, at + 1.25, 2.1, 0));
+  addTo(bag, "DarkMetal", onWall(box([0.012, 0.08, 0.01], [0.02, 0.03, 0.07], [0, 0, -0.5]), wall, at + 1.25, 2.1, 0));
+  addTo(bag, "LampGlass", onWall(ball([0, -0.19, 0.04], 0.035, 8), wall, at + 1.25, 2.1, 0));
+}
+
 // ---------------------------------------------------------------------------------------------------
 // The Observatory (the Knight's corner of the Works)
 
@@ -104,7 +165,6 @@ export function worksObservatoryPieces(secondDoor: boolean): Placement[] {
     ...front,
     { piece: "Column_Square", position: [-4, 0, -4] },
     { piece: "Column_Square", position: [4, 0, -4], scale: 0.5 },
-    { piece: "Bricks", position: [3.1, 0, -3.0], rotationY: 0.4 },
     { piece: "Brick", position: [1.9, 0, 2.2], rotationY: 0.7 },
     { piece: "Brick", position: [1.75, 0, 2.55], rotationY: 2.0 }, // weighs down the Knight's letter
     { piece: "Bricks", position: [-3.2, 0, 3.4], rotationY: 2.1, scale: 0.8 },
@@ -147,6 +207,15 @@ export function worksObservatory(secondDoor: boolean) {
   gauge(bag, "back", 2.9, 2.55, 0.22, 0.12);
   lamp(bag, glows, "back", -2.7, 2.0);
   lamp(bag, glows, "left", -1.2, 2.0);
+  drawerCabinet(bag, "back", 3.0, 1.1, 1.5, 4, 6);
+  hatch(bag, "left", -3.0, 1.55, 0.28);
+  tubes(bag, [
+    [
+      [-3.9, 3.9, -2.2],
+      [-3.9, 3.1, -2.2],
+      [-3.9, 3.1, -0.4],
+    ],
+  ]);
   // A great gear fallen from the train, leaning against the back wall among the rubble.
   addTo(bag, "Brass", rotated(gearGeometry(0.55, 14, 0.07, 5), [3.0, 0.55, -3.55], [-0.25, 0.3, 0.2]));
   const gears: Gear[] = [
@@ -196,6 +265,8 @@ export function worksHouse() {
   ]);
   gauge(bag, "left", -2.4, 1.9, 0.22);
   lamp(bag, glows, "back", 2.8, 2.1);
+  drawerCabinet(bag, "left", 1.9, 1.3, 1.2, 5, 4);
+  hatch(bag, "back", -2.9, 1.5, 0.3);
   const gears: Gear[] = [
     { wall: "back", along: -3.2, y: 2.75, radius: 0.42, teeth: 12, spin: 1, spokes: 5 },
     { wall: "back", along: -2.5, y: 2.35, radius: 0.24, teeth: 7, spin: -1.75, out: 0.14 },
@@ -221,7 +292,22 @@ export function worksHallDressing(used: { wall: Wall; at: number }[]) {
   const bag: Bag = {};
   const glows: Glow[] = [];
   const door = (wall: Wall, at: number) => used.some((s) => s.wall === wall && s.at === at);
-  for (const s of used) worksDoorFrame(bag, s.wall, s.at);
+  for (const s of used) {
+    worksDoorFrame(bag, s.wall, s.at);
+    if (s.at < 3) doorDial(bag, s.wall, s.at);
+  }
+  // The sorters' card index and an inspection hatch, between the doors where there's wall.
+  if (!door("left", 1)) drawerCabinet(bag, "left", 1.0, 1.3, 1.7, 4, 7);
+  else if (!door("back", -1)) drawerCabinet(bag, "back", -1.0, 1.3, 1.7, 4, 7);
+  if (!door("back", 3)) hatch(bag, "back", 3.0, 1.3, 0.34);
+  tubes(bag, [
+    [
+      [-3.7, 0, 3.6],
+      [-3.7, 2.75, 3.6],
+      [-3.7, 2.75, -3.5],
+      [3.9, 2.75, -3.5],
+    ],
+  ]);
   // The upper wall: brick over the 2 m walls and the doorways' lintels, up to the gantry.
   for (const at of [-3, -1, 1, 3]) {
     for (const wall of ["back", "left"] as const) {

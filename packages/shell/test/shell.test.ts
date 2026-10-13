@@ -63,9 +63,11 @@ describe("lab send-frame", () => {
     expect(run("lab send-frame --to 02:00:00:00:00:AB").out).toEqual([
       "stdout: sent 1 frame (to 02:00:00:00:00:ab, 19 bytes)",
     ]);
-    expect(run("lab send-frame --to lantern")).toMatchObject({
+    // A machine's name stands for its first door (before Floor 2 teaches door names).
+    expect(run("lab send-frame --to lantern").out).toEqual(["stdout: sent 1 frame (to lantern, 19 bytes)"]);
+    expect(run("lab send-frame --to nowhere")).toMatchObject({
       code: 2,
-      out: ['stderr: lab send-frame: "lantern" is not a MAC address (like 02:00:00:00:00:07)'],
+      out: ['stderr: lab send-frame: "nowhere" is not a MAC address (like 02:00:00:00:00:07)'],
     });
     expect(run("lab send-frame").code).toBe(2);
   });

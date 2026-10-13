@@ -1,6 +1,6 @@
 import { landing, roomTexts } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, StrictMode, Suspense, useCallback, useState } from "react";
 import { LandingPage } from "./landing/LandingPage";
 import { reducedMotion } from "./progress/motion";
 import { useProgress } from "./progress/progress";
@@ -43,17 +43,16 @@ export function App() {
   }, []);
 
   // Going in: the descent plays (ONB-05; quick after Skip intro, ONB-07) while the game's code loads.
-  // With reduced motion, a short fade instead (ONB-06). (The tour, which Skip intro also skips, comes
-  // in a later step.)
+  // With reduced motion, a short fade instead (ONB-06).
   const start = useCallback(
     (skipIntro: boolean) => {
       void loadPlay().then((m) => m.preloadRoom());
+      setQuick(skipIntro); // Skip intro also skips the tour (ONB-07), with or without the fade
       if (reducedMotion()) {
         setStage("fading");
         setTimeout(arrive, REDUCED_FADE_MS);
         return;
       }
-      setQuick(skipIntro);
       setStage("descending");
     },
     [arrive],
@@ -61,13 +60,15 @@ export function App() {
 
   if (stage !== "game")
     return (
-      <LandingPage
-        main={main}
-        onStart={start}
-        descending={stage === "descending" ? { quick } : null}
-        fading={stage === "fading"}
-        onArrived={arrive}
-      />
+      <StrictMode>
+        <LandingPage
+          main={main}
+          onStart={start}
+          descending={stage === "descending" ? { quick } : null}
+          fading={stage === "fading"}
+          onArrived={arrive}
+        />
+      </StrictMode>
     );
   return (
     <Suspense fallback={null}>

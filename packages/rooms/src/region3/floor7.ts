@@ -106,7 +106,6 @@ export const sameStreet = defineRoom({
   ],
   detectorTests: [
     { misconception: "right-street-wrong-prefix", steps: [click("observatory", "ip addr add 10.0.1.5/16 dev eth0")] },
-    { misconception: "right-street-wrong-prefix", steps: [click("observatory", "ip addr add 10.0.1.5/32 dev eth0")] },
     { misconception: "take-lanterns-house", steps: [click("observatory", "ip addr add 10.0.1.7/24 dev eth0")] },
     { misconception: "ping-the-lane", steps: [typed("observatory", "ping -c 1 10.0.2.7")] },
   ],

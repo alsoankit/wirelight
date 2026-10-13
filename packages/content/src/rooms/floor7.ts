@@ -9,7 +9,8 @@ export const sameStreet: RoomText = {
   access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
   notes: [],
   hints: [
-    { text: "Compare your plate with lantern's." },
+    // Lantern's house is locked, so its address is read on the register in the square.
+    { text: "Compare your plate with lantern's address on the square's register." },
     { text: "The street sign on the square says which street this is." },
     {
       text: "An address is a street and a house number; the `/24` says the street is the first three numbers. Only same-street houses talk directly.",
@@ -132,7 +133,7 @@ export const census: RoomText = {
   notes: ["Census: lantern .7 · quill .12 · anvil .10 · bell .18 · moth .14"],
   hints: [
     { text: "Ping each house on the census. Note who's silent." },
-    { text: "Compare every plate's street colour." },
+    { text: "Compare the street colour on every plate, and on the census board." },
     {
       text: "Same street to talk; one address per house; ask the registry when you need one.",
       codex: "street-sign",

@@ -1,5 +1,6 @@
 import { Html } from "@react-three/drei";
 import { voice } from "@wirelight/content";
+import { streetColour } from "../play/names";
 
 // A door's plate (CORE-08): its name, its MAC address (from Floor 2) and the link light. Plates are
 // HTML so the text stays crisp at every quality tier (principle 11). Filled diamond = link up, hollow
@@ -27,7 +28,9 @@ export function Address({ cidr, streets }: { cidr: string; streets: boolean }) {
   const street = Math.min(4, Math.floor(Number(prefix) / 8));
   return (
     <span className="plate-addr">
-      <span className="street">{octets.slice(0, street).join(".")}</span>
+      <span className="street" style={{ color: streetColour(octets.slice(0, street).join(".")) }}>
+        {octets.slice(0, street).join(".")}
+      </span>
       {street < 4 && (
         <>
           .<span className="house">{octets.slice(street).join(".")}</span>

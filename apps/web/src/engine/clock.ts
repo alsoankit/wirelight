@@ -11,6 +11,18 @@ export const SCREEN_MS_PER_CROSSING = 900;
 export const SPEEDS = [0.25, 0.5, 1, 2, 4, 16, 64] as const;
 export const CROWD = 12;
 export const CROWD_RATE = 0.25;
+/**
+ * A loop (9.4): one packet crossing again and again. After LOOP_HOPS crossings of the same packet,
+ * each further crossing is followed a little faster, up to LOOP_MAX times, so 64 bounces take seconds,
+ * not minutes; the first few are still followed at the normal pace.
+ */
+export const LOOP_HOPS = 8;
+export const LOOP_MAX = 12;
+
+/** How much faster to follow a packet that has already made `hops` crossings (1 for a normal one). */
+export function loopBoost(hops: number): number {
+  return hops <= LOOP_HOPS ? 1 : Math.min(LOOP_MAX, 1 + (hops - LOOP_HOPS) / 2);
+}
 
 /** A message on a cable, from its `link.enter` event. */
 export type Crossing = {
@@ -24,6 +36,8 @@ export type Crossing = {
   summary: string;
   /** Its real bytes: for its shape and size (CORE-15) and what hovering it says (CORE-16). */
   bytes: Uint8Array;
+  /** How many crossings its packet has made so far, this one included (a loop, 9.4); 1 if not a packet. */
+  hops?: number;
 };
 
 /** Where network time should be after `screenMs` of screen time. */
@@ -31,7 +45,9 @@ export function nextNetworkTime(now: number, onCables: readonly Crossing[], scre
   if (onCables.length === 0) return now + screenMs * speed;
   // The shortest crossing sets the pace, so no message flashes past.
   const shortest = Math.min(...onCables.map((c) => Math.max(c.arriveAt - c.enter, 1e-6)));
-  const paced = (screenMs * speed * shortest) / SCREEN_MS_PER_CROSSING;
+  // Every message on the cables is a packet going round (a loop): follow it faster.
+  const boost = loopBoost(Math.min(...onCables.map((c) => c.hops ?? 1)));
+  const paced = (screenMs * speed * shortest * boost) / SCREEN_MS_PER_CROSSING;
   return now + (onCables.length > CROWD ? Math.max(paced, screenMs * speed * CROWD_RATE) : paced);
 }
 

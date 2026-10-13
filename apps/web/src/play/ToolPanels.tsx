@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSession } from "../engine/store";
 import { KeeperPanel } from "./KeeperPanel";
 import { noteMoment } from "./momentRules";
+import { arrivalText, plainSummary, sayDoor } from "./names";
 import { SlatePanel } from "./SlatePanel";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
@@ -127,34 +128,72 @@ function CardPanel() {
   );
 }
 
-const ETHERTYPE_NAME: Record<number, string> = { 2048: "IPv4", 2054: "ARP", 34997: "lab", 34998: "lab" };
+/**
+ * A catch, as the jar shows it before the Slate (Floor 6): the frame's *to* and *from* in plain words,
+ * then its message if it's a plain lab message, or one note that there's more inside, sealed. No
+ * ethertypes, no tcpdump text: those come with the Slate.
+ */
+function Opened({ layers }: { layers: SlateLayer[] }) {
+  const room = useRoom();
+  const frame = layers.find((l) => l.layer === "frame");
+  const lab = layers.find((l) => l.layer === "message" && l.kind === "lab");
+  const sealed = !lab && layers.some((l) => l.layer !== "frame");
+  return (
+    <>
+      {frame?.layer === "frame" && (
+        <dl className="catch-layer">
+          <dt>{voice.jar.frame}</dt>
+          <dd>
+            {voice.jar.to} <code>{sayDoor(frame.to, room)}</code>
+          </dd>
+          <dd>
+            {voice.jar.from} <code>{sayDoor(frame.from, room)}</code>
+          </dd>
+        </dl>
+      )}
+      {lab?.layer === "message" && lab.kind === "lab" && (
+        <dl className="catch-layer">
+          <dt>{voice.jar.message}</dt>
+          <dd>{lab.text}</dd>
+        </dl>
+      )}
+      {sealed && <p className="panel-note">{voice.jar.sealed}</p>}
+    </>
+  );
+}
 
-/** One layer of a catch, as the jar shows it before the Slate: the frame, then its message or a seal. */
-function Layer({ l, sealed }: { l: SlateLayer; sealed: boolean }) {
-  if (l.layer === "frame")
-    return (
-      <dl className="catch-layer">
-        <dt>{voice.jar.frame}</dt>
-        <dd>
-          {voice.jar.to} <code>{l.to}</code>
-        </dd>
-        <dd>
-          {voice.jar.from} <code>{l.from}</code>
-        </dd>
-        <dd>
-          {voice.jar.carrying} <code>{ETHERTYPE_NAME[l.type] ?? `0x${l.type.toString(16)}`}</code>
-        </dd>
-      </dl>
-    );
-  if (sealed) return <p className="panel-note">{voice.jar.sealed}</p>;
-  if (l.layer === "message" && l.kind === "lab")
-    return (
-      <dl className="catch-layer">
-        <dt>{voice.jar.message}</dt>
-        <dd>{l.text}</dd>
-      </dl>
-    );
-  return null;
+/**
+ * What reached the player's own doors lately (one line per door): an answer can be read here even if
+ * it wasn't caught in flight. With how many arrived, and how many of them the door ignored.
+ */
+function Arrived() {
+  const room = useRoom();
+  const here = useSession((s) => s.here);
+  const arrivals = useSession((s) => s.arrivals);
+  if (!room || !here) return null;
+  const doors = room.topology.devices.find((d) => d.id === here)?.interfaces.map((i) => i.name) ?? [];
+  const rows = doors.flatMap((door) => {
+    const a = arrivals[`${here}:${door}`];
+    return a ? [{ door, a }] : [];
+  });
+  if (rows.length === 0) return null;
+  return (
+    <>
+      <h3 className="panel-sub">{fill(voice.arrived.title, { machine: here })}</h3>
+      <ul className="arrived-list">
+        {rows.map(({ door, a }) => (
+          <li key={door}>
+            <span className="arrived-door">{door}</span> {arrivalText(a.bytes, room)}
+            <span className="arrived-count">
+              {" "}
+              · {fill(a.count === 1 ? voice.arrived.countOne : voice.arrived.count, { n: String(a.count) })}
+              {a.ignored > 0 && `, ${fill(voice.arrived.ignored, { n: String(a.ignored) })}`}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
 }
 
 /**
@@ -165,6 +204,7 @@ function Moving() {
   const here = useSession((s) => s.here);
   const onCables = useSession((s) => s.onCables);
   const catchFrame = useSession((s) => s.catchFrame);
+  const room = useRoom();
   const moving = onCables.filter((c) => c.from === here || c.to === here);
   if (moving.length === 0) return null;
   return (
@@ -174,7 +214,7 @@ function Moving() {
         {moving.map((c) => (
           <li key={c.frameId}>
             <button type="button" onClick={() => void catchFrame(c.frameId)}>
-              {voice.jar.catchThis}: {c.summary}
+              {voice.jar.catchThis}: {plainSummary(c.bytes, room)}
             </button>
           </li>
         ))}
@@ -197,12 +237,12 @@ function JarPanel({ open }: { open?: number }) {
     void openCatch(here, open, "message").then(setShown);
   }, [open, here, openCatch]);
   if (!room) return null;
-  const beforeSlate = room.floor < 6;
   return (
     <section className="panel" aria-label={voice.jar.title}>
       <h2>{voice.jar.title}</h2>
       {jar.length === 0 && <p>{voice.jar.empty}</p>}
       {room.controls.catching && <Moving />}
+      <Arrived />
       <ol className="catch-list">
         {jar.map((c) => (
           <li key={c.n}>
@@ -217,14 +257,7 @@ function JarPanel({ open }: { open?: number }) {
           </li>
         ))}
       </ol>
-      {shown?.ok &&
-        shown.layers.map((l) => (
-          <Layer
-            key={l.layer}
-            l={l}
-            sealed={beforeSlate && l.layer !== "frame" && !(l.layer === "message" && l.kind === "lab")}
-          />
-        ))}
+      {shown?.ok && <Opened layers={shown.layers} />}
       <div className="panel-actions">
         <button type="button" className="quiet" onClick={close}>
           {voice.jar.close}
@@ -264,7 +297,19 @@ function BoardPanel({
       ) : (
         <>
           <p>{board === "mac" ? voice.board.about : voice.ledger.about}</p>
-          <pre className="cmd-output">{lines.map((e) => (e.kind === "proc.output" ? e.text : "")).join("\n")}</pre>
+          <pre className="cmd-output board-output">
+            {lines.map((e, i) => {
+              const text = e.kind === "proc.output" ? e.text : "";
+              // The hall's own door names (`permanent`) are dimmed: they aren't learned (CMD-02).
+              return (
+                // biome-ignore lint/suspicious/noArrayIndexKey: the board's lines, in order
+                <span key={i} className={/\bpermanent\b/.test(text) ? "board-permanent" : undefined}>
+                  {text}
+                  {"\n"}
+                </span>
+              );
+            })}
+          </pre>
         </>
       )}
       <div className="panel-actions">
@@ -303,7 +348,7 @@ function RoutesPanel({ device, execId }: { device: string; execId?: number }) {
         {voice.routes.title} · {device}
       </h2>
       <p>{voice.routes.about}</p>
-      <pre className="cmd-output">
+      <pre className="cmd-output board-output">
         {works
           ? output.join("\n")
           : routes
@@ -342,7 +387,23 @@ function RoutesPanel({ device, execId }: { device: string; execId?: number }) {
   );
 }
 
-/** A keeper's desk in hand mode (0042): the waiting message, then the keeper's two steps by hand. */
+/** What a machine's ledger (neighbour table) says, read from the trace: address → door name, or asking. */
+function useLedger(device: string): { ip: string; mac: string | null }[] {
+  const events = useSession((s) => s.events);
+  return useMemo(() => {
+    const out = new Map<string, string | null>();
+    for (const e of events)
+      if (e.kind === "table.change" && e.table === "neigh" && e.device === device) {
+        const ip = e.key.split(" ")[0] ?? e.key;
+        const after = e.after as { mac?: string | null } | null;
+        if (e.op === "del" || !after) out.delete(ip);
+        else out.set(ip, after.mac ?? out.get(ip) ?? null);
+      }
+    return [...out].map(([ip, mac]) => ({ ip, mac }));
+  }, [events, device]);
+}
+
+/** A keeper's desk in hand mode (0042): the waiting message, then the keeper's steps by hand. */
 function DeskPanel({ device }: { device: string }) {
   const room = useRoom();
   const desk = useSession((s) => s.status?.desks[device]);
@@ -351,51 +412,106 @@ function DeskPanel({ device }: { device: string }) {
   const doors = room?.topology.devices.find((d) => d.id === device)?.interfaces.map((i) => i.name) ?? [];
   const [out, setOut] = useState("flood");
   const [mac, setMac] = useState("");
+  const [countdown, setCountdown] = useState(false);
+  const ledger = useLedger(device);
   const first = desk?.waiting[0];
-  const act = (line: string) => void exec(device, line, "click");
+  // Each send starts the next choice afresh: nothing carries over to the next frame.
+  const act = (line: string, fresh = false) => {
+    if (fresh) {
+      setOut("flood");
+      setMac("");
+      setCountdown(false);
+    }
+    void exec(device, line, "click");
+  };
+  // Identical waiting lines (the same frame again) are shown once, counted.
+  const lines: { text: string; n: number }[] = [];
+  for (const w of desk?.waiting ?? []) {
+    const text = fill(desk?.desk === "switch" ? voice.desk.frame : voice.desk.packet, {
+      from: w.from,
+      to: w.to,
+      door: w.door,
+    });
+    const last = lines.at(-1);
+    // The first line is the one being worked on: never folded into the ones behind it.
+    if (last && lines.length > 1 && last.text === text) last.n++;
+    else lines.push({ text, n: 1 });
+  }
+  const router = desk?.desk === "router";
+  const kind = router ? voice.desk.lectern : voice.desk;
   return (
-    <section className="panel" aria-label={voice.desk.title}>
-      <h2>{voice.desk.title}</h2>
+    <section className="panel desk-panel" aria-label={router ? voice.desk.lectern.title : voice.desk.title}>
+      <h2>
+        {router ? voice.desk.lectern.title : voice.desk.title} · {device}
+      </h2>
       {!desk ? (
-        <p>{voice.desk.awake}</p>
+        <p>{kind.awake}</p>
       ) : (
         <>
-          <p className="panel-note">{voice.desk.asleep}</p>
+          <p className="panel-note">{kind.asleep}</p>
           {desk.waiting.length === 0 && <p>{voice.desk.empty}</p>}
-          <ol className="catch-list">
-            {desk.waiting.map((w, i) => (
+          <ol className="catch-list desk-queue">
+            {lines.map((l, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: the desk's queue, in order
-              <li key={i}>
-                {fill(desk.desk === "switch" ? voice.desk.frame : voice.desk.packet, {
-                  from: w.from,
-                  to: w.to,
-                  door: w.door,
-                })}
+              <li key={i} data-current={i === 0 ? "yes" : "no"}>
+                {l.text}
+                {l.n > 1 && <span className="panel-note"> {fill(voice.desk.times, { n: String(l.n) })}</span>}
+                {i === 0 && <span className="desk-now"> ← {voice.desk.now}</span>}
               </li>
             ))}
           </ol>
           {first && desk.desk !== "switch" && (
-            <div className="panel-actions">
-              <button type="button" onClick={() => act(`lab keeper arp-ask ${first.to}`)}>
-                {fill(voice.desk.ask, { to: first.to })}
-              </button>
-              <label className="field inline">
-                <span>{desk.desk === "host" ? voice.desk.wrap : voice.desk.forward}</span>
-                <input
-                  value={mac}
-                  onChange={(e) => setMac(e.target.value)}
-                  placeholder="02:00:00:00:00:00"
-                  spellCheck={false}
-                />
-              </label>
-              <button
-                type="button"
-                disabled={!mac.trim()}
-                onClick={() => act(`lab keeper ${desk.desk === "host" ? "wrap" : "forward"} ${mac.trim()}`)}
-              >
-                {voice.desk.go}
-              </button>
-            </div>
+            <>
+              <div className="panel-actions">
+                <button type="button" onClick={() => act(`lab keeper arp-ask ${first.to}`)}>
+                  {fill(voice.desk.ask, { to: first.to })}
+                </button>
+              </div>
+              <div className="desk-ledger">
+                <h3 className="panel-sub">{voice.desk.ledger}</h3>
+                {ledger.length === 0 && <p className="panel-note">{voice.desk.ledgerEmpty}</p>}
+                <ul className="arrived-list">
+                  {ledger.map((l) => (
+                    <li key={l.ip}>
+                      {l.mac ? (
+                        <>
+                          {fill(voice.desk.ledgerAt, { ip: l.ip, mac: l.mac })}{" "}
+                          <button type="button" className="link inline" onClick={() => setMac(l.mac ?? "")}>
+                            {voice.desk.pick}
+                          </button>
+                        </>
+                      ) : (
+                        <span className="panel-note">{fill(voice.desk.ledgerAsking, { ip: l.ip })}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {router && (
+                <label className="radio">
+                  <input type="checkbox" checked={countdown} onChange={(e) => setCountdown(e.target.checked)} />
+                  {voice.desk.countdown}
+                </label>
+              )}
+              <div className="desk-wrap">
+                <label className="field">
+                  <span>{router ? voice.desk.wrapSend : voice.desk.wrap}</span>
+                  <input
+                    value={mac}
+                    onChange={(e) => setMac(e.target.value)}
+                    placeholder="02:00:00:00:00:00"
+                    spellCheck={false}
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={!mac.trim()}
+                  onClick={() => act(`lab keeper ${router && countdown ? "forward" : "wrap"} ${mac.trim()}`, true)}
+                >
+                  {voice.desk.go}
+                </button>
+              </div>
+            </>
           )}
           {first && desk.desk === "switch" && (
             <div className="panel-actions">
@@ -411,7 +527,7 @@ function DeskPanel({ device }: { device: string }) {
                   ))}
                 </select>
               </label>
-              <button type="button" onClick={() => act(`lab keeper send ${out}`)}>
+              <button type="button" onClick={() => act(`lab keeper send ${out}`, true)}>
                 {voice.desk.send}
               </button>
             </div>

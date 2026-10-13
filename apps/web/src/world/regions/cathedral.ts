@@ -32,7 +32,8 @@ type Bag = Record<string, BufferGeometry[]>;
 
 // Coloured light falls in from the back left, down across the floor.
 const SHAFT: V3 = [0.55, -0.85, 0.55];
-const SHAFT_TINTS = [GOLD, "#E8A08C", "#A8B8E8"];
+// Jewel-tinted shafts (ruby, sapphire, gold; kept away from cyan), strong enough to colour the floor.
+const SHAFT_TINTS = [GOLD, "#E0707E", "#7E9CE6"];
 
 function floor(seed: number): Extra[] {
   return [
@@ -83,32 +84,33 @@ function course(bag: Bag, wall: Wall, from: number, to: number, y: number, depth
 }
 
 /**
- * A winged statue, broken: on its plinth a robed figure whose shoulders and head have fallen, its two
- * great wings still folded behind; a piece of a wingtip lies beside it. (A stand-in for the stone
- * warden's kin; never a doll: no face, no arms.)
+ * A winged statue of the stone warden's kin (region-4 brief): a tall robed figure on a plinth, its
+ * hood bowed, two great wings folded behind it rising above its head, and a faint light in its eyes
+ * (the glass material: an ember in ruin, warm gold restored). Never a doll: no face, no arms.
  */
-function brokenStatue(bag: Bag, at: V3, turn: number) {
+function wardenStatue(bag: Bag, at: V3, turn: number) {
   const [x, y, z] = at;
   const r = (g: BufferGeometry) => g.rotateY(turn).translate(x, y, z);
   addTo(bag, "Stone", r(box([0.8, 0.5, 0.7], [0, 0.25, 0])));
   addTo(bag, "Highlights", r(box([0.9, 0.08, 0.8], [0, 0.52, 0])));
-  addTo(bag, "Stone", r(rod([0, 0.56, 0], [0, 1.55, 0], 0.3, 9, 0.2)));
-  addTo(bag, "Stone", r(box([0.36, 0.14, 0.3], [0.03, 1.6, 0], [0.2, 0.3, 0.25])));
+  // The robe, falling in a long taper, and the bowed, hooded head.
+  addTo(bag, "Stone", r(rod([0, 0.56, 0], [0, 1.75, 0], 0.3, 10, 0.17)));
+  addTo(bag, "Stone", r(placed(ball([0, 0, 0], 1, 10), [0, 1.9, 0.04], [0.25, 0, 0], [0.16, 0.2, 0.17])));
+  // The wings: long folded feathers of stone, tips rising above the head, spreading a little.
   for (const side of [-1, 1]) {
     addTo(
       bag,
       "Stone",
-      r(
-        placed(
-          ball([0, 0, 0], 1, 10),
-          [side * 0.17, 1.62, -0.24],
-          [0.12, side * 0.25, side * -0.1],
-          [0.08, 0.95, 0.34],
-        ),
-      ),
+      r(placed(ball([0, 0, 0], 1, 10), [side * 0.24, 1.55, -0.2], [0.1, side * 0.3, side * -0.18], [0.07, 0.95, 0.3])),
+    );
+    addTo(
+      bag,
+      "Highlights",
+      r(placed(ball([0, 0, 0], 1, 8), [side * 0.32, 1.25, -0.24], [0.08, side * 0.35, side * -0.3], [0.05, 0.6, 0.22])),
     );
   }
-  addTo(bag, "Stone", r(placed(ball([0, 0, 0], 1, 8), [0.75, 0.1, 0.3], [QUARTER, 0.6, 0.2], [0.07, 0.42, 0.2])));
+  // A faint light in its eyes.
+  for (const side of [-1, 1]) addTo(bag, "GlassGold", r(ball([side * 0.055, 1.88, 0.18], 0.018, 6)));
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -148,12 +150,12 @@ export function cathedralObservatory(secondDoor: boolean) {
   stainedWindow(bag, glows, list, "left", -2.0, 1.4);
   course(bag, "back", -3.95, -2.0, 1.0);
   course(bag, "left", -3.95, secondDoor ? -0.05 : 2.0, 1.0);
-  brokenStatue(bag, [3.0, 0, -2.9], -0.5);
+  wardenStatue(bag, [3.0, 0, -2.9], -0.5);
   return {
     placements: cathedralObservatoryPieces(secondDoor),
     extras: [...floor(1103), ...extras(bag)],
     glows,
-    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.12, restored: 0.45, pools: true },
+    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.1, restored: 0.7, pools: true },
   };
 }
 
@@ -188,7 +190,7 @@ export function cathedralHouse() {
     placements: CATHEDRAL_HOUSE_PIECES,
     extras: [...floor(2207), ...extras(bag)],
     glows,
-    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.12, restored: 0.45, pools: true },
+    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.1, restored: 0.7, pools: true },
   };
 }
 
@@ -233,6 +235,6 @@ export function cathedralHall(used: { wall: Wall; at: number }[]) {
   return {
     extras: [...floor(3301), ...extras(bag)],
     glows,
-    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.12, restored: 0.45, pools: true },
+    beams: { list, direction: SHAFT, colour: GOLD, ruined: 0.1, restored: 0.7, pools: true },
   };
 }

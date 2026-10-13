@@ -29,7 +29,7 @@ export const why48Bits: RoomText = {
   },
   debrief: {
     happened:
-      "A door's name is 48 bits long: six pairs, each pair 8 bits, enough names for every door ever made. The first three pairs say who made the door (00:1b:21 is one maker's mark); the last three are that door's own number. One bit in the very first pair says whether a person chose the name: that's why every name in these halls starts with 02. The relic's name was the factory's.",
+      "A door's name is 48 bits long. A bit is one tiny light, on or off: each pair in a name is 8 of them, and six pairs make 48, enough names for every door ever made. The first three pairs say who made the door (00:1b:21 is one maker's mark); the last three are that door's own number. One light in the very first pair says whether a person chose the name: that's why every name in these halls starts with 02. The relic's name was the factory's.",
     terms: [],
   },
   guardian: [

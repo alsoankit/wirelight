@@ -10,7 +10,8 @@ export const insideTheEnvelope: RoomText = {
   access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
   notes: ["Found this in the post office. Try it on lantern's letters."],
   hints: [
-    { text: "Pick up what's glowing on the table." },
+    // The Slate is the button at the bottom left (it replaced the jar), not an object on the table.
+    { text: "The Knight left you a new tool: the Slate, at the bottom left. Open it." },
     { text: "Catch one of lantern's sealed letters with the Slate." },
     { text: "A frame can carry another envelope inside it: a packet.", codex: "packet" },
     { text: "Open a catch, then open what's inside the frame, then what's inside that." },

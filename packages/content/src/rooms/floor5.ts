@@ -31,7 +31,8 @@ export const whereNotWho: RoomText = {
   notes: [],
   hints: [
     { text: "Lantern isn't gone. Its door is new." },
-    { text: "Look at lantern's plate, and the register on the square's wall." },
+    // Lantern's house is locked in 5.1, so its own plate can't be read: the register is the place to look.
+    { text: "Read the register on the square's wall: it lists every house's address." },
     {
       text: "A door has a name; a house has an address. The address stays when the door changes.",
       codex: "ip-address",
@@ -89,6 +90,12 @@ export const placeToLive: RoomText = {
     },
   ],
   detectors: {
+    "ping-no-address": {
+      // The same words as F5-NOTE-01 (the Knight's line after this first, failed ping).
+      note: "A house with no address can't send letters, or get answers.",
+      tried:
+        "You pinged before your house had an address: `Network is unreachable`. Nothing could leave without a return address.",
+    },
     "wrong-house": {
       note: "That answer came from your own house. Whose address did you write?",
       tried: "You gave your house lantern's address, so your pings answered themselves.",

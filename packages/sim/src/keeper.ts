@@ -24,7 +24,10 @@ import type { DeskItem, DeviceId, DeviceState, IfaceName, Ip } from "./types";
 
 export type KeeperResult =
   | { ok: true }
-  | { ok: false; error: "not-asleep" | "empty" | "bad-mac" | "bad-ip" | "no-door" | "no-route" | "wrong-desk" };
+  | {
+      ok: false;
+      error: "not-asleep" | "empty" | "bad-mac" | "bad-ip" | "no-door" | "no-route" | "wrong-desk" | "own-door";
+    };
 
 function desk(d: DeviceState): DeskItem[] {
   return d.keeper.desk;
@@ -34,6 +37,15 @@ function desk(d: DeviceState): DeskItem[] {
 export function hold(k: Kernel, device: DeviceId, item: DeskItem): void {
   const d = deviceOf(k, device);
   if (!d) return;
+  // A sleeping hall's desk holds one copy of each frame: the same frame again (a messenger calling
+  // while nobody sorts) isn't piled up, so the desk stays readable (it never leaves a mark).
+  if (
+    d.keeper.asleep === "switch" &&
+    d.keeper.desk.some((w) => w.kind === "frame" && w.hex === item.hex && w.port === item.port)
+  ) {
+    k.emit({ kind: "frame.drop", t: k.s.t, device, frameId: item.frameId, reason: "queue-full" });
+    return;
+  }
   d.keeper.desk.push(item);
   const bytes = fromHex(item.hex);
   const summary = item.kind === "frame" ? decodeEth(bytes).src : decodeIPv4(bytes).dst;
@@ -108,10 +120,14 @@ export function keeperAsk(k: Kernel, device: DeviceId, ip: Ip): KeeperResult {
   return { ok: true };
 }
 
-/** `lab keeper wrap <MAC>` (house): the waiting packet goes into a frame to that door name, and out. */
+/**
+ * `lab keeper wrap <MAC>` (house): the waiting packet goes into a frame to that door name, and out. At a
+ * router's lectern it's allowed too, skipping the countdown step (floor-8.md, 8.5: *skip-ttl* is
+ * allowed, with a warning): the packet goes on with its TTL unchanged.
+ */
 export function keeperWrap(k: Kernel, device: DeviceId, mac: string): KeeperResult {
   const d = deviceOf(k, device);
-  const bad = needs(d, "host");
+  const bad = d?.keeper.asleep === "router" ? null : needs(d, "host");
   if (bad) return bad;
   return sendHeld(k, device, d as DeviceState, mac, "wrap", false);
 }
@@ -136,6 +152,9 @@ function sendHeld(
   if (!item) return { ok: false, error: "empty" };
   const m: Mac | null = parseMac(mac);
   if (!m) return { ok: false, error: "bad-mac" };
+  // A frame belongs to one street: sending the packet on to this machine's own door name (the frame it
+  // came in) is refused (8.5, *reuse-the-frame*).
+  if (d.ifaces.some((i) => i.mac === m)) return { ok: false, error: "own-door" };
   const packet = fromHex(item.hex);
   const r = lookupRoute(d, decodeIPv4(packet).dst);
   if (!r) return { ok: false, error: "no-route" };

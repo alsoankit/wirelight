@@ -59,11 +59,11 @@ const FLOOR = [
 /** Every piece a hall can use (for preloading). */
 export const HALL_PIECES: Placement[] = [...walls(0), ...DRESSING, ...TOWN_SQUARE_PIECES, ...CATHEDRAL_HALL_PIECES];
 
+// The Works dresses its halls in its own pieces (regions/works.ts: cabinets, tubes, hatches, dials),
+// not the Overgrown Halls' crates and rubble.
 const WORKS_DRESSING: Placement[] = [
   { piece: "Column_Square", position: [-4, 0, -4] },
   { piece: "Column_Square", position: [4, 0, -4], scale: 0.5 },
-  { piece: "Bricks", position: [2.9, 0, 2.6], rotationY: 0.8, scale: 0.8 },
-  { piece: "Crate", position: [2.6, 0, -3.3], rotationY: 0.4 },
 ];
 
 export function hallLayout(doors: number, region: RegionId = 1): RoomLayout {

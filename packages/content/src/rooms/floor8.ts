@@ -163,7 +163,7 @@ export const noWayBack: RoomText = {
   hints: [
     { text: "No error means nothing turned your letter back. Where did it go?" },
     { text: "The Slate can listen at doors now. Try one at each step." },
-    { text: "A reply needs its own way back: the far house needs a route too.", codex: "default-gateway" },
+    { text: "A reply needs its own way back: the far house needs a route too.", codex: "return-path" },
     { text: "Find the door where requests arrive but nothing leaves, and give that house its way back." },
     {
       text: "Capture in vesper's room: requests arrive, nothing goes out. In vesper: `ip route add default via {crossingCloister}`.",

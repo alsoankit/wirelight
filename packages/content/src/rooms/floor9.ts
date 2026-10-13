@@ -67,7 +67,8 @@ export const twoEnvelopes: RoomText = {
 
 export const showTheWay: RoomText = {
   title: "Show the Way",
-  mission: "Wren has just moved into the bell tower. It can't reach anyone off its street, and nobody can reach it.",
+  mission:
+    "Wren has just moved into the bell tower. It can't reach anyone off its street, and nobody can reach it: show it the way, then trace a ping home.",
   notes: [],
   hints: [
     { text: "Read wren's board." },

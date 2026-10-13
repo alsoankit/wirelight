@@ -10,6 +10,7 @@ import { shellContent, voice } from "@wirelight/content";
 import type { SimEvent } from "@wirelight/sim";
 import { useEffect, useRef } from "react";
 import { ask, useSession } from "../engine/store";
+import { useProgress } from "../progress/progress";
 import { noteMoment } from "./momentRules";
 
 const RESET = "\x1b[0m";
@@ -30,15 +31,25 @@ function setOpen(v: boolean | ((o: boolean) => boolean)): void {
   s.setConsoleOpen(typeof v === "function" ? v(s.consoleOpen) : v);
 }
 
-export function Console({ device, subtitles }: { device: string; subtitles: boolean }) {
+export function Console({ device, subtitles: byRoom }: { device: string; subtitles: boolean }) {
   const open = useSession((s) => s.consoleOpen);
+  // Settings → Error subtitles (UI-17): always on or off wins over the room's rule, as in the shell.
+  const setting = useProgress((s) => s.settings.subtitles);
+  const subtitles = setting === "on" ? true : setting === "off" ? false : byRoom;
 
   const host = useRef<HTMLDivElement>(null);
   const term = useRef<Terminal | null>(null);
   const fit = useRef<FitAddon | null>(null);
   /** How many of the store's events have been written. */
   const written = useRef(0);
-  const state = useRef({ buf: "", running: null as number | null, labExecs: new Set<number>(), hi: -1, tabbed: false });
+  const state = useRef({
+    buf: "",
+    running: null as number | null,
+    labExecs: new Set<number>(),
+    background: new Set<number>(),
+    hi: -1,
+    tabbed: false,
+  });
   const events = useSession((s) => s.events);
   const dropped = useSession((s) => s.dropped);
   const roomId = useSession((s) => s.roomId);
@@ -75,7 +86,7 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
   useEffect(() => {
     term.current?.reset();
     written.current = 0;
-    state.current = { buf: "", running: null, labExecs: new Set(), hi: -1, tabbed: false };
+    state.current = { buf: "", running: null, labExecs: new Set(), background: new Set(), hi: -1, tabbed: false };
     term.current?.write(P);
   }, [roomId, device]);
 
@@ -98,6 +109,15 @@ export function Console({ device, subtitles }: { device: string; subtitles: bool
         return;
       }
       if (!("device" in e) || e.device !== device) return;
+      // The Slate's Capture listens in the background (its lines show on the Slate): one dim line
+      // here, and the prompt stays free.
+      if (e.kind === "cmd.exec" && useSession.getState().capture?.execId === e.execId) {
+        st.background.add(e.execId);
+        out += `${DIM}↳ ${e.line}  ${voice.console.onSlate}${RESET}\r\n`;
+        needPrompt = true;
+        return;
+      }
+      if ((e.kind === "proc.output" || e.kind === "proc.exit") && st.background.has(e.execId)) return;
       if (e.kind === "cmd.exec") {
         if (e.line.startsWith("lab")) st.labExecs.add(e.execId);
         // A typed line is already on screen; a click's command is shown for it (UI-07).

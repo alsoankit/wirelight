@@ -83,7 +83,7 @@ for (let i = 0; i < 2; i++) {
   await p.waitForFunction(() => document.querySelector(".panel")?.textContent?.includes("A packet from"), null, {
     timeout: 8000,
   });
-  await p.fill(".panel input", "02:00:00:00:00:17");
+  await p.fill(".panel .desk-wrap input", "02:00:00:00:00:17");
   await p.click(".panel button:has-text('Send') >> nth=-1");
   await p.waitForTimeout(900);
 }

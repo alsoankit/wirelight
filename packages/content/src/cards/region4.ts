@@ -40,6 +40,14 @@ export const REGION_4_CARDS: Card[] = [
     text: "The Slate can listen at a door and catch everything that passes, labelled, until you stop.",
   },
   {
+    // 8.4's hint 3 links it (floors/floor-8.md: "Codex: Return path"); the spec gives it no card text,
+    // so it's written from the debrief's meaning, and found through the hint rather than on arrival.
+    id: "return-path",
+    floor: 8,
+    title: "Return path",
+    text: "The way the answers come back. A reply needs a route home, just as the question needed a route there.",
+  },
+  {
     id: "lectern",
     floor: 8,
     title: "Lectern",

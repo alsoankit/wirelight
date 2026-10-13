@@ -10,8 +10,9 @@ export type DropReason = Extract<SimEvent, { kind: "frame.drop" }>["reason"];
  * A keeper explains one decision in plain words (CORE-25), built only from what really happened:
  * the decision, the table line it used, and why something was let go. Keepers never lie and never fix.
  */
-export function keeperSays(d: Decision, reason?: DropReason): string {
-  const r = d.tableRef;
+export function keeperSays(d: Decision, reason?: DropReason, name?: (mac: string) => string | undefined): string {
+  // Before Floor 2 teaches door names, a door name is said as its machine's name (`name`).
+  const r = { ...d.tableRef, dst: (d.tableRef.dst && name?.(d.tableRef.dst)) || d.tableRef.dst };
   if (d.layer === "l3") {
     const ip = r.ip ?? "?";
     if (d.decision === "deliver") return `That packet was for ${ip}. That's me, so I took it in.`;
@@ -52,6 +53,8 @@ export function keeperSays(d: Decision, reason?: DropReason): string {
 export const voice = {
   keeper: {
     name: "Keeper",
+    /** In the Cathedral (Region 4) the keeper is the navigator, at its lectern (region-4 brief). */
+    navigator: "Navigator",
     title: "The keeper",
     about: "Ask it about something it handled. It tells you exactly what it did, and why.",
     idle: "Nothing has arrived yet.",
@@ -79,7 +82,8 @@ export const voice = {
   card: {
     name: "Address card",
     title: "The messenger's card",
-    numbered: "Card {n}",
+    // 3.3 labels its cards by the hall door each letter is for (floor-3.md): Door 1 is for eth1.
+    numbered: "Door {n}",
     about: "The messenger sends to whatever is written here, again and again.",
     blank: "(blank)",
     write: "Write it on the card",
@@ -112,6 +116,8 @@ export const voice = {
   /** A keeper's desk in hand mode (0042): what waits, and the keeper's job, step by step. */
   desk: {
     name: "Keeper's desk",
+    /** Region 4's desk is the navigator's lectern. */
+    lecternName: "Lectern",
     title: "The keeper's desk",
     asleep: "The keeper has forgotten its job. Messages wait here until you do it.",
     empty: "Nothing is waiting.",
@@ -127,6 +133,26 @@ export const voice = {
     go: "Send",
     awake: "The keeper remembers its job now.",
     close: "Close",
+    /** The router's lectern (8.5): the navigator remembers every step, but isn't allowed to pass anything along. */
+    lectern: {
+      title: "The navigator's lectern",
+      asleep:
+        "The navigator isn't allowed to pass anything along, so packets for other streets wait here. You can do its job by hand.",
+      awake: "The navigator is allowed again: it passes every packet along itself.",
+    },
+    /** The frame or packet the next step acts on (the first waiting). */
+    now: "this one",
+    /** Identical frames waiting, shown once. */
+    times: "×{n}",
+    /** What the machine's ledger knows (ip neigh): a door name to pick for the new frame. */
+    ledger: "The ledger knows",
+    ledgerAt: "{ip} is at {mac}",
+    ledgerAsking: "{ip}: asked, no answer yet",
+    ledgerEmpty: "The ledger has nothing yet. Ask everyone first.",
+    pick: "Use",
+    /** The router's two separate steps (8.5): the countdown, then wrapping and sending. */
+    countdown: "Take one off its countdown first",
+    wrapSend: "Wrap it in a new frame to",
   },
   /** The Slate (0043): catches tagged and peeled; Capture (tcpdump), Trace and Compare later. */
   slate: {
@@ -152,6 +178,29 @@ export const voice = {
     changed: "changed",
     same: "same",
     empty: "Nothing caught yet.",
+    /** Capture runs in the background; the Slate remembers it. */
+    listening: "Listening at {device}'s door {door}. The console stays free.",
+    listened: "Listened at {device}'s door {door}.",
+    nothingHeard: "Nothing has crossed that door yet.",
+    /** Where a catch was made: the street it was on. */
+    onStreet: "on {street}",
+    /** A run of catches of one packet going back and forth between the same two machines (9.4). */
+    folded: "{a} ⇄ {b} ×{n}, countdown {from} → {to}",
+    countdownShort: "countdown {ttl}",
+    /** The countdown before 9.3 names it TTL (8.5 took one off it by hand). */
+    ttlPlain: "Packet: countdown",
+    /** Compare (9.1): plain labels, what changed glows. */
+    compareRows: {
+      frameTo: "Frame: to",
+      frameFrom: "Frame: from",
+      packetTo: "Packet: to",
+      packetFrom: "Packet: from",
+      ttl: "Packet: countdown (ttl)",
+      checksum: "Packet: checksum",
+      message: "Message",
+    },
+    sealedRow: "sealed",
+    catchN: "Catch {n}",
   },
   /** The capture jar (CORE-19, CORE-20): catches, opened one layer at a time. */
   jar: {
@@ -176,6 +225,8 @@ export const voice = {
     open: "open",
     hide: "hide",
     reset: "— room reset —",
+    /** The Slate's Capture runs in the background: its lines show on the Slate, not here. */
+    onSlate: "(listening on the Slate: its lines show there)",
   },
   debrief: {
     title: "Restored",
@@ -186,17 +237,25 @@ export const voice = {
   },
   /** A door's plate, opened (UI-03): its controls. {door} and {name} are filled in. */
   plate: {
-    title: "Door {door}",
+    title: "{machine} · door {door}",
     /** The plate's light, for screen readers (filled diamond, hollow diamond). */
     lightUp: "link up",
     lightDown: "link down",
     linkUp: "Link up: the cable behind this door is working.",
     linkDown: "Link down: nothing can cross this door.",
+    /** Switched on, but the cable behind it isn't working (1.3). */
+    onButDown: "Switched on · link down: the door is on, but nothing comes through the cable behind it.",
+    /** Switched off by its own switch. */
+    switchedOff: "Switched off: nothing can cross this door.",
     switchOn: "Switch the door on",
     switchOff: "Switch the door off",
     switchBroken: "The switch is cracked and stuck. It won't move.",
     unplug: "Pull the cable out",
     address: "House address",
+    /** A crossing's door (a router: more than one door, on different streets) has an address per door. */
+    doorAddress: "This door's address",
+    /** The address slot's example: a shape to copy, never an answer (192.0.2.x is never used in a room). */
+    addressExample: "like 192.0.2.40/24",
     noAddress: "No address yet.",
     addAddress: "Give this door an address",
     removeAddress: "Remove",
@@ -304,6 +363,8 @@ export const voice = {
     label: "Room controls",
     /** Said beside the notes button when a hint is ready (it also glows). */
     hintReady: "a hint is ready",
+    /** Shown for a moment after Reset room (HELP-03). */
+    resetDone: "The room is back as it was.",
   },
   /** The Knight's notes (HELP-08..10): his notes in the room, reactions, hints. */
   notes: {
@@ -311,6 +372,8 @@ export const voice = {
     hint: "Hint {n} of 5",
     nextHint: "Read the next hint",
     waiting: "The next hint isn't ready yet. Look around, try something.",
+    /** Under the hint button once the room is won: no more hints are needed here. */
+    solved: "This room is restored. No more hints needed here.",
     allRead: "That's every hint.",
     codex: "In the Codex: {card}",
     memories: "Knight's Memories",
@@ -364,6 +427,15 @@ export const voice = {
     motion: { title: "Motion", system: "Follow my system", reduced: "Reduced", full: "Full" },
     quality: { title: "Graphics", auto: "Automatic", high: "High", medium: "Medium", low: "Low", simple: "Simple" },
     replayIntro: "Replay intro",
+    /** Captions (UI-17): every spoken line is always written out; this sets how large. */
+    captions: { title: "Captions", standard: "Standard", large: "Large" },
+    /** The privacy note (UI-17, tech/quality.md): what is saved and why. */
+    privacy: {
+      title: "Privacy",
+      text: "Your progress and settings are saved only in this browser, so you can pick up where you left off. Nothing is sent anywhere: no account, no analytics, no tracking.",
+    },
+    /** In the keyring: the room a key came from. */
+    keyFrom: "from {room}",
     empty: "Nothing here yet.",
     close: "Close",
   },
@@ -372,6 +444,8 @@ export const voice = {
     name: "Keyring",
     /** For screen readers: the button, and the key arriving. */
     count: "Keyring: {n} keys",
+    /** The same, for exactly one key. */
+    countOne: "Keyring: 1 key",
     arrived: "The key: {word}",
   },
   /** Knight's Memories (0008): offered on other paths, then the one small thing to do after. */
@@ -380,8 +454,11 @@ export const voice = {
     watch: "Watch",
     later: "Not now",
     yourTurn: "Your turn: {action}.",
-    done: "That's it.",
+    /** The memory's action, done: it names what was done (never a word that sounds like a win). */
+    done: "Done: {action}.",
     dismiss: "Close",
+    /** Who speaks a Knight's memory (the memory's topic shows under it). */
+    speaker: "The Knight",
   },
   /** The gentle way back (HELP-12): the Knight's offer in a boss, on the Know a little and Know networking paths. */
   wayBack: {
@@ -404,4 +481,20 @@ export const voice = {
   send: "Send",
   /** UI-06: before the gift of the voice, a click shows the command it ran under this caption. */
   heard: "the machine heard:",
+  // ── Agent B additions ──
+  /** Saying who a message is for before door names are taught (Floor 2), and in plain words before the Slate. */
+  names: {
+    everyone: "everyone",
+    toFrom: "to {to} · from {from}",
+  },
+  /** What reached a machine's doors lately (the jar, a plate): readable without catching it in flight. */
+  arrived: {
+    title: "Arrived at {machine}'s doors lately",
+    plate: "Last arrived here",
+    countOne: "1 so far",
+    count: "{n} so far",
+    ignored: "{n} ignored (not for this door)",
+  },
+  /** Where the player is standing (the room's own machine, or the one walked into). */
+  here: "You are in: {machine}",
 };

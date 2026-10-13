@@ -119,7 +119,7 @@ const manyDoors: RoomText = {
 const keepersMemory: RoomText = {
   title: "The Keeper's Memory",
   mission:
-    "Something behind the hall's third door keeps a key. Nobody remembers its name, and the hall's board has clouded over.",
+    "Something behind the hall's third door keeps a key. Nobody remembers its door name, and the hall's board has clouded over.",
   access: { compass: SEALED, beacon: SEALED, gate: SEALED },
   notes: ["The one behind the third door has the key."],
   hints: [

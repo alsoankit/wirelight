@@ -5,9 +5,12 @@ import { create } from "zustand";
 import { speak, stopVoice } from "../audio/audio";
 import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
-import { FloorMap } from "./Glass";
+import "./memory.css";
+import { MemoryScene } from "./MemoryScene";
+import { scenes } from "./memoryScenes";
 import { useMoments } from "./momentRules";
 import { RideAlong } from "./RideAlong";
+import { floorStates, WorldMapView } from "./WorldMap";
 
 // Guardian memories in the Scrying Glass (0036, 0037, tech/rendering.md "Memories and
 // ride-alongs"): the floor as it was, in a warm sepia-gold grade with a soft vignette ("back in
@@ -108,6 +111,7 @@ function MemoryView({ show, onClose }: { show: MemoryShow; onClose: () => void }
   }, [i]);
 
   if (!memory || !chapter || !room) return null;
+  const scene = scenes[chapter.id];
   return (
     <section className="glass memory" aria-label={memory.heading} data-memory={chapter.id}>
       <header className="memory-head">
@@ -122,8 +126,14 @@ function MemoryView({ show, onClose }: { show: MemoryShow; onClose: () => void }
           {voice.memory.skip}
         </button>
       </header>
-      <div className="memory-stage">
-        {chapter.ride ? <RideAlong key={chapter.id} roomId={room.id} /> : <FloorMap room={room} mini={false} memory />}
+      <div className="memory-stage" data-kind={chapter.ride ? "ride" : scene?.world !== undefined ? "world" : "scene"}>
+        {chapter.ride ? (
+          <RideAlong key={chapter.id} floor={room.floor} />
+        ) : scene?.world !== undefined ? (
+          <WorldMapView key={chapter.id} states={floorStates({}, undefined, scene.world)} variant="memory" />
+        ) : (
+          <MemoryScene key={chapter.id} room={room} scene={scene ?? { beats: [] }} label={voice.memory.map} />
+        )}
       </div>
       <div className="memory-caption" aria-live="polite">
         <div className="lines-speaker">{memory.speaker}</div>
@@ -202,3 +212,6 @@ export function MemoryList() {
     </>
   );
 }
+
+// The play scripts open memories directly (tools/shots/play/memory-chapters.mjs).
+if (import.meta.env.DEV) (window as unknown as { __wirelightMemory?: unknown }).__wirelightMemory = { openMemory };

@@ -75,16 +75,18 @@ await p.click(".console-term");
 await p.keyboard.type("ping -c 1 10.0.2.7");
 await p.keyboard.press("Enter");
 await walk("nave", "crossing");
-await p.click("text=Keeper's desk");
+await p.click("text=Lectern");
 await p.waitForSelector(".panel button:has-text('Ask everyone')", { timeout: 10000 });
 await p.click(".panel button:has-text('Ask everyone')");
 await p.waitForTimeout(800);
-await p.fill(".panel input", "02:00:00:00:00:27");
+await p.check(".panel .radio input");
+await p.fill(".panel .desk-wrap input", "02:00:00:00:00:27");
 await p.click(".panel button:has-text('Send') >> nth=-1");
 await p.waitForFunction(() => document.querySelector(".panel")?.textContent?.includes("from 10.0.2.7"), null, {
   timeout: 15000,
 });
-await p.fill(".panel input", "02:00:00:00:00:05");
+await p.check(".panel .radio input");
+await p.fill(".panel .desk-wrap input", "02:00:00:00:00:05");
 await p.click(".panel button:has-text('Send') >> nth=-1");
 await p.waitForTimeout(800);
 await p.click(".panel .quiet");

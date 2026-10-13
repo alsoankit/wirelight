@@ -286,7 +286,7 @@ function keeper(ctx: CommandContext, args: string[]): number {
   }
 }
 
-const USAGE = 'usage: lab send-frame --to <mac> [--from <mac>] [--dev <iface>] [--msg "<text>"]';
+const USAGE = 'usage: lab send-frame --to <mac|machine> [--from <mac>] [--dev <iface>] [--msg "<text>"]';
 
 function sendFrame(ctx: CommandContext, args: string[]): number {
   const opts: Record<string, string> = {};
@@ -311,6 +311,12 @@ function sendFrame(ctx: CommandContext, args: string[]): number {
     ctx.err(USAGE);
     return 2;
   }
+  // A lab tool may name a machine instead of a door name (before Floor 2 teaches door names): the
+  // frame goes to that machine's first door.
+  const named =
+    opts.to && !parseMac(opts.to) ? ctx.sim.device(opts.to)?.ifaces.find((i) => i.kind !== "loopback") : undefined;
+  const shownTo = named ? opts.to : undefined;
+  if (named) opts.to = named.mac;
   for (const k of ["to", "from"] as const) {
     const v = opts[k];
     if (v !== undefined && !parseMac(v)) {
@@ -336,7 +342,7 @@ function sendFrame(ctx: CommandContext, args: string[]): number {
     ...(opts.from ? { from: opts.from } : {}),
   });
   if (!r.ok) return 1;
-  ctx.out(`sent 1 frame (to ${parseMac(opts.to)}, ${r.length} bytes)`);
+  ctx.out(`sent 1 frame (to ${shownTo ?? parseMac(opts.to)}, ${r.length} bytes)`);
   return 0;
 }
 

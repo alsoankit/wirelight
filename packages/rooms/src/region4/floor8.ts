@@ -97,7 +97,19 @@ export const otherStreet = defineRoom({
   glow: "symptoms",
   winCondition: all(pingAnswered("observatory", IP.crossing0), pingAnswered("vesper", IP.crossing1)),
   key: { word: keyFor(otherId), via: "mark" },
-  healthChecks: [],
+  // Nothing is broken: each side comes back to life once it has talked to the crossing.
+  healthChecks: [
+    {
+      id: "observatory-reached-crossing",
+      object: { kind: "door", device: "observatory", iface: "eth0" },
+      check: pingAnswered("observatory", IP.crossing0),
+    },
+    {
+      id: "vesper-reached-crossing",
+      object: { kind: "door", device: "vesper", iface: "eth0" },
+      check: pingAnswered("vesper", IP.crossing1),
+    },
+  ],
   teaches: ["router"],
   uses: ["subnet", "ip-address", "ping"],
   cards: ["router", "navigator"],
@@ -141,8 +153,6 @@ export const acrossTheStreet = defineRoom({
   controls: { console: "typing", routingBoards: { observatory: "works" } },
   tools: { unlock: ["ip route"] },
   glow: "symptoms",
-  // "Error: Nexthop has invalid gateway." is new here, so its subtitle shows.
-  subtitles: true,
   winCondition: pingAnswered("observatory", IP.vesper),
   key: { word: keyFor(acrossId), via: "mark" },
   healthChecks: [{ id: "gateway", object: { kind: "board", device: "observatory" }, check: observatoryGateway }],
@@ -190,8 +200,6 @@ export const directions = defineRoom({
   controls: { console: "typing", routingBoards: crackedBoards(towerTopo) },
   tools: {},
   glow: "symptoms",
-  // `Destination Net Unreachable` is new here.
-  subtitles: true,
   winCondition: pingAnswered("observatory", IP.lumen),
   key: { word: keyFor(directionsId), via: "mark" },
   healthChecks: [{ id: "crossing-knows-tower", object: { kind: "board", device: "crossing" }, check: crossingToTower }],

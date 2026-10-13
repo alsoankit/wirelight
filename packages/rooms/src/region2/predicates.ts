@@ -259,7 +259,7 @@ export function stormSeenAt(trace: readonly SimEvent[], links: string[], windowM
 /**
  * 4.3's win: the player joined a span while the halls were calm and a storm followed; then a span
  * was taken away (cut or unplugged), the halls are down to one working span, and after that cut
- * `text` reached `to` (a message got through).
+ * `to` wrote a letter (the workbench) and `text` came back (a message got through).
  */
 export function stormThenThrough(spans: SpanEnds, to: DeviceId, text: string): Predicate {
   const links = Object.keys(spans);
@@ -278,8 +278,14 @@ export function stormThenThrough(spans: SpanEnds, to: DeviceId, text: string): P
       if (c && !c.mend && c.t >= storm) cut = c.t;
     }
     if (cut === null) return false;
+    // The letter must be written after the cut: an answer to one sent into the storm doesn't count
+    // (it got through by luck, and the debrief says it was sent in the storm).
     const after = cut;
-    return f.trace.some((e) => e.kind === "app.deliver" && e.device === to && e.text === text && e.t > after);
+    const sent = f.trace.find(
+      (e) => e.kind === "cmd.exec" && e.device === to && /^lab send-frame\b/.test(e.line) && e.t >= after,
+    );
+    if (!sent) return false;
+    return f.trace.some((e) => e.kind === "app.deliver" && e.device === to && e.text === text && e.t > sent.t);
   };
 }
 

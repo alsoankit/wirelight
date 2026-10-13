@@ -3,7 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 // The first visit, as a new player, on the production build (gameplay/onboarding.md): the landing,
 // the descent, the gift of sight, the path, the tour, the Prologue won by pressing Send, then on into
 // Floor 1 and its first room won by walking to lantern's room and reading its plate. A reload then
-// resumes in that room (ONB-20).
+// goes on from there: Continue opens the next room on the path (ONB-20).
 
 /** Takes whatever waits on screen: spoken lines, discovery cards. */
 async function tidy(page: Page) {
@@ -47,13 +47,13 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
   await page.locator("button.plate").first().click();
   await expect(page.locator(".debrief")).toBeVisible({ timeout: 30_000 });
 
-  // Back later: the game resumes where it was, with nothing from the first visit again.
+  // Back later: the game goes on with the next room, with nothing from the first visit again.
   await page.reload();
   await page
     .getByRole("button", { name: /Continue/ })
     .first()
     .click();
-  await expect(page.locator(".room-title")).toHaveText("Two Rooms, One Cable", { timeout: 60_000 });
+  await expect(page.locator(".room-title")).toHaveText("The Loose Cable", { timeout: 60_000 });
   await expect(page.locator(".path-choice, .tour-card")).toHaveCount(0);
 
   expect(errors).toEqual([]);

@@ -1,5 +1,6 @@
 import { roomById } from "@wirelight/rooms";
 import { useSession } from "../engine/store";
+import { TOWN_LOOK } from "./town/palette";
 
 // Which region the room belongs to (rooms carry it: `roomById(id).region`), and each region's light
 // on the ruin dial (world/art-briefs/region-*.md). Materials follow the region too
@@ -42,11 +43,12 @@ export const LOOKS: Record<RegionId, RegionLook> = {
   // The Overgrown Halls: moonlit blue ruin, warm rune light restored.
   1: {
     background: "#0b0d12",
-    ambient: { ruined: "#4A5878", restored: "#8A7058" },
-    sky: { ruined: "#7f93c8", restored: "#a08a70" },
-    ground: { ruined: "#30343c", restored: "#3a3028" },
-    fog: { ruined: "#1E2433", restored: "#3a2d22" },
-    moon: { ruined: "#8FA8E0", restored: "#B8BCCB", strengthRuined: 1.25, strengthRestored: 0.45 },
+    // Moonlight grey-blue, not navy (brief: stone #5B6370, moon #9AA7C2, fog #2A3140).
+    ambient: { ruined: "#636b79", restored: "#8A7058" },
+    sky: { ruined: "#99a1b2", restored: "#a08a70" },
+    ground: { ruined: "#32343a", restored: "#3a3028" },
+    fog: { ruined: "#2A3140", restored: "#3a2d22" },
+    moon: { ruined: "#9AA7C2", restored: "#B8BCCB", strengthRuined: 1.25, strengthRestored: 0.45 },
     moss: { ruined: "#4b584c", restored: "#4f7a3c", amount: 1 },
     fireflies: "#D9F28A",
     dust: "#c8d2e6",
@@ -55,37 +57,30 @@ export const LOOKS: Record<RegionId, RegionLook> = {
   // haze and lamplight restored.
   2: {
     background: "#0c0c0d",
-    ambient: { ruined: "#7a7d84", restored: "#b08a62" },
-    sky: { ruined: "#b4b8be", restored: "#d6aa74" },
-    ground: { ruined: "#2e3238", restored: "#3a2c20" },
-    fog: { ruined: "#23272d", restored: "#3b2a1c" },
-    moon: { ruined: "#AAB2BC", restored: "#E3B27A", strengthRuined: 1.3, strengthRestored: 0.6 },
+    // Restored fill stays near neutral (a touch warm): amber belongs to the lamps and the metal.
+    ambient: { ruined: "#7a7d84", restored: "#aaa096" },
+    sky: { ruined: "#b4b8be", restored: "#cbbfae" },
+    ground: { ruined: "#2e3238", restored: "#33302c" },
+    fog: { ruined: "#23272d", restored: "#2c2925" },
+    moon: { ruined: "#AAB2BC", restored: "#cfc0a8", strengthRuined: 1.3, strengthRestored: 0.6 },
     moss: { ruined: "#2c2b29", restored: "#3a2a1e", amount: 0.55 },
     // Warm motes drifting up from the machines (never sparks in the face: background only).
     fireflies: "#F0B060",
     dust: "#b9bec6",
   },
-  // The Lantern Town: a blue-black town asleep in ruin; deep blue night with lamplit windows restored.
-  3: {
-    background: "#0a0c14",
-    ambient: { ruined: "#5a6488", restored: "#8a7a74" },
-    sky: { ruined: "#7a88b8", restored: "#9a96a8" },
-    ground: { ruined: "#1B1E2A", restored: "#3a3026" },
-    fog: { ruined: "#1B1E2A", restored: "#22304A" },
-    moon: { ruined: "#8FA0D0", restored: "#9fb0d8", strengthRuined: 1.5, strengthRestored: 0.5 },
-    moss: { ruined: "#55594F", restored: "#6F8F5E", amount: 0.8 },
-    fireflies: "#E8D890",
-    dust: "#c4cce0",
-  },
+  // The Lantern Town: its light lives with the town (town/palette.ts, agent D).
+  3: TOWN_LOOK,
   // The Cathedral of Crossings: cold grey-blue and echoing in ruin; warm golden shafts and incense haze
   // restored.
   4: {
     background: "#0b0b0e",
-    ambient: { ruined: "#6c7488", restored: "#706454" },
-    sky: { ruined: "#98a4ba", restored: "#988462" },
-    ground: { ruined: "#252A35", restored: "#3a2e22" },
-    fog: { ruined: "#252A35", restored: "#5C4A38" },
-    moon: { ruined: "#8a96ac", restored: "#F2CF8A", strengthRuined: 1.6, strengthRestored: 0.5 },
+    // Cold grey in ruin (brief: stone #55575E, light #7E8AA0), not navy; restored, pale sandstone
+    // under a near-neutral fill, the gold and jewel colours left to the glass and its shafts.
+    ambient: { ruined: "#6c6f77", restored: "#8e877c" },
+    sky: { ruined: "#9a9fa9", restored: "#bdb19d" },
+    ground: { ruined: "#2a2c31", restored: "#3a3229" },
+    fog: { ruined: "#2a2d33", restored: "#5C4A38" },
+    moon: { ruined: "#8e95a4", restored: "#efdcb0", strengthRuined: 1.5, strengthRestored: 0.5 },
     moss: { ruined: "#45474c", restored: "#8c7a5c", amount: 0.45 },
     fireflies: null,
     dust: "#d8ccb0",

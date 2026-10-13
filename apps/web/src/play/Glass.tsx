@@ -1,14 +1,17 @@
-import { fill, floors, keeperSays, regions, voice } from "@wirelight/content";
-import { floorDefs, type RoomDef, roomById } from "@wirelight/rooms";
+import { fill, keeperSays, voice } from "@wirelight/content";
+import { type RoomDef, roomById } from "@wirelight/rooms";
 import type { Topology } from "@wirelight/sim";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { progress } from "../engine/clock";
 import { journey } from "../engine/journey";
 import { useSession } from "../engine/store";
-import { useProgress } from "../progress/progress";
 import { messageSummary } from "../world/messageKind";
+import { RoomCommandMemory } from "./CommandMemory";
+import { CLOSE_GLASS, OPEN_GLASS } from "./keys";
 import { Memory } from "./Memory";
 import { noteMoment } from "./momentRules";
+import { arrivalText, machineNamer } from "./names";
+import { WorldMap } from "./WorldMap";
 
 // The Scrying Glass (CORE-31..33, 0064): a live map of the whole floor, view-only. Machines are
 // nodes, cables lines between doors; a corridor's state shows by shape and colour (dark: thin,
@@ -60,8 +63,60 @@ export function layout(t: Topology, start: string, w: number, h: number): Map<st
   return out;
 }
 
+type Pt = { x: number; y: number };
+/** A cable on the map: from its `a` end to its `b` end, bent when it shares its two machines with others. */
+type Curve = { a: Pt; c: Pt; b: Pt; aDevice: string };
+
+/** A point `t` (0 at `a`, 1 at `b`) along a cable's curve (a quadratic Bézier). */
+function along(k: Curve, t: number): Pt {
+  const u = 1 - t;
+  return { x: u * u * k.a.x + 2 * u * t * k.c.x + t * t * k.b.x, y: u * u * k.a.y + 2 * u * t * k.c.y + t * t * k.b.y };
+}
+
+/**
+ * Every cable's curve. Two or more cables between the same two machines (a loop, 4.3) bow apart, so
+ * each one and its door names can be seen; a single cable stays straight.
+ */
+export function curves(t: Topology, nodes: Map<string, Node>, spread: number): Map<string, Curve> {
+  const pairs = new Map<string, string[]>();
+  for (const l of t.links) {
+    const pair = [l.a.device, l.b.device].sort().join("|");
+    pairs.set(pair, [...(pairs.get(pair) ?? []), l.id]);
+  }
+  const out = new Map<string, Curve>();
+  for (const l of t.links) {
+    const a = nodes.get(l.a.device);
+    const b = nodes.get(l.b.device);
+    if (!a || !b) continue;
+    const [first] = [l.a.device, l.b.device].sort();
+    const same = pairs.get([l.a.device, l.b.device].sort().join("|")) ?? [l.id];
+    // The bend is measured across the line from the pair's first machine, so cables don't cancel out.
+    const p = first === l.a.device ? a : b;
+    const q = first === l.a.device ? b : a;
+    const len = Math.hypot(q.x - p.x, q.y - p.y) || 1;
+    const nx = -(q.y - p.y) / len;
+    const ny = (q.x - p.x) / len;
+    const bend = (same.indexOf(l.id) - (same.length - 1) / 2) * spread * 2;
+    const c = { x: (a.x + b.x) / 2 + nx * bend, y: (a.y + b.y) / 2 + ny * bend };
+    out.set(l.id, { a, c, b, aDevice: l.a.device });
+  }
+  return out;
+}
+
+/** The street (network) an address is on, like `10.0.1.0/24`. */
+export function streetOfAddress(cidr: string): string | null {
+  const [ip = "", p = "32"] = cidr.split("/");
+  const prefix = Number(p);
+  const n = ip.split(".").map(Number);
+  if (n.length !== 4 || n.some((x) => !Number.isInteger(x)) || !Number.isInteger(prefix)) return null;
+  const v = ((n[0] as number) << 24) | ((n[1] as number) << 16) | ((n[2] as number) << 8) | (n[3] as number);
+  const mask = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
+  const net = (v & mask) >>> 0;
+  return `${net >>> 24}.${(net >>> 16) & 255}.${(net >>> 8) & 255}.${net & 255}/${prefix}`;
+}
+
 /** A replayed message's place on the map: the hop it's on, and how far along (CORE-23). */
-type Replaying = { from: string; to: string; t: number } | null;
+type Replaying = { from: string; to: string; t: number; link?: string } | null;
 
 /**
  * The floor's map. `memory`: the floor as it was (0036, 0037), every corridor whole and lit, no live
@@ -82,9 +137,29 @@ export function FloorMap({
 }) {
   const here = useSession((s) => s.here);
   const corridors = useSession((s) => s.status?.corridors);
+  const doors = useSession((s) => s.status?.doors);
+  // From Floor 8 (streets joined by crossings), each street's hall is labelled with its street.
+  const streets = useMemo(() => {
+    const out = new Map<string, string>();
+    if (room.floor < 8 || !doors) return out;
+    for (const d of room.topology.devices) {
+      if (!d.bridges?.length) continue;
+      for (const l of room.topology.links) {
+        const far = l.a.device === d.id ? l.b : l.b.device === d.id ? l.a : null;
+        const addr = far ? doors[`${far.device}:${far.iface}`]?.addrs[0] : undefined;
+        const street = addr ? streetOfAddress(addr) : null;
+        if (street) {
+          out.set(d.id, street);
+          break;
+        }
+      }
+    }
+    return out;
+  }, [room, doors]);
   const W = mini ? 240 : MAP_W;
   const H = mini ? 150 : MAP_H;
   const nodes = useMemo(() => layout(room.topology, room.playerDevice, W, H), [room, W, H]);
+  const bends = useMemo(() => curves(room.topology, nodes, mini ? 9 : 34), [room, nodes, mini]);
   const dots = useRef<SVGGElement>(null);
   // Messages: drawn each frame from the session, without React (positions change every frame).
   useEffect(() => {
@@ -97,12 +172,10 @@ export function FloorMap({
         const now = status?.now ?? 0;
         const circles = onCables
           .map((c) => {
-            const a = nodes.get(c.from);
-            const b = nodes.get(c.to);
-            if (!a || !b) return "";
+            const k = bends.get(c.link);
+            if (!k) return "";
             const t = progress(c, now);
-            const x = a.x + (b.x - a.x) * t;
-            const y = a.y + (b.y - a.y) * t;
+            const { x, y } = along(k, c.from === k.aDevice ? t : 1 - t);
             return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${mini ? 2.5 : 5}" class="glass-msg" />`;
           })
           .join("");
@@ -112,7 +185,7 @@ export function FloorMap({
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
-  }, [nodes, mini, memory]);
+  }, [bends, mini, memory]);
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -121,29 +194,24 @@ export function FloorMap({
       aria-label={memory ? voice.memory.map : voice.glass.floorMap}
     >
       {room.topology.links.map((l) => {
-        const a = nodes.get(l.a.device);
-        const b = nodes.get(l.b.device);
-        if (!a || !b) return null;
+        const k = bends.get(l.id);
+        if (!k) return null;
         const state = memory ? "lit" : (corridors?.[l.id] ?? "dark");
+        const near = along(k, 0.24);
+        const far = along(k, 0.76);
         return (
           <g key={l.id}>
-            <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} className={`glass-link ${state}`} />
+            <path
+              d={`M${k.a.x},${k.a.y} Q${k.c.x},${k.c.y} ${k.b.x},${k.b.y}`}
+              className={`glass-link ${state}`}
+              fill="none"
+            />
             {!mini && (
               <>
-                <text
-                  x={a.x + (b.x - a.x) * 0.3}
-                  y={a.y + (b.y - a.y) * 0.3 - 8}
-                  textAnchor="middle"
-                  className="glass-door"
-                >
+                <text x={near.x} y={near.y - 8} textAnchor="middle" className="glass-door">
                   {l.a.iface}
                 </text>
-                <text
-                  x={a.x + (b.x - a.x) * 0.7}
-                  y={a.y + (b.y - a.y) * 0.7 - 8}
-                  textAnchor="middle"
-                  className="glass-door"
-                >
+                <text x={far.x} y={far.y - 8} textAnchor="middle" className="glass-door">
                   {l.b.iface}
                 </text>
               </>
@@ -157,8 +225,10 @@ export function FloorMap({
           const a = nodes.get(replaying.from);
           const b = nodes.get(replaying.to);
           if (!a || !b) return null;
-          const x = a.x + (b.x - a.x) * replaying.t;
-          const y = a.y + (b.y - a.y) * replaying.t;
+          const k = replaying.link ? bends.get(replaying.link) : undefined;
+          const { x, y } = k
+            ? along(k, replaying.from === k.aDevice ? replaying.t : 1 - replaying.t)
+            : { x: a.x + (b.x - a.x) * replaying.t, y: a.y + (b.y - a.y) * replaying.t };
           return (
             <g transform={`translate(${x},${y})`}>
               <circle r={7} className="glass-msg" />
@@ -179,54 +249,13 @@ export function FloorMap({
           {!mini && (
             <text y={30} textAnchor="middle" className="glass-name">
               {n.id}
+              {streets.get(n.id) && <tspan className="glass-street"> {streets.get(n.id)}</tspan>}
             </text>
           )}
         </g>
       ))}
       {children}
     </svg>
-  );
-}
-
-function WorldMap() {
-  const cleared = useProgress((s) => s.cleared);
-  const roomId = useSession((s) => s.roomId);
-  const current = roomId ? roomById(roomId)?.floor : undefined;
-  const floorDone = (n: number) => {
-    const boss = floorDefs.find((f) => f.floor === n)?.boss;
-    return n === 0 ? !!cleared["p.first-message"] : !!(boss && cleared[boss]);
-  };
-  const firstOpen = Object.values(floors).find((f) => !floorDone(f.n))?.n;
-  return (
-    <div className="glass-world">
-      {Object.values(regions).map((r) => (
-        <section key={r.n} className="glass-region">
-          <h3>{r.name}</h3>
-          <ul>
-            {Object.values(floors)
-              .filter((f) => f.region === r.n)
-              .map((f) => {
-                const state =
-                  f.n === current
-                    ? "here"
-                    : floorDone(f.n)
-                      ? "restored"
-                      : f.n === firstOpen
-                        ? "open"
-                        : firstOpen !== undefined && f.n === firstOpen + 1
-                          ? "mist"
-                          : "fog";
-                return (
-                  <li key={f.n} data-state={state}>
-                    {f.n === 0 ? f.name : `${f.n} · ${f.name}`}
-                    <span className="panel-note"> {voice.glass.states[state]}</span>
-                  </li>
-                );
-              })}
-          </ul>
-        </section>
-      ))}
-    </div>
   );
 }
 
@@ -256,14 +285,16 @@ function Replay({ room, frameId }: { room: RoomDef; frameId: number }) {
       <FloorMap
         room={room}
         mini={false}
-        replaying={hop ? { from: hop.from, to: hop.to, t: Math.min(at - step, 1) } : null}
+        replaying={hop ? { from: hop.from, to: hop.to, t: Math.min(at - step, 1), link: hop.link } : null}
       />
       <ol className="replay-steps">
         {hops.slice(0, step + 1).map((h) => (
           <li key={h.frameId}>
             <strong>{fill(voice.replay.hop, { from: h.from, to: h.to })}</strong>{" "}
-            <span className="panel-note">{messageSummary(h.bytes, room.floor)}</span>
-            {h.decision && <p className="note">{keeperSays(h.decision, h.dropped)}</p>}
+            <span className="panel-note">
+              {room.floor < 6 ? arrivalText(h.bytes, room) : messageSummary(h.bytes, room.floor)}
+            </span>
+            {h.decision && <p className="note">{keeperSays(h.decision, h.dropped, machineNamer(room))}</p>}
           </li>
         ))}
       </ol>
@@ -285,6 +316,7 @@ export function Glass() {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"floor" | "world">("floor");
   const replay = useSession((s) => s.replay);
+  const here = useSession((s) => s.here);
   const setReplay = useSession((s) => s.setReplay);
   // A replay opens the Glass on it; closing the Glass ends it.
   useEffect(() => {
@@ -303,13 +335,23 @@ export function Glass() {
       if (e.key === "g" || e.key === "G") setOpen((o) => !o);
       if (e.key === "Escape") setOpen(false);
     };
+    // Agent A hook: something else opens the Glass (the Prologue's Send, ONB-19).
+    const onOpen = () => setOpen(true);
+    const onClose = () => setOpen(false); // the debrief arrives: the restored room is the thing to see
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener(OPEN_GLASS, onOpen);
+    window.addEventListener(CLOSE_GLASS, onClose);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(OPEN_GLASS, onOpen);
+      window.removeEventListener(CLOSE_GLASS, onClose);
+    };
   }, []);
   if (!room) return <Memory />;
   return (
     <>
       <Memory />
+      <RoomCommandMemory />
       <button
         type="button"
         className="mini-glass"
@@ -319,6 +361,7 @@ export function Glass() {
         aria-label={voice.glass.open}
       >
         <FloorMap room={room} mini />
+        {here && <span className="mini-glass-here">{fill(voice.here, { machine: here })}</span>}
       </button>
       {open && replay !== null && (
         <section className="glass" aria-label={voice.replay.title}>

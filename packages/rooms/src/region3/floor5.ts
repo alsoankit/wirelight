@@ -1,6 +1,6 @@
 /** floors/floor-5.md · Addresses. From here, real IPv4: the messenger and `ping` send real echo requests. */
 import { keyFor, lanternNewDoorReply, messengerMessage } from "@wirelight/content";
-import { messengerPingAnswered, printed, ran } from "../predicates";
+import { messengerPingAnswered, printed, ran, ranBefore } from "../predicates";
 import { type Access, defineRoom, type Misconception, type SolutionStep } from "../types";
 import { answeredBy, crossedBothWays, hasAddr, pingRanFor, pingsTo, ranAfterAnswer } from "./predicates";
 import { ANVIL, BELL, IP, LANTERN, QUILL, town } from "./topology";
@@ -120,8 +120,16 @@ export const placeToLive = defineRoom({
   uses: ["ip-address"],
   cards: ["address-slot", "echo"],
   commandMemory: "CMD-04",
-  misconceptions: [wrongHouse, noPrefix, pingForever],
+  misconceptions: [
+    // The spec's flow expects this first try (CMD-04's action); it's listed under "What you tried" so
+    // the debrief can say why it failed.
+    { id: "ping-no-address", detect: ranBefore("observatory", /^ping\b/, /^ip addr add /) },
+    wrongHouse,
+    noPrefix,
+    pingForever,
+  ],
   detectorTests: [
+    { misconception: "ping-no-address", steps: [typed("observatory", "ping -c 1 10.0.1.7")] },
     {
       misconception: "wrong-house",
       steps: [click("observatory", "ip addr add 10.0.1.7/24 dev eth0"), typed("observatory", "ping -c 1 10.0.1.7")],

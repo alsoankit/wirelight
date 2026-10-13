@@ -4,9 +4,11 @@ import { useRegion } from "../region";
 import { Board } from "../room/Furniture";
 import { MachineScene } from "../room/MachineScene";
 import { houseLayout } from "./layout";
+import { HouseTraits } from "./Traits";
 
 // Another computer's room (lantern, quill…: CORE-06's computer layout), entered through its door.
-// Its light is the old lamp by the back wall.
+// Its light is the old lamp by the back wall. Each house has its own name plaque, rug and things
+// left behind (Traits.tsx), so no two look the same.
 
 const LAMP = [{ position: [-2.4, 1.9, -3.2] as [number, number, number], colour: "#FFC27A", strength: 3.2 }];
 
@@ -18,6 +20,7 @@ export function HouseScene({ device }: { device: string }) {
     <MachineScene device={device} layout={layout} barred={barred} glows={LAMP}>
       <Board device={device} kind="routes" at={[2.5, 0, 2.2]} turn={-0.6} />
       <Board device={device} kind="ledger" at={[-2.6, 0, 1.9]} turn={0.7} />
+      <HouseTraits device={device} region={region} />
     </MachineScene>
   );
 }

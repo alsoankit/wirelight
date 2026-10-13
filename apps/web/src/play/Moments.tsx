@@ -16,8 +16,19 @@ import { useProgress } from "../progress/progress";
 import { useDialogFocus } from "./focus";
 import { useElapsed, useNewPath } from "./hints";
 import { type Line, Lines } from "./Lines";
-import { journalShows, matchingRoom, memoriesDue, readEvents, readView, ruleFor, useMoments } from "./momentRules";
+import {
+  journalShows,
+  linesDue,
+  matchingRoom,
+  memoriesDue,
+  readEvents,
+  readView,
+  ruleFor,
+  useMoments,
+} from "./momentRules";
+import { RichText } from "./RichText";
 import { goToRoom } from "./RoomHud";
+import { WorldBackdrop } from "./WorldMap";
 
 // The game-feel moments around a room (CORE-36, CORE-45, HELP-12, 0008, END1): the key flying to the
 // keyring, region arrivals and boss introductions, Knight's Memories when their moment comes (with
@@ -102,10 +113,17 @@ const ARRIVALS: Record<number, Line[]> = {
 
 const spoken = (lines: readonly Line[]): Line[] => lines.map((l) => ({ ...l, speaker: capital(l.speaker) }));
 
-/** What plays when the room opens: the region's arrival (once), then a boss's introduction (once). */
-function startLines(room: RoomDef, seen: readonly string[]): Line[] {
+/** A region's arrival waits this long for the player to step into its hall before it plays anyway. */
+const ARRIVAL_WAIT_MS = 40_000;
+
+/**
+ * What plays when the room opens: a boss's introduction (once), and the region's arrival (once),
+ * the first time the player steps into the region's hall (or after a while if they don't), never
+ * as a pile of lines before the first move.
+ */
+function startLines(room: RoomDef, seen: readonly string[], inHall: boolean): Line[] {
   const arrival = ARRIVALS[room.region] ?? [];
-  const arrive = arrival[0] && !seen.includes(arrival[0].id) ? arrival : [];
+  const arrive = arrival[0] && inHall && !seen.includes(arrival[0].id) ? arrival : [];
   const intro = (roomTexts[room.content]?.voice ?? []).filter((v) => /BOSS-01$/.test(v.id) && !seen.includes(v.id));
   return spoken([...arrive, ...intro]);
 }
@@ -129,7 +147,8 @@ export function KnightMoments() {
   const list = useMoments((s) => s.happened);
   const happened = useMemo(() => new Set(list), [list]);
   const [watching, setWatching] = useState<string | null>(null);
-  const [action, setAction] = useState<{ id: string; text: string } | null>(null);
+  const [action, setAction] = useState<{ id: string; text: string; here: string | null } | null>(null);
+  const here = useSession((s) => s.here);
 
   // A new room: nothing carries over.
   // biome-ignore lint/correctness/useExhaustiveDependencies: startedAt marks a new visit
@@ -143,15 +162,21 @@ export function KnightMoments() {
   const ctx = { happened, room, elapsedMs, moving };
   const actionRule = action ? ruleFor(action.id, "") : null;
   const actionDone = !!actionRule?.done?.(ctx);
-  // Once the room is won, the prompt has had its moment.
-  const prompt = action && !won && (
+  // Once the room is won, the prompt has had its moment; and it belongs to the machine's room where
+  // it was given (it doesn't follow the player into another room, unless walking there was the action).
+  const prompt = action && !won && (actionDone || action.here === here) && (
     <ActionPrompt key={action.id} text={action.text} done={actionDone} onClose={() => setAction(null)} />
   );
 
   // The gift's room has its own lines; nothing else plays over it.
   if (room.commandMemory === "CMD-01" && !voiceGiven) return null;
 
-  const start = startLines(room, seen);
+  // Agent B: a room's other voiced lines play when their moment comes (momentRules.ts LINE_RULES).
+  const start = [
+    // (A region's arrival never plays over a debrief: if the room was won first, it waits for the next.)
+    ...startLines(room, seen, !won && (happened.has("walked") || elapsedMs > ARRIVAL_WAIT_MS)),
+    ...spoken(linesDue(room, seen, ctx)),
+  ];
   if (start.length > 0)
     return (
       <Lines
@@ -167,7 +192,7 @@ export function KnightMoments() {
     setWatching(null);
     const rule = ruleFor(m.id, "");
     // Its action, unless it's already done (or there's none).
-    if (m.action && rule.done && !rule.done(ctx)) setAction({ id: m.id, text: m.action });
+    if (m.action && rule.done && !rule.done(ctx)) setAction({ id: m.id, text: m.action, here });
   };
   const memories = text?.memories ?? [];
   const playing = watching ? memories.find((m) => m.id === watching) : undefined;
@@ -178,7 +203,9 @@ export function KnightMoments() {
       <>
         <Lines
           key={next.id}
-          lines={[{ id: next.id, speaker: next.title, text: fill(next.text, room.vars) }]}
+          lines={[
+            { id: next.id, speaker: voice.knightMemory.speaker, title: next.title, text: fill(next.text, room.vars) },
+          ]}
           onDone={() => finish(next)}
         />
         {prompt}
@@ -218,7 +245,7 @@ function ActionPrompt({ text, done, onClose }: { text: string; done: boolean; on
   return (
     <aside className="moment-card" aria-live="polite" data-moment="action" data-done={done ? "yes" : "no"}>
       <span aria-hidden="true">{done ? "✓ " : "✦ "}</span>
-      {done ? voice.knightMemory.done : fill(voice.knightMemory.yourTurn, { action: text })}
+      {fill(done ? voice.knightMemory.done : voice.knightMemory.yourTurn, { action: text })}
       {!done && (
         <button type="button" className="quiet moment-close" onClick={onClose} aria-label={voice.knightMemory.dismiss}>
           ×
@@ -332,7 +359,7 @@ export function KeyringButton() {
       data-keyring=""
       data-landed={landed ? "yes" : "no"}
       onClick={() => openPanel({ kind: "menu", tab: "keys" })}
-      aria-label={fill(voice.keyring.count, { n: String(n) })}
+      aria-label={n === 1 ? voice.keyring.countOne : fill(voice.keyring.count, { n: String(n) })}
       title={voice.keyring.name}
     >
       <KeyIcon /> {n}
@@ -362,7 +389,9 @@ export function JournalPage() {
         <h2>{voice.journalPage.title}</h2>
         <blockquote className="journal">
           <strong>{journal.title}</strong>
-          <p>{journal.text}</p>
+          <p>
+            <RichText text={journal.text} />
+          </p>
         </blockquote>
         <p className="panel-note">{voice.journalPage.kept}</p>
         <div className="panel-actions">
@@ -411,7 +440,9 @@ export function WayBack() {
   return (
     <aside className="moment-card way-back" aria-live="polite" data-moment="way-back">
       <div className="note-label">{voice.notes.title}</div>
-      <p>{fill(voice.wayBack.text, { room: title })}</p>
+      <p>
+        <RichText text={fill(voice.wayBack.text, { room: title })} />
+      </p>
       <div className="panel-actions">
         <button
           type="button"
@@ -444,37 +475,44 @@ function EndingView() {
   const ref = useRef<HTMLElement>(null);
   useDialogFocus(ref, { trap: card, step: card });
   const lines = useMemo(() => spoken(firstReleaseEnding.lines), []);
+  // The ending plays on its own stage: the room and everything over it are gone from view.
   if (!card)
     return (
-      <Lines
-        lines={lines}
-        onDone={() => {
-          for (const l of lines) seeMemory(l.id);
-          setCard(true);
-        }}
-      />
+      <div className="ending-stage">
+        <WorldBackdrop />
+        <Lines
+          lines={lines}
+          onDone={() => {
+            for (const l of lines) seeMemory(l.id);
+            setCard(true);
+          }}
+        />
+      </div>
     );
   const c = firstReleaseEnding.card;
   return (
-    <section ref={ref} className="ending-card" role="dialog" aria-modal="true" aria-label={c.text}>
-      <p className="ending-text">{c.text}</p>
-      {next && <p className="panel-note">{voice.ending.next}</p>}
-      <div className="panel-actions">
-        <button
-          type="button"
-          onClick={() => {
-            setEnding(false);
-            useSession.getState().openPanel({ kind: "menu", tab: "dungeon" });
-          }}
-        >
-          {c.continue}
-        </button>
-        {!next && (
-          <button type="button" className="quiet" onClick={() => setNext(true)}>
-            {c.next}
+    <div className="ending-stage">
+      <WorldBackdrop />
+      <section ref={ref} className="ending-card" role="dialog" aria-modal="true" aria-label={c.text}>
+        <p className="ending-text">{c.text}</p>
+        {next && <p className="panel-note">{voice.ending.next}</p>}
+        <div className="panel-actions">
+          <button
+            type="button"
+            onClick={() => {
+              setEnding(false);
+              useSession.getState().openPanel({ kind: "menu", tab: "dungeon" });
+            }}
+          >
+            {c.continue}
           </button>
-        )}
-      </div>
-    </section>
+          {!next && (
+            <button type="button" className="quiet" onClick={() => setNext(true)}>
+              {c.next}
+            </button>
+          )}
+        </div>
+      </section>
+    </div>
   );
 }

@@ -3,6 +3,9 @@ import {
   CROWD,
   CROWD_RATE,
   type Crossing,
+  LOOP_HOPS,
+  LOOP_MAX,
+  loopBoost,
   nextNetworkTime,
   progress,
   SCREEN_MS_PER_CROSSING,
@@ -49,5 +52,16 @@ describe("the presentation clock (CORE-42)", () => {
     expect(nextNetworkTime(0, many, 1000, 1)).toBeCloseTo(1000 * CROWD_RATE);
     const few = Array.from({ length: CROWD }, () => crossing(0, 0.05));
     expect(nextNetworkTime(0, few, 1000, 1)).toBeLessThan(1);
+  });
+
+  it("follows a looping packet faster after LOOP_HOPS crossings, never more than LOOP_MAX (9.4)", () => {
+    expect(loopBoost(1)).toBe(1);
+    expect(loopBoost(LOOP_HOPS)).toBe(1);
+    expect(loopBoost(LOOP_HOPS + 4)).toBe(3);
+    expect(loopBoost(500)).toBe(LOOP_MAX);
+    const looping = { ...crossing(0, 1), hops: LOOP_HOPS + 4 };
+    expect(nextNetworkTime(0, [looping], 900, 1)).toBeCloseTo(3);
+    // One ordinary message on a cable keeps the normal pace.
+    expect(nextNetworkTime(0, [looping, crossing(0, 1)], 900, 1)).toBeCloseTo(1);
   });
 });

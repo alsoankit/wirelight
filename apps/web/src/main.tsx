@@ -22,4 +22,7 @@ const page = path.startsWith("/dev/renderer-check") ? (
   <App />
 );
 
-createRoot(root).render(<StrictMode>{page}</StrictMode>);
+// The game (App) sets its own StrictMode: around the landing and the game's HTML layer, never around
+// the 3D canvas, whose floating labels (drei's Html, a React root each) can't be unmounted inside
+// StrictMode's doubled effects without React warning ("synchronously unmount a root").
+createRoot(root).render(page.type === App ? page : <StrictMode>{page}</StrictMode>);

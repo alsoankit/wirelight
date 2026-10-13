@@ -1,11 +1,14 @@
-import { fill, floors, floorTexts, regions, roomTexts, voice } from "@wirelight/content";
+import { fill, firstReleaseEnding, floors, floorTexts, regions, roomTexts, voice } from "@wirelight/content";
 import { floorDefs, nextOnPath, roomById, rooms } from "@wirelight/rooms";
 import { useEffect, useState } from "react";
 import { winningFrame } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { takeFocusPolitely } from "./focus";
-import { openMemory } from "./Memory";
+import { closeGlass, openGlass } from "./keys";
+import { openMemory, useMemory } from "./Memory";
+import { useMoments } from "./momentRules";
+import { RichText } from "./RichText";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
@@ -16,6 +19,9 @@ const NONE: never[] = [];
 // Guardian's memories (building, floor), the journal page, and on to the next room on your path.
 
 const DEBRIEF_AFTER_MS = 2600; // let the restoration wave finish first
+
+/** The first release's last boss (9.B): its win leads into the ending (END1). */
+const LAST_BOSS = floorDefs.reduce((a, f) => (f.floor > a.floor ? f : a)).boss;
 
 /** Goes to a room: loads it, remembers it (ONB-20), and puts it in the address bar. */
 export function goToRoom(roomId: string): void {
@@ -50,6 +56,12 @@ export function RoomHud() {
 
   const room = roomId ? roomById(roomId) : undefined;
   const text = room ? roomTexts[room.content] : undefined;
+  // The finale (END1, floor-9.md): after the last boss, its floor memory plays by itself, then the
+  // ending; the debrief waits until both are over (skipping the memory still leads to the ending).
+  const endingSeen = useProgress((s) => s.memoriesSeen.includes(firstReleaseEnding.lines[0]?.id ?? ""));
+  const memoryShowing = useMemory((s) => s.show !== null);
+  const ending = useMoments((s) => s.ending);
+  const finale = !!room && room.id === LAST_BOSS && won && (!endingSeen || ending);
 
   // A page read in one room's debrief doesn't stay open into the next.
   // biome-ignore lint/correctness/useExhaustiveDependencies: a new room is the trigger
@@ -57,7 +69,16 @@ export function RoomHud() {
 
   useEffect(() => {
     if (!won) return setShowDebrief(false);
-    const timer = setTimeout(() => setShowDebrief(true), DEBRIEF_AFTER_MS);
+    const timer = setTimeout(() => {
+      setShowDebrief(true);
+      closeGlass();
+      const s = useSession.getState();
+      const r = s.roomId ? roomById(s.roomId) : undefined;
+      const seen = useProgress.getState().memoriesSeen.includes(firstReleaseEnding.lines[0]?.id ?? "");
+      if (r && r.id === LAST_BOSS && !seen) openMemory({ kind: "floor", floor: r.floor });
+      // The console steps down for the debrief (UI-02): its buttons must never sit under the console.
+      useSession.getState().setConsoleOpen(false);
+    }, DEBRIEF_AFTER_MS);
     return () => clearTimeout(timer);
   }, [won]);
 
@@ -70,6 +91,9 @@ export function RoomHud() {
       revealed: hintsOpened >= 5,
       key: room.key.word,
     });
+    // A returning player goes on from here (ONB-20): the saved place is now the next room on the path.
+    const next = nextOnPath(rooms, room.id, useProgress.getState().path ?? "new");
+    if (next) useProgress.getState().setCurrent(next.id);
   }, [won, room, fired.length, hintsOpened, clear]);
 
   if (!room || !text) return null;
@@ -85,43 +109,57 @@ export function RoomHud() {
   const capital = guardian.charAt(0).toUpperCase() + guardian.slice(1);
 
   return (
-    <div className="hud">
-      <header className="mission-card">
-        <div className="room-floor">{floors[room.floor]?.name}</div>
-        <h1 className="room-title">{text.title}</h1>
-        <p className="mission">{say(text.mission)}</p>
-      </header>
+    <>
+      <div className="hud">
+        <header className="mission-card">
+          <div className="room-floor">{floors[room.floor]?.name}</div>
+          <h1 className="room-title">{text.title}</h1>
+          <p className="mission">
+            <RichText text={say(text.mission)} />
+          </p>
+        </header>
 
-      <footer className="controls">
-        {send && (
-          <button
-            type="button"
-            className="send"
-            data-pulse={heard === null ? "yes" : "no"}
-            onClick={() => exec(send.device, send.line, "click")}
-          >
-            {voice.send}
-          </button>
-        )}
-        {heard && !voiceGiven && (
-          <div className="heard">
-            {voice.heard} <code>{heard}</code>
-          </div>
-        )}
-      </footer>
-
-      {showDebrief && (
+        <footer className="controls">
+          {send && (
+            <button
+              type="button"
+              className="send"
+              data-pulse={heard === null && !won ? "yes" : "no"}
+              onClick={() => {
+                exec(send.device, send.line, "click");
+                // The Prologue: the Glass opens so the first message can be watched there (ONB-19).
+                if (room.kind === "prologue") openGlass();
+              }}
+            >
+              {voice.send}
+            </button>
+          )}
+          {heard && !voiceGiven && (
+            <div className="heard">
+              {voice.heard} <code>{heard}</code>
+            </div>
+          )}
+        </footer>
+      </div>
+      {/* The debrief sits outside the room's layer, above the Glass and the world's labels. */}
+      {showDebrief && !finale && !memoryShowing && (
         <section ref={takeFocusPolitely} className="debrief" aria-live="polite" aria-labelledby="debrief-title">
           <h2 id="debrief-title">{voice.debrief.title}</h2>
-          <p>{say(text.debrief.happened)}</p>
+          <p>
+            <RichText text={say(text.debrief.happened)} />
+          </p>
           {text.debrief.terms.length > 0 && (
             <>
               <h3>{voice.debrief.terms}</h3>
               <dl>
                 {text.debrief.terms.map((t) => (
                   <div key={t.term}>
-                    <dt>{t.term}</dt>
-                    <dd>{say(t.meaning)}</dd>
+                    <dt>
+                      <RichText text={t.term} />
+                    </dt>
+                    <dd>
+                      <RichText text={say(t.meaning)} />
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -133,7 +171,9 @@ export function RoomHud() {
           ) : (
             <ul>
               {tried.map((t) => (
-                <li key={t}>{say(t)}</li>
+                <li key={t}>
+                  <RichText text={say(t)} />
+                </li>
               ))}
             </ul>
           )}
@@ -143,7 +183,9 @@ export function RoomHud() {
           {page && floorText && (
             <blockquote className="journal">
               <strong>{floorText.journal.title}</strong>
-              <p>{floorText.journal.text}</p>
+              <p>
+                <RichText text={floorText.journal.text} />
+              </p>
             </blockquote>
           )}
           <div className="panel-actions">
@@ -191,6 +233,6 @@ export function RoomHud() {
           </div>
         </section>
       )}
-    </div>
+    </>
   );
 }

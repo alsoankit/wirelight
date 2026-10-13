@@ -4,14 +4,25 @@ import { speak, stopVoice } from "../audio/audio";
 import { useSession } from "../engine/store";
 import { useDialogFocus } from "./focus";
 import { isTyping } from "./keys";
+import { RichText } from "./RichText";
 
 // Spoken lines (the Guardian, the Knight): one at a time, always written out with the speaker
-// (UI-20), whatever the voice setting. Enter or a click goes on; the last one calls `onDone`. Audio
-// plays from slots later (0047); a missing file plays nothing.
+// (UI-20), whatever the voice setting. Enter or a click goes on; Esc closes them all (the last one's
+// `onDone` runs either way). Audio plays from slots later (0047); a missing file plays nothing.
 
-export type Line = { id: string; speaker: string; text: string };
+/** A spoken line. `title`: what it's about, shown under the speaker (a Knight's memory's topic). */
+export type Line = { id: string; speaker: string; text: string; title?: string };
 
-export function Lines({ lines, onDone }: { lines: Line[]; onDone: () => void }) {
+export function Lines({
+  lines,
+  onDone,
+  doneLabel,
+}: {
+  lines: Line[];
+  onDone: () => void;
+  /** The last button's word, when it isn't "Close" (the gift of sight: "Accept the sight"). */
+  doneLabel?: string;
+}) {
   const [i, setI] = useState(0);
   const line = lines[i];
   const ref = useRef<HTMLElement>(null);
@@ -20,10 +31,19 @@ export function Lines({ lines, onDone }: { lines: Line[]; onDone: () => void }) 
   // Its button takes focus when the room has it, so Enter goes on (UI-18); never from someone typing.
   useDialogFocus(ref, { polite: true, step: i });
   const next = () => (i + 1 < lines.length ? setI(i + 1) : onDone());
+  const done = useRef(onDone);
+  done.current = onDone;
   // biome-ignore lint/correctness/useExhaustiveDependencies: next changes every render; the key handler only needs the latest
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTyping(e)) return;
+      if (e.key === "Escape") {
+        // Only the topmost thing closes: a dialog over the lines (the menu, a memory) takes its own Esc.
+        if (document.querySelector(".menu, .glass.memory, .cmd-memory")) return;
+        e.preventDefault();
+        done.current();
+        return;
+      }
       // Enter on another control (a plate, a door) is for that control.
       const t = e.target instanceof HTMLElement ? e.target : null;
       if (t?.closest("button, a, [role='button']") && !t.closest(".lines")) return;
@@ -42,19 +62,25 @@ export function Lines({ lines, onDone }: { lines: Line[]; onDone: () => void }) 
     return () => stopVoice();
   }, [i]);
   if (!line) return null;
+  const last = i + 1 >= lines.length;
   return (
     <section
       ref={ref}
       className="lines"
       data-raised={raised ? "yes" : "no"}
       aria-live="polite"
-      aria-label={line.speaker}
+      aria-label={line.title ? `${line.speaker}: ${line.title}` : line.speaker}
       data-line={line.id}
     >
-      <div className="lines-speaker">{line.speaker}</div>
-      <p className="lines-text">{line.text}</p>
+      <div className="lines-speaker">
+        {line.speaker}
+        {line.title && <span className="lines-title"> · {line.title}</span>}
+      </div>
+      <p className="lines-text">
+        <RichText text={line.text} />
+      </p>
       <button type="button" onClick={next}>
-        {i + 1 < lines.length ? voice.lines.next : voice.lines.done}
+        {last ? (doneLabel ?? voice.lines.done) : voice.lines.next}
       </button>
     </section>
   );

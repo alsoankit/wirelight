@@ -53,9 +53,11 @@ export const FLOORS: Record<1 | 2 | 3 | 4, Omit<FloorOptions, "size" | "seed">> 
     gap: 0.02,
   },
   4: {
-    course: [1.2, 1.2],
-    slab: [1.2, 1.2],
-    long: 0,
+    // Great dressed slabs, but laid in courses of different depths with staggered joints (one big
+    // even grid read as tiles).
+    course: [0.85, 1.3],
+    slab: [0.9, 1.6],
+    long: 0.2,
     chipped: 0.15,
     cracked: 0.12,
     sunk: 0.06,
@@ -329,7 +331,10 @@ export function makeFlagstones({
       });
       const convex = counterClockwise(outline);
       const [cx, cz] = centroid(convex);
-      if (random() >= missing && keep(cx, cz)) {
+      // A missing slab never sits in the middle of the room (it read as a black hole where the keeper
+      // and the boards stand): only near the walls and edges.
+      const nearEdge = Math.max(Math.abs(cx), Math.abs(cz)) > half - 1.6;
+      if ((random() >= missing || !nearEdge) && keep(cx, cz)) {
         // Mostly level; now and then one has sunk or tilted.
         const sunk = random() < sunkShare ? -0.02 - random() * 0.02 : 0;
         const lift = 0.02 + (random() - 0.5) * 0.012 + sunk;

@@ -1,6 +1,7 @@
 import {
   cards,
   commandMemories,
+  fill,
   floors,
   floorTexts,
   guide,
@@ -11,12 +12,14 @@ import {
   voice,
 } from "@wirelight/content";
 import { onPath, type Path, rooms } from "@wirelight/rooms";
-import { useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { type Panel, useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { CommandMemory } from "./CommandMemory";
 import { GuideVisual } from "./GuideVisual";
 import { MemoryList } from "./Memory";
+import { KeyIcon } from "./Moments";
+import { RichText } from "./RichText";
 import { goToRoom } from "./RoomHud";
 
 // The menu (M, UI-13): the dungeon (every floor and room with its status), the Codex (objects, words,
@@ -24,7 +27,8 @@ import { goToRoom } from "./RoomHud";
 // keyring and Settings (path, replay intro). A drawer from the left; Esc closes it.
 
 type Tab = NonNullable<Extract<Panel, { kind: "menu" }>["tab"]>;
-const TABS: Tab[] = ["dungeon", "codex", "guide", "keys", "settings"];
+// UI-13's order: Field Guide, Codex, the dungeon, the keyring, Settings.
+const TABS: Tab[] = ["guide", "codex", "dungeon", "keys", "settings"];
 
 function useOpened(): Set<string> {
   // A room is open when it's cleared, or it's the first on the path not yet cleared (CORE-04),
@@ -32,14 +36,17 @@ function useOpened(): Set<string> {
   const cleared = useProgress((s) => s.cleared);
   const path = useProgress((s) => (s.path ?? "new") as Path);
   const roomId = useSession((s) => s.roomId);
+  const secretsFound = useProgress((s) => s.secretsFound);
   const open = new Set(Object.keys(cleared));
   const next = rooms.find((r) => onPath(r, path) && !cleared[r.id]);
   if (next) open.add(next.id);
   if (roomId) open.add(roomId);
   // Optional rooms (off the path) open once the room after them on the path is reached.
   rooms.forEach((r, i) => {
+    if (r.kind === "secret") return; // a secret room opens when its door is found (0065)
     if (!onPath(r, path) && rooms.slice(i + 1).some((x) => open.has(x.id))) open.add(r.id);
   });
+  for (const id of secretsFound) open.add(id);
   return open;
 }
 
@@ -49,10 +56,17 @@ function Dungeon() {
   const roomId = useSession((s) => s.roomId);
   const opened = useOpened();
   const close = useSession((s) => s.closePanel);
+  const found = useProgress((s) => s.secretsFound);
+  // The one room marked "next": the first on the path not yet cleared.
+  const nextId = rooms.find((r) => onPath(r, path) && r.kind !== "secret" && !cleared[r.id])?.id;
   return (
     <div className="menu-dungeon">
       {Object.values(floors).map((f) => {
-        const mine = rooms.filter((r) => r.floor === f.n);
+        // A secret room is listed only once its door has been found in the world (0065), or it's been
+        // played: until then nothing gives it away.
+        const mine = rooms.filter(
+          (r) => r.floor === f.n && (r.kind !== "secret" || found.includes(r.id) || !!cleared[r.id] || r.id === roomId),
+        );
         return (
           <section key={f.n}>
             <h3>
@@ -61,20 +75,26 @@ function Dungeon() {
             {mine.length === 0 && <p className="panel-note">{voice.menu.status.planned}</p>}
             <ul>
               {mine.map((r) => {
-                const state = cleared[r.id]
-                  ? voice.menu.status.cleared
-                  : !onPath(r, path)
-                    ? voice.menu.status.optional
-                    : opened.has(r.id)
-                      ? voice.menu.status.next
-                      : voice.menu.status.locked;
+                const secret = r.kind === "secret";
+                const state =
+                  r.id === roomId
+                    ? null
+                    : cleared[r.id]
+                      ? voice.menu.status.cleared
+                      : secret
+                        ? voice.menu.status.optional
+                        : r.id === nextId
+                          ? voice.menu.status.next
+                          : !onPath(r, path)
+                            ? voice.menu.status.optional
+                            : voice.menu.status.locked;
                 return (
                   <li
                     key={r.id}
                     data-here={r.id === roomId ? "yes" : "no"}
                     aria-current={r.id === roomId ? "location" : undefined}
                   >
-                    <span>{roomTexts[r.content]?.title}</span> <span className="panel-note">{state}</span>
+                    <span>{roomTexts[r.content]?.title}</span> {state && <span className="panel-note">{state}</span>}
                     {r.id === roomId && <span className="panel-note"> · {voice.menu.here}</span>}
                     {opened.has(r.id) && r.id !== roomId && (
                       <button
@@ -117,7 +137,9 @@ function Codex() {
           cards[id] ? (
             <div key={id}>
               <dt>{cards[id]?.title}</dt>
-              <dd>{cards[id]?.text}</dd>
+              <dd>
+                <RichText text={cards[id]?.text} />
+              </dd>
             </div>
           ) : null,
         )}
@@ -127,8 +149,12 @@ function Codex() {
       <dl>
         {words.map(([id, t]) => (
           <div key={id}>
-            <dt>{t.term}</dt>
-            <dd>{t.meaning}</dd>
+            <dt>
+              <RichText text={t.term} />
+            </dt>
+            <dd>
+              <RichText text={t.meaning} />
+            </dd>
           </div>
         ))}
       </dl>
@@ -147,24 +173,12 @@ function Codex() {
         .map((f) => (
           <blockquote key={f.journal.page} className="journal">
             <strong>{f.journal.title}</strong>
-            <p>{f.journal.text}</p>
+            <p>
+              <RichText text={f.journal.text} />
+            </p>
           </blockquote>
         ))}
     </div>
-  );
-}
-
-/** A guide line with its `[[key]]` marks shown as key caps. */
-function WithKeys({ text }: { text: string }) {
-  const parts = text.split(/\[\[(.+?)\]\]/g);
-  // Split with a capture group: odd places are the keys.
-  return (
-    <>
-      {parts.map((part, i) =>
-        // biome-ignore lint/suspicious/noArrayIndexKey: pieces of one fixed line, in order
-        i % 2 ? <kbd key={i}>{part}</kbd> : part,
-      )}
-    </>
   );
 }
 
@@ -185,7 +199,7 @@ function Guide() {
           {shown.visual && <GuideVisual visual={shown.visual} />}
           {shown.body.map((p) => (
             <p key={p}>
-              <WithKeys text={p} />
+              <RichText text={p} />
             </p>
           ))}
         </>
@@ -207,14 +221,21 @@ function Guide() {
 
 function Keys() {
   const keys = useProgress((s) => s.keys);
+  const cleared = useProgress((s) => s.cleared);
   if (keys.length === 0) return <p className="panel-note">{voice.menu.noKeys}</p>;
   return (
     <ul className="keyring">
-      {keys.map((k) => (
-        <li key={k}>
-          <code>{k}</code>
-        </li>
-      ))}
+      {keys.map((k) => {
+        // The room it came back from (the first cleared room whose key it is).
+        const from = rooms.find((r) => r.key.word === k && cleared[r.id]) ?? rooms.find((r) => r.key.word === k);
+        const title = from ? roomTexts[from.content]?.title : undefined;
+        return (
+          <li key={k}>
+            <KeyIcon /> <code>{k}</code>
+            {title && <span className="keyring-from">{fill(voice.menu.keyFrom, { room: title })}</span>}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -243,6 +264,8 @@ function Choice<T extends string | number>({
   );
 }
 
+/** Settings in UI-17's order: path, graphics, volumes and voices, captions, error subtitles, motion,
+ * text size, replay intro, and the privacy note. */
 function Settings() {
   const path = useProgress((s) => s.path ?? "new");
   const choosePath = useProgress((s) => s.choosePath);
@@ -251,7 +274,22 @@ function Settings() {
   const set = useProgress((s) => s.setSettings);
   const m = voice.menu;
   return (
-    <div>
+    <div className="settings">
+      <h3>{voice.menu.path}</h3>
+      {pathChoice.options.map((o) => (
+        <label key={o.id} className="radio">
+          <input type="radio" name="path" checked={path === o.id} onChange={() => choosePath(o.id as Path)} />
+          <span>
+            <strong>{o.title}</strong> — {o.line}
+          </span>
+        </label>
+      ))}
+      <Choice
+        title={m.quality.title}
+        value={settings.quality}
+        options={(["auto", "high", "medium", "low", "simple"] as const).map((q) => [q, m.quality[q]])}
+        onPick={(quality) => set({ quality })}
+      />
       <h3>{m.sound}</h3>
       {(["master", "music", "effects", "voices"] as const).map((k) => (
         <label key={k} className="slider">
@@ -262,8 +300,10 @@ function Settings() {
             max={1}
             step={0.05}
             value={settings.volumes[k]}
+            style={{ "--fill": `${Math.round(settings.volumes[k] * 100)}%` } as CSSProperties}
             onChange={(e) => set({ volumes: { ...settings.volumes, [k]: Number(e.target.value) } })}
           />
+          <output className="slider-value">{Math.round(settings.volumes[k] * 100)}%</output>
         </label>
       ))}
       <Choice
@@ -276,6 +316,15 @@ function Settings() {
         onPick={(voices) => set({ voices })}
       />
       <Choice
+        title={m.captions.title}
+        value={settings.captions ?? "standard"}
+        options={[
+          ["standard", m.captions.standard],
+          ["large", m.captions.large],
+        ]}
+        onPick={(captions) => set({ captions })}
+      />
+      <Choice
         title={m.subtitles.title}
         value={settings.subtitles}
         options={[
@@ -284,16 +333,6 @@ function Settings() {
           ["off", m.subtitles.off],
         ]}
         onPick={(subtitles) => set({ subtitles })}
-      />
-      <Choice
-        title={m.textSize}
-        value={settings.textSize}
-        options={[
-          [1, "100%"],
-          [1.25, "125%"],
-          [1.5, "150%"],
-        ]}
-        onPick={(textSize) => set({ textSize })}
       />
       <Choice
         title={m.motion.title}
@@ -306,25 +345,22 @@ function Settings() {
         onPick={(motion) => set({ motion })}
       />
       <Choice
-        title={m.quality.title}
-        value={settings.quality}
-        options={(["auto", "high", "medium", "low", "simple"] as const).map((q) => [q, m.quality[q]])}
-        onPick={(quality) => set({ quality })}
+        title={m.textSize}
+        value={settings.textSize}
+        options={[
+          [1, "100%"],
+          [1.25, "125%"],
+          [1.5, "150%"],
+        ]}
+        onPick={(textSize) => set({ textSize })}
       />
-      <h3>{voice.menu.path}</h3>
-      {pathChoice.options.map((o) => (
-        <label key={o.id} className="radio">
-          <input type="radio" name="path" checked={path === o.id} onChange={() => choosePath(o.id as Path)} />
-          <span>
-            <strong>{o.title}</strong> — {o.line}
-          </span>
-        </label>
-      ))}
       <div className="panel-actions">
         <button type="button" className="quiet" onClick={replayIntro}>
           {voice.menu.replayIntro}
         </button>
       </div>
+      <h3>{m.privacy.title}</h3>
+      <p className="panel-note">{m.privacy.text}</p>
     </div>
   );
 }
@@ -346,7 +382,7 @@ export function Menu() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   if (panel?.kind !== "menu") return null;
-  const tab = panel.tab ?? "dungeon";
+  const tab = panel.tab ?? TABS[0] ?? "guide";
   return (
     <aside className="menu" aria-label={voice.menu.title}>
       <nav className="menu-tabs" aria-label={voice.menu.sections}>

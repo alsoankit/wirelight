@@ -74,11 +74,11 @@ function ruin(): Placement[] {
   ];
 }
 
-// Old statues of the weavers' beasts, broken: a fox leaning in the corner among the rubble, and a
-// stag that has toppled onto its side.
+// An old statue of the weavers' beasts, broken: a stag that has toppled onto its side. (A standing
+// fox statue behind the keeper read as the keeper itself, a cat on a plinth: playtest.)
 function statues(): Placement[] {
   return [
-    { piece: "Statue_Fox", position: [-3.0, -0.05, -2.75], rotation: [0.07, 0.75, -0.05], scale: 0.55 },
+    { piece: "Bricks", position: [-3.1, 0, -2.6], rotationY: 0.9, scale: 0.8 },
     { piece: "Statue_Stag", position: [-1.0, 0.72, 2.75], rotation: [0, -0.35, Math.PI / 2], scale: 0.45 },
     { piece: "Bricks", position: [-1.9, 0, 2.2], rotationY: 1.4, scale: 0.7 },
   ];

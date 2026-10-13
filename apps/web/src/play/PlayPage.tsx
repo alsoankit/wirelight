@@ -1,14 +1,24 @@
-import { PerformanceMonitor, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import { Canvas, useThree } from "@react-three/fiber";
 import { roomById } from "@wirelight/rooms";
-import { useEffect, useState } from "react";
+import {
+  type Dispatch,
+  memo,
+  type ReactNode,
+  type SetStateAction,
+  StrictMode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { AudioDriver } from "../audio/AudioDriver";
 import { DevPanel } from "../dev/DevPanel";
 import { EngineDriver } from "../engine/EngineDriver";
 import { ask, useSession } from "../engine/store";
 import { useHydrated, useProgress } from "../progress/progress";
+import { AutoQuality } from "../render/AutoQuality";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
-import { lower, QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
+import { QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
 import { HALL_PIECES } from "../world/hall/layout";
 import { HOUSE_PIECES } from "../world/house/layout";
 import { pieceUrl } from "../world/kit/Piece";
@@ -65,14 +75,102 @@ function Resolution({ scale }: { scale: number }) {
 /** Settings that act outside React's tree: text size, motion, error subtitles (UI-17). */
 function SettingsApplied() {
   const settings = useProgress((s) => s.settings);
+  const path = useProgress((s) => s.path);
   useEffect(() => {
     document.documentElement.style.setProperty("--ui-zoom", String(settings.textSize));
     document.documentElement.dataset.motion = settings.motion;
     document.documentElement.dataset.textSize = String(settings.textSize);
-    void ask.setSubtitles(settings.subtitles === "auto" ? null : settings.subtitles === "on");
-  }, [settings]);
+    document.documentElement.dataset.captions = settings.captions ?? "standard";
+    // Auto: the room decides, except that the New path keeps error subtitles on everywhere (0009).
+    const auto = path === "new" ? true : null;
+    void ask.setSubtitles(settings.subtitles === "auto" ? auto : settings.subtitles === "on");
+  }, [settings, path]);
   return null;
 }
+
+/** How long the quality note shows after the tier changes. */
+const QUALITY_NOTE_MS = 3000;
+
+/** Dev aid: which quality tier is showing, for a moment after it changes (never in the way). */
+function QualityNote({ tier, auto }: { tier: Tier; auto: boolean }) {
+  const [shown, setShown] = useState(false);
+  const first = useRef(true);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new tier is the trigger
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    setShown(true);
+    const id = setTimeout(() => setShown(false), QUALITY_NOTE_MS);
+    return () => clearTimeout(id);
+  }, [tier]);
+  if (!shown) return null;
+  return (
+    <div className="dev-badge" role="status">
+      Quality: {tier}
+      {auto ? " (auto)" : ""} · T to change
+    </div>
+  );
+}
+
+/**
+ * Renders its children from the scene's first frame on. The canvas's very first renders run inside
+ * the page's own commit, where a label that mounts and is then hidden again (a model still loading)
+ * can't be unmounted cleanly; from the first frame on, the scene renders on its own schedule.
+ */
+function AfterFirstFrame({ children }: { children: ReactNode }) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  return ready ? children : null;
+}
+
+/**
+ * The 3D room. Memoised, so it renders only when its own props change: the canvas's scene renders
+ * inside the page's commit whenever the canvas does, and a label (drei's Html, a React root each)
+ * leaving then makes React warn "synchronously unmount a root while rendering". The room's own
+ * changes reach the scene through its stores instead, on the scene's own schedule.
+ */
+const WorldCanvas = memo(function WorldCanvas({
+  backend,
+  dpr,
+  auto,
+  setTier,
+  arriving,
+}: {
+  backend: "webgpu" | "webgl2";
+  dpr: number;
+  auto: boolean;
+  setTier: Dispatch<SetStateAction<Tier>>;
+  arriving: boolean;
+}) {
+  return (
+    <Canvas
+      className="world"
+      // A click on the room outside anything that can be clicked steps back (UI-05). Only on the
+      // canvas itself: clicks on the room's HTML labels (plates, doorways) bubble through here too.
+      onPointerMissed={(e) => {
+        if (e.type === "click" && e.target instanceof HTMLCanvasElement) useSession.getState().closePanel();
+      }}
+      gl={nodeRendererFactory(backend)}
+      // Dev aid: the renderer, for reading draw calls and triangles from scripts.
+      onCreated={(state) => {
+        (window as unknown as { __renderer?: unknown }).__renderer = state.gl;
+      }}
+    >
+      <Resolution scale={dpr} />
+      {/* Steps down when frames stay slow and back up when they recover (agent C: render/AutoQuality). */}
+      <AutoQuality auto={auto} setTier={setTier} ceiling={backend === "webgpu" ? "high" : "medium"} />
+      <EngineDriver />
+      <AfterFirstFrame>
+        <World arriving={arriving} />
+      </AfterFirstFrame>
+    </Canvas>
+  );
+});
 
 /** `skipIntro`: the player chose Skip intro on the landing (ONB-07: no tour). */
 export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: boolean; skipIntro?: boolean }) {
@@ -107,7 +205,10 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
       if (!p.path) p.choosePath("new");
       p.finishTour();
     }
-    void load(startingRoom());
+    const first = startingRoom();
+    // Where the player is is where they'll come back to (ONB-20), from the very first room.
+    useProgress.getState().setCurrent(first);
+    void load(first);
   }, [load, hydrated]);
 
   useEffect(() => {
@@ -123,65 +224,44 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
 
   return (
     <QualityContext.Provider value={quality}>
-      <Canvas
+      <WorldCanvas
         key={backend}
-        className="world"
-        // A click on the room outside anything that can be clicked steps back (UI-05). Only on the
-        // canvas itself: clicks on the room's HTML labels (plates, doorways) bubble through here too.
-        onPointerMissed={(e) => {
-          if (e.type === "click" && e.target instanceof HTMLCanvasElement) useSession.getState().closePanel();
-        }}
-        gl={nodeRendererFactory(backend)}
-        // Dev aid: the renderer, for reading draw calls and triangles from scripts.
-        onCreated={(state) => {
-          (window as unknown as { __renderer?: unknown }).__renderer = state.gl;
-        }}
-      >
-        <Resolution scale={quality.dpr} />
-        {/* Step down when frames stay under 45 per second; never step up on its own. */}
-        <PerformanceMonitor
-          bounds={() => [45, 1000]}
-          flipflops={3}
-          onDecline={() => {
-            if (auto) setTier((t) => lower(t));
-          }}
-        />
-        <EngineDriver />
-        <World arriving={arriving} />
-      </Canvas>
-      {/* Dev aid only: which quality tier is showing (Settings has the player's choice). */}
-      {import.meta.env.DEV && (
-        <div className="dev-badge">
-          Quality: {tier}
-          {auto ? " (auto)" : ""} · T to change
-        </div>
-      )}
-      <Keyboard />
-      <AudioDriver />
-      <DevPanel />
-      <SettingsApplied />
-      <RoomHud />
-      <PlatePanel />
-      <ToolPanels />
-      <JarButton />
-      <Gift />
-      <TopBar />
-      <Glass />
-      <Menu />
-      <NotesPanel />
-      <AskPanel />
-      <Reaction />
-      {hydrated && <Onboarding skipTour={skipIntro} />}
-      {hydrated && tourDone && <DiscoveryCards />}
-      {hydrated && tourDone && <KnightMoments />}
-      <MomentsDriver />
-      <JournalPage />
-      <WayBack />
-      <KeyFlight />
-      <Ending />
-      {room && room.controls.console === "typing" && voiceGiven && (
-        <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
-      )}
+        backend={backend}
+        dpr={quality.dpr}
+        auto={auto}
+        setTier={setTier}
+        arriving={arriving}
+      />
+      {/* Dev aid only: which quality tier is showing, for a moment when it changes. */}
+      {import.meta.env.DEV && <QualityNote tier={tier} auto={auto} />}
+      <StrictMode>
+        <Keyboard />
+        <AudioDriver />
+        <DevPanel />
+        <SettingsApplied />
+        <RoomHud />
+        <PlatePanel />
+        <ToolPanels />
+        <JarButton />
+        <Gift />
+        <TopBar />
+        <Glass />
+        <Menu />
+        <NotesPanel />
+        <AskPanel />
+        <Reaction />
+        {hydrated && <Onboarding skipTour={skipIntro} />}
+        {hydrated && tourDone && <DiscoveryCards />}
+        {hydrated && tourDone && <KnightMoments />}
+        <MomentsDriver />
+        <JournalPage />
+        <WayBack />
+        <KeyFlight />
+        <Ending />
+        {room && room.controls.console === "typing" && voiceGiven && (
+          <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
+        )}
+      </StrictMode>
       {arriving && <div className="arrival-veil" />}
     </QualityContext.Provider>
   );

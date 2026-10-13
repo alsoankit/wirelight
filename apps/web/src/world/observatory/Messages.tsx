@@ -12,8 +12,9 @@ import { VIEW_DIRECTION } from "../RoomCamera";
 // comes the other way. Where it is comes only from its crossing (link.enter → link.exit) and network
 // time, never from a timer of its own. Colours above 1 make them bloom.
 
-const MESSAGE_COLOUR: [number, number, number] = [0.55, 2.6, 2.8];
-const POOL = 6; // at most this many on screen at once
+// Cyan #5EE0E8 (linear), lifted just past the bloom threshold: it glows but stays cyan, never white.
+const MESSAGE_COLOUR: [number, number, number] = [0.17, 1.12, 1.21];
+const POOL = 12; // at most this many on screen at once per cable (a storm fills them)
 
 // What the keeper reacts to, in seconds of the render clock: a message reached it; one left it.
 export type KeeperCue = { arrived: number; departed: number };

@@ -62,6 +62,12 @@ describe("3.1 · the switch, by hand", () => {
     expect(sim.trace.some((e) => e.kind === "frame.tx" && e.device === "hall")).toBe(false);
   });
 
+  it("holds one copy of the same frame: the messenger calling again doesn't pile up the desk", () => {
+    const sim = new Simulator(hall(), ASLEEP);
+    sim.advance(14_000); // the messenger's frames at 1.5 s, 7.5 s and 13.5 s
+    expect(sim.device("hall")?.keeper.desk).toHaveLength(1);
+  });
+
   it("plays the room's solution: learn, flood, learn, send back, send on; then the keeper takes over", () => {
     const sim = new Simulator(hall(), ASLEEP);
     sim.advance(2000);
@@ -217,6 +223,20 @@ describe("8.5 · forwarding by hand (the router's navigator)", () => {
     expect(sim.device("crossing")?.keeper.asleep).toBe(null);
     sim.advance(4000);
     expect(replies(sim)).toHaveLength(3);
+  });
+
+  it("refuses to send a packet on to its own door name (the frame it came in); wraps without the countdown when asked", () => {
+    const sim = new Simulator(street(), [{ kind: "keeper-asleep", device: "crossing", desk: "router" }]);
+    sim.startPing("observatory", 1, { dst: "10.0.2.7", target: "10.0.2.7", count: 1, numeric: true });
+    sim.advance(20);
+    const own = sim.device("crossing")?.ifaces[0]?.mac as string;
+    expect(sim.keeperForward("crossing", own)).toEqual({ ok: false, error: "own-door" });
+    expect(sim.device("crossing")?.keeper.desk).toHaveLength(1);
+    sim.keeperAsk("crossing", "10.0.2.7");
+    sim.advance(30);
+    // Skipping the countdown (8.5's skip-ttl) is allowed: the packet goes on with its TTL unchanged.
+    expect(sim.keeperWrap("crossing", "02:00:00:00:00:27")).toEqual({ ok: true });
+    expect(sim.device("crossing")?.keeper.desk).toHaveLength(0);
   });
 
   it("a packet with no time left dies at the lectern with 'time exceeded'", () => {

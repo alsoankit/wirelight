@@ -1,6 +1,10 @@
-import { fill, type CommandMemory as Memory, voice } from "@wirelight/content";
-import { useRef, useState } from "react";
+import { commandMemories, fill, type CommandMemory as Memory, voice } from "@wirelight/content";
+import { roomById } from "@wirelight/rooms";
+import { useEffect, useRef, useState } from "react";
+import { useSession } from "../engine/store";
+import { useProgress } from "../progress/progress";
 import { useDialogFocus } from "./focus";
+import { RichText } from "./RichText";
 
 // A command memory (0041): how a command is built word by word, its common forms, how to read its
 // output, then one action. Shown over the dimmed room; the Knight's voice later (0047).
@@ -49,7 +53,9 @@ function Marked({ text, marks }: { text: string; marks: Memory["output"]["marks"
             <dt>
               <code>{m.match}</code>
             </dt>
-            <dd>{m.meaning}</dd>
+            <dd>
+              <RichText text={m.meaning} />
+            </dd>
           </div>
         ))}
       </dl>
@@ -68,11 +74,13 @@ export function CommandMemory({ memory, onDone }: { memory: Memory; onDone: () =
   const steps = [
     <div key="roles">
       <h3>{voice.commandMemory.roles}</h3>
-      <p>{memory.intro}</p>
+      <p>
+        <RichText text={memory.intro} />
+      </p>
       <ol className="cmd-words">
         {memory.anatomy.map((w) => (
           <li key={w.word}>
-            <code>{w.word}</code> <em>({w.role})</em> — {w.meaning}
+            <code>{w.word}</code> <em>({w.role})</em> — <RichText text={w.meaning} />
           </li>
         ))}
       </ol>
@@ -82,7 +90,7 @@ export function CommandMemory({ memory, onDone }: { memory: Memory; onDone: () =
       <ul className="cmd-words">
         {memory.forms.map((f) => (
           <li key={f.line}>
-            <code>{f.line}</code> — {f.meaning}
+            <code>{f.line}</code> — <RichText text={f.meaning} />
           </li>
         ))}
       </ul>
@@ -90,11 +98,13 @@ export function CommandMemory({ memory, onDone }: { memory: Memory; onDone: () =
     <div key="output">
       <h3>{voice.commandMemory.output}</h3>
       <Marked text={memory.output.text} marks={memory.output.marks} />
-      <p className="panel-note">{memory.output.dimmed}</p>
+      <p className="panel-note">
+        <RichText text={memory.output.dimmed} />
+      </p>
     </div>,
     <div key="action">
       <p className="cmd-action">
-        {memory.action.say} <code>{memory.action.type}</code>
+        <RichText text={memory.action.say} /> <code>{memory.action.type}</code>
       </p>
     </div>,
   ];
@@ -115,5 +125,56 @@ export function CommandMemory({ memory, onDone }: { memory: Memory; onDone: () =
         </button>
       </div>
     </section>
+  );
+}
+
+/** How long a room waits, once nothing else is speaking, before its command memory plays. */
+const SETTLE_MS = 800;
+
+/**
+ * A room's command memory (0041; CMD-02 … CMD-11, the floor specs: "plays first"): once per player,
+ * when the room has settled (no spoken lines or other dialog showing), before the command is needed.
+ * CMD-01 is the gift's (Gift.tsx).
+ */
+export function RoomCommandMemory() {
+  const roomId = useSession((s) => s.roomId);
+  const room = roomId ? roomById(roomId) : undefined;
+  const voiceGiven = useSession((s) => s.voiceGiven);
+  const won = useSession((s) => s.status?.won ?? false);
+  const seen = useProgress((s) => s.memoriesSeen);
+  const seeMemory = useProgress((s) => s.seeMemory);
+  const id = room?.commandMemory;
+  const due = !!id && id !== "CMD-01" && voiceGiven && !won && !seen.includes(id);
+  const [showing, setShowing] = useState<string | null>(null);
+  useEffect(() => {
+    setShowing(null);
+    if (!due || !id) return;
+    let quietSince = performance.now();
+    const timer = setInterval(() => {
+      // Never over a spoken line, a memory or another dialog.
+      // Once the player has typed in this room it's too late to come first: it never interrupts typing
+      // (it stays in the Menu's command book).
+      if (useSession.getState().events.some((e) => e.kind === "cmd.exec" && e.source === "typed")) {
+        clearInterval(timer);
+        return;
+      }
+      if (document.querySelector(".lines, .cmd-memory, [role='dialog']")) quietSince = performance.now();
+      else if (performance.now() - quietSince > SETTLE_MS) {
+        clearInterval(timer);
+        setShowing(id);
+      }
+    }, 300);
+    return () => clearInterval(timer);
+  }, [due, id]);
+  const memory = showing ? commandMemories[showing] : undefined;
+  if (!memory || !showing) return null;
+  return (
+    <CommandMemory
+      memory={memory}
+      onDone={() => {
+        seeMemory(showing);
+        setShowing(null);
+      }}
+    />
   );
 }

@@ -4,6 +4,7 @@ import type { SimEvent } from "@wirelight/sim";
 import { useEffect, useMemo, useState } from "react";
 import { ask, useSession } from "../engine/store";
 import { messageSummary } from "../world/messageKind";
+import { arrivalText, machineNamer } from "./names";
 
 // Asking the keeper why (CORE-25): what it handled lately, and for each one, in plain words, exactly
 // what it did and the table line it used. Once the matching command is unlocked, asking also runs it
@@ -13,7 +14,9 @@ type Decision = Extract<SimEvent, { kind: "fwd.decision" }>;
 
 export function KeeperPanel({ device }: { device: string }) {
   const events = useSession((s) => s.events);
-  const floor = useSession((s) => (s.roomId ? (roomById(s.roomId)?.floor ?? 0) : 0));
+  const roomId = useSession((s) => s.roomId);
+  const room = roomId ? roomById(roomId) : undefined;
+  const floor = room?.floor ?? 0;
   const exec = useSession((s) => s.exec);
   const close = useSession((s) => s.closePanel);
   const [picked, setPicked] = useState<number | null>(null);
@@ -26,13 +29,18 @@ export function KeeperPanel({ device }: { device: string }) {
   const recent = useMemo(() => {
     const bytes = new Map<number, Uint8Array>();
     const reason = new Map<number, DropReason>();
-    const out: Decision[] = [];
+    // One line per message: a router first takes the frame in, then decides where its packet goes;
+    // the last decision is the one that says what happened to it.
+    const byFrame = new Map<number, Decision>();
     for (const e of events) {
       if (e.kind === "link.enter") bytes.set(e.frameId, e.bytes);
       if (e.kind === "frame.drop" && e.device === device) reason.set(e.frameId, e.reason as DropReason);
-      if (e.kind === "fwd.decision" && e.device === device) out.push(e);
+      if (e.kind === "fwd.decision" && e.device === device) {
+        byFrame.delete(e.frameId);
+        byFrame.set(e.frameId, e);
+      }
     }
-    return out
+    return [...byFrame.values()]
       .slice(-8)
       .reverse()
       .map((d) => ({ d, bytes: bytes.get(d.frameId), reason: reason.get(d.frameId) }));
@@ -56,7 +64,7 @@ export function KeeperPanel({ device }: { device: string }) {
       {recent.length === 0 && <p>{voice.keeper.idle}</p>}
       <ol className="catch-list">
         {recent.map(({ d, bytes }) => (
-          <li key={`${d.frameId}-${d.t}`}>
+          <li key={d.frameId}>
             <button
               type="button"
               data-open={chosen?.d === d ? "yes" : "no"}
@@ -65,7 +73,7 @@ export function KeeperPanel({ device }: { device: string }) {
             >
               {fill(voice.keeper.item, {
                 time: (d.t / 1000).toFixed(1),
-                what: bytes ? messageSummary(bytes, floor) : d.tableRef.dst,
+                what: bytes ? (floor < 6 ? arrivalText(bytes, room) : messageSummary(bytes, floor)) : d.tableRef.dst,
               })}
             </button>
           </li>
@@ -73,7 +81,7 @@ export function KeeperPanel({ device }: { device: string }) {
       </ol>
       {chosen && (
         <p className="note" aria-live="polite">
-          {keeperSays(chosen.d, chosen.reason)}
+          {keeperSays(chosen.d, chosen.reason, machineNamer(room))}
         </p>
       )}
       <div className="panel-actions">

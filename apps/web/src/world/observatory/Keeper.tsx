@@ -15,6 +15,7 @@ import { color, float, frontFacing, mix, mx_noise_float, positionLocal, smoothst
 import { MeshBasicNodeMaterial, MeshStandardNodeMaterial } from "three/webgpu";
 import { noise3 } from "../kit/bake";
 import { regionMaterial } from "../kit/regionMaterials";
+import type { RegionId } from "../region";
 import { ruinHere } from "../ruin";
 import { BREEZE, gust, windDirection } from "../wind";
 import type { KeeperCue } from "./Messages";
@@ -28,6 +29,9 @@ import type { KeeperCue } from "./Messages";
 
 type Props = {
   position: [number, number, number];
+  region?: RegionId;
+  /** Its desk holds messages it won't pass on (0042): it sleeps, head bowed, eye nearly out. */
+  asleep?: boolean;
   rest: [number, number, number]; // where it looks when nothing is moving (the doorway)
   watch: RefObject<Object3D | null>;
   cue: RefObject<KeeperCue>; // when to bow (a message arrived) and when to point (an answer left)
@@ -46,9 +50,18 @@ const eyeLevel = uniform(1);
 // in the wind.
 // Its inside (seen through the face opening) is near-black, so the face is only darkness: one
 // double-sided mesh instead of a second lining mesh.
-function clothMaterial() {
+// In the Cathedral the keeper is the navigator (region-4 brief): a pale stone-and-brass robe, never a
+// black cloak (a dark hooded figure there read as a reaper: "never horror").
+const CLOTH: Record<RegionId, { ruined: string; restored: string }> = {
+  1: { ruined: "#474c58", restored: "#5a4b3f" },
+  2: { ruined: "#4a4c50", restored: "#5b4a3c" },
+  3: { ruined: "#474c58", restored: "#5a4b3f" },
+  4: { ruined: "#8a8a8c", restored: "#cdbb98" },
+};
+
+function clothMaterial(region: RegionId) {
   const m = new MeshStandardNodeMaterial({ roughness: 1, side: DoubleSide });
-  const base = mix(color("#5a4b3f"), color("#474c58"), ruinHere);
+  const base = mix(color(CLOTH[region].restored), color(CLOTH[region].ruined), ruinHere);
   const weave = base.mul(
     mx_noise_float(positionLocal.mul(vec3(9, 2.5, 9)))
       .mul(0.08)
@@ -203,8 +216,9 @@ function Lantern() {
   );
 }
 
-// The beam of its decision (CORE-24): warm lantern-light from its eye toward the door it chose,
-// brightest at the eye, fading along its length and away over about a second. Never cyan.
+// The beam of its decision (CORE-24): a thin thread of warm lantern-light from its eye toward the door
+// it chose, brightest at the eye, fading along its length and away over about a second. Never cyan,
+// never a torch's cone (playtest: it read as a flashlight sweeping the room).
 function Beam() {
   const material = useMemo(() => {
     const m = new MeshBasicNodeMaterial({
@@ -216,19 +230,19 @@ function Beam() {
     });
     // positionLocal.y: +0.5 at the eye, −0.5 at the door.
     const along = smoothstep(-0.5, 0.35, positionLocal.y);
-    m.colorNode = color("#FFD9A0").mul(along.mul(beamLevel).mul(0.3));
+    m.colorNode = color("#FFD9A0").mul(along.mul(beamLevel).mul(0.16));
     return m;
   }, []);
   return (
     <mesh material={material}>
-      <cylinderGeometry args={[0.03, 0.32, 1, 20, 1, true]} />
+      <cylinderGeometry args={[0.01, 0.045, 1, 12, 1, true]} />
     </mesh>
   );
 }
 
-export function Keeper({ position, rest, watch, cue }: Props) {
+export function Keeper({ position, rest, watch, cue, region = 1, asleep = false }: Props) {
   const robe = useMemo(buildRobe, []);
-  const cloth = useMemo(clothMaterial, []);
+  const cloth = useMemo(() => clothMaterial(region), [region]);
   const eye = useMemo(() => {
     const m = new MeshBasicNodeMaterial({ toneMapped: false });
     // Faint: an ember in the dark of the hood, not a lamp.
@@ -268,9 +282,9 @@ export function Keeper({ position, rest, watch, cue }: Props) {
     const sinceArrival = now - c.arrived;
     const bowing = sinceArrival >= 0 && sinceArrival < BOW_SECONDS;
     const bow = bowing ? Math.sin((Math.PI * sinceArrival) / BOW_SECONDS) : 0;
-    f.rotation.x = bow * 0.07;
-    f.position.y = Math.sin(now * 0.7) * 0.005;
-    eyeLevel.value = 1 + bow * 0.5;
+    f.rotation.x = bow * 0.07 + (asleep ? 0.16 : 0);
+    f.position.y = Math.sin(now * (asleep ? 0.4 : 0.7)) * (asleep ? 0.012 : 0.005);
+    eyeLevel.value = asleep ? 0.12 : 1 + bow * 0.5;
 
     // The lantern sways on its chain and stirs in a gust.
     l.rotation.z = Math.sin(now * 0.8) * 0.04 + gust.value * 0.1;
@@ -311,6 +325,17 @@ export function Keeper({ position, rest, watch, cue }: Props) {
         <mesh position={[0, 1.07, 0.34]} material={regionMaterial("Iron")}>
           <cylinderGeometry args={[0.008, 0.008, 0.12, 6]} />
         </mesh>
+        {region === 4 && (
+          <>
+            {/* The navigator's brass: a band at the hem and a clasp at the collar. */}
+            <mesh position={[0, 0.08, 0]} rotation={[Math.PI / 2, 0, 0]} material={regionMaterial("Brass", 4)}>
+              <torusGeometry args={[0.39, 0.018, 6, 40]} />
+            </mesh>
+            <mesh position={[0, 1.43, 0.2]} material={regionMaterial("Brass", 4)}>
+              <sphereGeometry args={[0.045, 12, 8]} />
+            </mesh>
+          </>
+        )}
         <group ref={lantern} position={LANTERN_RING}>
           <Lantern />
         </group>

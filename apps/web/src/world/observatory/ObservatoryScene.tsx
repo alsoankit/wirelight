@@ -62,6 +62,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
     >
       {/* The weavers' runes are Region 1's light; other regions bring their own (layout.glows). */}
       {region === 1 && <Runes />}
+      {region === 4 && <Runes set="chapel" />}
       <KnightLetter position={LETTER} />
       {quality.moonbeams && region === 1 && (
         <Moonbeams

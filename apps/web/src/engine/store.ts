@@ -24,6 +24,9 @@ export type Panel =
   | { kind: "ask" }
   | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "keys" | "settings" };
 
+/** What reached one door lately (see Session.arrivals). */
+export type Arrival = { t: number; frameId: number; bytes: Uint8Array; count: number; ignored: number };
+
 type Session = {
   roomId: string | null;
   /** The machine whose room the player is standing in (CORE-10); commands run there (UI-11). */
@@ -47,6 +50,18 @@ type Session = {
   onCables: Crossing[];
   /** Where messages died lately (CORE-17): a faded mark at that door for about ten seconds of screen time. */
   marks: { door: string; at: number; frameId: number }[];
+  /**
+   * What reached each door lately (keyed `device:iface`): the last message that arrived, how many have
+   * arrived since the room began, and how many of them the door ignored (not for it). So an answer can
+   * be read without catching it in flight, and ignored marks can be counted.
+   */
+  arrivals: Record<string, Arrival>;
+  /**
+   * The Slate's Capture (`tcpdump -n -i <door>`, 0043): it listens in the background, so the console
+   * stays free; `running` until it's stopped. Kept here so the Slate remembers it when reopened.
+   */
+  capture: { device: string; door: string; execId: number; running: boolean } | null;
+  startCapture(device: string, door: string): Promise<void>;
   /** A message whose journey is being replayed in the Glass (CORE-23), or null. */
   replay: number | null;
   setReplay(frameId: number | null): void;
@@ -135,9 +150,52 @@ function refreshJarIfCaught(batch: Batch): void {
   void engine.catches().then((jar) => useSession.setState({ jar }));
 }
 
+/** A packet's identity (IPv4 from, to, protocol and id: unchanged hop to hop), or null for other frames. */
+function packetKey(b: Uint8Array): string | null {
+  if (b.length < 34 || b[12] !== 0x08 || b[13] !== 0x00) return null;
+  return [b[18], b[19], b[23], ...b.subarray(26, 34)].join(".");
+}
+/** How many crossings each packet has made (a loop, 9.4). */
+const hopsOf = new Map<string, number>();
+
+/** Messages on a cable, by frame and cable: the door they're heading for and their bytes. */
+const heading = new Map<string, { door: string; bytes: Uint8Array }>();
+
 function apply(state: Session, batch: Batch): Partial<Session> {
   refreshJarIfCaught(batch);
   let onCables = state.onCables;
+  let arrivals = state.arrivals;
+  const arrive = (door: string, change: (a: Arrival | undefined) => Arrival) => {
+    if (arrivals === state.arrivals) arrivals = { ...arrivals };
+    arrivals[door] = change(arrivals[door]);
+  };
+  for (const e of batch.events) {
+    if (e.kind === "link.enter")
+      heading.set(`${e.frameId}:${e.link}:${e.dir}`, { door: `${e.to.device}:${e.to.iface}`, bytes: e.bytes });
+    else if (e.kind === "link.exit") {
+      const h = heading.get(`${e.frameId}:${e.link}:${e.dir}`);
+      heading.delete(`${e.frameId}:${e.link}:${e.dir}`);
+      if (h)
+        arrive(h.door, (a) => ({
+          t: e.t,
+          frameId: e.frameId,
+          bytes: h.bytes,
+          count: (a?.count ?? 0) + 1,
+          ignored: a?.ignored ?? 0,
+        }));
+    } else if (e.kind === "frame.drop" && e.reason === "not-for-me" && e.iface) {
+      const a = arrivals[`${e.device}:${e.iface}`];
+      if (a) arrive(`${e.device}:${e.iface}`, () => ({ ...a, ignored: a.ignored + 1 }));
+    } else if (e.kind === "world.reset") {
+      heading.clear();
+      arrivals = {};
+    }
+  }
+  let capture = state.capture;
+  for (const e of batch.events)
+    if (capture?.running && e.kind === "proc.exit" && e.execId === capture.execId)
+      capture = { ...capture, running: false };
+    else if (e.kind === "world.reset") capture = null;
   for (const e of batch.events) {
     if (e.kind === "link.enter")
       onCables = [
@@ -152,10 +210,20 @@ function apply(state: Session, batch: Batch): Partial<Session> {
           arriveAt: e.arriveAt,
           summary: e.summary,
           bytes: e.bytes,
+          hops: (() => {
+            const k = packetKey(e.bytes);
+            if (!k) return 1;
+            const n = (hopsOf.get(k) ?? 0) + 1;
+            hopsOf.set(k, n);
+            return n;
+          })(),
         },
       ];
     else if (e.kind === "link.exit") onCables = onCables.filter((c) => c.frameId !== e.frameId);
-    else if (e.kind === "world.reset") onCables = [];
+    else if (e.kind === "world.reset") {
+      onCables = [];
+      hopsOf.clear();
+    }
   }
   // A message that died at a door leaves a mark there (it never says why).
   const now = performance.now();
@@ -171,7 +239,7 @@ function apply(state: Session, batch: Batch): Partial<Session> {
     events = events.slice(cut);
     dropped += cut;
   }
-  return { events, dropped, status: batch.status, onCables, marks };
+  return { events, dropped, status: batch.status, onCables, marks, arrivals, capture };
 }
 
 export const useSession = create<Session>((set, get) => ({
@@ -191,6 +259,16 @@ export const useSession = create<Session>((set, get) => ({
   status: null,
   onCables: [],
   marks: [],
+  arrivals: {},
+  capture: null,
+  async startCapture(device, door) {
+    const batch = await exclusive(() => engine.exec(device, `tcpdump -n -i ${door}`, "click"));
+    // One update: the console sees the command and knows it's the Slate's at the same moment.
+    set((s) => ({
+      ...apply(s, batch),
+      capture: { device, door, execId: batch.execId, running: batch.exitCode === null },
+    }));
+  },
   replay: null,
   setReplay: (replay) => set({ replay, panel: null }),
   paused: false,
@@ -200,6 +278,8 @@ export const useSession = create<Session>((set, get) => ({
     const batch = await exclusive(() => engine.loadRoom(roomId));
     // The voice, once given, stays (saved); a room after the gift's room has it even if this browser never saw the gift.
     const voiceGiven = useProgress.getState().voiceGiven || afterGift(roomId);
+    heading.clear();
+    hopsOf.clear();
     set({
       roomId,
       here: roomById(roomId)?.playerDevice ?? null,
@@ -208,6 +288,8 @@ export const useSession = create<Session>((set, get) => ({
       events: [],
       dropped: 0,
       onCables: [],
+      arrivals: {},
+      capture: null,
       voiceGiven,
       startedAt: performance.now(),
     });

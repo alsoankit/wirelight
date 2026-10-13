@@ -29,6 +29,8 @@ export type Settings = {
   motion: "system" | "reduced" | "full";
   /** Graphics quality (0020): automatic, or a tier chosen by hand. */
   quality: "auto" | "high" | "medium" | "low" | "simple";
+  /** Captions (UI-17): every spoken line is always written out (UI-20); this is how large. */
+  captions?: "standard" | "large";
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -55,6 +57,8 @@ type Progress = {
   memoriesSeen: string[];
   journalPages: number[];
   floorMemoriesSeen: number[];
+  /** Secret rooms whose door the player has found in the world (0065: shown after the floor's boss). */
+  secretsFound: string[];
   /** Hints opened per room (kept through Reset, HELP-03). */
   hints: Record<string, number>;
 
@@ -68,6 +72,7 @@ type Progress = {
   seeMemory(id: string): void;
   findJournalPage(page: number): void;
   seeFloorMemory(floor: number): void;
+  findSecret(roomId: string): void;
   openHint(roomId: string): void;
   /** Settings: Replay intro (ONB-21). */
   replayIntro(): void;
@@ -101,6 +106,7 @@ export const useProgress = create<Progress>()(
       memoriesSeen: [],
       journalPages: [],
       floorMemoriesSeen: [],
+      secretsFound: [],
       hints: {},
 
       giveSight: () => setState({ sightGiven: true }),
@@ -118,6 +124,7 @@ export const useProgress = create<Progress>()(
       seeMemory: (id) => setState((s) => ({ memoriesSeen: add(s.memoriesSeen, id) })),
       findJournalPage: (page) => setState((s) => ({ journalPages: add(s.journalPages, page) })),
       seeFloorMemory: (floor) => setState((s) => ({ floorMemoriesSeen: add(s.floorMemoriesSeen, floor) })),
+      findSecret: (roomId) => setState((s) => ({ secretsFound: add(s.secretsFound, roomId) })),
       openHint: (roomId) =>
         setState((s) => ({ hints: { ...s.hints, [roomId]: Math.min(5, (s.hints[roomId] ?? 0) + 1) } })),
       replayIntro: () => setState({ sightGiven: false, tourDone: false }),

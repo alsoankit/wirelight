@@ -24,7 +24,7 @@ type Props = {
 export function Moonbeams({
   beams,
   direction,
-  colour = "#9AB4E8",
+  colour = "#A3AEC6",
   ruined = 0.3,
   restored = 0.07,
   pools = false,

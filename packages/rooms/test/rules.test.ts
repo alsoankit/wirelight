@@ -2,7 +2,7 @@
  * The room format's rules across rooms and floors (tech/room-format.md ROOM-01..09): solutions and
  * alternatives, terms in order, controls before and after the gift of the voice, pacing, floors.
  */
-import { cards, commandMemories, floorTexts, roomTexts, terms } from "@wirelight/content";
+import { cards, commandMemories, floorTexts, roomTexts, shellContent, terms } from "@wirelight/content";
 import { describe, expect, it } from "vitest";
 import {
   type CommandStep,
@@ -212,6 +212,37 @@ describe("across rooms", () => {
         expect(seen.get(c), `card ${c} opens twice`).toBeUndefined();
         seen.set(c, r.id);
       }
+  });
+
+  it("ROOM-09: no two rooms share a key", () => {
+    const seen = new Map<string, string>();
+    const clashes: string[] = [];
+    for (const r of rooms) {
+      const other = seen.get(r.key.word);
+      if (other) clashes.push(`${r.id} and ${other} both have "${r.key.word}"`);
+      seen.set(r.key.word, r.id);
+    }
+    expect(clashes).toEqual([]);
+  });
+
+  it("detector tests name distinct misconceptions in each room", () => {
+    for (const r of rooms) {
+      const ids = r.detectorTests.map((t) => t.misconception);
+      expect(ids.length, `${r.id}: ${ids.join(", ")}`).toBe(new Set(ids).size);
+    }
+  });
+
+  it("a command memory's flags are all on its tool's man page", () => {
+    const missing: string[] = [];
+    for (const m of Object.values(commandMemories)) {
+      const tool = m.command.split(" ")[0] ?? "";
+      const page = shellContent.man(tool)?.join("\n");
+      if (!page) continue;
+      const lines = [...m.anatomy.map((a) => a.word), ...m.forms.map((f) => f.line)];
+      for (const flag of new Set(lines.join(" ").match(/(?<=^|\s)-[a-z]\b/g) ?? []))
+        if (!new RegExp(`(^|\\s)${flag}\\b`, "m").test(page)) missing.push(`${m.id}: ${flag} not in man ${tool}`);
+    }
+    expect(missing).toEqual([]);
   });
 
   it("voice line ids are unique", () => {

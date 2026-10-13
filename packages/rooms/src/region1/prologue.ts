@@ -2,12 +2,12 @@
 import { keyFor, lanternReply } from "@wirelight/content";
 import { corridorLit, labDelivered } from "../predicates";
 import { defineRoom } from "../types";
-import { halls, LANTERN } from "./topology";
+import { halls } from "./topology";
 
 const id = "p.first-message";
 const key = keyFor(id);
 const reply = lanternReply(key);
-const send = { device: "observatory", line: `lab send-frame --to ${LANTERN} --msg "hello"`, source: "click" as const };
+const send = { device: "observatory", line: 'lab send-frame --to lantern --msg "hello"', source: "click" as const };
 
 export const firstMessage = defineRoom({
   id,

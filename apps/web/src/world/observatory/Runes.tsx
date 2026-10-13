@@ -5,8 +5,8 @@ import { color, mix } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
 import { ruinHere } from "../ruin";
 
-// Runes carved into the stone by the first wire-weavers (0052): the room's own light. Single glyphs
-// scattered over the walls, their positions suggesting two or three shapes. Dark in ruin; they
+// Runes carved into the stone by the first wire-weavers (0052): the room's own light. Two or three
+// single glyphs scattered over the walls. Dark in ruin; they
 // relight one by one as the restoration wave reaches them (the material reads the ruin at its own
 // position). All strokes are one mesh (one draw call); each group also casts a warm light
 // (RUNE_GLOWS, used by RoomLights).
@@ -81,28 +81,27 @@ function glyphAt(at: Vector3, wall: Wall, size = 0.18): Mark {
   return { centre: at, u: wall.u, v: UP, normal: wall.normal, size, glyph: nextGlyph() };
 }
 
-// Runes scattered over the walls, single glyphs set well apart; only where they sit suggests a shape
-// (owner: no carved outlines; the positions convey the shapes). Three shapes, no more:
-// - a tall diamond of four glyphs across the back wall, from low stone to the broken top;
-// - a wide triangle of three glyphs on the left wall;
-// - a shallow arc of three glyphs under the barred window.
-const MARKS: Mark[] = [
-  glyphAt(onBack(-3.0, 0.7), BACK),
-  glyphAt(onBack(-3.6, 1.75), BACK),
-  glyphAt(onBack(-2.4, 1.75), BACK),
-  glyphAt(onBack(-3.0, 2.85), BACK),
-  glyphAt(onLeft(-3.3, 0.8), LEFT),
-  glyphAt(onLeft(-0.9, 0.8), LEFT),
-  glyphAt(onLeft(-2.1, 1.75), LEFT),
-  glyphAt(onLeft(-3.55, 2.32), LEFT, 0.15),
-  glyphAt(onLeft(-3.0, 2.18), LEFT, 0.15),
-  glyphAt(onLeft(-2.45, 2.32), LEFT, 0.15),
-];
+// Runes scattered over the walls (owner: 2–3 per room, scattered, never centred on the back wall):
+// single glyphs set well apart, at different heights, one low, one high, one by the window.
+export type RuneSet = "observatory" | "chapel";
+const SETS: Record<RuneSet, Mark[]> = {
+  observatory: [
+    glyphAt(onBack(-3.3, 2.35), BACK),
+    glyphAt(onLeft(-2.5, 0.85), LEFT),
+    glyphAt(onLeft(-0.35, 1.75), LEFT, 0.15),
+  ],
+  // The Cathedral's side chapel: carved low by the plinth, high on the left wall.
+  chapel: [
+    glyphAt(onBack(-1.6, 0.8), BACK, 0.16),
+    glyphAt(onLeft(-3.3, 2.9), LEFT),
+    glyphAt(onLeft(0.6, 1.1), LEFT, 0.15),
+  ],
+};
 
-// The warm light each group casts (a little out from the wall).
+// The warm light the runes cast (a little out from the wall).
 export const RUNE_GLOWS: { position: [number, number, number]; colour: string; strength: number }[] = [
-  { position: [-3.0, 1.75, -3.45], colour: "#FFD08A", strength: 2.4 }, // the diamond
-  { position: [-3.45, 1.6, -2.4], colour: "#FFD08A", strength: 2.4 }, // the triangle and the window arc
+  { position: [-3.0, 1.75, -3.45], colour: "#FFD08A", strength: 2.0 },
+  { position: [-3.45, 1.6, -1.4], colour: "#FFD08A", strength: 2.0 },
 ];
 
 const STROKE_DEPTH = 0.012;
@@ -115,9 +114,9 @@ function strokeBox(a: Vector3, b: Vector3, normal: Vector3, width: number): Buff
   return box.applyMatrix4(new Matrix4().makeBasis(x, y, normal).setPosition(centre));
 }
 
-function buildGeometry(): BufferGeometry {
+function buildGeometry(marks: Mark[]): BufferGeometry {
   const parts: BufferGeometry[] = [];
-  for (const mark of MARKS) {
+  for (const mark of marks) {
     for (const [u1, v1, u2, v2] of GLYPHS[mark.glyph] ?? []) {
       const a = mark.centre
         .clone()
@@ -133,13 +132,14 @@ function buildGeometry(): BufferGeometry {
   return mergeGeometries(parts) ?? new BoxGeometry(0, 0, 0);
 }
 
-export function Runes() {
+export function Runes({ set = "observatory" }: { set?: RuneSet }) {
   const { geometry, material } = useMemo(() => {
     const mat = new MeshStandardNodeMaterial({ roughness: 0.9 });
     mat.colorNode = color("#2a2622");
-    // Dark in ruin (a faint ember so they can still be noticed), glowing gold where restored.
-    mat.emissiveNode = color("#FFD08A").mul(mix(1.6, 0.035, ruinHere));
-    return { geometry: buildGeometry(), material: mat };
-  }, []);
+    // Dark in ruin (a faint ember so they can still be noticed), a soft gold where restored: carved
+    // light in the stone, not white signs (playtest: dimmed by about 40%).
+    mat.emissiveNode = color("#FFD08A").mul(mix(0.95, 0.03, ruinHere));
+    return { geometry: buildGeometry(SETS[set]), material: mat };
+  }, [set]);
   return <mesh geometry={geometry} material={material} />;
 }

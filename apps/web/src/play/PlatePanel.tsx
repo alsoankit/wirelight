@@ -3,6 +3,7 @@ import { roomById } from "@wirelight/rooms";
 import { useState } from "react";
 import { useSession } from "../engine/store";
 import { Address } from "../world/Plate";
+import { arrivalText, DOOR_NAMES_FLOOR } from "./names";
 
 // A door's plate, opened (UI-03): its name, its MAC address (Floor 2 on), whether its link works, and
 // the controls the room gives it (0040): the door's switch, working or worn out, and pulling its cable.
@@ -21,6 +22,9 @@ export function PlatePanel() {
   const touch = useSession((s) => s.touch);
   const close = useSession((s) => s.closePanel);
   const [draft, setDraft] = useState("");
+  const arrival = useSession((s) =>
+    s.panel?.kind === "plate" ? s.arrivals[`${s.panel.device}:${s.panel.iface}`] : undefined,
+  );
 
   const room = roomId ? roomById(roomId) : undefined;
   if (panel?.kind !== "plate" || !room || !door) return null;
@@ -28,25 +32,44 @@ export function PlatePanel() {
   const sw = room.controls.plateSwitches?.[key];
   const cable = room.controls.cableEnds?.[key];
   const slot = room.controls.addressSlots?.[key];
+  const spec = room.topology.devices.find((d) => d.id === panel.device);
+  // A crossing (Floor 8 on): a machine with several doors that isn't a hall; each door has its own address.
+  const crossing = room.floor >= 8 && (spec?.interfaces.length ?? 0) > 1 && !spec?.bridges?.length;
+  const title = fill(voice.plate.title, { machine: panel.device, door: panel.iface });
   const act = (line: string) => {
     close();
     void exec(panel.device, line, "click");
   };
 
   return (
-    <section className="panel" aria-label={fill(voice.plate.title, { door: panel.iface })}>
-      <h2>{fill(voice.plate.title, { door: panel.iface })}</h2>
+    <section className="panel" aria-label={title}>
+      <h2>{title}</h2>
       <p className="panel-plate" data-link={door.up ? "up" : "down"}>
         <span className="plate-light" role="img" aria-label={door.up ? voice.plate.lightUp : voice.plate.lightDown}>
           {door.up ? "◆" : "◇"}
         </span>{" "}
         {panel.iface}
-        {room.floor !== 1 && <span className="plate-mac"> {door.mac}</span>}
+        {room.floor >= DOOR_NAMES_FLOOR && <span className="plate-mac"> {door.mac}</span>}
       </p>
-      <p>{door.up ? voice.plate.linkUp : voice.plate.linkDown}</p>
+      <p>
+        {door.up
+          ? voice.plate.linkUp
+          : !door.adminUp
+            ? voice.plate.switchedOff
+            : sw
+              ? voice.plate.onButDown
+              : voice.plate.linkDown}
+      </p>
+      {arrival && room.controls.catching && (
+        <p className="panel-note plate-arrival">
+          {voice.arrived.plate}: {arrivalText(arrival.bytes, room)} ·{" "}
+          {fill(arrival.count === 1 ? voice.arrived.countOne : voice.arrived.count, { n: String(arrival.count) })}
+          {arrival.ignored > 0 && `, ${fill(voice.arrived.ignored, { n: String(arrival.ignored) })}`}
+        </p>
+      )}
       {room.floor >= 5 && (
         <div className="field">
-          <span>{voice.plate.address}</span>
+          <span>{crossing ? voice.plate.doorAddress : voice.plate.address}</span>
           {door.addrs.length === 0 && <span className="panel-note">{voice.plate.noAddress}</span>}
           {door.addrs.map((a) => (
             <div key={a} className="addr-row">
@@ -74,7 +97,7 @@ export function PlatePanel() {
                 aria-label={voice.plate.address}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="10.0.1.5/24"
+                placeholder={voice.plate.addressExample}
                 spellCheck={false}
               />
               <button type="submit">{voice.plate.addAddress}</button>

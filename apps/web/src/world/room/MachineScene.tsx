@@ -5,7 +5,6 @@ import { type ReactNode, Suspense, useMemo, useRef } from "react";
 import type { Object3D } from "three";
 import { useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
-import { Bloom } from "../../render/Bloom";
 import { useQuality } from "../../render/quality";
 import { Dust } from "../Dust";
 import { Fireflies } from "../Fireflies";
@@ -14,12 +13,15 @@ import { Keeper } from "../observatory/Keeper";
 import type { KeeperCue } from "../observatory/Messages";
 import { Moonbeams } from "../observatory/Moonbeams";
 import { RoomLights } from "../observatory/RoomLights";
+import { RoomPost } from "../post/RoomPost";
 import { RoomCamera, VIEW_DIRECTION } from "../RoomCamera";
 import { RuinDial } from "../RuinDial";
 import { LOOKS, useRegion } from "../region";
 import { Gears } from "../regions/Gears";
+import { Haze } from "../regions/Haze";
 import { WindDriver } from "../WindDriver";
-import { type DoorInfo, Doorway } from "./Doorway";
+import { BossPiece } from "./BossPiece";
+import { type DoorInfo, Doorway, EmptyDoor } from "./Doorway";
 import { doorGeometry, type RoomLayout, type Vec3 } from "./layout";
 
 // One machine's room (CORE-06): its layout, its keeper, and a doorway for each of its real doors,
@@ -39,6 +41,7 @@ export function doorsOf(room: RoomDef, device: string, barred: (peer: string) =>
     if (!link) continue;
     const peer = link.a.device === device && link.a.iface === i.name ? link.b.device : link.a.device;
     const access = room.access[peer]?.state ?? "off-limits";
+    const far = link.a.device === device && link.a.iface === i.name ? link.b : link.a;
     out.push({
       device,
       iface: i.name,
@@ -46,14 +49,17 @@ export function doorsOf(room: RoomDef, device: string, barred: (peer: string) =>
       peer,
       enterable: access === "enterable",
       barred: access === "enterable" ? undefined : barred(peer),
-      showMac: room.floor !== 1,
+      showMac: room.floor >= 2,
       showAddrs: room.floor >= 5,
       streets: room.floor >= 7,
       catchable: !!room.controls.catching,
       floor: room.floor,
       cableControl: room.controls.cableEnds?.[`${device}:${i.name}`],
+      farEnd: `${far.device}:${far.iface}`,
+      twin: false,
     });
   }
+  for (const d of out) d.twin = out.some((o) => o !== d && o.peer === d.peer);
   return out;
 }
 
@@ -77,11 +83,16 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
   const look = LOOKS[region];
   const openPanel = useSession((s) => s.openPanel);
   const doors = useMemo(() => (room ? doorsOf(room, device, barred) : []), [room, device, barred]);
-  // CORE-38: ruin = failing checks ÷ all checks.
-  const ruinLevel = useSession((s) => {
-    const checks = Object.values(s.status?.health ?? {});
-    return checks.length === 0 ? null : checks.filter((ok) => !ok).length / checks.length;
-  });
+  const asleep = useSession((s) => !!s.status?.desks[device]);
+  const empty = useMemo(() => {
+    const spec = room?.topology.devices.find((d) => d.id === device);
+    const linked = new Set(doors.map((d) => d.iface));
+    return (spec?.interfaces ?? []).map((i) => i.name).filter((n) => n !== "lo" && !linked.has(n));
+  }, [room, device, doors]);
+  // The room restores on the win, all at once (playtest 2026-10-13, amending CORE-38's share of
+  // failing checks): partial progress relights only the thing that was fixed (its corridor, its
+  // plate's light), never the room. A room with no health checks still restores when won.
+  const ruinLevel = useSession((s) => (s.status ? (s.status.won ? 0 : 1) : null));
   const first = layout.doorSlots[0];
   // Restoration spreads from the doorway (the door and its corridor are what rooms fix first).
   const origin: Vec3 = first ? [doorGeometry(first).doorway[0], 1, doorGeometry(first).doorway[2]] : [0, 1, 0];
@@ -107,18 +118,26 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
         />
       )}
       <WindDriver />
+      {region === 4 && quality.moonbeams && <Haze />}
       {quality.fireflies && look.fireflies && <Fireflies bounds={layout.air} colour={look.fireflies} />}
       {quality.dust && <Dust bounds={layout.air} colour={look.dust} />}
-      <Keeper position={layout.keeper} rest={[origin[0], 1.4, origin[2]]} watch={watch} cue={cue} />
+      <Keeper
+        position={layout.keeper}
+        rest={[origin[0], 1.4, origin[2]]}
+        watch={watch}
+        cue={cue}
+        region={region}
+        asleep={asleep}
+      />
       {/* Ask the keeper why (CORE-25). */}
-      <Html center position={[layout.keeper[0], 2.35, layout.keeper[2]]} zIndexRange={[10, 0]}>
+      <Html center position={[layout.keeper[0], 2.2, layout.keeper[2]]} zIndexRange={[10, 0]}>
         <button
           type="button"
           className="world-chip"
           data-tab={TAB.keeper}
           onClick={() => openPanel({ kind: "keeper", device })}
         >
-          {voice.keeper.name}
+          {region === 4 ? voice.keeper.navigator : voice.keeper.name}
         </button>
       </Html>
       {doors.map((info, i) => {
@@ -127,8 +146,21 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
           <Doorway key={info.iface} info={info} index={i} slot={slot} keeper={layout.keeper} watch={watch} cue={cue} />
         ) : null;
       })}
+      {/* Doors with no cable (the home router's spare ports): the doorway and its plate, nothing beyond. */}
+      {empty.map((iface, i) => {
+        const slot = layout.doorSlots[doors.length + i];
+        return slot ? <EmptyDoor key={iface} device={device} iface={iface} slot={slot} /> : null;
+      })}
+      <BossPiece
+        device={device}
+        region={region}
+        slots={layout.doorSlots}
+        doors={doors.length}
+        hall={layout.doorSlots.length > 2}
+      />
       {children}
-      {quality.bloom && <Bloom />}
+      {/* The finishing pass: bloom, tone mapping, the region's grade, vignette (world/post). */}
+      <RoomPost />
     </>
   );
 }

@@ -56,12 +56,22 @@ export function readEvents(
         break;
       case "slate.open":
         out.add("opened-catch");
+        if (e.layer !== "frame" && e.reached) out.add("opened-inside");
+        break;
+      case "slate.compare":
+        // Two catches of one packet from different streets: the frame changed, the packet didn't (9.1).
+        if (e.samePacket && !e.sameStreet) out.add("compared-streets");
         break;
       case "slate.arm":
         if (e.what === "trace") out.add("trace-armed");
         break;
       case "keeper.step":
         if (e.action === "learn") out.add("remembered");
+        if (e.action === "forward") out.add("hand-forwarded");
+        if (e.action === "wake") out.add("keeper-woke");
+        break;
+      case "proc.output":
+        if (e.device === player && /Network is unreachable/.test(e.text)) out.add("ping-unreachable");
         break;
       case "cmd.exec":
         if (/^lab send-frame\b/.test(e.line)) out.add("sent-frame");
@@ -142,6 +152,34 @@ export const MEMORY_RULES: Record<string, Rule> = {
   // 9.1: first use of the Slate's tracer (the Slate opened where it has one); action: press Trace.
   "F9-MEM-01": { when: has("slate-open"), done: has("trace-armed") },
 };
+
+/**
+ * Voiced lines that aren't a boss's introduction (those open the room), by id: when each plays, as
+ * its floor spec says. Each plays once (it's seen afterwards), never over another line.
+ */
+export const LINE_RULES: Record<string, (c: MemoryContext) => boolean> = {
+  // 3.1: the keeper wakes and says what it does (floor-3.md, step 4).
+  "F3-KEEP-01": has("keeper-woke"),
+  // 5.2: the Knight, after the first ping that can't leave (no address yet).
+  "F5-NOTE-01": has("ping-no-address", "ping-unreachable"),
+  // 6.1: the first time a catch is opened past its frame (the seal breaks).
+  "F6-SEAL-01": has("opened-inside"),
+  // 6.2: the keeper wakes.
+  "F6-KEEP-01": has("keeper-woke"),
+  // 7.1: the street sign is read (or the player's plate, or the first unreachable ping): what /24 means.
+  "F7-SIGN-01": has("street-sign", "own-plate", "ping-unreachable"),
+  // 8.5: the navigator, after the player's first packet forwarded by hand.
+  "F8-NAV-01": has("hand-forwarded"),
+  // 8.5: sending a packet on in the frame it came in (refused).
+  "F8-NAV-02": has("reuse-the-frame"),
+  // 9.1: a compare of one packet from two streets.
+  "F9-SEE-01": has("compared-streets"),
+};
+
+/** A room's voiced lines (not its boss introduction) that should play now: not seen yet, and due. */
+export function linesDue(room: RoomDef, seen: readonly string[], c: MemoryContext) {
+  return (roomTexts[room.content]?.voice ?? []).filter((v) => !seen.includes(v.id) && LINE_RULES[v.id]?.(c));
+}
 
 /** The rule for a memory: its own, or "on entering" when its trigger says so, or never. */
 export function ruleFor(id: string, trigger: string): Rule {

@@ -1,9 +1,13 @@
 import { Html } from "@react-three/drei";
 import { voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
+import { useEffect, useMemo, useRef } from "react";
+import { type BufferGeometry, type InstancedMesh, Object3D } from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { regionMaterial } from "../kit/regionMaterials";
+import { addTo, box, rod } from "../kit/shapes";
 import { type RegionId, useRegion } from "../region";
 import type { Vec3 } from "./layout";
 
@@ -20,56 +24,77 @@ const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Walnut", 3: "Timber", 4
 const STAND: Record<RegionId, string> = { 1: "Main", 2: "Brass", 3: "Iron", 4: "Sandstone" };
 const DESK: Record<RegionId, string> = { 1: "Wood", 2: "Walnut", 3: "Timber", 4: "Sandstone" };
 
-/** Brass tiles on the Works' MAC board (the ledger's entries), and brass inlay on the Cathedral's map. */
+/** One mesh per material from code-made pieces (a board's marks: a few draw calls, not dozens). */
+function mergeBag(bag: Record<string, BufferGeometry[]>) {
+  const out: { name: string; geometry: BufferGeometry }[] = [];
+  for (const [name, list] of Object.entries(bag)) {
+    const geometry = list.length === 1 ? list[0] : mergeGeometries(list);
+    if (geometry) out.push({ name, geometry });
+  }
+  return out;
+}
+
+/**
+ * The Works' MAC board: brass tiles, each stamped with a name (dark struck letters), as the hall's
+ * ledger (region-2 brief); not a glowing grid. The Cathedral's map: brass roads between carved towns.
+ */
 function Marks({ region, kind }: { region: RegionId; kind: "mac" | "ledger" | "routes" }) {
-  if (region === 2 && kind === "mac") {
-    const tiles: [number, number][] = [];
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) tiles.push([-0.52 + c * 0.26, 1.7 - r * 0.22]);
-    return (
-      <>
-        {tiles.map(([x, y]) => (
-          <mesh key={`${x},${y}`} position={[x, y, 0.065]} material={regionMaterial("Brass", 2)}>
-            <boxGeometry args={[0.2, 0.15, 0.02]} />
-          </mesh>
-        ))}
-      </>
-    );
-  }
-  if (region === 4 && kind === "routes") {
-    // Brass lines between a few carved towns: the map's roads.
-    const roads: [number, number, number, number][] = [
-      [-0.5, 1.6, 0.1, 1.2],
-      [0.1, 1.2, 0.5, 1.6],
-      [0.1, 1.2, -0.2, 0.95],
-      [-0.5, 1.6, -0.5, 1.05],
-    ];
-    return (
-      <>
-        {roads.map(([x1, y1, x2, y2]) => (
-          <mesh
-            key={`${x1},${y1},${x2},${y2}`}
-            position={[(x1 + x2) / 2, (y1 + y2) / 2, 0.065]}
-            rotation={[0, 0, Math.atan2(y2 - y1, x2 - x1)]}
-            material={regionMaterial("Brass", 4)}
-          >
-            <boxGeometry args={[Math.hypot(x2 - x1, y2 - y1), 0.035, 0.02]} />
-          </mesh>
-        ))}
-        {[
-          [-0.5, 1.6],
-          [0.1, 1.2],
-          [0.5, 1.6],
-          [-0.2, 0.95],
-          [-0.5, 1.05],
-        ].map(([x, y]) => (
-          <mesh key={`${x},${y}`} position={[x as number, y as number, 0.07]} material={regionMaterial("Brass", 4)}>
-            <cylinderGeometry args={[0.055, 0.055, 0.03, 12]} />
-          </mesh>
-        ))}
-      </>
-    );
-  }
-  return null;
+  const parts = useMemo(() => {
+    const bag: Record<string, BufferGeometry[]> = {};
+    if (region === 2 && kind === "mac") {
+      for (let r = 0; r < 4; r++)
+        for (let c = 0; c < 4; c++) {
+          const x = -0.48 + c * 0.32;
+          const y = 1.7 - r * 0.22;
+          addTo(bag, "AgedBrass", box([0.27, 0.15, 0.02], [x, y, 0.065]));
+          // The stamped name: a row of short struck letters, a different length on each tile.
+          const letters = 3 + ((r * 5 + c * 3) % 4);
+          for (let k = 0; k < letters; k++)
+            addTo(bag, "DarkMetal", box([0.022, 0.05, 0.006], [x - 0.1 + k * 0.035, y + 0.01, 0.077]));
+          addTo(bag, "DarkMetal", box([0.18, 0.008, 0.006], [x, y - 0.045, 0.077]));
+        }
+    }
+    if (region === 3 && kind === "ledger") {
+      // The town's ledger: ruled lines of neighbours in ink (agent D).
+      for (let r = 0; r < 6; r++)
+        addTo(bag, "Iron", box([0.9 - (r % 3) * 0.18, 0.025, 0.006], [-0.1 + (r % 2) * 0.05, 1.7 - r * 0.13, 0.065]));
+    }
+    if (region === 4 && kind === "routes") {
+      // Brass lines between a few carved towns: the map's roads.
+      const roads: [number, number, number, number][] = [
+        [-0.5, 1.6, 0.1, 1.2],
+        [0.1, 1.2, 0.5, 1.6],
+        [0.1, 1.2, -0.2, 0.95],
+        [-0.5, 1.6, -0.5, 1.05],
+      ];
+      for (const [x1, y1, x2, y2] of roads)
+        addTo(
+          bag,
+          "Brass",
+          box(
+            [Math.hypot(x2 - x1, y2 - y1), 0.035, 0.02],
+            [(x1 + x2) / 2, (y1 + y2) / 2, 0.065],
+            [0, 0, Math.atan2(y2 - y1, x2 - x1)],
+          ),
+        );
+      for (const [x, y] of [
+        [-0.5, 1.6],
+        [0.1, 1.2],
+        [0.5, 1.6],
+        [-0.2, 0.95],
+        [-0.5, 1.05],
+      ] as const)
+        addTo(bag, "Brass", rod([x, y, 0.055], [x, y, 0.085], 0.055, 12));
+    }
+    return mergeBag(bag);
+  }, [region, kind]);
+  return (
+    <>
+      {parts.map((p) => (
+        <mesh key={p.name} geometry={p.geometry} material={regionMaterial(p.name, region)} />
+      ))}
+    </>
+  );
 }
 
 function Chip({ label, onClick, at, tab }: { label: string; onClick: () => void; at: Vec3; tab: number }) {
@@ -152,7 +177,41 @@ function BoardBody({
         />
       </group>
     ); // The board's face stays dark and plain (its text opens in a panel); a clouded board is greyer.
-  const face = region === 4 && kind === "routes" ? (works ? "#5a5248" : "#6a665f") : works ? "#2a2f33" : "#4a4f52";
+  if (region === 4 && kind === "routes")
+    // The Cathedral's routing board is a carved stone map laid on a lectern (region-4 brief), not a
+    // board on a stand; cracked through its inlay when worn out (0040).
+    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); the chip is the keyboard way
+      <group position={at} rotation={[0, turn, 0]} onClick={() => void read()}>
+        <mesh position={[0, 0.5, 0]} material={regionMaterial("Sandstone", 4)}>
+          <cylinderGeometry args={[0.16, 0.26, 1.0, 8]} />
+        </mesh>
+        <mesh position={[0, 0.03, 0]} material={regionMaterial("Highlights", 4)}>
+          <cylinderGeometry args={[0.36, 0.4, 0.06, 8]} />
+        </mesh>
+        <group position={[0, 1.08, 0]} rotation={[-0.95, 0, 0]}>
+          <mesh material={regionMaterial("Highlights", 4)}>
+            <boxGeometry args={[1.05, 0.78, 0.08]} />
+          </mesh>
+          <mesh position={[0, 0, 0.045]}>
+            <boxGeometry args={[0.95, 0.68, 0.01]} />
+            <meshStandardMaterial color={works ? "#8c7c62" : "#77726a"} roughness={0.85} />
+          </mesh>
+          <group position={[0, -1.27 * 0.8, -0.005]} scale={0.8}>
+            <Marks region={region} kind={kind} />
+          </group>
+          {!works && (
+            <mesh position={[0.1, -0.05, 0.052]} rotation={[0, 0, 0.7]}>
+              <boxGeometry args={[0.9, 0.012, 0.004]} />
+              <meshBasicMaterial color="#1c1a18" />
+            </mesh>
+          )}
+        </group>
+        <Chip label={label} onClick={() => void read()} at={[0, 1.75, 0]} tab={TAB.furniture + 2} />
+      </group>
+    );
+  // The town's neighbour ledger is a sheet of paper, ruled, so it reads across the room (agent D).
+  const face = region === 3 && kind === "ledger" ? (works ? "#e6d6b2" : "#9a917f") : works ? "#2a2f33" : "#4a4f52";
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); the chip is the keyboard way
     <group position={at} rotation={[0, turn, 0]} onClick={() => void read()}>
@@ -229,12 +288,47 @@ export function Desk({ device, at }: { device: string; at: Vec3 }) {
           )}
         </>
       )}
+      <Waiting device={device} at={lectern ? [0.55, 0, 0.35] : [0, 1.0, 0.05]} />
       <Chip
-        label={asleep ? `${voice.desk.name} ●` : voice.desk.name}
+        label={`${lectern ? voice.desk.lecternName : voice.desk.name}${asleep ? " ●" : ""}`}
         onClick={() => openPanel({ kind: "desk", device })}
         at={[0, 1.4, 0]}
         tab={TAB.furniture + 3}
       />
+    </group>
+  );
+}
+
+const PILE_MAX = 16;
+// Cyan #5EE0E8 (linear), as the messages on the cables: these are messages too, only waiting.
+const WAITING_COLOUR: [number, number, number] = [0.11, 0.75, 0.81];
+
+/** What waits at a desk or lectern (0042): small message lights heaped beside it, one per message. */
+function Waiting({ device, at }: { device: string; at: Vec3 }) {
+  const count = useSession((s) => Math.min(s.status?.desks[device]?.waiting.length ?? 0, PILE_MAX));
+  const mesh = useRef<InstancedMesh>(null);
+  const dummy = useMemo(() => new Object3D(), []);
+  useEffect(() => {
+    const m = mesh.current;
+    if (!m) return;
+    for (let i = 0; i < count; i++) {
+      // A small heap: a ring of five on the bottom, the rest on top.
+      const layer = Math.floor(i / 5);
+      const a = (i % 5) * 1.256 + layer * 0.6;
+      const r = layer === 0 ? 0.13 : 0.07;
+      dummy.position.set(Math.cos(a) * r, 0.06 + layer * 0.1, Math.sin(a) * r);
+      dummy.updateMatrix();
+      m.setMatrixAt(i, dummy.matrix);
+    }
+    m.count = count;
+    m.instanceMatrix.needsUpdate = true;
+  }, [count, dummy]);
+  return (
+    <group position={at}>
+      <instancedMesh ref={mesh} args={[undefined, undefined, PILE_MAX]} visible={count > 0}>
+        <sphereGeometry args={[0.06, 12, 8]} />
+        <meshBasicMaterial color={WAITING_COLOUR} toneMapped={false} />
+      </instancedMesh>
     </group>
   );
 }

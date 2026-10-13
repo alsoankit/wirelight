@@ -65,7 +65,10 @@ export const insideTheEnvelope = defineRoom({
   glow: "symptoms",
   winCondition: openedLantern,
   key: { word: keyFor(envelopeId), via: "mark" },
-  healthChecks: [],
+  // Nothing is broken here: the room comes back to life once the sealed letter is opened all the way.
+  healthChecks: [
+    { id: "letter-opened", object: { kind: "door", device: "observatory", iface: "eth0" }, check: openedLantern },
+  ],
   teaches: ["packet", "encapsulation"],
   uses: ["frame", "mac-address", "broadcast", "ip-address"],
   cards: ["slate", "packet"],

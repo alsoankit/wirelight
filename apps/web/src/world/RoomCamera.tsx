@@ -1,7 +1,9 @@
 import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { roomById } from "@wirelight/rooms";
 import { useMemo, useRef } from "react";
 import { type PerspectiveCamera as Camera, Vector3 } from "three";
+import { useSession } from "../engine/store";
 import { useReducedMotion } from "../progress/motion";
 
 // The fixed three-quarter view (0006, art-direction.md): a narrow lens, no orbit,
@@ -20,6 +22,8 @@ type Props = {
 // from it can be dropped (kit/StaticRoom.tsx).
 export const VIEW_DIRECTION = new Vector3(1, 0.9, 1).normalize();
 const PARALLAX = 0.5; // metres of camera drift at the screen edge
+const LIFT_DROP = 2.6; // metres the view moves down while the console is open
+const LIFT_OUT = 4; // …and how far it steps back
 
 export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0 }: Props) {
   const ref = useRef<Camera>(null);
@@ -28,21 +32,35 @@ export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0 }: 
   const right = useMemo(() => new Vector3(1, 0, -1).normalize(), []);
   const wanted = useMemo(() => new Vector3(), []);
   const still = useReducedMotion();
+  const lift = useRef(0);
+  const aim = useMemo(() => new Vector3(), []);
 
   useFrame(({ pointer }, delta) => {
     const camera = ref.current;
     if (!camera) return;
+    // With the console slid up over the bottom of the screen, the view eases down and a little out,
+    // so the room sits in the part still showing (it doesn't vanish under the console).
+    const { consoleOpen, voiceGiven, roomId } = useSession.getState();
+    const typing = roomId ? roomById(roomId)?.controls.console === "typing" : false;
+    const target = consoleOpen && voiceGiven && typing ? 1 : 0;
+    lift.current = still ? target : lift.current + (target - lift.current) * (1 - Math.exp(-delta * 4));
+    const drop = lift.current * LIFT_DROP;
     if (still) {
-      camera.position.copy(home);
-      camera.lookAt(lookAt);
+      camera.position
+        .copy(home)
+        .addScaledVector(VIEW_DIRECTION, lift.current * LIFT_OUT)
+        .add({ x: 0, y: -drop, z: 0 });
+      camera.lookAt(aim.copy(lookAt).add({ x: 0, y: -drop, z: 0 }));
       return;
     }
     wanted
       .copy(home)
+      .addScaledVector(VIEW_DIRECTION, lift.current * LIFT_OUT)
       .addScaledVector(right, pointer.x * PARALLAX)
-      .add({ x: 0, y: pointer.y * PARALLAX * 0.6, z: 0 });
+      .add({ x: 0, y: pointer.y * PARALLAX * 0.6 - drop, z: 0 });
     camera.position.lerp(wanted, 1 - Math.exp(-delta * 3));
-    camera.lookAt(lookAt);
+    aim.copy(lookAt).add({ x: 0, y: -drop, z: 0 });
+    camera.lookAt(aim);
   });
 
   // The camera eases toward `home` every frame, so starting further out makes it settle in.

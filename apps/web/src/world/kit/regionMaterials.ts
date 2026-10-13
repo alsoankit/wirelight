@@ -16,6 +16,7 @@ import {
 import { MeshStandardNodeMaterial } from "three/webgpu";
 import { LOOKS, type RegionId } from "../region";
 import { ruinHere as ruin } from "../ruin";
+import { TOWN_SWATCHES } from "../town/palette";
 import { BREEZE, gust, windDirection } from "../wind";
 
 // Restyles a kit piece in its region's palette (world/art-briefs/region-*.md). Every kit material with
@@ -39,21 +40,24 @@ type Swatch = {
   aged?: boolean; // stone: weathering, grime and creeping moss
   verdigris?: boolean; // old brass: green-grey patina in patches
   sway?: number; // plants: how far the top bends in a full gust, in metres per metre of height
+  patchy?: string; // moss and ivy: broken into patches, the stone (this swatch) showing between them
 };
 
 const PATINA_RUINED = "#43564f";
 const PATINA_RESTORED = "#5a7d68";
 
 const REGION_1: Record<string, Swatch> = {
-  Floor: { ruined: "#666d78", restored: "#988168", roughness: 0.95, aged: true },
-  Main: { ruined: "#6b7380", restored: "#a28a6c", roughness: 0.95, aged: true },
-  Main2: { ruined: "#666d78", restored: "#957e62", roughness: 0.95, aged: true },
-  Stone: { ruined: "#6d7480", restored: "#a8916f", roughness: 0.95, aged: true },
-  Highlights: { ruined: "#747c88", restored: "#ae9473", roughness: 0.95, aged: true },
+  // Ruined stone is the brief's cool grey-blue #5B6370: grey first, a little blue (not navy).
+  Floor: { ruined: "#5d636c", restored: "#988168", roughness: 0.95, aged: true },
+  Main: { ruined: "#636973", restored: "#a28a6c", roughness: 0.95, aged: true },
+  Main2: { ruined: "#5e646d", restored: "#957e62", roughness: 0.95, aged: true },
+  Stone: { ruined: "#656a73", restored: "#a8916f", roughness: 0.95, aged: true },
+  Highlights: { ruined: "#6b7078", restored: "#ae9473", roughness: 0.95, aged: true },
   Black: { ruined: "#16181d", restored: "#221a14", roughness: 1 },
-  Leaf_Texture: { ruined: "#46524a", restored: "#5d8f48", roughness: 1 },
+  // Moss on the walls comes in patches, never whole flat-green bricks (playtest).
+  Leaf_Texture: { ruined: "#4a524b", restored: "#4f7a40", roughness: 1, patchy: "Highlights" },
   Texture_Leaves: { ruined: "#3f4a42", restored: "#3E6B3A", roughness: 1, sway: 0.06 },
-  Green: { ruined: "#4a554b", restored: "#6FA85A", roughness: 1, sway: 0.14 },
+  Green: { ruined: "#4d564d", restored: "#5f8f4c", roughness: 1, sway: 0.14, patchy: "Highlights" },
   Bark: { ruined: "#3d3833", restored: "#5c4330", roughness: 1 },
   Dirt: { ruined: "#2f2c29", restored: "#4a3a2a", roughness: 1 },
   Earth: { ruined: "#2a2926", restored: "#3a3024", roughness: 1, aged: true },
@@ -68,7 +72,8 @@ const REGION_1: Record<string, Swatch> = {
   DarkWood: { ruined: "#33302d", restored: "#46301f", roughness: 0.85 },
   Pot_Main: { ruined: "#524d48", restored: "#94583a", roughness: 0.9 },
   Pot_Detail: { ruined: "#403c39", restored: "#5e432e", roughness: 0.9 },
-  Flag: { ruined: "#41454f", restored: "#7a342e", roughness: 0.9 },
+  // The Knight's cloak: old, faded cloth (a saturated red read as a slab on the wall).
+  Flag: { ruined: "#3f4249", restored: "#4f3d35", roughness: 0.95 },
   Candle: { ruined: "#97938a", restored: "#c9bea6", roughness: 0.7 },
   Parchment: { ruined: "#8d887b", restored: "#cbbd9c", roughness: 0.95 },
   // Flames are kept modest so restored rooms glow warmly without glare (0051).
@@ -80,13 +85,15 @@ const REGION_1: Record<string, Swatch> = {
 // brick walls; no greenery (the kit's moss reads as plain wall here). Brief: tarnished brown-green
 // metal and grey wood in ruin.
 const REGION_2: Record<string, Swatch> = {
-  Floor: { ruined: "#50555d", restored: "#6a7079", roughness: 0.8, aged: true },
-  Main: { ruined: "#6a6c71", restored: "#857263", roughness: 0.95, aged: true },
-  Main2: { ruined: "#65676c", restored: "#7c6a5c", roughness: 0.95, aged: true },
-  Stone: { ruined: "#6c6e73", restored: "#8a7766", roughness: 0.95, aged: true },
-  Highlights: { ruined: "#717378", restored: "#917d6b", roughness: 0.95, aged: true },
-  Leaf_Texture: { ruined: "#65676c", restored: "#7c6a5c", roughness: 0.95, aged: true },
-  Green: { ruined: "#65676c", restored: "#7c6a5c", roughness: 0.95, aged: true },
+  // Slate floors stay slate when restored (brief #4A5058, lifted a little for balance); the warmth is
+  // in the brass, copper, walnut and lamps, not the whole room.
+  Floor: { ruined: "#474c54", restored: "#59606a", roughness: 0.8, aged: true },
+  Main: { ruined: "#6a6c71", restored: "#7b746d", roughness: 0.95, aged: true },
+  Main2: { ruined: "#65676c", restored: "#746c65", roughness: 0.95, aged: true },
+  Stone: { ruined: "#6c6e73", restored: "#7f776f", roughness: 0.95, aged: true },
+  Highlights: { ruined: "#717378", restored: "#857c73", roughness: 0.95, aged: true },
+  Leaf_Texture: { ruined: "#65676c", restored: "#746c65", roughness: 0.95, aged: true },
+  Green: { ruined: "#65676c", restored: "#746c65", roughness: 0.95, aged: true },
   Earth: { ruined: "#1d1f22", restored: "#2a2420", roughness: 1, aged: true },
   // Metals stay mostly diffuse: there's no environment map to reflect, so full metal reads black.
   Metal: { ruined: "#5f6253", restored: "#B86A3C", roughness: 0.45, metalness: 0.4 },
@@ -101,35 +108,18 @@ const REGION_2: Record<string, Swatch> = {
   LampGlass: { ruined: "#3a3934", restored: "#F5A04A", glow: 1.5, ember: 0.04 },
 };
 
-// Region 3, the Lantern Town: pastel plaster houses with terracotta and teal roofs, mossy cobbles,
-// lanterns. Brief: grey plaster and slate in ruin, lanterns unlit.
-const REGION_3: Record<string, Swatch> = {
-  Floor: { ruined: "#55594F", restored: "#6F8F5E", roughness: 0.95, aged: true },
-  Cobble: { ruined: "#6a6c68", restored: "#857d6c", roughness: 0.95, aged: true },
-  Boards: { ruined: "#68635c", restored: "#8a6646", roughness: 0.85 },
-  Main: { ruined: "#7A7670", restored: "#d8c9a8", roughness: 0.95, aged: true },
-  Main2: { ruined: "#726e69", restored: "#cdbd9c", roughness: 0.95, aged: true },
-  Stone: { ruined: "#77736d", restored: "#d4c4a2", roughness: 0.95, aged: true },
-  Highlights: { ruined: "#7d7973", restored: "#d6a98e", roughness: 0.95, aged: true },
-  Plaster: { ruined: "#86827b", restored: "#E6D6B6", roughness: 0.95, aged: true },
-  PlasterPeach: { ruined: "#7f7a74", restored: "#D9A88E", roughness: 0.95, aged: true },
-  Roof: { ruined: "#4C4E55", restored: "#B4644A", roughness: 0.85 },
-  RoofTeal: { ruined: "#474950", restored: "#3d7a78", roughness: 0.85 },
-  Timber: { ruined: "#3e3b38", restored: "#5a3d28", roughness: 0.85 },
-  Iron: { ruined: "#24272c", restored: "#2a2826", roughness: 0.55, metalness: 0.75 },
-  Lantern: { ruined: "#34332f", restored: "#FFCB70", glow: 1.7, ember: 0.03 },
-  Window: { ruined: "#23252c", restored: "#E8A85A", glow: 0.5, ember: 0.02 },
-};
+// Region 3, the Lantern Town: its swatches live with the town (town/palette.ts, agent D).
+const REGION_3: Record<string, Swatch> = TOWN_SWATCHES;
 
 // Region 4, the Cathedral of Crossings: sandstone vaults, polished brass, stained glass in jewel
 // tones (kept away from cyan). Brief: cold grey stone, dark brass and dull dark glass in ruin.
 const REGION_4: Record<string, Swatch> = {
-  Floor: { ruined: "#585a61", restored: "#a08868", roughness: 0.85, aged: true },
-  Main: { ruined: "#62646b", restored: "#bb9f7a", roughness: 0.95, aged: true },
-  Main2: { ruined: "#5d5f66", restored: "#b09570", roughness: 0.95, aged: true },
-  Stone: { ruined: "#65676e", restored: "#bea37c", roughness: 0.95, aged: true },
-  Highlights: { ruined: "#696b72", restored: "#c4aa84", roughness: 0.95, aged: true },
-  Sandstone: { ruined: "#62646b", restored: "#bb9f7a", roughness: 0.95, aged: true },
+  Floor: { ruined: "#55575E", restored: "#a8957a", roughness: 0.85, aged: true },
+  Main: { ruined: "#5c5e64", restored: "#C2A57E", roughness: 0.95, aged: true },
+  Main2: { ruined: "#585a60", restored: "#b89c78", roughness: 0.95, aged: true },
+  Stone: { ruined: "#5e6066", restored: "#c6aa84", roughness: 0.95, aged: true },
+  Highlights: { ruined: "#64666c", restored: "#cdb38e", roughness: 0.95, aged: true },
+  Sandstone: { ruined: "#5c5e64", restored: "#C2A57E", roughness: 0.95, aged: true },
   Leaf_Texture: { ruined: "#505259", restored: "#b69a74", roughness: 0.95, aged: true },
   Green: { ruined: "#505259", restored: "#b69a74", roughness: 0.95, aged: true },
   Earth: { ruined: "#1f2128", restored: "#2e261e", roughness: 1, aged: true },
@@ -185,6 +175,15 @@ function nodeMaterial(swatch: Swatch, region: RegionId, baked = false): Material
     const low = float(1).sub(smoothstep(0.2, 1.4, positionWorld.y));
     const moss = patches.mul(upward.add(low).clamp(0, 1)).mul(0.85 * look.moss.amount);
     tint = mix(tint, mossColour, moss);
+  }
+  if (swatch.patchy) {
+    // Moss and ivy in patches: soft-edged clumps with the stone showing between, and a fine mottle
+    // inside each clump, so no face reads as one flat green.
+    const stone = swatchFor(swatch.patchy, region);
+    const stoneTint = stone ? mix(color(stone.restored), color(stone.ruined), ruin).mul(0.82) : tint.mul(0.6);
+    const clump = smoothstep(-0.05, 0.3, mx_noise_float(positionWorld.mul(2.3).add(5.7)));
+    const mottle = mx_noise_float(positionWorld.mul(9.0)).mul(0.22).add(0.86);
+    tint = mix(stoneTint, tint.mul(mottle), clump);
   }
   if (swatch.verdigris) {
     // Centuries of damp: patina gathers in patches across old brass.

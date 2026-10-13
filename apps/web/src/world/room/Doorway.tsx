@@ -1,15 +1,17 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
-import { type RefObject, useMemo } from "react";
-import { MeshBasicMaterial, type Object3D } from "three";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { type Group, MeshBasicMaterial, type Object3D } from "three";
 import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
+import { useRegion } from "../region";
 import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
+import { Sealed } from "./Sealed";
 
 // One door of a machine's room (CORE-08..13): its corridor's cable, the messages on it, its plate,
 // the way through to the room at the other end, and, when the cable is out at this end, the loose
@@ -35,6 +37,9 @@ export type DoorInfo = {
   catchable: boolean;
   /** Loose cable ends here can be plugged in by clicking (0040). */
   cableControl: "works" | "broken" | undefined;
+  /** The far end's key (`device:iface`), and whether another door here leads to the same machine. */
+  farEnd: string;
+  twin: boolean;
 };
 
 // The corridor's rune-line (CORE-12): dark until a message and its answer have crossed, then lit;
@@ -67,24 +72,67 @@ function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broke
   );
 }
 
-// Where a message died at this door (CORE-17): a faded mark on the floor for about ten seconds. It
-// never says why: that's for the player to find out.
-function LostMark({ at, since, onReplay }: { at: Vec3; since: number; onReplay: () => void }) {
-  const material = useMemo(() => new MeshBasicMaterial({ color: "#b9ad9c", transparent: true, opacity: 0.5 }), []);
+// Where messages died at this door (CORE-17): small faded scraps on the floor just inside it. They
+// pile up while messages keep dying here (2.2's clue: ignored messages pile at lantern's door), each
+// fading away about half a minute after it fell. They never say why: that's for the player to find out.
+const PILE_MS = Math.max(MARK_MS, 30_000);
+const PILE_MAX = 10;
+
+function LostPile({ door, at, onReplay }: { door: string; at: Vec3; onReplay: (frameId: number) => void }) {
+  const marks = useSession((s) => s.marks);
+  // The store forgets a mark after MARK_MS; the pile remembers what fell here a little longer.
+  const pile = useRef<{ frameId: number; at: number }[]>([]);
+  const [, redraw] = useState(0);
+  useEffect(() => {
+    const now = performance.now();
+    const known = new Set(pile.current.map((m) => m.frameId));
+    const fresh = marks.filter((m) => m.door === door && !known.has(m.frameId));
+    if (fresh.length === 0) return;
+    pile.current = [...pile.current, ...fresh.map((m) => ({ frameId: m.frameId, at: m.at }))]
+      .filter((m) => now - m.at < PILE_MS)
+      .slice(-PILE_MAX);
+    redraw((n) => n + 1);
+  }, [marks, door]);
+  const groups = useRef<(Group | null)[]>([]);
+  const material = useMemo(() => new MeshBasicMaterial({ color: "#b9ad9c", transparent: true, opacity: 0.55 }), []);
   useFrame(() => {
-    const age = performance.now() - since;
-    material.opacity = Math.max(0, 0.5 * (1 - age / MARK_MS));
+    const now = performance.now();
+    let gone = false;
+    pile.current.forEach((m, i) => {
+      const age = (now - m.at) / PILE_MS;
+      const g = groups.current[i];
+      if (age >= 1) gone = true;
+      if (g) g.scale.setScalar(age < 0.75 ? 1 : Math.max(0.001, 1 - (age - 0.75) / 0.25));
+    });
+    if (gone) {
+      pile.current = pile.current.filter((m) => now - m.at < PILE_MS);
+      redraw((n) => n + 1);
+    }
   });
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: a 3D mark (raycast click); replays are also in the debrief
-    <group position={[at[0], 0.04, at[2]]} rotation={[-Math.PI / 2, 0, Math.PI / 4]} onClick={onReplay}>
-      <mesh material={material}>
-        <planeGeometry args={[0.5, 0.07]} />
-      </mesh>
-      <mesh material={material} rotation={[0, 0, Math.PI / 2]}>
-        <planeGeometry args={[0.5, 0.07]} />
-      </mesh>
-    </group>
+    <>
+      {pile.current.map((m, i) => {
+        // Scattered a little, each a bit higher than the last: a heap, not one spot.
+        const dx = (((m.frameId * 37) % 11) - 5) * 0.045;
+        const dz = (((m.frameId * 53) % 7) - 3) * 0.05;
+        return (
+          // biome-ignore lint/a11y/noStaticElementInteractions: a 3D mark (raycast click); replays are also in the debrief
+          <group
+            key={m.frameId}
+            ref={(g) => {
+              groups.current[i] = g;
+            }}
+            position={[at[0] + dx, 0.035 + i * 0.008, at[2] + dz]}
+            rotation={[-Math.PI / 2, 0, (m.frameId * 1.7) % Math.PI]}
+            onClick={() => onReplay(m.frameId)}
+          >
+            <mesh material={material}>
+              <planeGeometry args={[0.2, 0.14]} />
+            </mesh>
+          </group>
+        );
+      })}
+    </>
   );
 }
 
@@ -134,13 +182,12 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
   const door = useSession((s) => s.status?.doors[key]);
   const corridor = useSession((s) => s.status?.corridors[info.link] ?? "dark");
   const end = useSession((s) => s.status?.cableEnds[key]);
-  // The latest mark here, if any (a number, so the selector is stable).
-  const lostAt = useSession((s) => s.marks.reduce((t, m) => (m.door === key ? Math.max(t, m.at) : t), 0));
-  const replayLost = () => {
-    const s = useSession.getState();
-    const mark = s.marks.filter((m) => m.door === key).at(-1);
-    if (mark) s.setReplay(mark.frameId);
-  };
+  const farEnd = useSession((s) => s.status?.cableEnds[info.farEnd]);
+  // A spare way to a machine already reachable by another door can't be walked while its cable is out
+  // (4.3's loose span); a room's only way stays walkable (1.2: you walk to the loose end).
+  const walkable = info.enterable && !(info.twin && (end === "out" || farEnd === "out"));
+  const replayLost = (frameId: number) => useSession.getState().setReplay(frameId);
+  const region = useRegion();
   const exec = useSession((s) => s.exec);
   const goTo = useSession((s) => s.goTo);
   const openPanel = useSession((s) => s.openPanel);
@@ -180,14 +227,12 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
           tab={TAB.plate + index}
         />
       )}
-      {lostAt > 0 && performance.now() - lostAt < MARK_MS && (
-        <LostMark
-          key={lostAt}
-          at={[(g.doorway[0] + g.looseEnd[0]) / 2, 0, (g.doorway[2] + g.looseEnd[2]) / 2]}
-          since={lostAt}
-          onReplay={replayLost}
-        />
-      )}
+      <LostPile
+        door={key}
+        at={[(g.doorway[0] + g.looseEnd[0]) / 2, 0, (g.doorway[2] + g.looseEnd[2]) / 2]}
+        onReplay={replayLost}
+      />
+      {!info.enterable && <Sealed slot={slot} region={region} />}
       {end === "out" && (
         <LooseEnd
           at={g.looseEnd}
@@ -202,7 +247,7 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
       )}
       {/* The way through (CORE-10): a chip in the arch; sealed rooms say why. */}
       <Html center position={[g.doorway[0], 2.9, g.doorway[2]]} zIndexRange={[10, 0]}>
-        {info.enterable ? (
+        {walkable ? (
           <button
             type="button"
             className="world-chip"
@@ -221,11 +266,36 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
             data-tab={TAB.door + index}
             role="note"
             aria-label={fill(voice.doorway.sealed, { name: info.peer, why: info.barred ?? "" })}
+            // biome-ignore lint/a11y/noNoninteractiveTabindex: focus shows why it's closed (agent D)
+            tabIndex={0}
           >
-            {info.peer} · {info.barred}
+            {/* Just the name; why it's closed shows on hover or focus (styles.css, agent D). */}
+            {info.peer}
+            {info.barred && <span className="chip-why">{info.barred}</span>}
           </span>
         )}
       </Html>
     </>
+  );
+}
+
+/** A door with no cable at all (a spare port): its plate, link down, and the dark doorway. */
+export function EmptyDoor({ device, iface, slot }: { device: string; iface: string; slot: DoorSlot }) {
+  const g = doorGeometry(slot);
+  const door = useSession((s) => s.status?.doors[`${device}:${iface}`]);
+  const exec = useSession((s) => s.exec);
+  const openPanel = useSession((s) => s.openPanel);
+  if (!door) return null;
+  return (
+    <Plate
+      position={g.plate}
+      name={iface}
+      mac={door.mac}
+      linkUp={door.up}
+      onOpen={() => {
+        openPanel({ kind: "plate", device, iface });
+        void exec(device, `ip link show ${iface}`, "click");
+      }}
+    />
   );
 }
