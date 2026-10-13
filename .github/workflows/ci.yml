@@ -1,5 +1,6 @@
-# CI: lint, typecheck, unit + golden tests, room validation. The web build and browser tests return in B1,
-# when apps/web is rebuilt for the 3D world.
+# CI: lint, typecheck, unit + golden tests, room validation, the web build, and a browser test of a
+# first visit on the production build (landing → onboarding → Prologue → Floor 1's first room). The
+# full play-through of every room (tools/shots/play) runs locally: it takes too long for CI minutes.
 # Deploys are done by Cloudflare itself from the GitHub repo (wrangler.jsonc), not from here.
 name: CI
 
@@ -25,4 +26,12 @@ jobs:
       - run: pnpm check
       - run: pnpm test
       - run: pnpm rooms:validate
-      # B1: add back `pnpm build`, Playwright install and `pnpm e2e` once apps/web exists.
+      - run: pnpm build
+      - run: pnpm --filter @wirelight/web exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: apps/web/test-results
+          retention-days: 7

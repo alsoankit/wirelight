@@ -2,6 +2,7 @@ import { landing, roomTexts } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import { lazy, Suspense, useCallback, useState } from "react";
 import { LandingPage } from "./landing/LandingPage";
+import { useProgress } from "./progress/progress";
 
 // Routes (tech/architecture.md): `/` the landing · `/play` the game · `/play/<room>` a link to a room.
 // Every visit opens the landing first (0044); a link to a room makes its main button "Play <room>".
@@ -26,8 +27,14 @@ export function App() {
   );
   const [quick, setQuick] = useState(false);
   const room = linkedRoom();
-  const title = room ? roomTexts[roomById(room)?.content ?? ""]?.title : undefined;
-  const main = title ? `${landing.playPrefix} ${title}` : landing.explore;
+  // Returning players continue where they left off (ONB-20); a link to a room plays that room (0044).
+  const current = useProgress((s) => s.current);
+  const titleOf = (id: string | null | undefined) => (id ? roomTexts[roomById(id)?.content ?? ""]?.title : undefined);
+  const main = room
+    ? `${landing.playPrefix} ${titleOf(room)}`
+    : titleOf(current)
+      ? `${landing.continuePrefix}: ${titleOf(current)}`
+      : landing.explore;
 
   const arrive = useCallback(() => {
     if (!window.location.pathname.startsWith("/play")) window.history.pushState(null, "", "/play");
