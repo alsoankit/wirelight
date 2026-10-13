@@ -8,6 +8,10 @@
 - **Turret Pack** (March 2020) — by [Quaternius](https://quaternius.com/packs/turretpack.html). CC0 1.0 Universal per the pack's `License.txt`; Quaternius Asset License v1.0 also applies (0072). Record in `assets-src/licenses/`. Geared bases and drums for the sorter keeper (Region 2); no weapon models used.
 - **Modular Cathedral Kit** (V1.0, 2026) — by [SigilsVault](https://sigilsvault.itch.io/modular-cathedral-kit) (Kevin Barany). CC0 1.0 Universal per the kit's `LICENSE.txt`. Record in `assets-src/licenses/`. Walls, vaults, columns, windows and floors for the Cathedral of Crossings (Region 4).
 
+## Sound effects and ambience
+- **Interface Sounds**, **UI Audio**, **Impact Sounds** and **RPG Audio** — by [Kenney](https://kenney.nl/assets?q=audio) (www.kenney.nl), CC0 1.0. Licence files and source pages in `assets-src/licenses/kenney-*`. Clicks, switches, latches, the key jingle, doors, footsteps, creaks and the far bell, softened and levelled by `tools/audio/make-sfx.sh`.
+- Every other effect (the broadcast chime, capture chime, restoration swell, shimmer, memory rewind, swooshes, wind gust, drip, keeper's gears, the Sorting Works gate and the Cathedral's stone door) and every ambience bed and hum was made for Wirelight, synthesised with FFmpeg by `tools/audio/make-sfx.sh` (the beds mix in a few of the Kenney creaks, a clank and the bell).
+
 ## Music and voices
 (Added as tracks and voice models are plugged in.)
 

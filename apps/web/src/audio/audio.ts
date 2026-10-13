@@ -3,6 +3,8 @@
 // errors, so the game is complete with no audio files at all. Voices are the content's line IDs and
 // play only when Voices is On (Text only plays none). Muted until the first click (browsers require
 // it). Music follows the room's ruin: muffled in ruin, opening up as it restores; speech dips it.
+// Ambience (0021) is two looping beds per place, `<base>.ruin` and `<base>.restored`, blended by the
+// same ruin level; it plays on the effects bus.
 
 type Slot = { src: string; volume?: number; loop?: boolean; credit?: string };
 export type Channel = "music" | "effects" | "voices";
@@ -17,6 +19,13 @@ const buffers = new Map<string, Promise<AudioBuffer | null>>();
 let volumes: Volumes = { master: 0.8, music: 0.6, effects: 0.7, voices: 0.9 };
 let textOnly = false;
 let music: { slot: string; source: AudioBufferSourceNode; gain: GainNode } | null = null;
+type Bed = { slot: string; source: AudioBufferSourceNode; gain: GainNode };
+let ambience: { base: string; beds: Bed[] } | null = null;
+let ambienceToken = 0;
+let ruin = 1;
+// What should be playing, so it can start once sound is allowed and the manifest is in.
+let wantMusic: string | null = null;
+let wantAmbience: string | null = null;
 let voice: AudioBufferSourceNode | null = null;
 const lastPlayed = new Map<string, number>();
 
@@ -28,6 +37,12 @@ export async function loadManifest(url = "/audio/manifest.json"): Promise<void> 
   } catch {
     manifest = {};
   }
+  resume();
+}
+
+function resume(): void {
+  if (wantMusic) void playMusic(wantMusic);
+  if (wantAmbience) void playAmbience(wantAmbience);
 }
 
 /** The first click or key: browsers allow sound from here on. */
@@ -53,6 +68,7 @@ export function unlock(): void {
   buses.effects.connect(master);
   buses.voices.connect(master);
   applyVolumes();
+  resume();
 }
 
 export function setVolumes(v: Volumes): void {
@@ -106,6 +122,7 @@ export async function effect(slot: string, throttleMs = 0): Promise<void> {
 
 /** The music slot for where the player is; crossfades from what was playing (2 s). */
 export async function playMusic(slot: string | null): Promise<void> {
+  wantMusic = slot;
   if (!ctx || !buses) return;
   if (music?.slot === slot) return;
   const old = music;
@@ -128,11 +145,54 @@ export async function playMusic(slot: string | null): Promise<void> {
   music = { slot, source, gain };
 }
 
-/** Ruin to restoration, live (0018): a ruined room's music is muffled; restored, it opens up. */
+/** A bed's level: equal-power between the ruined and restored beds, so a half-fixed room isn't quieter. */
+function bedLevel(slot: string): number {
+  return (manifest[slot]?.volume ?? 1) * Math.sqrt(slot.endsWith(".ruin") ? ruin : 1 - ruin);
+}
+
+/** The ambience for where the player is (`ambience.region.2` → its `.ruin` and `.restored` beds); fades over ~2 s. */
+export async function playAmbience(base: string | null): Promise<void> {
+  wantAmbience = base;
+  if (!ctx || !buses || (ambience?.base ?? null) === base) return;
+  const token = ++ambienceToken;
+  if (ambience) {
+    for (const b of ambience.beds) {
+      b.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.6);
+      b.source.stop(ctx.currentTime + 3);
+    }
+    ambience = null;
+  }
+  if (!base) return;
+  const slots = [`${base}.ruin`, `${base}.restored`];
+  const loaded = await Promise.all(slots.map(buffer));
+  if (token !== ambienceToken || !ctx || !buses) return;
+  const beds: Bed[] = [];
+  slots.forEach((slot, i) => {
+    const b = loaded[i];
+    if (!b || !ctx || !buses) return;
+    const source = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.gain.setTargetAtTime(bedLevel(slot), ctx.currentTime, 0.6);
+    source.buffer = b;
+    source.loop = manifest[slot]?.loop ?? true;
+    source.connect(gain).connect(buses.effects);
+    source.start();
+    beds.push({ slot, source, gain });
+  });
+  if (beds.length) ambience = { base, beds };
+}
+
+/**
+ * Ruin to restoration, live (0018, 0021): a ruined room's music is muffled; restored, it opens up;
+ * the ambience moves from the ruined bed to the restored one.
+ */
 export function setRuin(level: number): void {
+  ruin = Math.min(Math.max(level, 0), 1);
   if (!ctx || !musicFilter) return;
-  const hz = 600 + (1 - Math.min(Math.max(level, 0), 1)) ** 2 * 17400;
+  const hz = 600 + (1 - ruin) ** 2 * 17400;
   musicFilter.frequency.setTargetAtTime(hz, ctx.currentTime, 0.8);
+  for (const b of ambience?.beds ?? []) b.gain.gain.setTargetAtTime(bedLevel(b.slot), ctx.currentTime, 0.8);
 }
 
 /**

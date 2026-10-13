@@ -37,7 +37,7 @@ export function voiceLines(): VoiceLine[] {
   return [...out, ...extra, ...(ending.lines ?? [])];
 }
 
-/** Music and effects the web app plays (apps/web/src/audio/AudioDriver.tsx). */
+/** Music, effects and ambience beds the web app plays (apps/web/src/audio/AudioDriver.tsx). */
 export const MUSIC_AND_EFFECTS = [
   "music.landing",
   "music.region.1",
@@ -50,4 +50,11 @@ export const MUSIC_AND_EFFECTS = [
   "sfx.cable.plug",
   "sfx.restore",
   "sfx.key",
+  "sfx.cable.unplug",
+  "sfx.slate.catch",
+  "sfx.plate.on",
+  "sfx.plate.off",
+  "sfx.plate.broken",
+  "sfx.ui.click",
+  ...[1, 2, 3, 4].flatMap((r) => [`ambience.region.${r}.ruin`, `ambience.region.${r}.restored`]),
 ];
