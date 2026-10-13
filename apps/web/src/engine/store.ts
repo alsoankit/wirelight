@@ -19,6 +19,7 @@ export type Panel =
   | { kind: "board"; device: string; board: "mac" | "ledger" | "routes"; execId?: number }
   | { kind: "desk"; device: string }
   | { kind: "slate" }
+  | { kind: "keeper"; device: string }
   | { kind: "notes" }
   | { kind: "ask" }
   | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "keys" | "settings" };
@@ -99,6 +100,7 @@ async function exclusive<T>(fn: () => Promise<T>): Promise<T> {
 export const ask = {
   history: (device: string) => engine.history(device),
   complete: (device: string, line: string) => engine.complete(device, line),
+  tools: () => engine.tools(),
 };
 
 /** A batch caught something (the Slate by command, 0043): the jar's list is fetched again. */

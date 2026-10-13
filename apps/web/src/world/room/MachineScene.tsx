@@ -1,3 +1,5 @@
+import { Html } from "@react-three/drei";
+import { voice } from "@wirelight/content";
 import { type RoomDef, roomById } from "@wirelight/rooms";
 import { type ReactNode, Suspense, useMemo, useRef } from "react";
 import type { Object3D } from "three";
@@ -67,6 +69,7 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
   const quality = useQuality();
   const roomId = useSession((s) => s.roomId);
   const room = roomId ? roomById(roomId) : undefined;
+  const openPanel = useSession((s) => s.openPanel);
   const doors = useMemo(() => (room ? doorsOf(room, device, barred) : []), [room, device, barred]);
   // CORE-38: ruin = failing checks ÷ all checks.
   const ruinLevel = useSession((s) => {
@@ -90,6 +93,12 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
       {quality.fireflies && <Fireflies bounds={layout.air} />}
       {quality.dust && <Dust bounds={layout.air} />}
       <Keeper position={layout.keeper} rest={[origin[0], 1.4, origin[2]]} watch={watch} cue={cue} />
+      {/* Ask the keeper why (CORE-25). */}
+      <Html center position={[layout.keeper[0], 2.35, layout.keeper[2]]} zIndexRange={[10, 0]}>
+        <button type="button" className="world-chip" onClick={() => openPanel({ kind: "keeper", device })}>
+          {voice.keeper.name}
+        </button>
+      </Html>
       {doors.map((info, i) => {
         const slot = layout.doorSlots[i];
         return slot ? (

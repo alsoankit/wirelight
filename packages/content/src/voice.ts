@@ -3,24 +3,59 @@ import type { SimEvent } from "@wirelight/sim";
 
 type Decision = Extract<SimEvent, { kind: "fwd.decision" }>;
 
+/** Why a router or a switch let something go, from the frame.drop that followed the decision. */
+export type DropReason = Extract<SimEvent, { kind: "frame.drop" }>["reason"];
+
 /**
- * A computer keeper explains its accept/ignore decision from the trace (FR-KEEP-04, D13 #11).
- * Keepers never lie and never fix.
+ * A keeper explains one decision in plain words (CORE-25), built only from what really happened:
+ * the decision, the table line it used, and why something was let go. Keepers never lie and never fix.
  */
-export function computerKeeperSays(d: Decision): string {
-  if (d.decision === "deliver") {
-    return d.tableRef.dst === "ff:ff:ff:ff:ff:ff"
-      ? `That frame was for everyone (${d.tableRef.dst}), so I took it in.`
-      : `That frame was for ${d.tableRef.dst}. That's me, so I took it in.`;
+export function keeperSays(d: Decision, reason?: DropReason): string {
+  const r = d.tableRef;
+  if (d.layer === "l3") {
+    const ip = r.ip ?? "?";
+    if (d.decision === "deliver") return `That packet was for ${ip}. That's me, so I took it in.`;
+    if (d.decision === "forward" && r.route)
+      return r.route.via
+        ? `That packet is for ${ip}. My board says ${r.route.dst} goes via ${r.route.via}, out of door ${r.route.dev}, so I sent it there.`
+        : `That packet is for ${ip}. My board says ${r.route.dst} is the street behind door ${r.route.dev}, so I sent it there.`;
+    if (reason === "forwarding-disabled")
+      return `That packet is for ${ip}, not me. I'm not allowed to pass things on to other streets, so I let it go.`;
+    if (reason === "ttl-expired")
+      return `That packet is for ${ip}, but its countdown ran out here, so it went no further. I told whoever sent it.`;
+    return `That packet is for ${ip}. My board has no line for it, so I had nowhere to send it. I told whoever sent it.`;
   }
-  return `That frame was for ${d.tableRef.dst}. That's not me, so I ignored it.`;
+  if (r.fdb !== undefined) {
+    // A switch.
+    if (d.decision === "deliver")
+      return `That frame was for ${r.dst}, this hall's own door name, so the hall took it in.`;
+    if (d.decision === "flood")
+      return r.dst === "ff:ff:ff:ff:ff:ff"
+        ? `That frame was for everyone, so I sent it out of every other door: ${d.egress.join(", ")}.`
+        : `That frame was for ${r.dst}. I didn't know which door that name is behind, so I sent it out of every other door: ${d.egress.join(", ")}.`;
+    const line = r.fdb
+      ? `My board says ${r.fdb.mac} is behind ${r.fdb.port}${r.fdb.static ? " (pinned)" : ""}`
+      : "My board knew it";
+    if (d.decision === "forward") return `That frame was for ${r.dst}. ${line}, so I sent it there.`;
+    return `That frame was for ${r.dst}. ${line}, the door it came in by, so it didn't need to go anywhere.`;
+  }
+  // A computer's door.
+  if (d.decision === "deliver")
+    return r.dst === "ff:ff:ff:ff:ff:ff"
+      ? `That frame was for everyone (${r.dst}), so I took it in.`
+      : `That frame was for ${r.dst}. That's me, so I took it in.`;
+  return `That frame was for ${r.dst}. That's not me, so I ignored it.`;
 }
 
 export const voice = {
   keeper: {
+    name: "Keeper",
     title: "The keeper",
-    about: "It reads every frame that reaches this machine's doors and decides whether it's for this machine.",
+    about: "Ask it about something it handled. It tells you exactly what it did, and why.",
     idle: "Nothing has arrived yet.",
+    item: "{time} s · {what}",
+    askMachine: "Ask the machine",
+    close: "Close",
   },
   lock: {
     closedTitle: "A locked gate",

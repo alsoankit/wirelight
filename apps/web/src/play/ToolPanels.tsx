@@ -3,6 +3,7 @@ import { roomById } from "@wirelight/rooms";
 import type { SlateLayer, SlateOpen } from "@wirelight/sim";
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "../engine/store";
+import { KeeperPanel } from "./KeeperPanel";
 import { SlatePanel } from "./SlatePanel";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
@@ -426,5 +427,6 @@ export function ToolPanels() {
   if (panel?.kind === "board") return <BoardPanel device={panel.device} board={panel.board} execId={panel.execId} />;
   if (panel?.kind === "desk") return <DeskPanel device={panel.device} />;
   if (panel?.kind === "slate") return <SlatePanel />;
+  if (panel?.kind === "keeper") return <KeeperPanel device={panel.device} />;
   return null;
 }
