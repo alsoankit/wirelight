@@ -21,9 +21,9 @@ import type { KitPlacement } from "./placement";
 // chairs get their colour that way). Triangles facing away from the fixed camera are dropped, except on
 // thin, two-sided surfaces (leaves, cloth, glass), whose back is the side the camera may see.
 //
-// Built like bake/assemble.ts's assembleKitRoom (same order, same keys), so a lightmap baked from the
-// same pieces lines up; the differences: `color` is kept, thin surfaces aren't culled, and skinned
-// pieces (the chest) are left out here and drawn on their own (KitRoom).
+// The game (KitRoom) and the bake exporter (tools/bake/export.mjs) both build from this, so a lightmap
+// baked from the same pieces lines up. Thin surfaces aren't culled; skinned pieces (the chest) are left
+// out here and drawn on their own (KitRoom).
 
 /** Materials that are thin, two-sided cards: never culled by facing. */
 export const THIN_MATERIAL = /leaves|leaf|grass|flower|fern|clover|vine|banner|cloth|glass|page|mushroom/i;
@@ -165,7 +165,11 @@ export function assembleKit(
     const geometry = mergeGeometries(parts);
     for (const part of parts) part.dispose();
     if (!geometry) continue;
-    out.push({ ...entry, geometry: THIN_MATERIAL.test(entry.name) ? geometry : facingCamera(geometry, toCamera) });
+    const drawn = THIN_MATERIAL.test(entry.name) ? geometry : facingCamera(geometry, toCamera);
+    // A material whose every face looks away from the camera leaves nothing to draw or bake (an
+    // empty glTF primitive is invalid: Blender refuses the whole layout).
+    if (drawn.getAttribute("position").count === 0) continue;
+    out.push({ ...entry, geometry: drawn });
   }
   return out;
 }
