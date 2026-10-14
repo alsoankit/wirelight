@@ -30,7 +30,7 @@ const looking = new CatmullRomCurve3([
   new Vector3(0, BOTTOM - 0.4, SLICE.z),
 ]);
 
-export const DESCENT_SECONDS = { full: 2.8, quick: 0.9, faster: 3 }; // `faster`: speed-up on click or key
+export { DESCENT_SECONDS } from "./descentTiming";
 
 /** Ease in (gentle start), then fall. */
 function ease(u: number): number {

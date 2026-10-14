@@ -1,5 +1,6 @@
 import { landing } from "@wirelight/content/intro";
 import { lazy, StrictMode, Suspense, useCallback, useEffect, useState } from "react";
+import { DESCENT_GRACE_MS, DESCENT_SECONDS } from "./landing/descentTiming";
 import { LandingPage } from "./landing/LandingPage";
 import { reducedMotion } from "./progress/motion";
 import { useProgress } from "./progress/progress";
@@ -54,6 +55,10 @@ export function App() {
         return;
       }
       setStage("descending");
+      // The descent arrives by itself when its last frame is drawn; on a slow GPU (software WebGL)
+      // frames come so rarely that it would crawl, so the game opens anyway after its planned length.
+      const planned = (skipIntro ? DESCENT_SECONDS.quick : DESCENT_SECONDS.full) * 1000;
+      setTimeout(arrive, planned + DESCENT_GRACE_MS);
     },
     [arrive],
   );

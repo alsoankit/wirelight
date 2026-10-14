@@ -55,10 +55,15 @@ if (import.meta.env.DEV) (window as unknown as { __wirelight?: unknown }).__wire
  * (ONB-20), else the Prologue.
  */
 function startingRoom(): string {
+  // A link to a room (/play/<room>, 0044) opens that room.
   const fromPath = window.location.pathname.match(/^\/play\/(.+)$/)?.[1];
-  const asked = fromPath ? decodeURIComponent(fromPath) : new URLSearchParams(window.location.search).get("room");
-  if (asked && roomById(asked)) return asked;
+  const linked = fromPath ? decodeURIComponent(fromPath) : null;
+  if (linked && roomById(linked)) return linked;
+  // `?room=` is where the game itself last was (goToRoom keeps it in the address bar). Saved progress
+  // wins over it, so a reload after a win goes on to the next room; in dev it wins (play scripts).
   const current = useProgress.getState().current;
+  const inBar = new URLSearchParams(window.location.search).get("room");
+  if (inBar && roomById(inBar) && (import.meta.env.DEV || !current)) return inBar;
   return current && roomById(current) ? current : "p.first-message";
 }
 
