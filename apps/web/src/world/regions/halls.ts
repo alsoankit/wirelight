@@ -76,8 +76,8 @@ function rootCrown(
 // ---------------------------------------------------------------------------------------------------
 //
 // The doorway is a round arch in the back wall at x = 0, leading to the corridor (−z); on Floor 2 a
-// second arch in the left wall at z = 2. Broken stone, a fallen column, rubble, grass in the cracks, a
-// dead tree outside the collapsed corner, and the Knight's cloak on its peg.
+// second arch in the left wall at z = 2. Broken stone, a fallen column, rubble, grass in the cracks,
+// and the Knight's cloak on its peg.
 
 // Back wall: the overgrown arch is broken at the top; the right end has collapsed to a holed stub.
 function backWall(): Placement[] {
@@ -123,9 +123,6 @@ function rubble(): Placement[] {
     { piece: "Brick", position: [1.9, 0, 2.2], rotationY: 0.7 },
     { piece: "Brick", position: [-2.6, 0, -0.2], rotationY: 0.3 },
     { piece: "Brick", position: [1.75, 0, 2.55], rotationY: 2.0 }, // weighs down the Knight's letter
-    // A dead tree outside, behind the collapsed corner: its trunk hidden by the wall, its branches
-    // reaching over the broken top against the moon.
-    { piece: "DeadTree_3", position: [3.0, 0, -5.4], rotationY: 0.8, scale: 1.5 },
   ];
 }
 
@@ -259,7 +256,6 @@ export const HALLS_HOUSE_PIECES: Placement[] = [
   { piece: "Pot3_Broken", position: [2.6, 0, -3.2], rotationY: 2.2 },
   { piece: "Bricks", position: [2.9, 0, 1.9], rotationY: 0.9 },
   { piece: "Brick", position: [-1.6, 0, 2.6], rotationY: 0.4 },
-  { piece: "DeadTree_1", position: [-5.6, 0, -1.8], rotationY: 1.9, scale: 1.3 },
   // What makes it someone's room and not the Observatory (agent C, playtest): an old shelf of the
   // machine's own, a chest, candle stubs by the lamp-post. (The bush at the broken corner is now the
   // Stylized Nature growth below.)
