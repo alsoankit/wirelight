@@ -3,7 +3,10 @@
 // steps. Usage: node memory-chapters.mjs http://127.0.0.1:5173/play <screenshot folder> [floors] [WxH]
 import { launch, tidy } from "./lib.mjs";
 
-const [base, out, only, size] = process.argv.slice(2);
+// Screenshots go to the given folder, or the system temp folder (never a folder named "undefined").
+const [base, outArg, only, size] = process.argv.slice(2);
+const out = outArg ?? `${(await import("node:os")).tmpdir()}/wirelight-memory-chapters`;
+(await import("node:fs")).mkdirSync(out, { recursive: true });
 const { browser, page: p, errors } = await launch();
 p.on("console", (m) => {
   if (m.type() === "error" && !m.text().includes("unmount")) errors.push(m.text().slice(0, 400));

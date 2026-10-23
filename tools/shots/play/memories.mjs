@@ -1,9 +1,12 @@
 // Guardian memories and ride-alongs (0036, 0037): opens the floor memory from a real debrief, then
 // replays memories from the Codex (marked seen through the dev hook) and screenshots each ride.
 // Usage: node memories.mjs http://127.0.0.1:5173/play <screenshot folder>
-import { launch, open, plateSwitch, tidy, won } from "./lib.mjs";
+import { arrived, launch, open, plateSwitch, tidy, won } from "./lib.mjs";
 
-const [base, out] = process.argv.slice(2);
+// Screenshots go to the given folder, or the system temp folder (never a folder named "undefined").
+const [base, outArg] = process.argv.slice(2);
+const out = outArg ?? `${(await import("node:os")).tmpdir()}/wirelight-memories`;
+(await import("node:fs")).mkdirSync(out, { recursive: true });
 const { browser, page: p, errors } = await launch();
 const shot = (n) => p.screenshot({ path: `${out}/${n}.png` });
 
@@ -11,7 +14,7 @@ const shot = (n) => p.screenshot({ path: `${out}/${n}.png` });
 await open(p, base, "f1.boss-dark-corridor");
 await plateSwitch(p);
 await p.click("text=→ lantern");
-await p.waitForTimeout(2000);
+await arrived(p, "lantern");
 await tidy(p);
 await p.click("text=Cable end");
 await p.waitForTimeout(600);
