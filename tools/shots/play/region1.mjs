@@ -1,6 +1,6 @@
 // Plays every room of Region 1 (the Prologue, Floors 1 and 2) by clicking and typing, as a player
 // would. Usage: node region1.mjs http://127.0.0.1:5173/play
-import { bench, card, launch, open, plateSwitch, tidy, type, won } from "./lib.mjs";
+import { arrived, bench, card, launch, open, plateSwitch, tidy, type, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
 const { browser, page: p, errors } = await launch();
@@ -13,7 +13,7 @@ await check("P");
 
 await open(p, base, "f1.two-rooms");
 await p.click("text=→ lantern");
-await p.waitForTimeout(2000);
+await arrived(p, "lantern");
 await tidy(p);
 await p.click("button.plate");
 await check("1.1");
@@ -24,14 +24,14 @@ await check("1.2");
 
 await open(p, base, "f1.both-ends");
 await p.click("text=→ lantern");
-await p.waitForTimeout(2000);
+await arrived(p, "lantern");
 await plateSwitch(p);
 await check("1.3");
 
 await open(p, base, "f1.boss-dark-corridor");
 await plateSwitch(p);
 await p.click("text=→ lantern");
-await p.waitForTimeout(2000);
+await arrived(p, "lantern");
 await tidy(p);
 await p.click("text=Cable end");
 await p.waitForTimeout(600);

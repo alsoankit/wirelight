@@ -25,12 +25,20 @@ export type Panel =
   | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "keys" | "settings" };
 
 /** What reached one door lately (see Session.arrivals). */
+/** A corridor the player is in (0081): which cable, from which machine, and where they're gliding to. */
+export type Corridor = { link: string; from: string; through?: string };
+
 export type Arrival = { t: number; frameId: number; bytes: Uint8Array; count: number; ignored: number };
 
 type Session = {
   roomId: string | null;
   /** The machine whose room the player is standing in (CORE-10); commands run there (UI-11). */
   here: string | null;
+  /**
+   * In a corridor (0081): its cable and the machine the player came from (`here` stays that machine, so
+   * the console still runs there). With `through`, the player is gliding on to that machine's room.
+   */
+  corridor: Corridor | null;
   panel: Panel | null;
   /** When the room was loaded or reset (screen time, ms): hints count from here (HELP-09). */
   startedAt: number;
@@ -70,6 +78,10 @@ type Session = {
   load(roomId: string): Promise<void>;
   /** Walks through a door to the machine at the other end (the caller checks it can be entered). */
   goTo(device: string): void;
+  /** Steps into a corridor and stops there (0081): clicking the cable, or a key. */
+  enterCorridor(link: string, from: string): void;
+  /** Goes through a doorway: glides along its corridor into the room at the other end (0081). */
+  passThrough(link: string, from: string, to: string): void;
   openPanel(panel: Panel): void;
   closePanel(): void;
   /** Runs a command line; resolves with its exec id and exit code (null while it keeps running). */
@@ -245,6 +257,7 @@ function apply(state: Session, batch: Batch): Partial<Session> {
 export const useSession = create<Session>((set, get) => ({
   roomId: null,
   here: null,
+  corridor: null,
   panel: null,
   startedAt: 0,
   voiceGiven: false,
@@ -283,6 +296,7 @@ export const useSession = create<Session>((set, get) => ({
     set({
       roomId,
       here: roomById(roomId)?.playerDevice ?? null,
+      corridor: null,
       panel: null,
       jar: [],
       events: [],
@@ -340,7 +354,9 @@ export const useSession = create<Session>((set, get) => ({
       });
   },
 
-  goTo: (device) => set({ here: device, panel: null }),
+  goTo: (device) => set({ here: device, corridor: null, panel: null }),
+  enterCorridor: (link, from) => set({ corridor: { link, from }, here: from, panel: null }),
+  passThrough: (link, from, to) => set({ corridor: { link, from, through: to }, here: from, panel: null }),
 
   async reset() {
     const batch = await exclusive(() => engine.reset());

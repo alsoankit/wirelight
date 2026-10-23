@@ -1,6 +1,6 @@
 // Plays every room of Region 3 (Floors 5, 6 and 7) by clicking and typing, as a player would.
 // Usage: node region3.mjs http://127.0.0.1:5173/play
-import { card, closeConsole, launch, open, tidy, type, won } from "./lib.mjs";
+import { arrived, card, closeConsole, launch, open, tidy, type, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
 const { browser, page: p, errors } = await launch();
@@ -10,7 +10,7 @@ const walk = async (to) => {
   await tidy(p);
   await closeConsole(p);
   await p.click(`text=→ ${to} >> nth=0`);
-  await p.waitForTimeout(1600);
+  await arrived(p, to);
   await tidy(p);
 };
 const fast = async () => {

@@ -1,5 +1,7 @@
 import { roomById } from "@wirelight/rooms";
+import { useSession } from "../../engine/store";
 import { RoomWarmup, useShownRoom } from "../../render/RoomWarmup";
+import { CorridorScene } from "../corridor/CorridorScene";
 import { HallScene } from "../hall/HallScene";
 import { HouseScene } from "../house/HouseScene";
 import { ObservatoryScene } from "../observatory/ObservatoryScene";
@@ -12,8 +14,11 @@ export function World({ arriving = false }: { arriving?: boolean }) {
   // Walking to another machine swaps the room behind a brief veil, with its shaders compiled first
   // (render/RoomWarmup.tsx).
   const { roomId, here } = useShownRoom();
+  const corridor = useSession((s) => s.corridor);
   const room = roomId ? roomById(roomId) : undefined;
   if (!room || !here) return null;
+  // In a corridor, or gliding through one (0081): the corridor instead of a room.
+  if (corridor) return <CorridorScene key={`${corridor.link}:${corridor.through ?? ""}`} corridor={corridor} />;
   return (
     <>
       <Scene roomId={room.id} here={here} arriving={arriving} />

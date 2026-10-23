@@ -271,6 +271,17 @@ export const voice = {
     sealed: "{name}'s room is closed: {why}",
     back: "Back to {name}'s room",
   },
+  /** A corridor (0081): a cable you can stand in and watch. */
+  corridor: {
+    /** On the cable at a doorway: stepping into its corridor and stopping there. */
+    step: "Step into the corridor to {name}",
+    /** Where the player stands: the two machines the cable joins. */
+    title: "The corridor between {a} and {b}",
+    hint: "Every message on this cable passes here. Point at one to slow it down.",
+    /** The way out at each end. */
+    toEnd: "{name}'s room",
+    toEndLabel: "Go on to {name}'s room",
+  },
   /** Spoken lines (UI-20): always written out; Enter or a click goes on. */
   lines: { next: "Next", done: "Close" },
   /** A command memory (0041), shown over the dimmed room. */

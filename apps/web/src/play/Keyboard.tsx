@@ -1,11 +1,13 @@
 import { roomById } from "@wirelight/rooms";
 import { useEffect } from "react";
 import { type Panel, useSession } from "../engine/store";
+import { goThrough, stepIntoCorridor } from "../world/corridor/move";
 import { doorsOf } from "../world/room/MachineScene";
 import { isTyping, TAB, withModifier } from "./keys";
 
 // Playing by keyboard (CORE-47, UI-05, UI-18). Number keys go through the room's doors in order
-// (eth0 = 1, eth1 = 2…), only into rooms that can be entered; Esc steps back (closes the open panel;
+// (eth0 = 1, eth1 = 2…), only into rooms that can be entered; Shift and a number steps into that door's
+// corridor (0081), where ← and → go on and Esc steps back; Esc steps back (closes the open panel;
 // the Glass closes itself); Space pauses time; G, M and ` live with what they open. No key fires
 // while typing.
 // Panels take focus when they open and hand it back when they close; the room's objects are in a
@@ -14,14 +16,27 @@ import { isTyping, TAB, withModifier } from "./keys";
 /** Something modal is on screen (the path choice, the tour, a command memory): the room waits. */
 const modalOpen = () => !!document.querySelector('[aria-modal="true"]');
 
-function goThroughDoor(n: number): boolean {
+/** Door n of the room the player is in (not while in a corridor: its own keys move there). */
+function door(n: number) {
   const s = useSession.getState();
   const room = s.roomId ? roomById(s.roomId) : undefined;
-  if (!room) return false;
-  const here = s.here ?? room.playerDevice;
-  const door = doorsOf(room, here, () => undefined)[n - 1];
-  if (!door?.enterable) return false;
-  s.goTo(door.peer);
+  if (!room || s.corridor) return undefined;
+  return doorsOf(room, s.here ?? room.playerDevice, () => undefined)[n - 1];
+}
+
+/** A number key: through that door, gliding along its corridor (0081). */
+function goThroughDoor(n: number): boolean {
+  const d = door(n);
+  if (!d?.enterable) return false;
+  goThrough(d.link, d.device, d.peer);
+  return true;
+}
+
+/** Shift and a number key: into that door's corridor, stopping there (0081). */
+function stepIntoDoorCorridor(n: number): boolean {
+  const d = door(n);
+  if (!d) return false;
+  stepIntoCorridor(d.link, d.device);
   return true;
 }
 
@@ -84,8 +99,9 @@ function useKeys() {
     };
     const onKey = (e: KeyboardEvent) => {
       if (isTyping(e) || withModifier(e) || e.repeat) return;
-      if (/^[1-9]$/.test(e.key) && !modalOpen() && !document.querySelector(".glass")) {
-        if (goThroughDoor(Number(e.key))) e.preventDefault();
+      const digit = /^Digit([1-9])$/.exec(e.code)?.[1];
+      if (digit && !modalOpen() && !document.querySelector(".glass")) {
+        if (e.shiftKey ? stepIntoDoorCorridor(Number(digit)) : goThroughDoor(Number(digit))) e.preventDefault();
       }
       // Space pauses and resumes time, unless it's pressing a button or going on with spoken lines.
       const onControl = e.target instanceof HTMLElement && !!e.target.closest("button, a, [role='button']");

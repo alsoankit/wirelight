@@ -7,6 +7,7 @@ import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } fro
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
+import { goThrough, stepIntoCorridor } from "../corridor/move";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { useRegion } from "../region";
@@ -71,6 +72,49 @@ function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broke
     </mesh>
   );
 }
+
+/**
+ * The cable's click area (0081): wider than the rune-line itself, unseen; pointing at it says what it
+ * does, clicking steps into the corridor and stops there.
+ */
+function CableStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep: () => void }) {
+  const span = cableSpan(slot);
+  const [hover, setHover] = useState(false);
+  const rotationY = span.along === "z" ? 0 : Math.PI / 2;
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: a 3D target (raycast); Shift and the door's number is the keyboard way
+    <group
+      position={span.centre}
+      rotation={[0, rotationY, 0]}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHover(true);
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        setHover(false);
+        document.body.style.cursor = "";
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        document.body.style.cursor = "";
+        onStep();
+      }}
+    >
+      <mesh material={HIT_MATERIAL}>
+        <boxGeometry args={[0.7, 0.3, span.length]} />
+      </mesh>
+      {hover && (
+        <Html center position={[0, 0.5, 0]} zIndexRange={[20, 0]}>
+          <div className="message-summary">{fill(voice.corridor.step, { name })}</div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
+/** Invisible but still hit by the pointer (a hidden mesh would be skipped by raycasting). */
+const HIT_MATERIAL = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
 
 // Where messages died at this door (CORE-17): small faded scraps on the floor just inside it. They
 // pile up while messages keep dying here (2.2's clue: ignored messages pile at lantern's door), each
@@ -189,7 +233,6 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
   const replayLost = (frameId: number) => useSession.getState().setReplay(frameId);
   const region = useRegion();
   const exec = useSession((s) => s.exec);
-  const goTo = useSession((s) => s.goTo);
   const openPanel = useSession((s) => s.openPanel);
 
   const readPlate = () => {
@@ -204,6 +247,7 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
   return (
     <>
       <Cable slot={slot} state={corridor} />
+      <CableStep slot={slot} name={info.peer} onStep={() => stepIntoCorridor(info.link, info.device)} />
       <Messages
         device={info.device}
         link={info.link}
@@ -253,7 +297,7 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
             className="world-chip"
             data-tour="door"
             data-tab={TAB.door + index}
-            onClick={() => goTo(info.peer)}
+            onClick={() => goThrough(info.link, info.device, info.peer)}
             aria-label={label}
             aria-keyshortcuts={shortcut}
           >

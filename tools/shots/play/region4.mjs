@@ -1,18 +1,30 @@
 // Plays every room of Region 4 (Floors 8 and 9) by clicking and typing, as a player would.
 // Usage: node region4.mjs http://127.0.0.1:5173/play
-import { closeConsole, launch, open, tidy, type, waitPrompt, won } from "./lib.mjs";
+import { arrived, closeConsole, launch, open, tidy, type, waitPrompt, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
 const { browser, page: p, errors } = await launch();
 const results = [];
 const check = async (name) => results.push([name, await won(p, name)]);
+const isWon = () => p.evaluate(() => !!window.__wirelight.useSession.getState().status?.won);
 /** Walks through doors, one machine after another (each name is the room at the far end). */
 const walk = async (...rooms) => {
   for (const to of rooms) {
+    // Won on the way (a ping already in flight came back): the debrief comes up and the room's labels
+    // hide under it (0076), so there's nothing left to walk to. Checked before and while clicking.
+    if (await isWon()) return;
     await tidy(p);
     await closeConsole(p);
-    await p.click(`text=→ ${to} >> nth=0`);
-    await p.waitForTimeout(1500);
+    for (let tries = 1; ; tries++) {
+      const clicked = await p
+        .click(`text=→ ${to} >> nth=0`, { timeout: 4000 })
+        .then(() => true)
+        .catch(() => false);
+      if (clicked) break;
+      if (await isWon()) return;
+      if (tries === 15) throw new Error(`walk: no way through to ${to} after a minute`);
+    }
+    await arrived(p, to);
     await tidy(p);
   }
 };

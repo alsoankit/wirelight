@@ -39,8 +39,13 @@ export async function open(p, base, room, ready = ".plate") {
 }
 
 export async function won(p, name) {
+  // The session's own verdict: the debrief usually follows, but after the last boss the floor memory
+  // and the ending come first (0076), so the debrief alone isn't the sign of a win.
   const ok = await p
-    .waitForSelector(".debrief", { timeout: 60000 })
+    .waitForFunction(() => !!window.__wirelight.useSession.getState().status?.won, null, {
+      timeout: 60000,
+      polling: 250,
+    })
     .then(() => true)
     .catch(() => false);
   console.log(name, ok ? "won" : "NOT WON");
@@ -104,6 +109,20 @@ export async function plateSwitch(p, nth = 0) {
 }
 
 /** Slides the console down (a player does, to reach things it covers). */
+/** After a doorway click: waits until the player stands in `to`'s room (the glide along the corridor
+ * and the arrival veil are over, 0081). */
+export async function arrived(p, to) {
+  await p.waitForFunction(
+    (d) => {
+      const s = window.__wirelight.useSession.getState();
+      return s.here === d && !s.corridor;
+    },
+    to,
+    { timeout: 20000, polling: 100 },
+  );
+  await p.waitForTimeout(900);
+}
+
 export async function closeConsole(p) {
   if (await p.$('.console[data-open="yes"]')) {
     await p.click(".console-bar");
