@@ -4,12 +4,12 @@
 export type BakeEntry = { id: string; size: number; signature: string; v: string };
 
 export const BAKES: Record<string, BakeEntry> = {
-  "0670dbe1": { id: "r1-house-d1", size: 1024, signature: "d108937c", v: "4884885e" },
-  bc6d5850: { id: "r1-house-d1-kit", size: 512, signature: "fb1ae253", v: "4e1d1eef" },
-  da8a522c: { id: "r1-observatory-d1", size: 1024, signature: "0b8f0644", v: "a1ad50fc" },
-  dfef8e58: { id: "r1-observatory-d1-kit", size: 512, signature: "652d6244", v: "2d53f6d6" },
-  "3be1830a": { id: "r1-observatory-d2", size: 1024, signature: "7bcc3a42", v: "ee7dd8ec" },
-  c7aa7418: { id: "r1-observatory-d2-kit", size: 512, signature: "63a753f2", v: "6d03f467" },
+  "6252c0bd": { id: "r1-house-d1", size: 1024, signature: "148990ea", v: "afcea80a" },
+  bc6d5850: { id: "r1-house-d1-kit", size: 512, signature: "fb1ae253", v: "8828eb42" },
+  e2e76f65: { id: "r1-observatory-d1", size: 1024, signature: "07915967", v: "f85209c1" },
+  dfef8e58: { id: "r1-observatory-d1-kit", size: 512, signature: "652d6244", v: "a2e6d467" },
+  abca2abb: { id: "r1-observatory-d2", size: 1024, signature: "85d5ab03", v: "c572699e" },
+  c7aa7418: { id: "r1-observatory-d2-kit", size: 512, signature: "63a753f2", v: "23bc8612" },
   a7eaf7e5: { id: "r2-hall-d4", size: 1024, signature: "a36ad05b", v: "b64fcad8" },
   "0bcffcd2": { id: "r2-hall-d4-kit", size: 512, signature: "8467f591", v: "b85ab5bf" },
   e2bfbc14: { id: "r2-hall-d5", size: 1024, signature: "8a9d8f63", v: "84d6ceb3" },
