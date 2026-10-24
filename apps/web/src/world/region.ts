@@ -69,6 +69,9 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     // Warm motes drifting up from the machines (never sparks in the face: background only).
     fireflies: "#F0B060",
     dust: "#b9bec6",
+    // The fieldstone and the furniture keep their own colour when restored (near neutral, not the
+    // default warm): amber belongs to the brass, the copper and the lamps.
+    kitRestored: "#F6F4F0",
   },
   // The Lantern Town: its light lives with the town (town/palette.ts, agent D).
   3: TOWN_LOOK,

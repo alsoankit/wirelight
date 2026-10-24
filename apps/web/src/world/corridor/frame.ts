@@ -36,6 +36,8 @@ export type CorridorDressing = {
   kitPieces: KitPlacement[];
   glows: Glow[];
   gears?: Gear[];
+  /** Where steam rises from (Region 2: regions/Steam.tsx). */
+  steam?: [number, number, number][];
   beams?: Beams;
   stainedGlass?: BufferGeometry;
   /** Carved runes on the back wall (Region 1): the visible source of its glows. */

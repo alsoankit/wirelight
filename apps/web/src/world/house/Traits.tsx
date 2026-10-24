@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import type { BufferGeometry } from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { regionMaterial } from "../kit/regionMaterials";
-import { addTo, ball, box, rod } from "../kit/shapes";
+import { addTo, ball, box, gearGeometry, ring, rod } from "../kit/shapes";
 import type { RegionId } from "../region";
 
 // What makes one house's room its own (playtest, Region 4 #24: vesper, lumen, wren and halo looked
@@ -87,30 +87,131 @@ function byTheDoor(bag: Bag, wood: string, kind: number) {
   } else addTo(bag, "Cloth", box([0.6, 1.1, 0.03], [x, 1.85, -3.86]));
 }
 
+/**
+ * The Sorting Works' version (region-2 brief, 0052): what the sorters left in a workshop bay is
+ * machinery and its parts, never furniture: a crate of spare gears, a floor press, pipe on trestles, a
+ * copper boiler; by the door a toolbox, a coil of pipe, a stack of blank ledgers or a fallen gear.
+ */
+function worksLeftBehind(bag: Bag, kind: number) {
+  const [cx, cz] = [2.85, -1.5];
+  if (kind === 0) {
+    // A crate of spare gears, one fallen out beside it.
+    addTo(bag, "Walnut", box([0.75, 0.5, 0.6], [cx, 0.25, cz], [0, 0.25, 0]));
+    for (const [dx, r, a] of [
+      [-0.15, 0.3, 0.2],
+      [0.12, 0.22, -0.3],
+    ] as const)
+      addTo(
+        bag,
+        "Brass",
+        gearGeometry(r, Math.round(r * 30), 0.05, r > 0.25 ? 5 : 0)
+          .rotateZ(a)
+          .rotateY(0.25 + 1.3)
+          .translate(cx + dx * 0.3, 0.48, cz + dx),
+      );
+    addTo(
+      bag,
+      "Brass",
+      gearGeometry(0.26, 8, 0.05, 4)
+        .rotateX(-Math.PI / 2)
+        .translate(cx - 0.75, 0.03, cz + 0.55),
+    );
+  } else if (kind === 1) {
+    // A floor press: an iron bed and frame, its screw, a brass handwheel; blank tiles on the bed.
+    addTo(bag, "Iron", box([0.8, 0.5, 0.6], [cx, 0.25, cz]));
+    for (const dz of [-0.24, 0.24]) addTo(bag, "Iron", box([0.1, 1.1, 0.1], [cx, 1.0, cz + dz]));
+    addTo(bag, "Iron", box([0.16, 0.14, 0.62], [cx, 1.55, cz]));
+    addTo(bag, "DarkMetal", rod([cx, 0.75, cz], [cx, 1.8, cz], 0.03, 8));
+    addTo(bag, "Iron", box([0.22, 0.08, 0.22], [cx, 0.8, cz]));
+    addTo(bag, "Brass", ring([cx, 1.8, cz], 0.26, 0.022, "y", 20));
+    addTo(bag, "Brass", box([0.52, 0.025, 0.025], [cx, 1.8, cz]), box([0.025, 0.025, 0.52], [cx, 1.8, cz]));
+    for (const dz of [-0.12, 0.02, 0.16]) addTo(bag, "Brass", box([0.12, 0.02, 0.09], [cx + 0.25, 0.51, cz + dz]));
+  } else if (kind === 2) {
+    // Lengths of copper pipe across two iron trestles, a spare handwheel on the floor.
+    for (const dz of [-0.6, 0.6]) {
+      addTo(bag, "Iron", box([0.6, 0.06, 0.06], [cx, 0.62, cz + dz]));
+      for (const dx of [-0.25, 0.25])
+        addTo(bag, "Iron", box([0.05, 0.64, 0.05], [cx + dx, 0.31, cz + dz], [0, 0, dx > 0 ? -0.25 : 0.25]));
+    }
+    for (const dx of [-0.16, 0, 0.16])
+      addTo(bag, "Copper", rod([cx + dx, 0.71, cz - 0.95], [cx + dx, 0.71, cz + 0.95], 0.05, 10));
+    addTo(bag, "Brass", ring([cx - 0.7, 0.03, cz + 0.8], 0.15, 0.02, "y", 16));
+  } else {
+    // A copper boiler on iron feet, brass bands round it and a gauge on its side.
+    for (const [dx, dz] of [
+      [-0.22, -0.22],
+      [0.22, -0.22],
+      [-0.22, 0.22],
+      [0.22, 0.22],
+    ] as const)
+      addTo(bag, "Iron", box([0.07, 0.2, 0.07], [cx + dx, 0.1, cz + dz]));
+    addTo(bag, "Copper", rod([cx, 0.2, cz], [cx, 1.3, cz], 0.36, 16));
+    addTo(bag, "Copper", ball([cx, 1.3, cz], 0.36, 16));
+    for (const y of [0.35, 0.8, 1.22]) addTo(bag, "Brass", ring([cx, y, cz], 0.365, 0.02, "y", 20));
+    addTo(bag, "Brass", ring([cx + 0.38, 0.95, cz + 0.08], 0.09, 0.015, "x", 14));
+    addTo(bag, "Enamel", rod([cx + 0.36, 0.95, cz + 0.08], [cx + 0.39, 0.95, cz + 0.08], 0.08, 14));
+  }
+}
+
+function worksByTheDoor(bag: Bag, kind: number) {
+  const [x, z] = [1.65, -3.4];
+  if (kind === 0) {
+    // An iron toolbox with a brass handle.
+    addTo(bag, "Iron", box([0.6, 0.3, 0.3], [x, 0.15, z], [0, 0.2, 0]));
+    addTo(bag, "Brass", box([0.36, 0.03, 0.03], [x, 0.38, z], [0, 0.2, 0]));
+    for (const d of [-0.17, 0.17])
+      addTo(bag, "Brass", box([0.03, 0.09, 0.03], [x + d * Math.cos(0.2), 0.33, z - d * Math.sin(0.2)]));
+  } else if (kind === 1) {
+    // A coil of copper pipe, lying where it was dropped.
+    for (let k = 0; k < 3; k++) addTo(bag, "Copper", ring([x, 0.04 + k * 0.07, z], 0.32 - k * 0.015, 0.035, "y", 20));
+  } else if (kind === 2) {
+    // A stack of blank ledgers.
+    for (let i = 0; i < 4; i++)
+      addTo(
+        bag,
+        i % 2 ? "Walnut" : "Parchment",
+        box([0.5 - i * 0.05, 0.1, 0.36], [x, 0.05 + i * 0.1, z], [0, i * 0.3, 0]),
+      );
+  } else {
+    // A great gear leaning on the wall, fallen from a train.
+    addTo(bag, "Brass", gearGeometry(0.45, 14, 0.06, 5).rotateX(-0.18).translate(x, 0.45, -3.82));
+  }
+}
+
 export function HouseTraits({ device, region }: { device: string; region: RegionId }) {
   const h = hash(device);
   const rug = RUGS[h % RUGS.length] as string;
   const parts = useMemo(() => {
     const bag: Bag = {};
-    leftBehind(bag, WOOD[region], (h >>> 4) % 4);
-    byTheDoor(bag, WOOD[region], (h >>> 12) % 4);
+    if (region === 2) {
+      worksLeftBehind(bag, (h >>> 4) % 4);
+      worksByTheDoor(bag, (h >>> 12) % 4);
+    } else {
+      leftBehind(bag, WOOD[region], (h >>> 4) % 4);
+      byTheDoor(bag, WOOD[region], (h >>> 12) % 4);
+    }
     return Object.entries(bag).flatMap(([name, list]) => {
       const geometry = list.length === 1 ? list[0] : mergeGeometries(list);
       return geometry ? [{ name, geometry }] : [];
     });
   }, [h, region]);
-  // The rug, turned a little differently in each house.
+  // The rug, turned a little differently in each house. Not in the Sorting Works: its rooms are
+  // machinery, told apart by what machines were left behind (owner, 2026-10-25; 0083).
   const turn = (((h >>> 8) % 7) - 3) * 0.06;
   return (
     <>
-      <mesh position={[0.4, 0.06, 1.3]} rotation={[-Math.PI / 2, 0, turn]}>
-        <planeGeometry args={[2.2, 1.4]} />
-        <meshStandardMaterial color={rug} roughness={1} />
-      </mesh>
-      <mesh position={[0.4, 0.062, 1.3]} rotation={[-Math.PI / 2, 0, turn]}>
-        <ringGeometry args={[0.5, 0.56, 24]} />
-        <meshStandardMaterial color="#b9a888" roughness={1} transparent opacity={0.35} />
-      </mesh>
+      {region !== 2 && (
+        <>
+          <mesh position={[0.4, 0.06, 1.3]} rotation={[-Math.PI / 2, 0, turn]}>
+            <planeGeometry args={[2.2, 1.4]} />
+            <meshStandardMaterial color={rug} roughness={1} />
+          </mesh>
+          <mesh position={[0.4, 0.062, 1.3]} rotation={[-Math.PI / 2, 0, turn]}>
+            <ringGeometry args={[0.5, 0.56, 24]} />
+            <meshStandardMaterial color="#b9a888" roughness={1} transparent opacity={0.35} />
+          </mesh>
+        </>
+      )}
       {parts.map((p) => (
         <mesh key={p.name} geometry={p.geometry} material={regionMaterial(p.name, region)} />
       ))}

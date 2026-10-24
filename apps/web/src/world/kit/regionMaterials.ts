@@ -105,6 +105,9 @@ const REGION_2: Record<string, Swatch> = {
   Brass: { ruined: "#62644f", restored: "#D4A548", roughness: 0.4, metalness: 0.45 },
   Copper: { ruined: "#5a5c4e", restored: "#B86A3C", roughness: 0.45, metalness: 0.4, verdigris: true },
   DarkMetal: { ruined: "#34363a", restored: "#3e3530", roughness: 0.55, metalness: 0.35 },
+  // Riveted iron plating, frames and gear discs: dark grey in both states (the brass on it carries
+  // the warmth).
+  Iron: { ruined: "#3f4247", restored: "#4d4a48", roughness: 0.6, metalness: 0.3 },
   Wood: { ruined: "#55504A", restored: "#6B4226", roughness: 0.7 },
   DarkWood: { ruined: "#45413c", restored: "#4e301c", roughness: 0.7 },
   Walnut: { ruined: "#55504A", restored: "#6B4226", roughness: 0.65 },

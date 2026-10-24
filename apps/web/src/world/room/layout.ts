@@ -62,6 +62,8 @@ export type RoomLayout = {
   /** The room's own lights (when not given, the scene's). */
   glows?: Glow[];
   gears?: Gear[];
+  /** Where steam rises from (Region 2's valves and vents: regions/Steam.tsx). */
+  steam?: Vec3[];
   beams?: Beams;
   /**
    * Stained glass over the lit kit windows (Region 4, regions/Haze.tsx): panes whose `pane` attribute

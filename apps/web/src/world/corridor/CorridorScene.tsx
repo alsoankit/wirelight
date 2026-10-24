@@ -24,6 +24,7 @@ import { RuinDial } from "../RuinDial";
 import { LOOKS, useRegion } from "../region";
 import { Gears } from "../regions/Gears";
 import { Haze } from "../regions/Haze";
+import { Steam } from "../regions/Steam";
 import type { Vec3 } from "../room/layout";
 import { SecretDoor } from "../room/SecretDoor";
 import { corridorDressing } from "./dressing";
@@ -214,6 +215,7 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
         <KitRoom pieces={dressing.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
       </Suspense>
       {dressing.gears && <Gears gears={dressing.gears} region={region} />}
+      {quality.moonbeams && dressing.steam && <Steam vents={dressing.steam} />}
       {dressing.runes && <Runes marks={dressing.runes} />}
       {quality.moonbeams && dressing.beams && (
         <Moonbeams

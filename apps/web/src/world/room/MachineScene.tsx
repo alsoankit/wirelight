@@ -20,6 +20,7 @@ import { RuinDial } from "../RuinDial";
 import { LOOKS, useRegion } from "../region";
 import { Gears } from "../regions/Gears";
 import { Haze } from "../regions/Haze";
+import { Steam } from "../regions/Steam";
 import { WindDriver } from "../WindDriver";
 import { BossPiece } from "./BossPiece";
 import { type DoorInfo, Doorway, EmptyDoor } from "./Doorway";
@@ -111,6 +112,7 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
         <KitRoom pieces={layout.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
       </Suspense>
       {layout.gears && <Gears gears={layout.gears} region={region} />}
+      {quality.moonbeams && layout.steam && <Steam vents={layout.steam} />}
       {quality.moonbeams && layout.beams && (
         <Moonbeams
           beams={layout.beams.list}
