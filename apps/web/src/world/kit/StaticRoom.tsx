@@ -23,6 +23,14 @@ export type Placement = {
 
 type Merged = { name: string; geometry: BufferGeometry; material: Material };
 
+// The merge (and, without a Blender bake, the moonlight bake) runs while the room renders and can
+// take a few hundred milliseconds. A render that long is interrupted by the session's own updates
+// (messages crossing, the clock), and React drops an interrupted first render's memos, so a room
+// entered mid-play could rebuild forever and never appear. The work is kept here, by its inputs,
+// until a render that uses it commits; the room that commits it disposes of it when it goes.
+type Built = { inputs: readonly unknown[]; merged: Merged[] };
+const built = new WeakMap<Placement[], Built>();
+
 // Geometry made in code (the floor), already in world space, with the region material to use.
 export type Extra = { name: string; geometry: BufferGeometry };
 
@@ -53,6 +61,9 @@ export function StaticRoom({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the cached scenes (scenesKey), not the array
   const merged = useMemo<Merged[]>(() => {
+    const inputs = [scenesKey, extras, toCamera, toMoon, shadowsWithin, region, maps];
+    const known = built.get(placements);
+    if (known?.inputs.every((v, i) => v === inputs[i])) return known.merged;
     const scenes = new Map(names.map((n, i) => [n, gltfs[i]?.scene]));
     const { parts, occluder } = assembleRoom(
       scenes,
@@ -75,18 +86,21 @@ export function StaticRoom({
         shadowsWithin,
       );
     const lit = lightmapped ? maps : null;
-    return parts.map((m) => ({
+    const result = parts.map((m) => ({
       name: m.key,
       geometry: m.geometry,
       material: bakedRegionMaterial(m.name, region, lit) ?? (m.original as Material),
     }));
+    built.set(placements, { inputs, merged: result });
+    return result;
   }, [scenesKey, names, placements, extras, toCamera, toMoon, shadowsWithin, region, maps]);
 
   useEffect(() => {
     return () => {
+      if (built.get(placements)?.merged === merged) built.delete(placements);
       for (const m of merged) m.geometry.dispose();
     };
-  }, [merged]);
+  }, [merged, placements]);
 
   return (
     <>
