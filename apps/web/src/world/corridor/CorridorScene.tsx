@@ -16,6 +16,7 @@ import { KitRoom } from "../kits/KitRoom";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Moonbeams } from "../observatory/Moonbeams";
 import { RoomLights } from "../observatory/RoomLights";
+import { Runes } from "../observatory/Runes";
 import { Plate } from "../Plate";
 import { RoomPost } from "../post/RoomPost";
 import { VIEW_DIRECTION } from "../RoomCamera";
@@ -213,6 +214,7 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
         <KitRoom pieces={dressing.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
       </Suspense>
       {dressing.gears && <Gears gears={dressing.gears} region={region} />}
+      {dressing.runes && <Runes marks={dressing.runes} />}
       {quality.moonbeams && dressing.beams && (
         <Moonbeams
           beams={dressing.beams.list}

@@ -132,14 +132,21 @@ function buildGeometry(marks: Mark[]): BufferGeometry {
   return mergeGeometries(parts) ?? new BoxGeometry(0, 0, 0);
 }
 
-export function Runes({ set = "observatory" }: { set?: RuneSet }) {
+/** A rune placed by a layout of its own (a corridor's wall): which wall, how far along it, how high. */
+export type RuneMark = { wall: "back" | "left"; along: number; y: number; size?: number };
+
+function markOf({ wall, along, y, size }: RuneMark): Mark {
+  return wall === "back" ? glyphAt(onBack(along, y), BACK, size) : glyphAt(onLeft(along, y), LEFT, size);
+}
+
+export function Runes({ set = "observatory", marks }: { set?: RuneSet; marks?: RuneMark[] }) {
   const { geometry, material } = useMemo(() => {
     const mat = new MeshStandardNodeMaterial({ roughness: 0.9 });
     mat.colorNode = color("#2a2622");
     // Dark in ruin (a faint ember so they can still be noticed), a soft gold where restored: carved
     // light in the stone, not white signs (playtest: dimmed by about 40%).
     mat.emissiveNode = color("#FFD08A").mul(mix(0.95, 0.03, ruinHere));
-    return { geometry: buildGeometry(SETS[set]), material: mat };
-  }, [set]);
+    return { geometry: buildGeometry(marks ? marks.map(markOf) : SETS[set]), material: mat };
+  }, [set, marks]);
   return <mesh geometry={geometry} material={material} />;
 }

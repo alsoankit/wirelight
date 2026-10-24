@@ -2,6 +2,7 @@ import type { BufferGeometry } from "three";
 import { FLOORS, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import type { KitPlacement } from "../kits/placement";
+import type { RuneMark } from "../observatory/Runes";
 import type { RegionId } from "../region";
 import type { Beams, Gear, Glow } from "../room/layout";
 
@@ -37,6 +38,8 @@ export type CorridorDressing = {
   gears?: Gear[];
   beams?: Beams;
   stainedGlass?: BufferGeometry;
+  /** Carved runes on the back wall (Region 1): the visible source of its glows. */
+  runes?: RuneMark[];
 };
 
 /** The region's floor, laid as a path between the back wall and the cutaway's edge. */

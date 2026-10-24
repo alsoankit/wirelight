@@ -1,9 +1,13 @@
+import type { BufferGeometry } from "three";
 import { type CorridorDressing, corridorFloor } from "../corridor/frame";
 import { makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
+import { extras } from "../kit/shapes";
 import type { KitPlacement } from "../kits/placement";
 import { MOON_POSITION, MOON_TARGET } from "../moon";
-import type { Beams } from "../room/layout";
+import type { RuneMark } from "../observatory/Runes";
+import type { Beams, Glow } from "../room/layout";
+import { type RootRun, rootRuns } from "./roots";
 
 // Region 1, the Overgrown Halls (world/art-briefs/region-1-overgrown-halls.md): the first, oldest
 // halls of the Deep Network, gentle ruins reclaimed by moss and roots. The shell is Quaternius's
@@ -44,32 +48,6 @@ function nature(
   rotation?: [number, number, number],
 ): KitPlacement {
   return { kit: "region-1/nature", piece, position, rotationY, scale, ...(rotation ? { rotation } : {}) };
-}
-
-/** How far up a dead tree its branches begin, in metres at the kit's scale (the crown above is the "roots"). */
-const CROWN_STARTS: Record<string, number> = { DeadTree_1: 2.1, DeadTree_3: 3.0 };
-
-/**
- * Roots breaking up through the floor: a dead tree sunk almost whole, leaning, so only its crown of
- * gnarled branches shows, reading as the roots of something vast outside pushing in under the wall.
- * `at` is where it breaks the floor; it leans toward `heading` (radians about Y, 0 = +x); `tilt` from
- * upright (larger: lower and longer along the floor). The dead trees are ~6k triangles: one per room.
- */
-function rootCrown(
-  piece: "DeadTree_1" | "DeadTree_3",
-  at: [number, number],
-  heading: number,
-  tilt: number,
-  scale = 1,
-): KitPlacement {
-  const sunk = (CROWN_STARTS[piece] ?? 2) * scale;
-  const out = sunk * Math.sin(tilt);
-  const base: [number, number, number] = [
-    at[0] - Math.cos(heading) * out,
-    -sunk * Math.cos(tilt),
-    at[1] + Math.sin(heading) * out,
-  ];
-  return { kit: "region-1/nature", piece, position: base, rotation: [0, heading, -tilt], scale };
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -159,28 +137,124 @@ const OBSERVATORY_FLOOR: Extra[] = [
   { name: "Earth", geometry: makeEarth(8.4) },
 ];
 
-// Moss and roots reclaiming the hall (layer 2 and 4): roots breaking up under the left wall, growth
-// pouring in where the corner collapsed, ferns and clover where the moonlight pools on the floor, a
-// bracket fungus on the fallen column, mushrooms in the damp under the rubble. Low along the walls
-// and in the corners, so the boards, the desk, the Glass, the keeper and the plates stay clear.
+// The roots (regions/roots.ts), the region's signature: one great root pours in through the barred
+// window and down the left wall (clear of its runes) into the back-left corner, a thinner strand
+// runs along the wall's foot, two more hang over the broken tops of the walls (high, behind
+// nothing), one crawls out of the hole low in the back wall's right end, and with one door one comes
+// over the crumbled front of the left wall. None crosses the cable's path, the boards or the keeper.
+function observatoryRoots(secondDoor: boolean): BufferGeometry[] {
+  const runs: RootRun[] = [
+    // The great root: in through the barred window, down the wall, spreading over the corner.
+    {
+      path: [
+        [-4.3, 2.8, -3.05],
+        [-3.8, 2.62, -3.1],
+        [-3.76, 1.7, -3.2],
+        [-3.76, 0.8, -3.3],
+        [-3.68, 0.24, -3.42],
+        [-3.35, 0.1, -3.58],
+        [-2.8, 0.08, -3.72],
+        [-2.2, 0.06, -3.78],
+      ],
+      radius: 0.2,
+      strands: 3,
+      rootlets: 4,
+      seed: 11,
+    },
+    // A thinner strand from the window, along the left wall's foot toward the front (below the runes).
+    {
+      path: [
+        [-4.25, 2.6, -2.95],
+        [-3.86, 2.5, -2.98],
+        [-3.87, 1.3, -3.02],
+        [-3.84, 0.2, -2.95],
+        [-3.8, 0.08, -2.4],
+        [-3.74, 0.06, -1.75],
+      ],
+      radius: 0.09,
+      strands: 2,
+      rootlets: 2,
+      seed: 12,
+    },
+    // Out of the hole low in the back wall's right end, along the wall's foot.
+    {
+      path: [
+        [3.0, 0.75, -4.45],
+        [2.92, 0.52, -3.88],
+        [2.72, 0.14, -3.6],
+        [2.3, 0.07, -3.45],
+        [1.9, 0.05, -3.55],
+      ],
+      radius: 0.13,
+      strands: 2,
+      rootlets: 2,
+      seed: 13,
+    },
+    // Over the broken top of the back wall's left end, down the face (behind the boards, high).
+    {
+      path: [
+        [-2.55, 3.35, -4.45],
+        [-2.48, 3.25, -3.86],
+        [-2.42, 2.8, -3.82],
+        [-2.38, 2.3, -3.84],
+        [-2.4, 1.95, -3.86],
+      ],
+      radius: 0.1,
+      strands: 2,
+      seed: 15,
+    },
+    // Over the broken top of the left wall's middle, hanging (above the routes board).
+    {
+      path: [
+        [-4.45, 3.3, -1.2],
+        [-3.86, 3.2, -1.25],
+        [-3.82, 2.8, -1.3],
+        [-3.84, 2.4, -1.34],
+      ],
+      radius: 0.085,
+      strands: 2,
+      seed: 16,
+    },
+  ];
+  if (!secondDoor)
+    runs.push({
+      // Over the crumbled front of the left wall, onto the floor where the moon falls.
+      path: [
+        [-4.4, 0.65, 2.7],
+        [-3.85, 0.5, 2.76],
+        [-3.55, 0.12, 2.92],
+        [-3.0, 0.07, 3.2],
+        [-2.4, 0.05, 3.65],
+      ],
+      radius: 0.15,
+      strands: 3,
+      rootlets: 3,
+      seed: 14,
+    });
+  return rootRuns(runs);
+}
+
+// Moss and growth reclaiming the hall (layers 2 and 4): ferns, mushrooms and a bracket fungus where
+// the great root comes down, growth pouring in where the corner collapsed, clover where the
+// moonlight pools, loose chips of stone by the rubble. Low along the walls and in the corners, so the boards, the desk, the Glass,
+// the keeper and the plates stay clear.
 // With two doors, the strip from the second (sealed) arch across the floor stays bare: 2.B's great
 // channel and its wall of roots run there (room/BossPiece.tsx).
 function observatoryGrowth(secondDoor: boolean): KitPlacement[] {
   const out: KitPlacement[] = [
-    // Roots of something vast outside, breaking up through the floor and crawling along the left
-    // wall's foot under the barred window (below the runes).
-    rootCrown("DeadTree_1", [-3.85, -3.3], -1.2, 1.25, 1.25),
-    // The back-left corner: a fern in the damp, mushrooms under the fallen bricks.
-    nature("Fern_1", [-3.45, 0, -3.4], 0.6, 0.8),
+    // The back-left corner, where the great root comes down: a fern in the damp, a bracket fungus on
+    // the root, mushrooms and drifted leaves.
+    nature("Fern_1", [-3.4, 0, -3.3], 0.6, 0.75),
+    nature("Mushroom_Laetiporus", [-3.15, 0, -3.3], 0.5, 0.42),
     nature("Mushroom_Common", [-2.75, 0, -2.3], 0.9, 1.3),
-    nature("Grass_Wispy_Tall", [-2.2, 0, -3.7], 0.3, 0.8),
+    nature("Grass_Wispy_Tall", [-2.05, 0, -3.7], 0.3, 0.8),
     // Along the back wall either side of the arch (low: the cable comes in through it).
     nature("Grass_Wispy_Short", [1.25, 0, -3.65], 1.2),
     nature("Clover_1", [-0.95, 0, -3.72], 2.0, 0.8),
     // The collapsed corner: a mossy boulder of fallen masonry, a big plant and tall grass coming in.
     nature("Rock_Medium_3", [3.55, -0.12, -3.35], 2.6, 0.42),
     nature("Plant_1_Big", [3.65, 0, -2.75], 0.4, 0.9),
-    nature("Grass_Wispy_Tall", [2.55, 0, -3.65], 1.7),
+    nature("Grass_Wispy_Tall", [2.55, 0, -3.75], 1.7),
     nature("Grass_Common_Short", [3.35, 0, -2.35], 0.2),
     // Mushrooms in the damp under the fallen column.
     nature("Mushroom_Common", [3.45, 0, -1.45], 2.2, 1.1),
@@ -198,11 +272,13 @@ function observatoryGrowth(secondDoor: boolean): KitPlacement[] {
     // The front edges: low tufts and loose stones only.
     nature("Grass_Wispy_Short", [2.75, 0, 1.15], 0.9, 0.9),
     nature("Clover_1", [3.55, 0, 2.55], 2.6, 0.6),
+    nature("Pebble_Square_1", [2.2, 0, 2.0], 0.6),
+    nature("Pebble_Square_3", [3.25, 0, -2.75], 1.9),
+    nature("Pebble_Round_1", [-2.6, 0, -0.05], 0.8),
   ];
   if (!secondDoor) {
-    // Under the Knight's cloak, and where the left wall has crumbled at the front.
+    // Under the Knight's cloak.
     out.push(nature("Grass_Wispy_Short", [-3.6, 0, 1.75], 0.4, 0.8));
-    out.push(nature("Rock_Medium_2", [-3.55, -0.08, 2.6], 1.9, 0.33));
   }
   return out;
 }
@@ -216,18 +292,30 @@ const OBSERVATORY_MOON = moonlight([
   { from: [3, 2.4, -4], width: 1.6, depth: 1.0 },
 ]);
 
-export function hallsObservatory(secondDoor: boolean): {
+type HallsRoom = {
   placements: Placement[];
   extras: Extra[];
   kitPieces: KitPlacement[];
   beams: Beams;
-} {
-  return {
-    placements: hallsObservatoryPieces(secondDoor),
-    extras: OBSERVATORY_FLOOR,
-    kitPieces: observatoryGrowth(secondDoor),
-    beams: OBSERVATORY_MOON,
-  };
+  runes?: RuneMark[];
+  glows?: Glow[];
+};
+
+/** Built once per door count (the roots are made in code), so the room's layout keeps its identity. */
+const OBSERVATORIES = new Map<boolean, HallsRoom>();
+
+export function hallsObservatory(secondDoor: boolean): HallsRoom {
+  let room = OBSERVATORIES.get(secondDoor);
+  if (!room) {
+    room = {
+      placements: hallsObservatoryPieces(secondDoor),
+      extras: [...OBSERVATORY_FLOOR, ...extras({ Root: observatoryRoots(secondDoor) })],
+      kitPieces: observatoryGrowth(secondDoor),
+      beams: OBSERVATORY_MOON,
+    };
+    OBSERVATORIES.set(secondDoor, room);
+  }
+  return room;
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -250,18 +338,14 @@ export const HALLS_HOUSE_PIECES: Placement[] = [
   { piece: "Wall_Double_Broken", position: [-4, 0, 3], rotationY: QUARTER },
   { piece: "Column_Square", position: [-4, 0, -4] },
   { piece: "Column_Round_Short", position: [4, 0, -4] },
-  // What's left: the old lamp-post the room is named for, toppled pots, rubble, grass.
-  { piece: "Torch", position: [-2.4, 0, -3.5] },
+  // What's left (0052: only what the Forgetting left; no lamp, candles, bookcase or whole pots):
+  // broken pots, rubble, grass.
   { piece: "Pot2_Broken", position: [-3.1, 0, 0.6], rotationY: 0.6 },
-  { piece: "Pot1", position: [-3.3, 0, -0.3] },
   { piece: "Pot3_Broken", position: [2.6, 0, -3.2], rotationY: 2.2 },
   { piece: "Bricks", position: [2.9, 0, 1.9], rotationY: 0.9 },
   { piece: "Brick", position: [-1.6, 0, 2.6], rotationY: 0.4 },
-  // What makes it someone's room and not the Observatory (agent C, playtest): an old shelf of the
-  // machine's own, a chest, candle stubs by the lamp-post. (The bush at the broken corner is now the
-  // Stylized Nature growth below.)
-  { piece: "Bookcase_Empty", position: [-3.55, 0, -1.0], rotationY: QUARTER },
-  { piece: "Candles_2", position: [-1.7, 0, -3.4], rotationY: 0.5 },
+  // What tells it from the Observatory: an old chest of the machine's own (the rest is each house's
+  // own traits: house/Traits.tsx).
   { piece: "Chest", position: [-2.9, 0, 1.6], rotationY: 1.2 },
 ];
 
@@ -270,13 +354,61 @@ const HOUSE_FLOOR: Extra[] = [
   { name: "Earth", geometry: makeEarth(8.4) },
 ];
 
-// The house's overgrowth: roots breaking in under the crumbled front of the left wall (where the moon
-// falls on them), growth through the broken back corner, clover where the open window's light lands.
-// Clear of the lamp-post, the shelf, the chest, the left-behind things on the right (house/Traits.tsx:
-// around x 2.85, z −1.5), the rug in the middle and the keeper.
+// The house's roots (regions/roots.ts): one pours in through the open window and down the left wall
+// into the back-left corner (stopping short of the lamp-post), one comes over the crumbled front of
+// the left wall where the moon falls on it (left of the ledger board), and one hangs over the broken
+// top of the back wall's left end.
+function houseRoots(): BufferGeometry[] {
+  return rootRuns([
+    {
+      path: [
+        [-4.3, 2.75, -2.9],
+        [-3.8, 2.56, -2.95],
+        [-3.77, 1.6, -3.1],
+        [-3.75, 0.6, -3.25],
+        [-3.62, 0.15, -3.45],
+        [-3.3, 0.08, -3.62],
+        [-2.95, 0.06, -3.78],
+      ],
+      radius: 0.18,
+      strands: 3,
+      rootlets: 3,
+      seed: 21,
+    },
+    {
+      path: [
+        [-4.4, 0.8, 3.05],
+        [-3.84, 0.58, 3.0],
+        [-3.58, 0.14, 3.05],
+        [-3.15, 0.07, 3.3],
+        [-2.65, 0.05, 3.75],
+      ],
+      radius: 0.15,
+      strands: 3,
+      rootlets: 3,
+      seed: 22,
+    },
+    {
+      path: [
+        [-2.35, 3.45, -4.45],
+        [-2.28, 3.32, -3.86],
+        [-2.22, 2.85, -3.82],
+        [-2.2, 2.4, -3.84],
+      ],
+      radius: 0.09,
+      strands: 2,
+      seed: 25,
+    },
+  ]);
+}
+
+// The house's overgrowth: a fern and a bracket fungus where the window's root comes down, growth through the broken back corner, clover where the open window's light lands, leaves
+// and a wildflower by the root at the front. Clear of the lamp-post, the shelf, the chest, the
+// left-behind things on the right (house/Traits.tsx: around x 2.85, z −1.5), the rug in the middle
+// and the keeper.
 const HOUSE_GROWTH: KitPlacement[] = [
-  rootCrown("DeadTree_1", [-3.85, 2.75], -0.35, 1.2, 1.1),
-  nature("Fern_1", [-3.4, 0, -3.35], 0.4, 0.75),
+  nature("Fern_1", [-3.4, 0, -3.25], 0.4, 0.7),
+  nature("Mushroom_Laetiporus", [-3.05, 0, -3.4], 0.4, 0.4),
   nature("Mushroom_Common", [-3.35, 0, -1.95], 2.4, 1.2),
   nature("Grass_Wispy_Tall", [1.7, 0, -3.65], 0.6, 0.85),
   nature("Clover_1", [-0.95, 0, -3.7], 1.1, 0.7),
@@ -287,10 +419,12 @@ const HOUSE_GROWTH: KitPlacement[] = [
   // The open window's light on the floor.
   nature("Clover_2", [-1.75, 0, -0.85], 2.2, 0.5),
   nature("Grass_Wispy_Short", [-2.15, 0, -0.35], 0.8, 0.7),
-  // The front edges: low tufts.
+  // The front edges: low tufts, one wildflower by the root, chips of stone by the rubble.
   nature("Grass_Common_Short", [3.2, 0, 3.0], 0.3),
   nature("Clover_1", [3.5, 0, 1.4], 2.6, 0.6),
   nature("Flower_3_Single", [-2.2, 0, 3.55], 0.5, 0.65),
+  nature("Pebble_Square_1", [2.35, 0, 2.3], 1.1),
+  nature("Pebble_Round_3", [-1.25, 0, 2.85], 0.4),
 ];
 
 // Moonlight through the open window, over the crumbled front of the left wall, and over the broken
@@ -301,13 +435,27 @@ const HOUSE_MOON = moonlight([
   { from: [3, 2.2, -4], width: 1.4, depth: 0.9 },
 ]);
 
-export function hallsHouse(): {
-  placements: Placement[];
-  extras: Extra[];
-  kitPieces: KitPlacement[];
-  beams: Beams;
-} {
-  return { placements: HALLS_HOUSE_PIECES, extras: HOUSE_FLOOR, kitPieces: HOUSE_GROWTH, beams: HOUSE_MOON };
+// The house's light (0052): two runes carved into its walls, relit as the room is restored; in ruin
+// only the moon through the window and the keeper's lantern.
+const HOUSE_RUNES: RuneMark[] = [
+  { wall: "back", along: -2.7, y: 2.0 },
+  { wall: "left", along: -1.6, y: 1.1, size: 0.15 },
+];
+
+const HOUSE: HallsRoom = {
+  placements: HALLS_HOUSE_PIECES,
+  extras: [...HOUSE_FLOOR, ...extras({ Root: houseRoots() })],
+  kitPieces: HOUSE_GROWTH,
+  beams: HOUSE_MOON,
+  runes: HOUSE_RUNES,
+  glows: [
+    { position: [-2.7, 2.0, -3.5], colour: "#FFD08A", strength: 2.0 },
+    { position: [-3.5, 1.2, -1.6], colour: "#FFD08A", strength: 1.8 },
+  ],
+};
+
+export function hallsHouse(): HallsRoom {
+  return HOUSE;
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -345,7 +493,105 @@ function holeAt(half: number): number {
   return -half + 1 + 2 * 3;
 }
 
+/** Carved runes on the corridor's back wall, clear of the plates, the hole and the roots; each lights its glow. */
+function corridorRunes(half: number): RuneMark[] {
+  return half > 5
+    ? [
+        { wall: "back", along: -2.3, y: 1.4 },
+        { wall: "back", along: 2.4, y: 1.0, size: 0.16 },
+      ]
+    : [
+        { wall: "back", along: -1.7, y: 1.45 },
+        { wall: "back", along: 3.5, y: 1.05, size: 0.16 },
+      ];
+}
+
+/**
+ * The tunnel's roots (regions/roots.ts): one pours over the low wall at the near end and crawls along
+ * the foot; one comes out through the hole; roots break out of the wall face high up and arch
+ * forward overhead, their tips hanging (from the camera they lie over the wall, never over the
+ * rune-line). The long tunnel (1.B) has roots from both ends and more overhead. Clear of the plates
+ * (x = ±(half − 0.9), high on the wall) and of 2.2's secret door (x 0–1.2 at the wall's foot).
+ */
+function corridorRoots(half: number): BufferGeometry[] {
+  const near = -half + 1.6;
+  const hole = holeAt(half);
+  const runs: RootRun[] = [
+    // Over the low wall at the near end, down the face and along the foot.
+    {
+      path: [
+        [near - 0.3, 2.35, -4.5],
+        [near - 0.2, 2.12, -3.95],
+        [near - 0.1, 1.8, -3.8],
+        [near, 1.0, -3.78],
+        [near + 0.15, 0.24, -3.76],
+        [near + 0.5, 0.09, -3.58],
+        [near + 1.2, 0.07, -3.46],
+        [near + 1.9, 0.05, -3.52],
+      ],
+      radius: 0.2,
+      strands: 3,
+      rootlets: 4,
+      seed: 31,
+    },
+    // Out through the hole the moon comes in by.
+    {
+      path: [
+        [hole + 0.3, 1.0, -4.5],
+        [hole + 0.35, 0.8, -3.88],
+        [hole + 0.5, 0.15, -3.7],
+        [hole + 0.9, 0.07, -3.5],
+        [hole + 1.5, 0.05, -3.45],
+      ],
+      radius: 0.12,
+      strands: 2,
+      rootlets: 2,
+      seed: 32,
+    },
+  ];
+  if (half > 5)
+    // The long tunnel (1.B): roots from the far end too.
+    runs.push({
+      path: [
+        [half - 1.6, 1.75, -4.5],
+        [half - 1.65, 1.6, -3.8],
+        [half - 1.7, 0.5, -3.78],
+        [half - 1.9, 0.09, -3.6],
+        [half - 2.6, 0.07, -3.5],
+        [half - 3.3, 0.05, -3.6],
+      ],
+      radius: 0.17,
+      strands: 3,
+      rootlets: 3,
+      seed: 33,
+    });
+  // Overhead: roots coming over the broken top of the wall where it dips (the notches in its jagged
+  // top) and hanging down its face. From the camera they lie over the wall, never over the rune-line.
+  const notches = half > 5 ? [-5.7, -3.7, 0.3, 3.8] : [-2.7, -0.7];
+  notches.forEach((x, i) => {
+    // The notch's height: the Wall_Broken piece's top dips to about 2.4 m 0.7 m left of its centre,
+    // 2.65 m 0.8 m right of it.
+    const local = x - (-half + 1 + 2 * Math.round((x + half - 1) / 2));
+    const top = local < 0 ? 2.4 : 2.62;
+    const drop = 1.0 + ((i * 3) % 4) * 0.15;
+    runs.push({
+      path: [
+        [x - 0.02, top + 0.3, -4.55],
+        [x, top + 0.1, -4.08],
+        [x + 0.03, top - 0.1, -3.85],
+        [x + 0.08, top - drop * 0.6, -3.84],
+        [x + 0.1, top - drop, -3.86],
+      ],
+      radius: 0.1,
+      strands: 2,
+      seed: 40 + i,
+    });
+  });
+  return rootRuns(runs);
+}
+
 export function hallsCorridor(half = 5): CorridorDressing {
+  const runes = corridorRunes(half);
   // The back wall in 2 m pieces along the whole length, a hole the moon comes through, broken tops.
   const cycle = ["Wall_Overgrown", "Wall", "Wall_Overgrown", "Wall_Hole", "Wall_Overgrown", "Wall"];
   const walls: Placement[] = [];
@@ -354,8 +600,7 @@ export function hallsCorridor(half = 5): CorridorDressing {
     if (k % 3 !== 0) walls.push({ piece: "Wall_Broken", position: [x, 2, -4] });
   }
   const growth: KitPlacement[] = [
-    // Roots of something vast outside, crawling in along the back wall's foot.
-    rootCrown("DeadTree_1", [-half + 1.1, -3.7], 0.05, 1.32, 1.1),
+    // The damp along the back wall's foot, where the roots come in.
     nature("Fern_1", [-half + 0.7, 0, -3.5], 0.9, 0.75),
     nature("Mushroom_Common", [-1.2, 0, -3.65], 0.4, 1.1),
     nature("Grass_Wispy_Tall", [1.6, 0, -3.7], 1.1, 0.8),
@@ -368,11 +613,13 @@ export function hallsCorridor(half = 5): CorridorDressing {
     nature("Grass_Common_Short", [1.1, 0, -0.7], 1.7, 0.8),
   ];
   if (half > 5) {
-    // The long tunnel (1.B): roots from the far end too, and more growth in the damp between.
-    growth.push(rootCrown("DeadTree_3", [half - 1.4, -3.75], Math.PI - 0.05, 1.35, 0.85));
+    // The long tunnel (1.B): more growth in the damp between, a bracket fungus on the far root, and
+    // moss behind the far end of the cable where its loose end glints.
     growth.push(nature("Mushroom_Common", [-half + 3.2, 0, -3.6], 2.1, 0.9));
     growth.push(nature("Grass_Wispy_Tall", [-half + 4.1, 0, -3.65], 0.2, 0.75));
     growth.push(nature("Clover_1", [half - 4.2, 0, -3.55], 1.4, 0.65));
+    growth.push(nature("Mushroom_Laetiporus", [half - 2.3, 0, -3.3], 2.6, 0.4));
+    growth.push(nature("Clover_2", [half - 1.5, 0, -2.75], 1.9, 0.5));
   }
   return {
     placements: [
@@ -380,12 +627,15 @@ export function hallsCorridor(half = 5): CorridorDressing {
       { piece: "Bricks", position: [half - 1.6, 0, -0.9], rotationY: 0.7, scale: 0.8 },
       { piece: "Brick", position: [-half + 1.9, 0, -0.8], rotationY: 2.2 },
     ],
-    extras: corridorFloor(1, "Floor", 5101, half),
+    extras: [...corridorFloor(1, "Floor", 5101, half), ...extras({ Root: corridorRoots(half) })],
     kitPieces: growth,
-    glows: [
-      { position: [-2.4, 1.8, -3.6], colour: "#FFD08A", strength: 1.4 },
-      { position: [3.0, 1.8, -3.6], colour: "#FFD08A", strength: 1.2 },
-    ],
+    runes,
+    // Each rune's warm light, a little out from the wall.
+    glows: runes.map((r, i) => ({
+      position: [r.along, r.y + 0.1, -3.5] as [number, number, number],
+      colour: "#FFD08A",
+      strength: i === 0 ? 1.4 : 1.2,
+    })),
     beams: moonlight([{ from: [holeAt(half), 1.6, -4], width: 1.1, depth: 0.8 }]),
   };
 }

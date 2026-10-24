@@ -1,6 +1,7 @@
 import type { BufferGeometry } from "three";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import type { KitPlacement } from "../kits/placement";
+import type { RuneMark } from "../observatory/Runes";
 
 // What every machine's room needs to know about its own shape (CORE-06): where its doorways are, where
 // the keeper stands, where the air is. One layout per kind of room; the doors come from the machine's
@@ -55,6 +56,8 @@ export type RoomLayout = {
   placements: Placement[];
   /** Textured pieces from the region kits (`kits/catalog.ts`), drawn by `KitRoom`. */
   kitPieces?: KitPlacement[];
+  /** Carved runes on the walls (Region 1): the room's light when restored (0052). */
+  runes?: RuneMark[];
   extras: Extra[];
   /** The room's own lights (when not given, the scene's). */
   glows?: Glow[];

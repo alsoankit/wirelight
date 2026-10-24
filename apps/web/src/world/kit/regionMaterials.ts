@@ -60,6 +60,9 @@ const REGION_1: Record<string, Swatch> = {
   Texture_Leaves: { ruined: "#3f4a42", restored: "#3E6B3A", roughness: 1, sway: 0.06 },
   Green: { ruined: "#4d564d", restored: "#5f8f4c", roughness: 1, sway: 0.14, patchy: "Highlights" },
   Bark: { ruined: "#3d3833", restored: "#5c4330", roughness: 1 },
+  // The roots pushing in through the walls (regions/roots.ts): dry and grey in ruin (brief), a living
+  // brown restored, moss gathering on their tops and where they lie on the floor.
+  Root: { ruined: "#6b675f", restored: "#7a5a3e", roughness: 1, aged: true },
   Dirt: { ruined: "#2f2c29", restored: "#4a3a2a", roughness: 1 },
   Earth: { ruined: "#2a2926", restored: "#3a3024", roughness: 1, aged: true },
   Cloth: { ruined: "#2b2f38", restored: "#3a332e", roughness: 1 },
