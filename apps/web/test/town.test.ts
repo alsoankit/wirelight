@@ -1,6 +1,6 @@
 import { loadRoom, play, roomById, rooms } from "@wirelight/rooms";
 import { describe, expect, it } from "vitest";
-import { secretHere } from "../src/world/room/secretPlaces";
+import { secretHere, secretInCorridor } from "../src/world/room/secretPlaces";
 import { answered, census, houseNumber, register, squareStreet, streetOf, streetStart } from "../src/world/town/street";
 
 // The Lantern Town's readable things come from the room (decision 0072), never hard-coded.
@@ -61,8 +61,11 @@ describe("secret doors (0072)", () => {
     expect(secretHere(census, "square", {}, true)).toBe("f7.secret-binary");
     expect(secretHere(census, "observatory", {}, true)).toBeUndefined();
     const cleared = { "f2.boss-silent-line": {} };
-    expect(secretHere(room("f2.wrong-name"), "observatory", cleared, false)).toBe("f2.secret-48-bits");
-    expect(secretHere(room("f2.wrong-name"), "observatory", {}, false)).toBeUndefined();
+    // 2.2's door is in its corridor's wall (floor-2.md, 0081), not its Observatory.
+    expect(secretHere(room("f2.wrong-name"), "observatory", cleared, false)).toBeUndefined();
+    expect(secretInCorridor(room("f2.wrong-name"), cleared, false)).toBe("f2.secret-48-bits");
+    expect(secretInCorridor(room("f2.wrong-name"), {}, false)).toBeUndefined();
+    expect(secretInCorridor(room("f2.who-are-you"), cleared, false)).toBeUndefined();
     expect(secretHere(room("f2.boss-silent-line"), "observatory", {}, true)).toBe("f2.secret-48-bits");
     expect(secretHere(room("f4.boss-storm"), "hall-b", {}, true)).toBe("f4.secret-peacekeeper");
     expect(secretHere(room("f9.boss-crossing"), "spire", {}, true)).toBe("f9.secret-home-router");

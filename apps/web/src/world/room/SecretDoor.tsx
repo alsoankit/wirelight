@@ -8,7 +8,7 @@ import { goToRoom } from "../../play/RoomHud";
 import { useProgress } from "../../progress/progress";
 import { regionMaterial } from "../kit/regionMaterials";
 import { type RegionId, useRegion } from "../region";
-import { AT, secretHere } from "./secretPlaces";
+import { AT, secretHere, secretInCorridor } from "./secretPlaces";
 
 // A secret room's door (decision 0065; CORE-45): once a floor's boss is cleared, a narrow door shows
 // in the place its floor spec names, in the back corner of that room. Never before. Seeing it marks
@@ -23,11 +23,21 @@ import { AT, secretHere } from "./secretPlaces";
 
 const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Walnut", 3: "Timber", 4: "Sandstone" };
 
-function DoorBody({ region, onOpen }: { region: RegionId; onOpen: () => void }) {
+function DoorBody({
+  region,
+  at,
+  turn,
+  onOpen,
+}: {
+  region: RegionId;
+  at: [number, number, number];
+  turn: number;
+  onOpen: () => void;
+}) {
   const frame = regionMaterial(FRAME[region], region);
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); its chip is the keyboard way
-    <group position={AT} rotation={[0, Math.PI / 4, 0]} onClick={onOpen}>
+    <group position={at} rotation={[0, turn, 0]} onClick={onOpen}>
       {[-0.42, 0.42].map((x) => (
         <mesh key={x} position={[x, 1.0, 0]} material={frame}>
           <boxGeometry args={[0.14, 2.0, 0.22]} />
@@ -55,13 +65,33 @@ function DoorBody({ region, onOpen }: { region: RegionId; onOpen: () => void }) 
   );
 }
 
-export function SecretDoor({ device }: { device: string }) {
+/**
+ * In a machine's room (`device`: its back corner) or, with `corridor`, in the corridor's back wall at
+ * `at` (0081).
+ */
+export function SecretDoor({
+  device,
+  corridor = false,
+  at = AT,
+  turn = Math.PI / 4,
+}: {
+  device?: string;
+  corridor?: boolean;
+  at?: [number, number, number];
+  turn?: number;
+}) {
   const roomId = useSession((s) => s.roomId);
   const won = useSession((s) => s.status?.won ?? false);
   const cleared = useProgress((s) => s.cleared);
   const region = useRegion();
   const room = roomId ? roomById(roomId) : undefined;
-  const secret = room ? secretHere(room, device, cleared, won) : undefined;
+  const secret = room
+    ? corridor
+      ? secretInCorridor(room, cleared, won)
+      : device
+        ? secretHere(room, device, cleared, won)
+        : undefined
+    : undefined;
   useEffect(() => {
     if (secret) useProgress.getState().findSecret(secret);
   }, [secret]);
@@ -75,8 +105,8 @@ export function SecretDoor({ device }: { device: string }) {
   };
   return (
     <>
-      <DoorBody region={region} onOpen={open} />
-      <Html center position={[AT[0], 0.45, AT[2]]} zIndexRange={[10, 0]}>
+      <DoorBody region={region} at={at} turn={turn} onOpen={open} />
+      <Html center position={[at[0], 0.45, at[2]]} zIndexRange={[10, 0]}>
         <button
           type="button"
           className="world-chip"

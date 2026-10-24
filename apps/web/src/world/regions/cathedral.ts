@@ -1,5 +1,6 @@
 import { BufferAttribute, type BufferGeometry, CircleGeometry, ExtrudeGeometry, ShapeGeometry } from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { type CorridorDressing, corridorFloor } from "../corridor/frame";
 import type { Placement } from "../kit/StaticRoom";
 import {
   addTo,
@@ -307,4 +308,24 @@ export function cathedralHall(used: { wall: Wall; at: number }[]) {
   room.kit.push(...floor("floor_02"), ...piers());
   candles(room, [3.15, 2.7]);
   return finish(room); // its placements: CATHEDRAL_HALL_PIECES (hall/layout.ts)
+}
+
+// ---------------------------------------------------------------------------------------------------
+// A corridor (0081): a cloister walk (region-4 brief). Wall bays along the back with a lancet whose
+// coloured light falls across the floor, a cornice, candles at the far end; the rune-line inlaid down
+// the middle. Room coordinates: back wall on z = −4, x from −5 to 5.
+
+export function cathedralCorridor(): CorridorDressing {
+  const room = newRoom();
+  room.kit.push(bay("wall_01", "back", -5), bay("wall_01", "back", -3));
+  windowBay(room, "back", -1, "lancet");
+  room.kit.push(bay("wall_01", "back", 1), bay("wall_01", "back", 3));
+  course(room.bag, "back", -5, 5, HEIGHT + 0.07, 0.2);
+  candles(room, [4.1, -3.4]);
+  const done = finish(room);
+  return {
+    placements: [{ piece: "Bricks", position: [-3.6, 0, -0.9], rotationY: 0.4, scale: 0.6 }],
+    ...done,
+    extras: [...corridorFloor(4, "Floor", 5401), ...done.extras],
+  };
 }

@@ -1,4 +1,5 @@
 import type { BufferGeometry } from "three";
+import { type CorridorDressing, corridorFloor } from "../corridor/frame";
 import { FLOORS, makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import { addTo, box, extras, rod, type V3 } from "../kit/shapes";
@@ -360,3 +361,34 @@ export function townSquare(used: { wall: Wall; at: number }[]) {
 }
 
 export const TOWN_SQUARE_PIECES: Placement[] = [];
+
+// ---------------------------------------------------------------------------------------------------
+// A corridor (0081): a cobbled lane between houses (region-3 brief). House fronts along the back,
+// windows lit when restored, wall lanterns, the rest of the town's roofs beyond; the rune-line runs
+// down the middle of the lane. Room coordinates: back wall on z = −4, x from −5 to 5.
+
+export function townCorridor(): CorridorDressing {
+  const bag: Bag = {};
+  const glows: Glow[] = [];
+  const kit: KitPlacement[] = [];
+  const faces = [
+    "Wall_Plaster_Window_Wide_Round",
+    "Wall_Plaster_Window_Thin_Round",
+    "Wall_UnevenBrick_Door_Round",
+    "Wall_Plaster_Window_Thin_Round",
+    "Wall_Plaster_Window_Wide_Round",
+  ];
+  [-4, -2, 0, 2, 4].forEach((at, k) => {
+    houseFront(kit, "back", at, faces[k] as string, { lift: (k % 2) * 0.04, closed: k === 3 });
+  });
+  kit.push(prop("Barrel", -3.2, -3.4, 0.6));
+  kit.push(prop("Vase_2", 2.9, -3.45, 1.4));
+  wallLantern(bag, glows, "back", -1.0, 1.75);
+  wallLantern(bag, glows, "back", 3.0, 1.75);
+  return {
+    placements: [],
+    kitPieces: [...kit, ...farTown(41, 3.6, 0.5)],
+    extras: [...corridorFloor(3, "Cobble", 5301), ...extras(bag)],
+    glows,
+  };
+}

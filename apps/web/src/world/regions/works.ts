@@ -1,4 +1,5 @@
 import type { BufferGeometry } from "three";
+import { type CorridorDressing, corridorFloor } from "../corridor/frame";
 import { FLOORS, makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import { addTo, ball, box, extras, gearGeometry, onWall, pipe, ring, rod, type V3 } from "../kit/shapes";
@@ -491,4 +492,40 @@ function rotated(g: BufferGeometry, at: V3, euler: V3): BufferGeometry {
     .rotateY(euler[1])
     .rotateZ(euler[2])
     .translate(...at);
+}
+
+// ---------------------------------------------------------------------------------------------------
+// A corridor (0081): a workshop passage (region-2 brief: riveted pipes, the rune-line in a channel).
+// Brick with walnut panelling, a pipe run along the top with a riser, gauges, caged lamps, one gear;
+// the cable runs between two copper rails. Room coordinates: back wall on z = −4, x from −5 to 5.
+
+export function worksCorridor(): CorridorDressing {
+  const bag: Bag = {};
+  const glows: Glow[] = [];
+  const kitPieces = wallRun("back", -5, 5, [], () => "Wall_UnevenBrick_Straight");
+  wainscot(bag, "back", -5, 5);
+  pipes(bag, [
+    [
+      [-5, 2.75, -3.86],
+      [5, 2.75, -3.86],
+    ],
+    [
+      [-3.3, 0, -3.86],
+      [-3.3, 2.75, -3.86],
+    ],
+  ]);
+  gauge(bag, "back", -2.6, 2.35, 0.22);
+  gauge(bag, "back", 1.2, 2.4, 0.22, 0.12);
+  lamp(bag, glows, "back", -1.2, 2.05, 2.6);
+  lamp(bag, glows, "back", 3.2, 2.05, 2.6);
+  // The channel the cable runs in: two copper rails along the floor.
+  for (const z of [-2.34, -2.06]) addTo(bag, "Copper", rod([-4.7, 0.05, z], [4.7, 0.05, z], 0.025, 6));
+  const gears: Gear[] = [{ wall: "back", along: 0.3, y: 2.3, radius: 0.32, teeth: 9, spin: 1, spokes: 4 }];
+  return {
+    placements: [{ piece: "Brick", position: [3.6, 0, -0.9], rotationY: 1.1 }],
+    kitPieces,
+    extras: [...corridorFloor(2, "Floor", 5201), ...extras(bag)],
+    glows,
+    gears,
+  };
 }

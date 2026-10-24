@@ -40,10 +40,11 @@ export async function open(p, base, room, ready = ".plate") {
 
 export async function won(p, name) {
   // The session's own verdict: the debrief usually follows, but after the last boss the floor memory
-  // and the ending come first (0076), so the debrief alone isn't the sign of a win.
+  // and the ending come first (0076), so the debrief alone isn't the sign of a win. Two minutes: with
+  // traffic on the cables the presentation clock runs slow (CORE-41), so a win can take a while.
   const ok = await p
     .waitForFunction(() => !!window.__wirelight.useSession.getState().status?.won, null, {
-      timeout: 60000,
+      timeout: 120000,
       polling: 250,
     })
     .then(() => true)

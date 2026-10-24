@@ -2633,3 +2633,11 @@ body:has(.glass.memory, .ending-stage, .cmd-memory)
 .corridor-title span {
   color: var(--text-dim);
 }
+
+/* Where the player stands when it's a corridor (0081): a soft amber halo along that cable. */
+.glass-here-link {
+  stroke: var(--amber);
+  stroke-opacity: 0.35;
+  stroke-width: 10;
+  stroke-linecap: round;
+}

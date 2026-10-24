@@ -136,6 +136,8 @@ export function FloorMap({
   children?: ReactNode;
 }) {
   const here = useSession((s) => s.here);
+  /** Standing in a corridor (0081): its cable is where the player is, not a machine. */
+  const inCorridor = useSession((s) => (s.corridor && !s.corridor.through ? s.corridor.link : null));
   const corridors = useSession((s) => s.status?.corridors);
   const doors = useSession((s) => s.status?.doors);
   // From Floor 8 (streets joined by crossings), each street's hall is labelled with its street.
@@ -201,6 +203,13 @@ export function FloorMap({
         const far = along(k, 0.76);
         return (
           <g key={l.id}>
+            {!memory && inCorridor === l.id && (
+              <path
+                d={`M${k.a.x},${k.a.y} Q${k.c.x},${k.c.y} ${k.b.x},${k.b.y}`}
+                className="glass-here-link"
+                fill="none"
+              />
+            )}
             <path
               d={`M${k.a.x},${k.a.y} Q${k.c.x},${k.c.y} ${k.b.x},${k.b.y}`}
               className={`glass-link ${state}`}
@@ -238,7 +247,7 @@ export function FloorMap({
         })()}
       {[...nodes.values()].map((n) => (
         <g key={n.id} transform={`translate(${n.x},${n.y})`} className={`glass-node ${n.kind}`}>
-          {!memory && n.id === here && <circle r={mini ? 9 : 22} className="glass-here" />}
+          {!memory && !inCorridor && n.id === here && <circle r={mini ? 9 : 22} className="glass-here" />}
           {n.kind === "switch" ? (
             <rect x={mini ? -6 : -14} y={mini ? -4 : -9} width={mini ? 12 : 28} height={mini ? 8 : 18} rx={2} />
           ) : n.kind === "router" ? (
@@ -317,6 +326,9 @@ export function Glass() {
   const [view, setView] = useState<"floor" | "world">("floor");
   const replay = useSession((s) => s.replay);
   const here = useSession((s) => s.here);
+  const corridorLink = useSession((s) => (s.corridor && !s.corridor.through ? s.corridor.link : null));
+  const corridorLinkDef = corridorLink ? room?.topology.links.find((x) => x.id === corridorLink) : undefined;
+  const corridorEnds = corridorLinkDef ? ([corridorLinkDef.a.device, corridorLinkDef.b.device] as const) : null;
   const setReplay = useSession((s) => s.setReplay);
   // A replay opens the Glass on it; closing the Glass ends it.
   useEffect(() => {
@@ -361,7 +373,13 @@ export function Glass() {
         aria-label={voice.glass.open}
       >
         <FloorMap room={room} mini />
-        {here && <span className="mini-glass-here">{fill(voice.here, { machine: here })}</span>}
+        {here && (
+          <span className="mini-glass-here">
+            {corridorEnds
+              ? fill(voice.hereCorridor, { a: corridorEnds[0], b: corridorEnds[1] })
+              : fill(voice.here, { machine: here })}
+          </span>
+        )}
       </button>
       {open && replay !== null && (
         <section className="glass" aria-label={voice.replay.title}>

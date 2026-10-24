@@ -65,6 +65,8 @@ const { RUNE_GLOWS } = await load("src/world/observatory/Runes.tsx");
 const { observatoryLayout } = await load("src/world/observatory/layout.ts");
 const { houseLayout } = await load("src/world/house/layout.ts");
 const { hallLayout } = await load("src/world/hall/layout.ts");
+const { corridorDressing } = await load("src/world/corridor/dressing.ts");
+const { corridorHalf, endArches } = await load("src/world/corridor/frame.ts");
 
 // Kept in step with the scenes by hand (they are consts inside the components):
 // RoomCamera.tsx VIEW_DIRECTION, HouseScene.tsx LAMP, HallScene.tsx glows.
@@ -90,11 +92,27 @@ function layouts() {
       entry.rooms.push(`${room.id}:${d.id}`);
       found.set(id, entry);
     }
+    // Its corridors (0081): one per region, longer in the rooms that have long ones (frame.ts).
+    const half = corridorHalf(room.id);
+    const id = `r${room.region}-corridor-h${half}`;
+    const entry = found.get(id) ?? { id, region: room.region, kind: "corridor", half, rooms: [] };
+    for (const l of room.topology.links) entry.rooms.push(`${room.id}:${l.id}`);
+    found.set(id, entry);
   }
   return [...found.values()].sort((a, b) => a.id.localeCompare(b.id));
 }
 
-function build({ kind, doors, region }) {
+function build({ kind, doors, region, half }) {
+  if (kind === "corridor") {
+    // As CorridorScene draws it: the end arches first, then the region's dressing.
+    const d = corridorDressing(region, half);
+    const layout = {
+      placements: [...endArches(region, half), ...d.placements],
+      extras: d.extras,
+      kitPieces: d.kitPieces,
+    };
+    return { layout, glows: d.glows };
+  }
   if (kind === "observatory") {
     const layout = observatoryLayout(doors, region);
     return { layout, glows: layout.glows ?? RUNE_GLOWS };

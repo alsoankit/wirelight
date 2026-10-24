@@ -1,3 +1,4 @@
+import { type CorridorDressing, corridorFloor } from "../corridor/frame";
 import { makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import type { KitPlacement } from "../kits/placement";
@@ -332,4 +333,59 @@ const HALL_FLOOR: Extra[] = [
 /** A hall's dressing around its walls (the walls with their door gaps come from hall/layout.ts). */
 export function hallsHall(): { placements: Placement[]; extras: Extra[]; kitPieces: KitPlacement[] } {
   return { placements: HALLS_HALL_DRESSING, extras: HALL_FLOOR, kitPieces: [] };
+}
+
+// ---------------------------------------------------------------------------------------------------
+// A corridor (0081): a low root tunnel (region-1 brief). The back wall in mossy stone with a hole the
+// moon comes through, roots crawling along its foot, growth in the damp; the rune-line down the
+// middle stays clear. Room coordinates: the back wall on z = −4, the tunnel along x from −5 to 5.
+
+/** Where the corridor wall's hole is (the cycle's fourth piece, laid from the left end). */
+function holeAt(half: number): number {
+  return -half + 1 + 2 * 3;
+}
+
+export function hallsCorridor(half = 5): CorridorDressing {
+  // The back wall in 2 m pieces along the whole length, a hole the moon comes through, broken tops.
+  const cycle = ["Wall_Overgrown", "Wall", "Wall_Overgrown", "Wall_Hole", "Wall_Overgrown", "Wall"];
+  const walls: Placement[] = [];
+  for (let x = -half + 1, k = 0; x < half; x += 2, k++) {
+    walls.push({ piece: cycle[k % cycle.length] as string, position: [x, 0, -4] });
+    if (k % 3 !== 0) walls.push({ piece: "Wall_Broken", position: [x, 2, -4] });
+  }
+  const growth: KitPlacement[] = [
+    // Roots of something vast outside, crawling in along the back wall's foot.
+    rootCrown("DeadTree_1", [-half + 1.1, -3.7], 0.05, 1.32, 1.1),
+    nature("Fern_1", [-half + 0.7, 0, -3.5], 0.9, 0.75),
+    nature("Mushroom_Common", [-1.2, 0, -3.65], 0.4, 1.1),
+    nature("Grass_Wispy_Tall", [1.6, 0, -3.7], 1.1, 0.8),
+    nature("Clover_1", [2.4, 0, -3.6], 2.2, 0.7),
+    nature("Clover_2", [3.2, 0, -2.9], 0.5, 0.55),
+    nature("Fern_1", [half - 1.7, 0, -3.55], 2.0, 0.7),
+    nature("Rock_Medium_2", [half - 0.65, -0.08, -3.45], 1.3, 0.32),
+    // The front edge: low tufts only, so the rune-line and the messages stay in view.
+    nature("Grass_Wispy_Short", [-1.8, 0, -0.75], 0.3, 0.8),
+    nature("Grass_Common_Short", [1.1, 0, -0.7], 1.7, 0.8),
+  ];
+  if (half > 5) {
+    // The long tunnel (1.B): roots from the far end too, and more growth in the damp between.
+    growth.push(rootCrown("DeadTree_3", [half - 1.4, -3.75], Math.PI - 0.05, 1.35, 0.85));
+    growth.push(nature("Mushroom_Common", [-half + 3.2, 0, -3.6], 2.1, 0.9));
+    growth.push(nature("Grass_Wispy_Tall", [-half + 4.1, 0, -3.65], 0.2, 0.75));
+    growth.push(nature("Clover_1", [half - 4.2, 0, -3.55], 1.4, 0.65));
+  }
+  return {
+    placements: [
+      ...walls,
+      { piece: "Bricks", position: [half - 1.6, 0, -0.9], rotationY: 0.7, scale: 0.8 },
+      { piece: "Brick", position: [-half + 1.9, 0, -0.8], rotationY: 2.2 },
+    ],
+    extras: corridorFloor(1, "Floor", 5101, half),
+    kitPieces: growth,
+    glows: [
+      { position: [-2.4, 1.8, -3.6], colour: "#FFD08A", strength: 1.4 },
+      { position: [3.0, 1.8, -3.6], colour: "#FFD08A", strength: 1.2 },
+    ],
+    beams: moonlight([{ from: [holeAt(half), 1.6, -4], width: 1.1, depth: 0.8 }]),
+  };
 }

@@ -508,4 +508,5 @@ export const voice = {
   },
   /** Where the player is standing (the room's own machine, or the one walked into). */
   here: "You are in: {machine}",
+  hereCorridor: "You are in: the {a}–{b} corridor",
 };
