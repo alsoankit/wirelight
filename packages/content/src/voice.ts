@@ -509,4 +509,23 @@ export const voice = {
   /** Where the player is standing (the room's own machine, or the one walked into). */
   here: "You are in: {machine}",
   hereCorridor: "You are in: the {a}–{b} corridor",
+  /** When this browser can't draw the 3D world (no WebGPU and no WebGL2), or the drawing fails. */
+  cannotDraw: {
+    title: "This browser can't draw the Deep Network",
+    body: "Wirelight needs 3D drawing (WebGL2 or WebGPU), and it couldn't start here. Nothing is lost: your progress is saved in this browser.",
+    tipsTitle: "Things that usually help:",
+    tips: [
+      "Use a recent Chrome, Edge or Firefox.",
+      "Turn on hardware acceleration in the browser's settings, then restart the browser.",
+      "Update your graphics drivers.",
+      "On a work computer, 3D may be switched off by policy; try a personal one.",
+    ],
+    retry: "Try again",
+    webgl2: "Try the simpler drawing mode",
+    detail: "What went wrong",
+    /** Any other failure while playing (a bug, not the browser). */
+    crashedTitle: "Something stopped the game",
+    crashedBody:
+      "Sorry, that's a bug in Wirelight, not your computer. Your progress is saved in this browser; trying again usually brings you back to where you were.",
+  },
 };

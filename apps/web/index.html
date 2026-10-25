@@ -6,8 +6,70 @@
     <meta name="theme-color" content="#0b0d12" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Wirelight</title>
+    <!-- What a shared link shows (decision 0087). The image is public/og.jpg; links must be absolute. -->
+    <meta
+      name="description"
+      content="A browser game that teaches how computer networks really work, for complete beginners: restore a ruined world, room by room, with real Linux commands."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Wirelight" />
+    <meta property="og:title" content="Wirelight" />
+    <meta
+      property="og:description"
+      content="Learn how computer networks really work: restore a ruined world, room by room, with real Linux commands."
+    />
+    <meta property="og:url" content="https://wirelight.alsoankit.workers.dev/" />
+    <meta property="og:image" content="https://wirelight.alsoankit.workers.dev/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="A lantern-lit town square in Wirelight: house doors around a cobbled square, the keeper in the middle."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Wirelight" />
+    <meta
+      name="twitter:description"
+      content="Learn how computer networks really work: restore a ruined world, room by room, with real Linux commands."
+    />
+    <meta name="twitter:image" content="https://wirelight.alsoankit.workers.dev/og.jpg" />
+    <!-- The loading card: painted before any script runs, hidden once the game has put anything on screen. -->
+    <style>
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        background: #0b0d12;
+        color: #f3e9dc;
+        font-family: Georgia, serif;
+        z-index: 1;
+      }
+      #boot h1 {
+        margin: 0;
+        font-size: 40px;
+        font-weight: 400;
+        letter-spacing: 0.12em;
+        font-variant: small-caps;
+      }
+      #boot p {
+        margin: 0;
+        color: #b9ad9c;
+        font: 15px system-ui, sans-serif;
+      }
+      body:has(#root > *) #boot {
+        display: none;
+      }
+    </style>
   </head>
   <body>
+    <div id="boot" aria-hidden="true">
+      <h1>Wirelight</h1>
+      <p>Opening the gate…</p>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
