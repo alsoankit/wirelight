@@ -1923,6 +1923,61 @@ button.link.inline {
   font: 11px / 1.4 var(--mono);
 }
 
+/* The playthrough's controls (dev/PlaythroughHud.tsx): small, out of the game's way, above the console. */
+.dev-playthrough {
+  position: fixed;
+  left: 70px;
+  bottom: 104px;
+  max-width: min(520px, calc(100vw - 90px));
+  padding: 6px 10px;
+  border: 1px dashed var(--violet);
+  border-radius: 8px;
+  background: rgba(14, 10, 22, 0.92);
+  color: var(--text);
+  font: 12px / 1.4 var(--sans);
+  z-index: 71;
+}
+
+.dev-playthrough p {
+  margin: 0 0 4px;
+}
+
+.dev-playthrough .dev-actions {
+  margin: 2px 0;
+}
+
+.dev-playthrough button {
+  margin: 2px 4px 2px 0;
+  padding: 3px 7px;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  font: 12px var(--sans);
+  cursor: pointer;
+}
+
+.dev-playthrough input {
+  width: 100%;
+  margin-top: 4px;
+  padding: 5px 8px;
+  border: 1px solid var(--violet);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--text);
+  font: 13px var(--sans);
+}
+
+.dev-doing {
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+
+.dev-help {
+  margin: 2px 0;
+  color: var(--text-dim);
+}
+
 .dev-sheet details {
   margin: 4px 0;
 }

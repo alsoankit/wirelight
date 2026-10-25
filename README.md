@@ -65,6 +65,14 @@ pnpm e2e               # browser tests
 
 Dev aids: `?room=<id>` opens a room directly, and **Shift+D** opens the dev panel (jump to any room, auto-play it, try mistakes).
 
+**Playthrough (dev only):** watch the game play itself, room after room, at a pace a person can follow: missions, solutions, debriefs, memories and the ending. Start it from the dev panel ("Play from here" or "Play from the start"), or open a link such as
+
+```
+http://localhost:5173/play?room=prologue&autoplay=1&until=game&speed=1&pace=1
+```
+
+`until` is `floor`, `region` or `game`; `speed` is `1`, `4` or `16`; `pace` (reading time) is `0.6`, `1` or `1.6`; add `&memories=0` or `&secrets=0` to leave those out. While it plays: Pause, Next room and Stop. **Shift+N** writes a note about what's on screen (the playthrough waits while you type), and the notes copy or download as Markdown, grouped by room.
+
 ## Status
 All 40 first-release rooms and the four secret rooms are playable in 3D, with every region's art pass done. Still to come: the characters, music and voices, the public deploy and human playtests.
 

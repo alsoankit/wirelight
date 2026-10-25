@@ -6,41 +6,17 @@ import { isTyping } from "../play/keys";
 import { openMemory } from "../play/Memory";
 import { goToRoom } from "../play/RoomHud";
 import { useProgress } from "../progress/progress";
+import { PlaythroughHud } from "./PlaythroughHud";
+import { runSteps, startPlaythrough, type Until, usePlaythrough } from "./playthrough";
 
 // Developer tool (not part of the game): jump to any room, read everything about it, and watch it
 // play itself. Open with Shift+D in dev builds, or with ?dev=1 on any build. Auto-play runs the room's
 // own solution (or a detector's test script) step by step through the real engine, walking into each
-// machine's room so the player's view follows; nothing is faked.
+// machine's room so the player's view follows; nothing is faked. The playthrough (playthrough.ts)
+// plays room after room at a watchable pace; start it here or with ?autoplay=1 (&until=floor|region|
+// game, &speed=1|4|16, &pace=0.6|1|1.6, &secrets=0, &memories=0) on a room's link.
 
 const SPEEDS = [1, 4, 16];
-
-/** Waits until network time has moved on by `ms` (the presentation clock decides how fast). */
-async function waitNetwork(ms: number, stop: () => boolean): Promise<void> {
-  const start = useSession.getState().status?.now ?? 0;
-  while (!stop() && (useSession.getState().status?.now ?? 0) < start + ms) await new Promise((r) => setTimeout(r, 50));
-}
-
-/** Runs script steps as a player would: go to the machine's room, then click or type the line. */
-async function runSteps(room: RoomDef, steps: SolutionStep[], log: (s: string) => void, stop: () => boolean) {
-  const s = useSession.getState;
-  for (const step of steps) {
-    if (stop()) return;
-    if (s().here !== step.device) {
-      // Walk there if the player could; otherwise act from where they are (the script's own rule).
-      const enterable = room.access[step.device]?.state === "enterable";
-      if (enterable) s().goTo(step.device);
-    }
-    if ("touch" in step) {
-      log(`${step.device}: touch ${step.touch}`);
-      await s().touch(step.device, step.touch);
-    } else {
-      log(`${step.device}: ${step.line}`);
-      await s().exec(step.device, step.line, step.source === "click" ? "click" : "typed");
-    }
-    await waitNetwork(step.waitMs ?? 5000, stop);
-  }
-  log("done");
-}
 
 function Sheet({ room }: { room: RoomDef }) {
   const t = roomTexts[room.content];
@@ -148,6 +124,24 @@ export function DevPanel() {
   const [cancel] = useState(() => ({ stop: false }));
   const room = roomId ? roomById(roomId) : undefined;
   const allowed = import.meta.env.DEV || new URLSearchParams(window.location.search).get("dev") === "1";
+  const [scope, setScope] = useState<Until>("game");
+  const [secrets, setSecrets] = useState(true);
+  const pace = usePlaythrough((s) => s.pace);
+  const memories = usePlaythrough((s) => s.memories);
+  const playing = usePlaythrough((s) => s.running);
+
+  // ?autoplay=1: the playthrough starts by itself from the room in the link, once it has loaded.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once, on the first room
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (!allowed || q.get("autoplay") !== "1" || !roomId) return;
+    const until = (q.get("until") ?? "game") as Until;
+    usePlaythrough.setState({
+      pace: Number(q.get("pace") ?? 1) || 1,
+      memories: q.get("memories") !== "0",
+    });
+    void startPlaythrough(roomId, until, q.get("secrets") !== "0", Number(q.get("speed") ?? 1) || 1);
+  }, [allowed, roomId === null]);
 
   useEffect(() => {
     if (!allowed) return;
@@ -165,9 +159,12 @@ export function DevPanel() {
   if (!allowed) return null;
   if (!open)
     return (
-      <button type="button" className="dev-toggle" onClick={() => setOpen(true)}>
-        Dev
-      </button>
+      <>
+        <button type="button" className="dev-toggle" onClick={() => setOpen(true)}>
+          Dev
+        </button>
+        <PlaythroughHud />
+      </>
     );
 
   const jump = (id: string) => {
@@ -200,46 +197,30 @@ export function DevPanel() {
   };
 
   return (
-    <aside className="dev-panel" aria-label="Developer panel">
-      <header>
-        <strong>Dev</strong>
-        <button type="button" onClick={() => setOpen(false)}>
-          Close
-        </button>
-      </header>
-      <section className="dev-rooms">
-        {byFloor.map(({ f, list }) =>
-          list.length === 0 ? null : (
-            <div key={f.n}>
-              <div className="dev-floor">
-                {f.n === 0 ? "" : `${f.n} · `}
-                {f.name} <span>({regions[f.region]?.name})</span>
-              </div>
-              {list.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  data-here={r.id === roomId ? "yes" : "no"}
-                  onClick={() => jump(r.id)}
-                  title={r.id}
-                >
-                  {roomTexts[r.content]?.title ?? r.id}
-                  {r.kind === "boss" ? " ★" : r.kind === "secret" ? " ✧" : ""}
-                </button>
-              ))}
-            </div>
-          ),
-        )}
-      </section>
-      {room && (
-        <section>
+    <>
+      <PlaythroughHud />
+      <aside className="dev-panel" aria-label="Developer panel">
+        <header>
+          <strong>Dev</strong>
+          <button type="button" onClick={() => setOpen(false)}>
+            Close
+          </button>
+        </header>
+        <section className="dev-playthrough-start">
+          <div className="dev-floor">Playthrough</div>
+          <p className="dev-help">
+            Plays the game from this room at a pace you can watch: missions, solutions, debriefs, memories. Shift+N
+            writes a note.
+          </p>
           <div className="dev-actions">
-            <button type="button" disabled={running} onClick={() => void play(room.solution, "solution")}>
-              ▶ Auto-play solution
-            </button>
-            <button type="button" onClick={() => void restart()}>
-              ↺ Reset
-            </button>
+            <label>
+              until{" "}
+              <select value={scope} onChange={(e) => setScope(e.target.value as Until)}>
+                <option value="floor">end of floor</option>
+                <option value="region">end of region</option>
+                <option value="game">end of game</option>
+              </select>
+            </label>
             <label>
               speed{" "}
               <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}>
@@ -250,41 +231,127 @@ export function DevPanel() {
                 ))}
               </select>
             </label>
-            {running && (
-              <button type="button" onClick={() => (cancel.stop = true)}>
-                ■ Stop
-              </button>
-            )}
+            <label>
+              reading{" "}
+              <select value={pace} onChange={(e) => usePlaythrough.setState({ pace: Number(e.target.value) })}>
+                <option value={0.6}>brisk</option>
+                <option value={1}>normal</option>
+                <option value={1.6}>slow</option>
+              </select>
+            </label>
           </div>
           <div className="dev-actions">
-            {room.detectorTests.map((t) => (
-              <button
-                key={t.misconception}
-                type="button"
-                disabled={running}
-                onClick={async () => {
-                  await restart();
-                  await play(t.steps, `mistake: ${t.misconception}`);
-                }}
-              >
-                ✗ {t.misconception}
-              </button>
-            ))}
+            <label>
+              <input
+                type="checkbox"
+                checked={memories}
+                onChange={(e) => usePlaythrough.setState({ memories: e.target.checked })}
+              />{" "}
+              memories
+            </label>
+            <label>
+              <input type="checkbox" checked={secrets} onChange={(e) => setSecrets(e.target.checked)} /> secret rooms
+            </label>
           </div>
           <div className="dev-actions">
-            {roomTexts[room.content]?.building && (
-              <button type="button" onClick={() => openMemory({ kind: "building", roomId: room.id })}>
-                Building memory
-              </button>
-            )}
-            <button type="button" onClick={() => openMemory({ kind: "floor", floor: room.floor })}>
-              Floor memory + ride
+            <button
+              type="button"
+              disabled={playing || !roomId}
+              onClick={() => roomId && void startPlaythrough(roomId, scope, secrets, speed)}
+            >
+              ▶ Play from here
+            </button>
+            <button
+              type="button"
+              disabled={playing}
+              onClick={() => {
+                const first = rooms[0]?.id;
+                if (first) void startPlaythrough(first, scope, secrets, speed);
+              }}
+            >
+              ▶ Play from the start
             </button>
           </div>
-          {log.length > 0 && <pre className="dev-log">{log.join("\n")}</pre>}
-          <Sheet room={room} />
         </section>
-      )}
-    </aside>
+        <section className="dev-rooms">
+          {byFloor.map(({ f, list }) =>
+            list.length === 0 ? null : (
+              <div key={f.n}>
+                <div className="dev-floor">
+                  {f.n === 0 ? "" : `${f.n} · `}
+                  {f.name} <span>({regions[f.region]?.name})</span>
+                </div>
+                {list.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    data-here={r.id === roomId ? "yes" : "no"}
+                    onClick={() => jump(r.id)}
+                    title={r.id}
+                  >
+                    {roomTexts[r.content]?.title ?? r.id}
+                    {r.kind === "boss" ? " ★" : r.kind === "secret" ? " ✧" : ""}
+                  </button>
+                ))}
+              </div>
+            ),
+          )}
+        </section>
+        {room && (
+          <section>
+            <div className="dev-actions">
+              <button type="button" disabled={running} onClick={() => void play(room.solution, "solution")}>
+                ▶ Auto-play solution
+              </button>
+              <button type="button" onClick={() => void restart()}>
+                ↺ Reset
+              </button>
+              <label>
+                speed{" "}
+                <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))}>
+                  {SPEEDS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}×
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {running && (
+                <button type="button" onClick={() => (cancel.stop = true)}>
+                  ■ Stop
+                </button>
+              )}
+            </div>
+            <div className="dev-actions">
+              {room.detectorTests.map((t) => (
+                <button
+                  key={t.misconception}
+                  type="button"
+                  disabled={running}
+                  onClick={async () => {
+                    await restart();
+                    await play(t.steps, `mistake: ${t.misconception}`);
+                  }}
+                >
+                  ✗ {t.misconception}
+                </button>
+              ))}
+            </div>
+            <div className="dev-actions">
+              {roomTexts[room.content]?.building && (
+                <button type="button" onClick={() => openMemory({ kind: "building", roomId: room.id })}>
+                  Building memory
+                </button>
+              )}
+              <button type="button" onClick={() => openMemory({ kind: "floor", floor: room.floor })}>
+                Floor memory + ride
+              </button>
+            </div>
+            {log.length > 0 && <pre className="dev-log">{log.join("\n")}</pre>}
+            <Sheet room={room} />
+          </section>
+        )}
+      </aside>
+    </>
   );
 }

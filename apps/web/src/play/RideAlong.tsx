@@ -239,7 +239,8 @@ export function RideAlong({ floor }: { floor: number }) {
         );
 
   return (
-    <div className="ride">
+    // data-done: the ride has played to its end (the dev playthrough waits for it).
+    <div className="ride" data-done={paused && i + 1 >= flat.length ? "yes" : "no"}>
       <div className="ride-stage">
         <MemoryMap
           room={room}
