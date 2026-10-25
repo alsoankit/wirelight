@@ -98,7 +98,25 @@ export function kitMaterial(kit: string, original: Material, options: KitMateria
   const hue = new Color(sky.r / skyLum, sky.g / skyLum, sky.b / skyLum).lerp(new Color(1, 1, 1), 0.3);
   const ruined = mix(base, vec3(lum, lum, lum).mul(color(hue)), look.kitRuinGrey ?? 0.72).mul(0.8);
   const warmth = look.kitRestored ? new Color(look.kitRestored) : new Color(1.06, 1.0, 0.9);
-  const restored = base.mul(vec3(warmth.r, warmth.g, warmth.b));
+  let restored = base.mul(vec3(warmth.r, warmth.g, warmth.b));
+  const stone = look.kitStone;
+  if (stone && stone.material === original.name) {
+    // The region's stone colour at the texture's own brightness (its chroma replaced, its courses,
+    // joints and wear kept), lifted a little: the Cathedral's trim sheet is red brick and grey
+    // ashlar, which read as one orange-brown under warm light; the brief's stone is sandstone.
+    const c = new Color(stone.colour);
+    const cl = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+    const toned = vec3(lum, lum, lum)
+      .pow(vec3(stone.gamma ?? 1, stone.gamma ?? 1, stone.gamma ?? 1))
+      .mul(vec3(c.r / cl, c.g / cl, c.b / cl));
+    // Floors (faces that look up) keep more of their own grey, so the floor and walls part.
+    const amount = mix(
+      float(stone.amount),
+      float(stone.floorAmount ?? stone.amount),
+      smoothstep(0.6, 0.9, normalWorld.y),
+    );
+    restored = mix(restored, toned, amount);
+  }
   let tint = mix(restored, ruined, ruinHere);
 
   if (aged) {

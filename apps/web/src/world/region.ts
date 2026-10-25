@@ -43,6 +43,12 @@ export type RegionLook = {
   kitRuinGrey?: number;
   /** How brightly glowing kit pieces (windows, lanterns) light when restored (default 1.8). */
   kitGlow?: number;
+  /**
+   * One kit material re-coloured when restored: the region's stone colour at the texture's own
+   * brightness (`gamma` < 1 lifts dark courses), mixed in by `amount` (`floorAmount` on faces that
+   * look up; kits/kitMaterials.ts).
+   */
+  kitStone?: { material: string; colour: string; amount: number; gamma?: number; floorAmount?: number };
 };
 
 export const LOOKS: Record<RegionId, RegionLook> = {
@@ -85,16 +91,21 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     background: "#0b0b0e",
     // Cold grey in ruin (brief: stone #55575E, light #7E8AA0), not navy; restored, pale sandstone
     // under a near-neutral fill, the gold and jewel colours left to the glass and its shafts.
-    ambient: { ruined: "#6c6f77", restored: "#8e877c" },
-    sky: { ruined: "#9a9fa9", restored: "#bdb19d" },
+    ambient: { ruined: "#6c6f77", restored: "#8f8b84" },
+    sky: { ruined: "#9a9fa9", restored: "#c3bdb1" },
     ground: { ruined: "#2a2c31", restored: "#3a3229" },
     fog: { ruined: "#2a2d33", restored: "#5C4A38" },
-    moon: { ruined: "#8e95a4", restored: "#efdcb0", strengthRuined: 1.5, strengthRestored: 0.5 },
+    // Restored, pale daylight from the clerestory: the gold belongs to the windows' shafts and the
+    // candles, so the stone reads as sandstone, not one orange-brown.
+    moon: { ruined: "#8e95a4", restored: "#e2dccd", strengthRuined: 1.5, strengthRestored: 0.55 },
     moss: { ruined: "#45474c", restored: "#8c7a5c", amount: 0.45 },
     fireflies: null,
     dust: "#d8ccb0",
     // The cathedral kit's grey trim-sheet stone, warmed toward sandstone when restored (multiplied in
     // linear space, so as light as it can be: it can only darken).
-    kitRestored: "#FFE6C0",
+    kitRestored: "#FFF4E4",
+    // The trim sheet's red brick and grey ashlar become pale sandstone courses (brief: #C2A57E), so
+    // a restored room is stone, gold light and jewel glass, not one orange-brown.
+    kitStone: { material: "trim sheet", colour: "#C9B497", amount: 0.9, gamma: 0.72, floorAmount: 0.35 },
   },
 };

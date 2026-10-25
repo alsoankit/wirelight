@@ -296,6 +296,137 @@ function townByTheDoor(bag: Bag, kind: number) {
   }
 }
 
+/**
+ * The Cathedral's version (region-4 brief, 0052): what the builders left in a chapel is the work of
+ * the cathedral, never a home's furniture: a mason's half-dressed block with mallet and chisels, a
+ * bell fallen from its frame, a rack of rolled charts (the crossings' maps), or broken window tracery
+ * with its lead; by the door a box of unlit candles, a censer on its chain, a stack of hymnals, or
+ * a fallen pinnacle stone. Stone, bronze and parchment only: no glowing glass on the floor.
+ */
+function cathedralLeftBehind(bag: Bag, kind: number) {
+  const [cx, cz] = [2.85, -1.5];
+  if (kind === 0) {
+    // A block of sandstone, half dressed, on two timbers; a mallet and two chisels; chips round it.
+    for (const dz of [-0.35, 0.35]) addTo(bag, "DarkWood", box([0.9, 0.12, 0.14], [cx, 0.06, cz + dz], [0, 0.2, 0]));
+    addTo(bag, "Sandstone", box([0.8, 0.55, 0.65], [cx, 0.4, cz], [0, 0.2, 0]));
+    addTo(bag, "Highlights", box([0.5, 0.18, 0.4], [cx - 0.05, 0.76, cz + 0.05], [0, 0.35, 0]));
+    addTo(bag, "DarkWood", rod([cx - 0.75, 0.05, cz + 0.55], [cx - 0.45, 0.05, cz + 0.85], 0.025, 6));
+    addTo(bag, "DarkWood", box([0.14, 0.12, 0.2], [cx - 0.78, 0.06, cz + 0.5], [0, -0.8, 0]));
+    for (const [dx, dz, a] of [
+      [-0.6, 0.15, 0.4],
+      [-0.55, 0.3, 0.9],
+    ] as const)
+      addTo(
+        bag,
+        "Iron",
+        rod([cx + dx, 0.015, cz + dz], [cx + dx + Math.cos(a) * 0.22, 0.015, cz + dz + Math.sin(a) * 0.22], 0.012, 5),
+      );
+    for (let i = 0; i < 6; i++) {
+      const a = i * 1.9;
+      addTo(
+        bag,
+        "Sandstone",
+        box([0.07, 0.04, 0.06], [cx + Math.cos(a) * 0.62, 0.02, cz + Math.sin(a) * 0.5], [0, a, 0]),
+      );
+    }
+  } else if (kind === 1) {
+    // A bell fallen from its frame, lying on its side; the broken timber yoke beside it.
+    const bell = rod([0, 0, 0], [0, 0.7, 0], 0.42, 18, 0.2);
+    addTo(
+      bag,
+      "Bronze",
+      bell
+        .rotateZ(Math.PI / 2 - 0.12)
+        .rotateY(0.6)
+        .translate(cx + 0.1, 0.4, cz),
+    );
+    addTo(
+      bag,
+      "Bronze",
+      ring([0, 0, 0], 0.43, 0.03, "y", 20)
+        .rotateZ(Math.PI / 2 - 0.12)
+        .rotateY(0.6)
+        .translate(cx - 0.18, 0.42, cz - 0.2),
+    );
+    addTo(bag, "DarkWood", box([0.18, 0.18, 1.3], [cx - 0.7, 0.09, cz + 0.4], [0, 0.4, 0]));
+    addTo(bag, "DarkWood", box([0.14, 0.14, 0.6], [cx - 0.5, 0.07, cz - 0.7], [0, -0.9, 0]));
+  } else if (kind === 2) {
+    // A rack of rolled charts (the crossings' maps), one unrolled on the floor under two stones.
+    for (const dx of [-0.35, 0.35]) addTo(bag, "DarkWood", box([0.06, 1.1, 0.5], [cx + dx, 0.55, cz - 0.6]));
+    for (const y of [0.35, 0.7, 1.05]) addTo(bag, "DarkWood", box([0.76, 0.04, 0.5], [cx, y, cz - 0.6]));
+    for (const [y, n] of [
+      [0.42, 4],
+      [0.77, 3],
+    ] as const)
+      for (let i = 0; i < n; i++)
+        addTo(
+          bag,
+          "Parchment",
+          rod([cx - 0.28 + i * 0.16, y, cz - 0.82], [cx - 0.28 + i * 0.16, y, cz - 0.38], 0.05, 8),
+        );
+    addTo(bag, "Parchment", box([0.7, 0.008, 0.5], [cx - 0.35, 0.006, cz + 0.55], [0, 0.25, 0]));
+    for (const [dx, dz] of [
+      [-0.65, 0.4],
+      [-0.05, 0.7],
+    ] as const)
+      addTo(bag, "Sandstone", box([0.12, 0.08, 0.1], [cx + dx, 0.05, cz + dz], [0, dx * 3, 0]));
+  } else {
+    // Broken window tracery fallen in from a window, its lead came twisted beside it.
+    const arc = (r: number, a0: number, a1: number, at: V3, turn: number) => {
+      const out: BufferGeometry[] = [];
+      for (let k = 0; k < 6; k++) {
+        const t0 = a0 + ((a1 - a0) * k) / 6;
+        const t1 = a0 + ((a1 - a0) * (k + 1)) / 6;
+        out.push(rod([Math.cos(t0) * r, 0.05, Math.sin(t0) * r], [Math.cos(t1) * r, 0.05, Math.sin(t1) * r], 0.05, 6));
+      }
+      for (const g of out) g.rotateY(turn).translate(...at);
+      return out;
+    };
+    addTo(bag, "Highlights", ...arc(0.45, 0, Math.PI, [cx, 0, cz], 0.4));
+    addTo(bag, "Highlights", ...arc(0.3, 0.3, Math.PI * 0.9, [cx - 0.5, 0, cz + 0.6], 1.9));
+    addTo(bag, "Highlights", box([0.12, 0.1, 0.7], [cx + 0.3, 0.05, cz + 0.5], [0, 0.7, 0]));
+    for (let i = 0; i < 4; i++)
+      addTo(bag, "Lead", box([0.5, 0.015, 0.015], [cx - 0.6, 0.01, cz - 0.3 - i * 0.12], [0, i * 0.4, 0]));
+  }
+}
+
+function cathedralByTheDoor(bag: Bag, kind: number) {
+  const [x, z] = [1.65, -3.4];
+  if (kind === 0) {
+    // A box of unlit candles.
+    addTo(bag, "DarkWood", box([0.55, 0.2, 0.35], [x, 0.1, z], [0, 0.2, 0]));
+    for (let i = 0; i < 6; i++)
+      addTo(
+        bag,
+        "Candle",
+        rod(
+          [x - 0.2 + (i % 3) * 0.2, 0.2, z - 0.08 + Math.floor(i / 3) * 0.16],
+          [x - 0.2 + (i % 3) * 0.2, 0.24, z - 0.08 + Math.floor(i / 3) * 0.16],
+          0.035,
+          8,
+        ),
+      );
+  } else if (kind === 1) {
+    // A censer on its chain, lying where it was set down.
+    addTo(bag, "Bronze", ball([x, 0.12, z + 0.1], 0.12, 12));
+    addTo(bag, "Bronze", rod([x, 0.2, z + 0.1], [x, 0.3, z + 0.1], 0.06, 10, 0.02));
+    for (let i = 0; i < 6; i++)
+      addTo(bag, "Iron", ball([x - 0.1 - i * 0.07, 0.015, z + 0.15 + Math.sin(i) * 0.05], 0.02, 5));
+  } else if (kind === 2) {
+    // A stack of hymnals.
+    for (let i = 0; i < 4; i++)
+      addTo(
+        bag,
+        i % 2 ? "DarkWood" : "Parchment",
+        box([0.4 - i * 0.04, 0.09, 0.3], [x, 0.045 + i * 0.09, z], [0, i * 0.3, 0]),
+      );
+  } else {
+    // A pinnacle stone fallen from the parapet.
+    addTo(bag, "Sandstone", box([0.35, 0.35, 0.35], [x, 0.175, z], [0, 0.5, 0]));
+    addTo(bag, "Highlights", rod([x, 0.35, z], [x, 0.85, z], 0.2, 4, 0.01).rotateY(0.5));
+  }
+}
+
 export function HouseTraits({ device, region }: { device: string; region: RegionId }) {
   const h = hash(device);
   const rug = RUGS[h % RUGS.length] as string;
@@ -307,6 +438,9 @@ export function HouseTraits({ device, region }: { device: string; region: Region
     } else if (region === 3) {
       townLeftBehind(bag, (h >>> 4) % 4);
       townByTheDoor(bag, (h >>> 12) % 4);
+    } else if (region === 4) {
+      cathedralLeftBehind(bag, (h >>> 4) % 4);
+      cathedralByTheDoor(bag, (h >>> 12) % 4);
     } else {
       leftBehind(bag, WOOD[region], (h >>> 4) % 4);
       byTheDoor(bag, WOOD[region], (h >>> 12) % 4);
@@ -318,11 +452,11 @@ export function HouseTraits({ device, region }: { device: string; region: Region
   }, [h, region]);
   // The rug, turned a little differently in each house. Not in the Sorting Works: its rooms are
   // machinery, told apart by what machines were left behind (owner, 2026-10-25; 0083). Not in the
-  // Lantern Town either: nobody lives in its houses now (0052; 0084).
+  // Lantern Town either: nobody lives in its houses now (0052; 0084), nor the Cathedral's chapels (0086).
   const turn = (((h >>> 8) % 7) - 3) * 0.06;
   return (
     <>
-      {region !== 2 && region !== 3 && (
+      {region === 1 && (
         <>
           <mesh position={[0.4, 0.06, 1.3]} rotation={[-Math.PI / 2, 0, turn]}>
             <planeGeometry args={[2.2, 1.4]} />

@@ -10,6 +10,7 @@ import {
   positionWorld,
   sin,
   smoothstep,
+  step,
   time,
   vec3,
 } from "three/tsl";
@@ -42,6 +43,7 @@ type Swatch = {
   verdigris?: boolean; // old brass: green-grey patina in patches
   sway?: number; // plants: how far the top bends in a full gust, in metres per metre of height
   patchy?: string; // moss and ivy: broken into patches, the stone (this swatch) showing between them
+  coursed?: [number, number]; // stone laid in courses on walls: [course height, block length] in metres
 };
 
 const PATINA_RUINED = "#43564f";
@@ -127,6 +129,9 @@ const REGION_4: Record<string, Swatch> = {
   Stone: { ruined: "#5e6066", restored: "#c6aa84", roughness: 0.95, aged: true },
   Highlights: { ruined: "#64666c", restored: "#cdb38e", roughness: 0.95, aged: true },
   Sandstone: { ruined: "#5c5e64", restored: "#C2A57E", roughness: 0.95, aged: true },
+  // Code-made walls beside the kit's (the crossing halls' doorway bays): laid in the same courses as
+  // the kit's trim sheet, as dark as its stone reads, so a doorway bay is wall, not a flat panel.
+  Ashlar: { ruined: "#505257", restored: "#8f7b60", roughness: 0.95, aged: true, coursed: [0.2, 0.42] },
   Leaf_Texture: { ruined: "#505259", restored: "#b69a74", roughness: 0.95, aged: true },
   Green: { ruined: "#505259", restored: "#b69a74", roughness: 0.95, aged: true },
   Earth: { ruined: "#1f2128", restored: "#2e261e", roughness: 1, aged: true },
@@ -135,6 +140,8 @@ const REGION_4: Record<string, Swatch> = {
   GlassRuby: { ruined: "#2a2024", restored: "#A3263A", glow: 1.0, ember: 0.05 },
   GlassSapphire: { ruined: "#1e2230", restored: "#2C5DA8", glow: 1.1, ember: 0.05 },
   GlassGold: { ruined: "#2e2a20", restored: "#E0B040", glow: 0.6, ember: 0.05 },
+  // Old bell metal (the chapels' fallen bell and censer): mostly matte, so it reads without reflections.
+  Bronze: { ruined: "#4d463b", restored: "#9a7646", roughness: 0.55, metalness: 0.15, verdigris: true },
   Lead: { ruined: "#1a1b1e", restored: "#2a2622", roughness: 0.6, metalness: 0.5 },
   Void: { ruined: "#030304", restored: "#030304", roughness: 1 },
 };
@@ -184,6 +191,23 @@ function nodeMaterial(swatch: Swatch, region: RegionId, baked = false, lightmaps
     const low = float(1).sub(smoothstep(0.2, 1.4, positionWorld.y));
     const moss = patches.mul(upward.add(low).clamp(0, 1)).mul(0.85 * look.moss.amount);
     tint = mix(tint, mossColour, moss);
+  }
+  if (swatch.coursed) {
+    // Courses and staggered joints on a wall's face (its plane read from the normal: a back wall
+    // along x, a left wall along z), each block a shade of its own; mortar lines darker.
+    const [h, w] = swatch.coursed;
+    const sideways = step(normalWorld.z.abs(), normalWorld.x.abs());
+    const along = mix(positionWorld.x, positionWorld.z, sideways);
+    const row = positionWorld.y.div(h);
+    const col = along.div(w).add(row.floor().mul(0.5));
+    const joint = smoothstep(0.0, 0.06, row.fract())
+      .mul(smoothstep(1.0, 0.94, row.fract()))
+      .mul(smoothstep(0.0, 0.03, col.fract()))
+      .mul(smoothstep(1.0, 0.97, col.fract()));
+    const shade = mx_noise_float(vec3(col.floor().mul(1.7), row.floor().mul(2.3), 0.5))
+      .mul(0.16)
+      .add(0.97);
+    tint = tint.mul(mix(float(0.55), shade, joint));
   }
   if (swatch.patchy) {
     // Moss and ivy in patches: soft-edged clumps with the stone showing between, and a fine mottle

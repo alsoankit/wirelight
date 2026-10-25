@@ -37,10 +37,11 @@ import { ruin, ruinHere } from "../ruin";
 // - A little incense haze: a few soft, faint sheets of warm air hung through the room, drifting
 //   slowly, there only as the room restores. One draw call; background only (moonbeam tiers).
 // - Stained glass: the kit's windows glow a plain warm white through their leading (the emission
-//   atlas); panes laid over them (regions/cathedral.ts) multiply that light into jewel tones (ruby
-//   low, sapphire, a gold head; a rose of ruby and sapphire petals round a gold eye), so the kit's
-//   tracery and lattice stay dark and sharp over the colour. Dark glass in ruin stays dark, only
-//   tinted. Kept away from cyan: the blue leans to sapphire. One draw call, every tier.
+//   atlas); panes laid over them (regions/cathedral.ts) multiply that light into jewel tones (a
+//   lancet: a ruby border round a sapphire field of gold-ringed medallions under a gold head, never
+//   flag-like bands; a rose of ruby and sapphire petals round a gold eye), so the kit's tracery and
+//   lattice stay dark and sharp over the colour. In ruin the glass is dull grey with only a trace of
+//   its colour. Kept away from cyan: the blue leans to sapphire. One draw call, every tier.
 
 /** Multiply factors, against the warm window glow (#FFC46B): what reaches the eye is jewel-toned. */
 const RUBY = vec3(0.95, 0.07, 0.14);
@@ -63,8 +64,21 @@ function StainedGlass({ geometry }: { geometry: BufferGeometry }) {
     const pane = attribute("pane", "vec3");
     const u = pane.x;
     const v = pane.y;
-    // A lancet: ruby low, sapphire through the middle, gold in the head; a little mottling in each.
-    const lancet = select(v.lessThan(0.26), RUBY, select(v.lessThan(0.66), SAPPHIRE, GOLD));
+    // A lancet is leaded like a real one, not striped like a flag: a narrow ruby border, a sapphire
+    // field with gold-ringed medallions stacked up it (ruby and gold hearts by turns), and a gold
+    // head where the kit's tracery is. A tall window (z = 2) has three medallions, a lancet two.
+    const tall = pane.z.greaterThan(1.5);
+    const head = select(tall, float(0.8), float(0.74));
+    const count = select(tall, float(3), float(2));
+    const aspect = select(tall, float(3.2), float(2.36));
+    const field = v.div(head).mul(count);
+    const slot = field.floor();
+    const centre = slot.add(0.5).div(count).mul(head);
+    const d = vec2(u.sub(0.5), v.sub(centre).mul(aspect)).length();
+    const heart = select(slot.mod(2).lessThan(0.5), RUBY, GOLD);
+    const medallion = select(d.lessThan(0.22), heart, select(d.lessThan(0.31), GOLD, SAPPHIRE));
+    const border = u.lessThan(0.11).or(u.greaterThan(0.89));
+    const lancet = select(v.greaterThan(head), GOLD, select(border, RUBY, medallion));
     // A rose: a gold eye, eight petals in ruby and sapphire by turns, a gold rim.
     const centred = vec2(u, v).sub(0.5).mul(2);
     const r = centred.length();
@@ -75,10 +89,11 @@ function StainedGlass({ geometry }: { geometry: BufferGeometry }) {
         .fract(),
     );
     const rose = select(r.lessThan(0.26).or(r.greaterThan(0.86)), GOLD, mix(RUBY, SAPPHIRE, petal));
-    const tone = select(pane.z.greaterThan(0.5), rose, lancet);
+    const tone = select(pane.z.greaterThan(0.5).and(pane.z.lessThan(1.5)), rose, lancet);
     const mottle = mx_noise_float(positionWorld.mul(5.5)).mul(0.12).add(0.94);
-    // In ruin the glass is dull and dark: the colours sink toward a dim grey of themselves.
-    const dull = tone.mul(0.4).add(0.12);
+    // In ruin the glass is dull and dark: grey, with only a memory of its colour.
+    const grey = tone.dot(vec3(0.2126, 0.7152, 0.0722));
+    const dull = vec3(grey, grey, grey).mul(0.3).add(tone.mul(0.08)).add(0.1);
     m.colorNode = mix(tone.mul(mottle), dull, ruinHere).min(1);
     return m;
   }, []);
