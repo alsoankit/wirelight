@@ -96,7 +96,7 @@ export function kitMaterial(kit: string, original: Material, options: KitMateria
   const sky = new Color(look.sky.ruined);
   const skyLum = 0.2126 * sky.r + 0.7152 * sky.g + 0.0722 * sky.b;
   const hue = new Color(sky.r / skyLum, sky.g / skyLum, sky.b / skyLum).lerp(new Color(1, 1, 1), 0.3);
-  const ruined = mix(base, vec3(lum, lum, lum).mul(color(hue)), 0.72).mul(0.8);
+  const ruined = mix(base, vec3(lum, lum, lum).mul(color(hue)), look.kitRuinGrey ?? 0.72).mul(0.8);
   const warmth = look.kitRestored ? new Color(look.kitRestored) : new Color(1.06, 1.0, 0.9);
   const restored = base.mul(vec3(warmth.r, warmth.g, warmth.b));
   let tint = mix(restored, ruined, ruinHere);
@@ -145,7 +145,10 @@ export function kitMaterial(kit: string, original: Material, options: KitMateria
   }
 
   if (glow) {
-    const lit = float(1).sub(ruinHere).mul(GLOW_STRENGTH).add(GLOW_EMBER);
+    const lit = float(1)
+      .sub(ruinHere)
+      .mul(look.kitGlow ?? GLOW_STRENGTH)
+      .add(GLOW_EMBER);
     const emissiveMap = shared(maps.emissive, source.emissiveMap);
     const warmColour = new Color(GLOW_WARM);
     const warm = vec3(warmColour.r, warmColour.g, warmColour.b);

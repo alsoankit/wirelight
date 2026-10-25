@@ -26,6 +26,7 @@ import { HALL_PIECES } from "../world/hall/layout";
 import { HOUSE_PIECES } from "../world/house/layout";
 import { pieceUrl } from "../world/kit/Piece";
 import { OBSERVATORY } from "../world/observatory/layout";
+import { Declutter } from "../world/room/Declutter";
 import { World } from "../world/room/World";
 import { Gift } from "./Gift";
 import { Glass } from "./Glass";
@@ -176,6 +177,8 @@ const WorldCanvas = memo(function WorldCanvas({
       {/* Steps down when frames stay slow and back up when they recover (agent C: render/AutoQuality). */}
       <AutoQuality auto={auto} setTier={setTier} ceiling={backend === "webgpu" ? "high" : "medium"} />
       <EngineDriver />
+      {/* Door plates step aside from the labels they would cover (7.B's eight doors). */}
+      <Declutter />
       <AfterFirstFrame>
         <World arriving={arriving} />
       </AfterFirstFrame>

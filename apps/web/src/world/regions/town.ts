@@ -167,7 +167,8 @@ function stream(seed: number) {
  * open or (`closed`) shut. The gable and roof are drawn at `roof` × the house's scale (0.78 keeps a
  * 2 m front's gable inside its own width, so neighbours' roofs meet in a valley, never overlap), and
  * `lift` brings them forward a hair so two neighbours never share a plane. `short` uses the short
- * 2 m roof (the far town: only its front shows).
+ * 2 m roof (the far town: only its front shows). `y` stands the house a little up the hill; a
+ * `chimney` rises from the roof's slope, to one side of the ridge.
  */
 function houseFront(
   out: KitPlacement[],
@@ -181,20 +182,32 @@ function houseFront(
     lift = 0,
     closed = false,
     short = false,
-  }: { behind?: number; scale?: number; roof?: number; lift?: number; closed?: boolean; short?: boolean } = {},
+    y = 0,
+    chimney = 0,
+  }: {
+    behind?: number;
+    scale?: number;
+    roof?: number;
+    lift?: number;
+    closed?: boolean;
+    short?: boolean;
+    y?: number;
+    /** −1 or 1: a chimney on that side of the ridge (0: none). */
+    chimney?: number;
+  } = {},
 ) {
   const s = scale;
   const at = -behind - FACE * s;
   const sized = (k: number) => (Math.abs(k - 1) < 1e-6 ? undefined : k);
-  out.push(onWallKit(wall, face, along, { out: at, scale: sized(s) }));
+  out.push(onWallKit(wall, face, along, { out: at, y, scale: sized(s) }));
   const kind = /Window_Wide/.test(face) ? "Wide" : /Window_Thin/.test(face) ? "Thin" : null;
   if (kind) {
-    if (!closed) out.push(onWallKit(wall, `Window_${kind}_Round1`, along, { out: at, scale: sized(s), glow: true }));
+    if (!closed) out.push(onWallKit(wall, `Window_${kind}_Round1`, along, { out: at, y, scale: sized(s), glow: true }));
     const shutters = `WindowShutters_${kind}_Round_${closed ? "Closed" : "Open"}`;
-    out.push(onWallKit(wall, shutters, along, { out: at, scale: sized(s) }));
+    out.push(onWallKit(wall, shutters, along, { out: at, y, scale: sized(s) }));
   }
   const r = s * roof;
-  const top = STOREY * s;
+  const top = y + STOREY * s;
   out.push(onWallKit(wall, "Roof_Front_Brick2", along, { out: at + lift * s + 0.05 * s, y: top, scale: sized(r) }));
   if (short)
     out.push(
@@ -207,30 +220,55 @@ function houseFront(
     );
   else
     out.push(onWallKit(wall, "Roof_2x4_RoundTile", along, { out: at + lift * s - 1.75 * r, y: top, scale: sized(r) }));
+  if (chimney)
+    out.push(
+      onWallKit(wall, "Prop_Chimney2", along + chimney * 0.62 * s, {
+        out: at - (short ? 0.75 : 1.4) * s,
+        y: top - 0.1 * s,
+        scale: s * 0.42,
+      }),
+    );
 }
 
 /**
- * The rest of the town beyond a room's walls: rows of smaller houses (streets), roofs and lit windows
- * showing over the walls. The nearer streets light first as the restoration wave spreads (the
- * region's victory: the town lights up street by street).
+ * The rest of the town beyond a room's walls: two streets of smaller houses, roofs, chimneys and lit
+ * windows showing over the walls, with an alley here and there. The nearer street lights first as
+ * the restoration wave spreads (the region's victory: the town lights up street by street). Two
+ * streets, not three: a third stood so high over the room it read as a wall of gables.
  */
-function farTown(seed: number, start = 1.4, scale = 0.42): KitPlacement[] {
+function farTown(seed: number, start = 2.4, scale = 0.42): KitPlacement[] {
   const random = stream(seed);
   const out: KitPlacement[] = [];
   for (const wall of ["back", "left"] as const) {
-    for (const row of [0, 1, 2]) {
-      // Each street further back stands a little taller (up the hill), so its windows show over the roofs in front.
-      const s = scale * (1 + row * 0.18);
+    for (const row of [0, 1]) {
+      // The far street a little bigger and up the hill, so it shows over the near street's roofs.
+      const s = scale * (1 + row * 0.12);
       const behind = start + row * 2.3;
+      const hill = row * 0.3;
       let k = 0;
-      for (let a = -4.6 + random() * 0.4 + (row % 2) * s; a < 4.6; a += 2 * s + random() * 0.12) {
-        const face = random() < 0.55 ? "Wall_Plaster_Window_Thin_Round" : "Wall_Plaster_Window_Wide_Round";
+      for (let a = -4.6 + random() * 0.4 + row * s; a < 4.6; a += 2 * s + random() * 0.12) {
+        // An alley between two houses now and then.
+        if (k > 0 && random() < 0.16) {
+          a += 0.7 * s;
+          k = 0;
+          continue;
+        }
+        const pick = random();
+        const face =
+          pick < 0.18
+            ? "Wall_UnevenBrick_Window_Wide_Round"
+            : pick < 0.6
+              ? "Wall_Plaster_Window_Thin_Round"
+              : "Wall_Plaster_Window_Wide_Round";
+        const chimney = random();
         houseFront(out, wall, a, face, {
           behind,
           scale: s,
           lift: (k % 2) * 0.05,
-          closed: random() < 0.15,
+          closed: random() < 0.2,
           short: true,
+          y: hill + random() * 0.12,
+          chimney: chimney < 0.2 ? -1 : chimney > 0.8 ? 1 : 0,
         });
         k++;
       }
@@ -243,6 +281,20 @@ function farTown(seed: number, start = 1.4, scale = 0.42): KitPlacement[] {
 // The Observatory (the Knight's lodging in the town) and the other houses: small plaster interiors in
 // the square's own colours, timber framed, with floorboards, lanterns and a window or two.
 
+/** A dark timber frame round a round-headed doorway (the doors read first in every room). */
+function doorFrame(wall: Wall, along: number, behind = 0): KitPlacement {
+  return onWallKit(wall, "DoorFrame_Round_WoodDark", along, { out: -behind - FACE });
+}
+
+/**
+ * A timber beam along the top of both walls: the kit's walls are open on top (they wait for a roof),
+ * which showed as a black slot from the camera.
+ */
+function wallCaps(bag: Bag) {
+  addTo(bag, "Timber", box([8.5, 0.1, 0.5], [0.05, 3.17, -4.19]));
+  addTo(bag, "Timber", box([0.5, 0.1, 8.19], [-4.19, 3.17, 0.155]));
+}
+
 /**
  * A room's two walls from the inside: the back wall with its doorway at x = 0 (between whole pieces,
  * the gaps filled by plain pieces set a hair behind), the left wall plain with a window or two.
@@ -253,6 +305,7 @@ function interiorWalls(windowsBack: number[], windowsLeft: number[]): KitPlaceme
   const plain = (at: number) => (Math.round(at) % 2 === 0 ? "Wall_Plaster_WoodGrid" : "Wall_Plaster_Straight");
   // Back wall: the doorway, plain pieces at either end, fillers between (behind, so their edges hide).
   out.push(wallPiece("back", "Wall_Plaster_Door_Round", 0));
+  out.push(doorFrame("back", 0));
   for (const at of [-3, 3]) {
     out.push(
       wallPiece("back", windowsBack.includes(at) ? "Wall_Plaster_Window_Wide_Round" : "Wall_Plaster_Straight", at),
@@ -275,9 +328,8 @@ function interiorWalls(windowsBack: number[], windowsLeft: number[]): KitPlaceme
 
 const OBSERVATORY_KIT: KitPlacement[] = [
   ...interiorWalls([3], [-1]),
-  // A fallen street sign's crate, a pot by the wall, a broken one, loose bricks (one weighs down the
-  // Knight's letter).
-  prop("Vase_2", -3.3, -2.0, 0.4),
+  // A crate left by the wall, a broken pot, loose bricks (one weighs down the Knight's letter). No
+  // whole pots (0052).
   prop("Vase_Rubble_Medium", 3.0, -3.2, 2.2),
   prop("Prop_Crate", 3.0, -1.9, 0.5, 0.55, VILLAGE),
   prop("Prop_Brick1", 1.9, 2.2, 0.7, undefined, VILLAGE),
@@ -292,6 +344,7 @@ export function townObservatoryPieces(_secondDoor: boolean): Placement[] {
 export function townObservatory(_secondDoor: boolean) {
   const bag: Bag = {};
   const glows: Glow[] = [];
+  wallCaps(bag);
   wallLantern(bag, glows, "back", -2.0, 1.75);
   wallLantern(bag, glows, "left", 0.0, 1.75);
   return {
@@ -304,15 +357,12 @@ export function townObservatory(_secondDoor: boolean) {
 
 export const TOWN_HOUSE_PIECES: Placement[] = [];
 
-const HOUSE_KIT: KitPlacement[] = [
-  ...interiorWalls([-3], [-1, 3]),
-  prop("Vase_2", -3.3, -0.3, 1.1),
-  prop("Vase_Rubble_Medium", 2.6, -3.2, 0.6),
-];
+const HOUSE_KIT: KitPlacement[] = [...interiorWalls([-3], [-1, 3]), prop("Vase_Rubble_Medium", 2.6, -3.2, 0.6)];
 
 export function townHouse() {
   const bag: Bag = {};
   const glows: Glow[] = [];
+  wallCaps(bag);
   wallLantern(bag, glows, "back", 2.4, 1.75);
   wallLantern(bag, glows, "left", 0.0, 1.75, 1.4);
   return {
@@ -344,19 +394,20 @@ export function townSquare(used: { wall: Wall; at: number }[]) {
           ? "Wall_Plaster_Window_Wide_Round"
           : "Wall_Plaster_Window_Thin_Round";
       houseFront(kit, wall, at, face, { lift: (k % 2) * 0.04, closed: !door && k % 4 === 3 });
+      if (door) kit.push(doorFrame(wall, at));
       k++;
     }
   }
-  // A barrel and a crate by the doors, a pot, a broken one.
-  kit.push(prop("Barrel", 2.35, -3.45, 0.4));
-  kit.push(prop("Crate_Wooden", -3.45, 2.1, 0.3));
-  kit.push(prop("Vase_2", -3.45, 3.55, 0.8));
+  // A barrel and a crate by the houses (the street's, not a home's), a broken pot. No whole pots (0052).
+  kit.push(prop("Barrel", 2.45, -3.55, 0.4));
+  kit.push(prop("Crate_Wooden", -3.5, 2.5, 0.3));
   kit.push(prop("Vase_Rubble_Medium", 3.2, 2.9, 1.2));
   // The corner where the two rows of houses meet.
   addTo(bag, "Timber", box([0.45, STOREY + 0.2, 0.45], [-4.15, (STOREY + 0.2) / 2, -4.15]));
-  // Lamp posts at the edges of the square (none in the foreground, where one cut the view in two).
-  lampPost(bag, glows, 3.45, -1.7);
-  lampPost(bag, glows, -2.2, 3.5);
+  // Lamp posts in the square's two open corners, beyond the end doors as the camera sees them (never
+  // in front of a doorway or a board); none in the foreground, where one cut the view in two.
+  lampPost(bag, glows, 3.95, -3.65);
+  lampPost(bag, glows, -3.65, 3.95);
   return { kitPieces: [...kit, ...farTown(23, 3.6, 0.5)], extras: [...cobbles(3301), ...extras(bag)], glows };
 }
 
@@ -379,8 +430,16 @@ export function townCorridor(): CorridorDressing {
     "Wall_Plaster_Window_Wide_Round",
   ];
   [-4, -2, 0, 2, 4].forEach((at, k) => {
-    houseFront(kit, "back", at, faces[k] as string, { lift: (k % 2) * 0.04, closed: k === 3 });
+    houseFront(kit, "back", at, faces[k] as string, {
+      lift: (k % 2) * 0.04,
+      closed: k === 3,
+      chimney: k === 1 ? 1 : 0,
+    });
   });
+  // The lane's one house door is shut (a strapped door in its frame): the way on is the arches at the
+  // ends, never a dark doorway in the middle of the lane.
+  kit.push(doorFrame("back", 0));
+  kit.push(onWallKit("back", "Door_4_Round", -0.53, { out: -0.2 }));
   kit.push(prop("Barrel", -3.2, -3.4, 0.6));
   kit.push(prop("Vase_2", 2.9, -3.45, 1.4));
   wallLantern(bag, glows, "back", -1.0, 1.75);

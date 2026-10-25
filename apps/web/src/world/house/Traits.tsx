@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import type { BufferGeometry } from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { regionMaterial } from "../kit/regionMaterials";
-import { addTo, ball, box, gearGeometry, ring, rod } from "../kit/shapes";
+import { addTo, ball, box, gearGeometry, ring, rod, type V3 } from "../kit/shapes";
 import type { RegionId } from "../region";
 
 // What makes one house's room its own (playtest, Region 4 #24: vesper, lumen, wren and halo looked
@@ -178,6 +178,124 @@ function worksByTheDoor(bag: Bag, kind: number) {
   }
 }
 
+/**
+ * The Lantern Town's version (region-3 brief, 0052): what the townsfolk left is the town's own work,
+ * never a home's furniture: the post's sack and spilled letters, the lamplighter's ladder and spare
+ * lantern frames, crates and a sack, or a fallen shutter and broken roof tiles; by the door a ladder
+ * against the wall, ledgers, an empty lantern frame or a bundle of letters.
+ */
+function lettersAt(bag: Bag, x: number, z: number, n: number, seed: number) {
+  for (let i = 0; i < n; i++) {
+    const a = seed * 1.7 + i * 2.39;
+    const r = 0.18 + ((i * 37 + seed * 11) % 7) * 0.06;
+    addTo(
+      bag,
+      "Parchment",
+      box([0.22, 0.008, 0.13], [x + Math.cos(a) * r, 0.006 + i * 0.002, z + Math.sin(a) * r], [0, a * 1.3, 0]),
+    );
+  }
+}
+
+/** A wooden ladder: two rails and rungs, from `foot` to `top`. */
+function ladder(bag: Bag, foot: V3, top: V3, width = 0.42) {
+  const [fx, fy, fz] = foot;
+  const [tx, ty, tz] = top;
+  const along: V3 = [tx - fx, ty - fy, tz - fz];
+  const length = Math.hypot(...along);
+  // Sideways: horizontal, across the ladder.
+  const side: V3 = [-along[2], 0, along[0]];
+  const sl = Math.hypot(...side) || 1;
+  const w: V3 = [(side[0] / sl) * (width / 2), 0, (side[2] / sl) * (width / 2)];
+  for (const k of [-1, 1])
+    addTo(bag, "Timber", rod([fx + k * w[0], fy, fz + k * w[2]], [tx + k * w[0], ty, tz + k * w[2]], 0.025, 6));
+  const rungs = Math.floor(length / 0.3);
+  for (let i = 1; i < rungs; i++) {
+    const t = i / rungs;
+    const c: V3 = [fx + along[0] * t, fy + along[1] * t, fz + along[2] * t];
+    addTo(bag, "Timber", rod([c[0] - w[0], c[1], c[2] - w[2]], [c[0] + w[0], c[1], c[2] + w[2]], 0.017, 5));
+  }
+}
+
+/** An empty lantern frame (its glass long gone), standing or on its side. */
+function lanternFrame(bag: Bag, at: V3, onSide = false) {
+  const [x, y, z] = at;
+  const h = 0.3;
+  const w = 0.2;
+  const parts: BufferGeometry[] = [];
+  for (const [dx, dz] of [
+    [-w / 2, -w / 2],
+    [w / 2, -w / 2],
+    [-w / 2, w / 2],
+    [w / 2, w / 2],
+  ] as const)
+    parts.push(box([0.025, h, 0.025], [dx, h / 2, dz]));
+  parts.push(box([w + 0.05, 0.03, w + 0.05], [0, 0.015, 0]), box([w + 0.03, 0.025, w + 0.03], [0, h, 0]));
+  parts.push(rod([0, h, 0], [0, h + 0.13, 0], 0.15, 4, 0.02));
+  for (const g of parts) {
+    if (onSide) g.rotateZ(Math.PI / 2).translate(0.03, w / 2 + 0.02, 0);
+    g.rotateY(0.5).translate(x, y, z);
+  }
+  addTo(bag, "Iron", ...parts);
+}
+
+function townLeftBehind(bag: Bag, kind: number) {
+  const [cx, cz] = [2.85, -1.5];
+  if (kind === 0) {
+    // The post's sack, slumped, its letters spilled across the boards.
+    addTo(bag, "Cloth", rod([cx, 0, cz], [cx, 0.42, cz], 0.26, 10, 0.16));
+    addTo(bag, "Cloth", rod([cx, 0.42, cz], [cx + 0.05, 0.55, cz - 0.03], 0.09, 8, 0.05));
+    lettersAt(bag, cx - 0.55, cz + 0.35, 7, 3);
+  } else if (kind === 1) {
+    // The lamplighter's things: a ladder laid along the floor, two spare lantern frames.
+    ladder(bag, [cx + 0.2, 0.03, cz - 1.1], [cx - 0.1, 0.03, cz + 1.1]);
+    lanternFrame(bag, [cx - 0.75, 0, cz - 0.4]);
+    lanternFrame(bag, [cx - 0.55, 0, cz + 0.45], true);
+  } else if (kind === 2) {
+    // Crates and a sack, stacked.
+    addTo(bag, "Timber", box([0.6, 0.6, 0.6], [cx, 0.3, cz - 0.3], [0, 0.3, 0]));
+    addTo(bag, "Timber", box([0.5, 0.5, 0.5], [cx + 0.1, 0.85, cz - 0.25], [0, -0.2, 0]));
+    addTo(bag, "Timber", box([0.55, 0.45, 0.55], [cx - 0.3, 0.225, cz + 0.6], [0, 0.6, 0]));
+    addTo(bag, "Cloth", rod([cx + 0.4, 0, cz + 0.7], [cx + 0.4, 0.5, cz + 0.7], 0.22, 8, 0.12));
+  } else {
+    // A shutter fallen from its window, and broken roof tiles.
+    for (let i = 0; i < 4; i++)
+      addTo(bag, "Timber", box([0.15, 0.04, 1.1], [cx - 0.24 + i * 0.16, 0.03, cz], [0, 0.35, 0]));
+    addTo(bag, "Timber", box([0.66, 0.05, 0.07], [cx, 0.07, cz - 0.3], [0, 0.35, 0]));
+    addTo(bag, "Timber", box([0.66, 0.05, 0.07], [cx + 0.0, 0.07, cz + 0.3], [0, 0.35, 0]));
+    for (const [dx, dz, a] of [
+      [-0.8, 0.6, 0.4],
+      [-0.6, 0.85, 1.9],
+      [-0.95, 0.2, 2.8],
+    ] as const)
+      addTo(
+        bag,
+        "Roof",
+        rod([cx + dx, 0.04, cz + dz], [cx + dx + Math.cos(a) * 0.3, 0.04, cz + dz + Math.sin(a) * 0.3], 0.06, 6),
+      );
+  }
+}
+
+function townByTheDoor(bag: Bag, kind: number) {
+  const [x, z] = [1.65, -3.4];
+  if (kind === 0) ladder(bag, [x + 0.05, 0, z + 0.45], [x - 0.05, 2.3, -3.86]);
+  else if (kind === 1) {
+    // A stack of ledgers.
+    for (let i = 0; i < 4; i++)
+      addTo(
+        bag,
+        i % 2 ? "Cloth" : "Parchment",
+        box([0.5 - i * 0.05, 0.1, 0.36], [x, 0.05 + i * 0.1, z], [0, i * 0.3, 0]),
+      );
+  } else if (kind === 2) lanternFrame(bag, [x, 0, z + 0.1]);
+  else {
+    // A bundle of letters, tied, and a few loose.
+    for (let i = 0; i < 5; i++)
+      addTo(bag, "Parchment", box([0.24, 0.025, 0.15], [x, 0.015 + i * 0.027, z], [0, i * 0.08, 0]));
+    addTo(bag, "Cloth", box([0.03, 0.15, 0.17], [x, 0.07, z]));
+    lettersAt(bag, x - 0.3, z + 0.35, 3, 5);
+  }
+}
+
 export function HouseTraits({ device, region }: { device: string; region: RegionId }) {
   const h = hash(device);
   const rug = RUGS[h % RUGS.length] as string;
@@ -186,6 +304,9 @@ export function HouseTraits({ device, region }: { device: string; region: Region
     if (region === 2) {
       worksLeftBehind(bag, (h >>> 4) % 4);
       worksByTheDoor(bag, (h >>> 12) % 4);
+    } else if (region === 3) {
+      townLeftBehind(bag, (h >>> 4) % 4);
+      townByTheDoor(bag, (h >>> 12) % 4);
     } else {
       leftBehind(bag, WOOD[region], (h >>> 4) % 4);
       byTheDoor(bag, WOOD[region], (h >>> 12) % 4);
@@ -196,11 +317,12 @@ export function HouseTraits({ device, region }: { device: string; region: Region
     });
   }, [h, region]);
   // The rug, turned a little differently in each house. Not in the Sorting Works: its rooms are
-  // machinery, told apart by what machines were left behind (owner, 2026-10-25; 0083).
+  // machinery, told apart by what machines were left behind (owner, 2026-10-25; 0083). Not in the
+  // Lantern Town either: nobody lives in its houses now (0052; 0084).
   const turn = (((h >>> 8) % 7) - 3) * 0.06;
   return (
     <>
-      {region !== 2 && (
+      {region !== 2 && region !== 3 && (
         <>
           <mesh position={[0.4, 0.06, 1.3]} rotation={[-Math.PI / 2, 0, turn]}>
             <planeGeometry args={[2.2, 1.4]} />

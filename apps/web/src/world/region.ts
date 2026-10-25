@@ -39,6 +39,10 @@ export type RegionLook = {
   dust: string;
   /** Multiplies the textured kit pieces' restored colour (kits/kitMaterials.ts); default a gentle warm. */
   kitRestored?: string;
+  /** How far ruin greys the textured kit pieces toward the ruined light (0–1; default 0.72). */
+  kitRuinGrey?: number;
+  /** How brightly glowing kit pieces (windows, lanterns) light when restored (default 1.8). */
+  kitGlow?: number;
 };
 
 export const LOOKS: Record<RegionId, RegionLook> = {

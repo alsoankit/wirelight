@@ -40,12 +40,18 @@ export const TOWN_SWATCHES: Record<string, Swatch> = {
 
 export const TOWN_LOOK: RegionLook = {
   background: "#0b0c12",
-  ambient: { ruined: "#5e6274", restored: "#8a7a70" },
-  sky: { ruined: "#8a90a8", restored: "#9a96a8" },
+  // Night in ruin is a cool grey, not lilac: the kit's own colours (faded terracotta roofs beside grey
+  // plaster, mossy stone) keep showing through it, so the town isn't all one blue.
+  ambient: { ruined: "#60656e", restored: "#8a7a70" },
+  sky: { ruined: "#8d939e", restored: "#9a96a8" },
   ground: { ruined: "#26272c", restored: "#3a3026" },
   fog: { ruined: "#1B1E2A", restored: "#22304A" },
-  moon: { ruined: "#a3aac2", restored: "#9fb0d8", strengthRuined: 1.2, strengthRestored: 0.5 },
+  moon: { ruined: "#a7aebd", restored: "#9fb0d8", strengthRuined: 1.2, strengthRestored: 0.5 },
   moss: { ruined: "#55594F", restored: "#6F8F5E", amount: 0.9 },
   fireflies: "#E8D890",
   dust: "#c4cce0",
+  // Ruin greys the kit's textures less than elsewhere (faded colour, not none), and lit windows and
+  // lanterns glow softer than the default (big arched panes read blown out at 1.8).
+  kitRuinGrey: 0.5,
+  kitGlow: 1.3,
 };

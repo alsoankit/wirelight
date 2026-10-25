@@ -38,6 +38,12 @@ body,
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
+  /* Stepping aside from a label it would cover (world/room/Declutter.tsx). */
+  transition: translate 0.2s ease-out;
+}
+
+:root[data-reduced="yes"] .plate {
+  transition: none;
 }
 
 .plate-light {
