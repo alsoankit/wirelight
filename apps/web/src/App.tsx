@@ -39,7 +39,9 @@ export function App() {
       : landing.explore;
 
   const arrive = useCallback(() => {
-    if (!window.location.pathname.startsWith("/play")) window.history.pushState(null, "", "/play");
+    // Options in the link (?tier=, ?backend=) come along into the game.
+    if (!window.location.pathname.startsWith("/play"))
+      window.history.pushState(null, "", `/play${window.location.search}`);
     setStage("game");
   }, []);
 

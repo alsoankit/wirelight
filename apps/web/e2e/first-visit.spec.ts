@@ -19,7 +19,9 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
 
-  await page.goto("/");
+  // CI has no GPU: software drawing is slow, so it plays on the simplest graphics (the tier the game's
+  // own auto quality would settle on there). The game logic under test is the same on every tier.
+  await page.goto(process.env.CI ? "/?tier=simple" : "/");
   await page
     .getByRole("button", { name: /Explore the dungeon/ })
     .first()
@@ -36,7 +38,7 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
 
   // The Prologue: Send, and the answer comes back.
   await page.locator(".send").click();
-  await expect(page.locator(".debrief")).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".debrief")).toBeVisible({ timeout: 90_000 });
   await page.locator(".debrief .panel-actions button").last().click();
 
   // 1.1: walk to lantern's room and read its plate.
@@ -45,7 +47,7 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
   await page.getByRole("button", { name: /lantern's room/ }).click();
   await tidy(page);
   await page.locator("button.plate").first().click();
-  await expect(page.locator(".debrief")).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".debrief")).toBeVisible({ timeout: 90_000 });
 
   // Back later: the game goes on with the next room, with nothing from the first visit again.
   await page.reload();

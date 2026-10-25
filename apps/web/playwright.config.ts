@@ -7,7 +7,8 @@ const channel = process.env.PW_CHANNEL;
 
 export default defineConfig({
   testDir: "e2e",
-  timeout: 180_000,
+  // Six minutes: CI has no GPU and draws in software (about two minutes on the simplest tier).
+  timeout: 360_000,
   retries: process.env.CI ? 1 : 0,
   use: {
     baseURL: "http://localhost:4173",
