@@ -174,6 +174,11 @@ const SUBTITLES: [RegExp, string][] = [
   [/Time to live exceeded$/, "The message's countdown ran out on the way, and a router sent word back."],
   [/cannot set unicast time-to-live/, "A message's countdown has to start at 1 or more."],
   [/out of range: 0 <= value <= 255$/, "That number has to be between 0 and 255."],
+  // The last line of each of ip's usage texts (`ip help`, `ip link help`, …): a plain word after the wall.
+  [
+    /^ {20}-c\[olor\]\}$|^ {10}xfrm \| virt_wifi \}$|^ {11}permanent \| probe \| reachable \| stale \}$|^ROUTE_GET_FLAG := /,
+    "That's everything ip can do; you'll only need a little of it. For a short guide with examples, type: man ip",
+  ],
 ];
 
 /** What the game-only lab tools say (lab keeper, lab cable). Plain voice; {name} are filled in. */

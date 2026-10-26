@@ -5,6 +5,7 @@
  */
 import { ipToInt, parseCidr, type RouteState, routesInOrder } from "@wirelight/sim";
 import type { CommandContext } from "../types";
+import { usage } from "./iplink";
 import { IP_ROUTE_USAGE } from "./usage";
 
 const matches = (word: string, full: string) => word.length > 0 && full.startsWith(word);
@@ -23,6 +24,7 @@ export function ipRoute(ctx: CommandContext, args: string[]): number {
   }
   if ((matches(cmd, "show") || matches(cmd, "list")) && rest[0] === "cache") return showCache(ctx, rest.slice(1));
   if (matches(cmd, "show") || matches(cmd, "list") || cmd === "lst") return show(ctx, rest);
+  if (matches(cmd, "help")) return usage(ctx, IP_ROUTE_USAGE);
   ctx.err(`Command "${cmd}" is unknown, try "ip route help".`);
   return 255;
 }

@@ -4,7 +4,7 @@
  */
 import type { IfaceState } from "@wirelight/sim";
 import type { CommandContext } from "../types";
-import { IP_LINK_BRIDGE_USAGE } from "./usage";
+import { IP_LINK_BRIDGE_USAGE, IP_LINK_USAGE } from "./usage";
 
 /** iproute2 matches objects and subcommands by prefix, in a fixed order. */
 const matches = (word: string, full: string) => word.length > 0 && full.startsWith(word);
@@ -15,7 +15,14 @@ export function ipLink(ctx: CommandContext, args: string[]): number {
   // Order matters: iproute2 checks "set" before "show", so `ip link s` means set.
   if (matches(cmd, "set")) return linkSet(ctx, rest);
   if (matches(cmd, "show") || matches(cmd, "list") || cmd === "lst") return linkShow(ctx, rest);
+  if (matches(cmd, "help")) return usage(ctx, IP_LINK_USAGE);
   ctx.err(`Command "${cmd}" is unknown, try "ip link help".`);
+  return 255;
+}
+
+/** A usage text, on stderr with iproute2's exit code. */
+export function usage(ctx: CommandContext, lines: readonly string[]): number {
+  for (const line of lines) ctx.err(line);
   return 255;
 }
 

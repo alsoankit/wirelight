@@ -245,6 +245,18 @@ describe("across rooms", () => {
     expect(missing).toEqual([]);
   });
 
+  it("each of ip's usage texts ends with a plain word pointing to man ip", () => {
+    // The last lines of `ip help`, `ip link help` / `ip addr help`, `ip neigh help`, `ip route help`.
+    const lasts = [
+      "                    -c[olor]}",
+      "          xfrm | virt_wifi }",
+      "           permanent | probe | reachable | stale }",
+      "ROUTE_GET_FLAG := [ connected | fibmatch | notify ]",
+    ];
+    for (const line of lasts) expect(shellContent.subtitle(line), line).toMatch(/man ip$/);
+    expect(shellContent.man("ip")).toBeDefined();
+  });
+
   it("voice line ids are unique", () => {
     const ids = rooms.flatMap((r) => {
       const t = text(r);

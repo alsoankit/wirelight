@@ -4,7 +4,8 @@
  */
 import { type AddrState, type IfaceState, lftLeft, parseCidr } from "@wirelight/sim";
 import type { CommandContext } from "../types";
-import { linkHeader } from "./iplink";
+import { linkHeader, usage } from "./iplink";
+import { IP_ADDR_USAGE } from "./usage";
 
 const matches = (word: string, full: string) => word.length > 0 && full.startsWith(word);
 
@@ -15,6 +16,7 @@ export function ipAddr(ctx: CommandContext, args: string[]): number {
   if (matches(cmd, "delete")) return del(ctx, rest);
   if (matches(cmd, "flush")) return flush(ctx, rest);
   if (matches(cmd, "show") || matches(cmd, "list") || cmd === "lst") return show(ctx, rest);
+  if (matches(cmd, "help")) return usage(ctx, IP_ADDR_USAGE);
   ctx.err(`Command "${cmd}" is unknown, try "ip address help".`);
   return 255;
 }

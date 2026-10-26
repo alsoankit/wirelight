@@ -4,7 +4,7 @@
 # Needs no root. Usage: tools/golden/capture-all.sh
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
-for s in bridge ipv4 route sysctl tcpdump redirect stp; do
+for s in bridge ipv4 help route sysctl tcpdump redirect stp; do
   echo "capture-$s.sh"
   "$here/capture-$s.sh"
 done
