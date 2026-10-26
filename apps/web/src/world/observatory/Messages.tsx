@@ -1,7 +1,9 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { type RefObject, useMemo, useRef, useState } from "react";
-import { type Group, type Mesh, type Object3D, Quaternion, Vector3 } from "three";
+import { AdditiveBlending, type Group, type Mesh, type Object3D, Quaternion, Vector3 } from "three";
+import { normalView, vec3 } from "three/tsl";
+import { MeshBasicNodeMaterial } from "three/webgpu";
 import { type Crossing, progress } from "../../engine/clock";
 import { useSession } from "../../engine/store";
 import { type MessageKind, messageKind, messageSummary } from "../messageKind";
@@ -12,8 +14,20 @@ import { VIEW_DIRECTION } from "../RoomCamera";
 // comes the other way. Where it is comes only from its crossing (link.enter → link.exit) and network
 // time, never from a timer of its own. Colours above 1 make them bloom.
 
-// Cyan #5EE0E8 (linear), lifted just past the bloom threshold: it glows but stays cyan, never white.
-const MESSAGE_COLOUR: [number, number, number] = [0.17, 1.12, 1.21];
+// Living light, not a neon signal (0090): a pale cyan (#5EE0E8 mixed toward white, linear, lifted past the
+// bloom threshold) with a soft halo round it and a short fading trail behind it. Still clearly cyan.
+const MESSAGE_COLOUR: [number, number, number] = [0.42, 1.18, 1.24];
+const HALO_COLOUR: [number, number, number] = [0.25, 0.85, 0.9];
+// The trail: a few fading lights where the message just was (fractions of its whole path).
+const TRAIL = [0.022, 0.044, 0.066];
+const TRAIL_FADE = [0.45, 0.25, 0.12];
+
+// The halo fades out toward its rim (strongest where it faces the camera), so it reads as a glow, not
+// a bubble.
+const HALO = new MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: AdditiveBlending });
+HALO.colorNode = vec3(...HALO_COLOUR);
+HALO.opacityNode = normalView.z.max(0).pow(3).mul(0.32);
+HALO.toneMapped = false;
 const POOL = 12; // at most this many on screen at once per cable (a storm fills them)
 
 // What the keeper reacts to, in seconds of the render clock: a message reached it; one left it.
@@ -68,6 +82,8 @@ export function Messages({
   floor = 1,
 }: Props) {
   const meshes = useRef<(Group | null)[]>([]);
+  /** Each slot's trail lights, behind it on its path. */
+  const trails = useRef<(Mesh | null)[][]>([]);
   /** Each slot's four shapes (CORE-15), shown one at a time by the message's kind. */
   const shapes = useRef<Record<MessageKind, Mesh | null>[]>([]);
   /** Each slot's message now, for hovering. */
@@ -100,7 +116,8 @@ export function Messages({
         seen.current.delete(frameId);
       }
 
-    const pulse = 1 + Math.sin(clock.elapsedTime * 9) * 0.12;
+    // A slow breath (under 1 Hz), not a flicker.
+    const pulse = 1 + Math.sin(clock.elapsedTime * 4) * 0.08;
     let newest: Group | null = null;
     meshes.current.forEach((mesh, i) => {
       if (!mesh) return;
@@ -108,6 +125,8 @@ export function Messages({
       mesh.visible = !!c;
       slots.current[i] = c?.frameId ?? null;
       showing.current[i] = c ?? null;
+      const trail = trails.current[i] ?? [];
+      for (const t of trail) if (t) t.visible = !!c;
       if (!c) return;
       const kind = messageKind(c.bytes);
       const parts = shapes.current[i];
@@ -119,6 +138,13 @@ export function Messages({
       // Size grows with the message's real length (CORE-15): a small ARP, a fuller ping.
       const size = 0.8 + Math.min(c.bytes.length / 1500, 1) * 0.8;
       mesh.scale.setScalar(pulse * size * emerge(leaving ? 1 - t : t));
+      trail.forEach((ghost, k) => {
+        if (!ghost) return;
+        const behind = t - (TRAIL[k] ?? 0);
+        ghost.visible = behind > 0;
+        along(leaving ? outward : inward, behind, ghost.position);
+        ghost.scale.setScalar(size * (1 - 0.18 * (k + 1)) * emerge(leaving ? 1 - behind : behind));
+      });
       newest = mesh;
     });
     // Several doorways share one keeper: only clear what it watches if that message has gone.
@@ -176,6 +202,10 @@ export function Messages({
             <boxGeometry args={[0.18, 0.18, 0.18]} />
             <meshBasicMaterial color={MESSAGE_COLOUR} toneMapped={false} />
           </mesh>
+          {/* The soft halo round every kind of message. */}
+          <mesh raycast={() => null} material={HALO}>
+            <sphereGeometry args={[0.28, 20, 12]} />
+          </mesh>
           {hover?.slot === i && (
             <Html center position={[0, 0.45, 0]} zIndexRange={[20, 0]}>
               <div className="message-summary">{hover.text}</div>
@@ -183,6 +213,31 @@ export function Messages({
           )}
         </group>
       ))}
+      {/* Each message's trail: small fading lights where it just was. */}
+      {Array.from({ length: POOL }, (_, i) =>
+        TRAIL.map((_, k) => (
+          <mesh
+            // biome-ignore lint/suspicious/noArrayIndexKey: a fixed pool, reused by slot
+            key={`${i}-${k}`}
+            ref={(m) => {
+              trails.current[i] ??= [];
+              (trails.current[i] as (Mesh | null)[])[k] = m;
+            }}
+            visible={false}
+            raycast={() => null}
+          >
+            <sphereGeometry args={[0.08, 10, 6]} />
+            <meshBasicMaterial
+              color={HALO_COLOUR}
+              transparent
+              opacity={TRAIL_FADE[k] ?? 0}
+              depthWrite={false}
+              blending={AdditiveBlending}
+              toneMapped={false}
+            />
+          </mesh>
+        )),
+      )}
     </>
   );
 }
