@@ -136,6 +136,12 @@ const SETTLE_MS = 800;
  * when the room has settled (no spoken lines or other dialog showing), before the command is needed.
  * CMD-01 is the gift's (Gift.tsx).
  */
+/** The room's events since it was last reset (all of them if it never was). */
+function sinceReset<E extends { kind: string }>(events: readonly E[]): readonly E[] {
+  const last = events.findLastIndex((e) => e.kind === "world.reset");
+  return last < 0 ? events : events.slice(last + 1);
+}
+
 export function RoomCommandMemory() {
   const roomId = useSession((s) => s.roomId);
   const room = roomId ? roomById(roomId) : undefined;
@@ -143,8 +149,10 @@ export function RoomCommandMemory() {
   const won = useSession((s) => s.status?.won ?? false);
   const seen = useProgress((s) => s.memoriesSeen);
   const seeMemory = useProgress((s) => s.seeMemory);
+  // After Reset room it plays again, even the gift's (CMD-01): the room starts over.
+  const again = useSession((s) => s.guidesAgain);
   const id = room?.commandMemory;
-  const due = !!id && id !== "CMD-01" && voiceGiven && !won && !seen.includes(id);
+  const due = !!id && voiceGiven && !won && (again || (id !== "CMD-01" && !seen.includes(id)));
   const [showing, setShowing] = useState<string | null>(null);
   useEffect(() => {
     setShowing(null);
@@ -154,7 +162,7 @@ export function RoomCommandMemory() {
       // Never over a spoken line, a memory or another dialog.
       // Once the player has typed in this room it's too late to come first: it never interrupts typing
       // (it stays in the Menu's command book).
-      if (useSession.getState().events.some((e) => e.kind === "cmd.exec" && e.source === "typed")) {
+      if (sinceReset(useSession.getState().events).some((e) => e.kind === "cmd.exec" && e.source === "typed")) {
         clearInterval(timer);
         return;
       }
@@ -173,6 +181,7 @@ export function RoomCommandMemory() {
       memory={memory}
       onDone={() => {
         seeMemory(showing);
+        useSession.getState().guidesShown();
         setShowing(null);
       }}
     />

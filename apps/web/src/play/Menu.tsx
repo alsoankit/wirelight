@@ -125,7 +125,20 @@ function Codex() {
   const pages = useProgress((s) => s.journalPages);
   const [memory, setMemory] = useState<string | null>(null);
   const words = Object.entries(terms).filter(([, t]) => cleared[t.room]);
-  const learned = rooms.filter((r) => r.commandMemory && cleared[r.id]).map((r) => r.commandMemory as string);
+  const seen = useProgress((s) => s.memoriesSeen);
+  const voiceGiven = useProgress((s) => s.voiceGiven);
+  // Every command memory the player has met: in a room cleared, seen in a room not yet cleared, or the
+  // gift's own (CMD-01, met with the voice).
+  const learned = rooms
+    .map((r) => r.commandMemory)
+    .filter(
+      (id): id is string =>
+        !!id &&
+        (rooms.some((r) => r.commandMemory === id && cleared[r.id]) ||
+          seen.includes(id) ||
+          (id === "CMD-01" && voiceGiven)),
+    )
+    .filter((id, i, all) => all.indexOf(id) === i);
   const shown = memory ? commandMemories[memory] : undefined;
   if (shown) return <CommandMemory memory={shown} onDone={() => setMemory(null)} />;
   return (

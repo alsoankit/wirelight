@@ -44,6 +44,9 @@ type Session = {
   startedAt: number;
   /** Back to the room's faulted start (HELP-03). */
   reset(): Promise<void>;
+  /** Reset was pressed: the room's command memory plays again, as on a first visit (until it's shown). */
+  guidesAgain: boolean;
+  guidesShown(): void;
   /** The console bar is slid up (UI-06): ` or a click toggles it; it opens by itself after the gift. */
   consoleOpen: boolean;
   setConsoleOpen(open: boolean): void;
@@ -260,6 +263,8 @@ export const useSession = create<Session>((set, get) => ({
   corridor: null,
   panel: null,
   startedAt: 0,
+  guidesAgain: false,
+  guidesShown: () => set({ guidesAgain: false }),
   voiceGiven: false,
   consoleOpen: false,
   setConsoleOpen: (consoleOpen) => set({ consoleOpen }),
@@ -305,6 +310,7 @@ export const useSession = create<Session>((set, get) => ({
       arrivals: {},
       capture: null,
       voiceGiven,
+      guidesAgain: false,
       startedAt: performance.now(),
     });
     set((s) => apply(s, batch));
@@ -360,7 +366,7 @@ export const useSession = create<Session>((set, get) => ({
 
   async reset() {
     const batch = await exclusive(() => engine.reset());
-    set((s) => ({ ...apply(s, batch), panel: null }));
+    set((s) => ({ ...apply(s, batch), panel: null, guidesAgain: true }));
   },
   openPanel: (panel) => set({ panel }),
   closePanel: () => set({ panel: null }),
