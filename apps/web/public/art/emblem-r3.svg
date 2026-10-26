@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="600" viewBox="0 0 512 600">
+<!-- Region 3, the lantern folk: a house door with its number, a lantern above it. -->
+<defs><filter id="grain" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="5"/><feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.24  0 0 0 0 0.17  0 0 0 0.16 0"/><feComposite in2="SourceGraphic" operator="in"/></filter><clipPath id="s"><path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z"/></clipPath></defs>
+<path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z" fill="#93452F"/>
+<path d="M176 470 V330 C 176 270 336 270 336 330 V470Z" fill="#4A3628" stroke="#2A211A" stroke-width="7"/>
+<path d="M256 290 V470" stroke="#2A211A" stroke-width="5"/>
+<circle cx="234" cy="390" r="6" fill="#CDBB94"/>
+<g fill="#E3D6B8" stroke="#2A211A" stroke-width="4"><circle cx="216" cy="250" r="12"/><circle cx="256" cy="250" r="12"/><circle cx="296" cy="250" r="12"/></g>
+<path d="M256 76 V108" stroke="#2A211A" stroke-width="6"/>
+<path d="M226 120 H286 L276 108 H236Z" fill="#3C3330" stroke="#2A211A" stroke-width="5"/>
+<path d="M232 120 H280 L274 196 H238Z" fill="#D9A640" stroke="#2A211A" stroke-width="6"/>
+<path d="M240 196 H272 L264 210 H248Z" fill="#3C3330" stroke="#2A211A" stroke-width="5"/>
+<rect width="512" height="600" fill="#fff" filter="url(#grain)" clip-path="url(#s)"/><path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z" fill="none" stroke="#2A211A" stroke-width="14"/><path d="M44 44 H468 V250 C468 405 370 498 256 556 C142 498 44 405 44 250 Z" fill="none" stroke="#E3D6B8" stroke-opacity="0.55" stroke-width="5"/></svg>

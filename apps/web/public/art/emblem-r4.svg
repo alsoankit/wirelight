@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="600" viewBox="0 0 512 600">
+<!-- Region 4, the cathedral builders: a winged arch, and a road of light crossing through it. -->
+<defs><filter id="grain" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="5"/><feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.24  0 0 0 0 0.17  0 0 0 0.16 0"/><feComposite in2="SourceGraphic" operator="in"/></filter><clipPath id="s"><path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z"/></clipPath></defs>
+<path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z" fill="#2F3656"/>
+<g fill="#E3D6B8" stroke="#2A211A" stroke-width="6">
+  <path d="M196 300 C 150 250 96 250 60 214 C 92 270 92 300 120 322 C 100 330 84 330 70 326 C 110 360 160 356 196 340Z"/>
+  <path d="M316 300 C 362 250 416 250 452 214 C 420 270 420 300 392 322 C 412 330 428 330 442 326 C 402 360 352 356 316 340Z"/>
+</g>
+<path d="M196 470 V290 C 196 220 256 170 256 170 C 256 170 316 220 316 290 V470Z" fill="#E3D6B8" stroke="#2A211A" stroke-width="7"/>
+<path d="M222 470 V300 C 222 250 256 214 256 214 C 256 214 290 250 290 300 V470Z" fill="#2F3656" stroke="#2A211A" stroke-width="5"/>
+<path d="M96 430 C 200 390 312 390 416 430" fill="none" stroke="#D9A640" stroke-width="12" stroke-linecap="round"/>
+<rect width="512" height="600" fill="#fff" filter="url(#grain)" clip-path="url(#s)"/><path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z" fill="none" stroke="#2A211A" stroke-width="14"/><path d="M44 44 H468 V250 C468 405 370 498 256 556 C142 498 44 405 44 250 Z" fill="none" stroke="#E3D6B8" stroke-opacity="0.55" stroke-width="5"/></svg>

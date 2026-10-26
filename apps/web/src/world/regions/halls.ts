@@ -203,16 +203,22 @@ function observatoryRoots(secondDoor: boolean): BufferGeometry[] {
       strands: 2,
       seed: 15,
     },
-    // Over the broken top of the left wall's middle, hanging (above the routes board).
+    // Over the broken top of the left wall's middle, then trained round the top of the weavers'
+    // emblem (0091) and down its far side, clear of the rune below it.
     {
       path: [
         [-4.45, 3.3, -1.2],
         [-3.86, 3.2, -1.25],
-        [-3.82, 2.8, -1.3],
-        [-3.84, 2.4, -1.34],
+        [-3.84, 2.85, -1.32],
+        [-3.87, 2.72, -1.72],
+        [-3.87, 2.76, -2.22],
+        [-3.87, 2.6, -2.66],
+        [-3.87, 2.1, -2.74],
+        [-3.87, 1.55, -2.7],
       ],
-      radius: 0.085,
+      radius: 0.075,
       strands: 2,
+      rootlets: 2,
       seed: 16,
     },
   ];

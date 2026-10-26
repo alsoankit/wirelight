@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="600" viewBox="0 0 512 600">
+<!-- The Knight's shield: a star of light rising over a line (the wire he came to relight). -->
+<defs><filter id="grain" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="5"/><feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.24  0 0 0 0 0.17  0 0 0 0.16 0"/><feComposite in2="SourceGraphic" operator="in"/></filter><clipPath id="s"><path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z"/></clipPath></defs>
+<path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z" fill="#3B4150"/>
+<path d="M24 250 H488" stroke="#E3D6B8" stroke-width="0"/>
+<path d="M60 400 H452" stroke="#CDBB94" stroke-width="14" stroke-linecap="round"/>
+<path d="M256 120 L276 236 L392 256 L276 276 L256 392 L236 276 L120 256 L236 236Z" fill="#D9A640" stroke="#2A211A" stroke-width="6"/>
+<path d="M256 186 L266 246 L326 256 L266 266 L256 326 L246 266 L186 256 L246 246Z" fill="#F0CF78"/>
+<rect width="512" height="600" fill="#fff" filter="url(#grain)" clip-path="url(#s)"/><path d="M24 24 H488 V250 C488 420 380 520 256 580 C132 520 24 420 24 250 Z" fill="none" stroke="#2A211A" stroke-width="14"/><path d="M44 44 H468 V250 C468 405 370 498 256 556 C142 498 44 405 44 250 Z" fill="none" stroke="#E3D6B8" stroke-opacity="0.55" stroke-width="5"/></svg>

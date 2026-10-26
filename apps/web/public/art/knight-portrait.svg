@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768">
+  <!-- The Knight, painted on the wall of his base: helmeted (no face), cloaked, his lantern held up.
+       An arched panel; gold (#D9A640) is the lantern's light, which relights when the room is restored. -->
+  <defs>
+    <filter id="grain" x="0" y="0" width="1" height="1">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9"/>
+      <feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.24  0 0 0 0 0.17  0 0 0 0.16 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+    </filter>
+    <clipPath id="a"><path d="M24 744 V256 C24 120 132 24 256 24 C380 24 488 120 488 256 V744Z"/></clipPath>
+    <radialGradient id="glow" r="0.5">
+      <stop offset="0" stop-color="#D9A640" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#D9A640" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g clip-path="url(#a)">
+    <rect width="512" height="768" fill="#2F3348"/>
+    <g fill="#CDBB94">
+      <circle cx="104" cy="200" r="4"/><circle cx="400" cy="150" r="5"/><circle cx="420" cy="300" r="3"/>
+      <circle cx="80" cy="360" r="3"/><circle cx="170" cy="110" r="3"/>
+    </g>
+    <!-- Cloak and shoulders -->
+    <path d="M60 768 C 70 600 130 500 256 492 C 382 500 442 600 452 768Z" fill="#6B2E2A" stroke="#2A211A" stroke-width="8"/>
+    <path d="M150 768 C 160 640 200 560 256 556 C 312 560 352 640 362 768Z" fill="#8E9096" stroke="#2A211A" stroke-width="6"/>
+    <path d="M256 556 V768" stroke="#2A211A" stroke-width="4"/>
+    <!-- The great helm: a tall rounded helmet, a cross-shaped visor slit, a plume -->
+    <path d="M176 500 V300 C 176 230 336 230 336 300 V500 C 300 520 212 520 176 500Z" fill="#A7A9AE" stroke="#2A211A" stroke-width="8"/>
+    <path d="M190 360 H322" stroke="#2A211A" stroke-width="14" stroke-linecap="round"/>
+    <path d="M256 360 V450" stroke="#2A211A" stroke-width="10" stroke-linecap="round"/>
+    <g fill="#2A211A"><circle cx="230" cy="420" r="5"/><circle cx="282" cy="420" r="5"/><circle cx="230" cy="444" r="5"/><circle cx="282" cy="444" r="5"/></g>
+    <path d="M256 250 C 250 180 300 140 360 150 C 320 170 300 200 290 252Z" fill="#93452F" stroke="#2A211A" stroke-width="6"/>
+    <!-- The lantern, held up in his gauntlet -->
+    <circle cx="372" cy="560" r="90" fill="url(#glow)"/>
+    <path d="M372 470 V500" stroke="#2A211A" stroke-width="6"/>
+    <path d="M344 512 H400 L392 500 H352Z" fill="#3C3330" stroke="#2A211A" stroke-width="5"/>
+    <path d="M350 512 H394 L388 590 H356Z" fill="#D9A640" stroke="#2A211A" stroke-width="6"/>
+    <path d="M358 590 H386 L378 604 H366Z" fill="#3C3330" stroke="#2A211A" stroke-width="5"/>
+    <path d="M330 640 C 340 610 360 600 372 604 C 384 608 392 630 380 660 C 360 676 336 670 330 640Z" fill="#8E9096" stroke="#2A211A" stroke-width="6"/>
+    <rect width="512" height="768" fill="#fff" filter="url(#grain)"/>
+  </g>
+  <path d="M24 744 V256 C24 120 132 24 256 24 C380 24 488 120 488 256 V744Z" fill="none" stroke="#2A211A" stroke-width="14"/>
+  <path d="M44 726 V258 C44 136 140 44 256 44 C372 44 468 136 468 258 V726Z" fill="none" stroke="#CDBB94" stroke-opacity="0.6" stroke-width="5"/>
+</svg>

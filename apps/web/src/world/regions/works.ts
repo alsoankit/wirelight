@@ -379,7 +379,7 @@ function rotated(g: BufferGeometry, at: V3, euler: V3): BufferGeometry {
 //
 // Gameplay keeps the middle: the keeper in front of the door, the workbench front left, the address
 // card right of the door, the Glass front right. The great gear train is on the back wall left of the
-// door; the card index right of it; a riveted hatch and a smaller train on the left wall.
+// door; the card index right of it; the sorters' emblem and a smaller train on the left wall.
 
 /** The Ruins kit pieces the Observatory keeps here: only the brick on the Knight's letter. */
 export function worksObservatoryPieces(_secondDoor: boolean): Placement[] {
@@ -426,11 +426,11 @@ export function worksObservatory(secondDoor: boolean) {
   vent(bag, steam, [-3.72, 1.75, -0.35], [-3.5, 1.75, -0.35]);
   gauge(bag, "left", -1.0, 2.35, 0.24, 0.13);
   gauge(bag, "back", 3.55, 2.4, 0.12, 0.11);
-  hatch(bag, "left", -2.1, 1.55, 0.38);
+  // The left wall's middle carries the sorters' emblem (0091) and, nearer the front, the Knight's corner.
   // A smaller train over the workbench, where the left wall has room.
   gearTrain(bag, gears, "left", 1.5, 2.05, { size: 0.62, a1: 2.3, a2: 2.6 });
   lamp(bag, glows, "back", -3.25, 2.5, 3.0);
-  lamp(bag, glows, "left", 0.3, 2.15, 3.2);
+  lamp(bag, glows, "left", 0.95, 2.15, 3.2);
   // A great gear fallen from a train, leaning against the card index.
   addTo(bag, "Brass", rotated(gearGeometry(0.42, 12, 0.07, 5), [1.95, 0.42, -3.45], [-0.25, 0.4, 0.2]));
   return {
