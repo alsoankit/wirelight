@@ -31,7 +31,8 @@ export const TOWN_SWATCHES: Record<string, Swatch> = {
   PlasterPeach: { ruined: "#78706a", restored: "#E0AE92", roughness: 0.95, aged: true },
   // Terracotta, faded to a dusky brown in ruin; slate grey that turns teal when restored.
   Roof: { ruined: "#5e4740", restored: "#C46A4B", roughness: 0.85 },
-  RoofTeal: { ruined: "#4C4E55", restored: "#3F8A8C", roughness: 0.85 },
+  // Slate blue, not teal: teal sat too close to the messages' cyan (0090).
+  RoofTeal: { ruined: "#4C4E55", restored: "#55617A", roughness: 0.85 },
   Timber: { ruined: "#3e3833", restored: "#5a3d28", roughness: 0.85 },
   Iron: { ruined: "#24272c", restored: "#2a2826", roughness: 0.55, metalness: 0.75 },
   Lantern: { ruined: "#2e2c28", restored: "#FFC468", glow: 0.85, ember: 0.02 },
