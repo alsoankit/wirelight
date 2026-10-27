@@ -8,7 +8,7 @@ export const landing = {
   name: "Wirelight",
   headline: "Learn how computer networks really work, by bringing one back to life.",
   facts: ["Real Linux commands", "No experience needed", "Free, in your browser"],
-  explore: "Explore the dungeon",
+  explore: "Enter the palace",
   /** Returning players: `Continue: <room title>` (0044). */
   continuePrefix: "Continue",
   /** A link to a room: `Play <room title>` (0044). */
@@ -27,7 +27,7 @@ export const landing = {
     steps: [
       {
         title: "A network in ruins",
-        body: "Under the gate lies a dungeon that is really a computer network. Rooms are machines, doors are where cables plug in, and corridors are the cables.",
+        body: "Behind the gate stands a ruined palace, the Palace of a Thousand Doors, and it is really a computer network. Rooms are machines, doors are where cables plug in, and corridors are the cables.",
       },
       {
         title: "Watch the messages",
@@ -41,7 +41,7 @@ export const landing = {
   },
   learn: {
     title: "What you'll learn",
-    intro: "Each part of the dungeon teaches one part of how networks work, from the very beginning.",
+    intro: "Each part of the palace teaches one part of how networks work, from the very beginning.",
     regions: [
       {
         name: "The Overgrown Halls",
@@ -51,7 +51,7 @@ export const landing = {
       { name: "The Lantern Town", body: "IP addresses, ping, and how machines get their addresses." },
       { name: "The Cathedral of Crossings", body: "Routers: how messages cross from one network to another." },
       {
-        name: "And deeper",
+        name: "And further in",
         body: "Ports, connections, names and the web, and the edges of the network. More floors are on the way.",
       },
     ],
@@ -73,7 +73,7 @@ export const tour = {
   cards: [
     {
       title: "Welcome to Wirelight",
-      body: "Beneath this gate lies a network: machines that once talked to each other through cables of light. Now it's in ruins. That dark doorway leads to one of its silent corridors. Your job is to bring it all back.",
+      body: "Beyond this gate stands a palace with a network running through its walls: machines that once talked to each other through cables of light. Now it's in ruins. That dark doorway leads to one of its silent corridors. Your job is to bring it all back.",
       target: "door",
     },
     {
@@ -99,7 +99,7 @@ export const tour = {
   ] satisfies TourCard[],
   next: "Next",
   back: "Back",
-  enter: "Enter the dungeon",
+  enter: "Enter the palace",
   fullGuide: "View full Field Guide",
   skip: "Skip intro",
   dontShow: "Don't show this again",

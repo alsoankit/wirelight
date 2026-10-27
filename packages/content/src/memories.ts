@@ -118,7 +118,7 @@ export const memoryText = {
   world: {
     title: "The Deep Network",
     label: "The Deep Network: every region and floor. {restored} of {total} floors restored.",
-    deeper: "Deeper still, under the mist",
+    deeper: "Further on, in the mist",
     floor: "Floor {n}",
     states: { restored: "restored", here: "you are here", open: "open now", mist: "in the mist", fog: "not yet seen" },
   },

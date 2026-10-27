@@ -410,7 +410,7 @@ export const voice = {
     sections: "Menu sections",
     back: "Back to the topics",
     here: "you are here",
-    tabs: { dungeon: "The dungeon", codex: "Codex", guide: "Field Guide", keys: "Keyring", settings: "Settings" },
+    tabs: { dungeon: "The palace", codex: "Codex", guide: "Field Guide", keys: "Keyring", settings: "Settings" },
     status: {
       cleared: "cleared",
       next: "next",

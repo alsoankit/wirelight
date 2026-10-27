@@ -21,7 +21,7 @@ export const REGION_1_CARDS: Card[] = [
     floor: 0,
     title: "Scrying Glass",
     text: "The Glass shows the whole floor at once: every room, every corridor, every message moving. Press G to open it from anywhere.",
-    more: "You can watch anything through the Glass, but you can't change anything through it. Zoom out and you'll see how much of the dungeon is still lost in fog.",
+    more: "You can watch anything through the Glass, but you can't change anything through it. Zoom out and you'll see how much of the palace is still lost in fog.",
   },
   {
     id: "door",

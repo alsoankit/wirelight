@@ -247,7 +247,7 @@ export const lightsOut: RoomText = {
   guardian: [
     {
       q: "Why did the switch break?",
-      a: "Everything here was left alone too long. The deeper you go, the more of them you'll find like that.",
+      a: "Everything here was left alone too long. The further in you go, the more of them you'll find like that.",
     },
     {
       q: "What is the console?",

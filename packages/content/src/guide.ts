@@ -42,7 +42,7 @@ export const guide: GuideTopic[] = [
   // ── From the start ──────────────────────────────────────────────────────────────────────────
   {
     id: "welcome",
-    title: "Welcome to the dungeon",
+    title: "Welcome to the palace",
     blurb: "What this place is and what you're doing here",
     visual: {
       kind: "room",
@@ -54,7 +54,7 @@ export const guide: GuideTopic[] = [
       ],
     },
     body: [
-      "This dungeon is a computer network. Every room is a machine. Every door is where a cable plugs into that machine. Every corridor is a cable between two doors.",
+      "This palace is a computer network. Every room is a machine. Every door is where a cable plugs into that machine. Every corridor is a cable between two doors.",
       "The network has fallen into ruin. Rooms are cold and grey until they work again. Your job is to bring them back, one room at a time, using the same tools people use on real Linux machines.",
       "There's no score, no timer and no way to lose. Trying things is how you learn here.",
     ],
@@ -137,7 +137,7 @@ export const guide: GuideTopic[] = [
   {
     id: "glass",
     title: "The Scrying Glass",
-    blurb: "A live map of the floor, and of the whole dungeon",
+    blurb: "A live map of the floor, and of the whole palace",
     visual: {
       kind: "glass",
       marks: [
@@ -149,7 +149,7 @@ export const guide: GuideTopic[] = [
     },
     body: [
       "The Glass shows the whole floor from above: every room, every corridor, and every message moving through it. Press [[G]] to open it from anywhere, or click the small map in the corner.",
-      "The Deep Network tab shows the whole dungeon: the floors you've restored glowing, the next one in mist, and fog over everything further on.",
+      "The Deep Network tab shows the whole palace: the floors you've restored glowing, the next one in mist, and fog over everything further on.",
       "You can watch anything through the Glass, but you can't change anything through it. To do something, go to the room where it belongs.",
     ],
   },
@@ -207,7 +207,7 @@ export const guide: GuideTopic[] = [
       caption: "A Knight's note reacting to something you tried",
     },
     body: [
-      "Long ago a Knight explored this dungeon and left notes behind. The Knight's notes button in the top bar shows how many hints you've opened out of five, and glows when a new one is ready. Some of his notes react to what you just tried.",
+      "Long ago a Knight explored this palace and left notes behind. The Knight's notes button in the top bar shows how many hints you've opened out of five, and glows when a new one is ready. Some of his notes react to what you just tried.",
       "Ask opens the Guardian's questions: a few things it still remembers about what's in front of you. It explains, but never gives the answer away.",
       "Getting something wrong costs nothing. Often it's the fastest way to see what's going on.",
     ],
@@ -235,10 +235,10 @@ export const guide: GuideTopic[] = [
   {
     id: "menu",
     title: "The menu",
-    blurb: "The dungeon, the Codex, this guide and more",
+    blurb: "The palace, the Codex, this guide and more",
     body: [
       "Press [[M]] or click Menu to open it.",
-      "The dungeon lists every floor and room, with what you've cleared. You can play any cleared room again from here.",
+      "The palace tab lists every floor and room, with what you've cleared. You can play any cleared room again from here.",
       "The Codex keeps everything you've found: objects, the words you've learned, the Command book, memories and journal pages. The Keyring shows every key you've won.",
     ],
   },

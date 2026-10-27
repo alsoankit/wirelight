@@ -2,7 +2,7 @@
 
 **A browser game that teaches how computer networks really work, for complete beginners.**
 
-The network is a ruined dungeon called the Deep Network. **Machines are rooms, network doors (interfaces) are doors, and cables are corridors.** Long ago its peoples left, the knowledge of how it works was forgotten, and the lights went out. You are a newcomer who found the gate at the edge of the forest, and you restore it room by room, by doing the network's own job with real Linux networking commands. Every room you fix comes back to life: light, colour and life spread out from the very thing you repaired.
+The world is a ruined palace on a hill, the Palace of a Thousand Doors, with a network running through its walls: the Deep Network. **Machines are rooms, network doors (interfaces) are doors, and cables are corridors.** Long ago its peoples left, the knowledge of how it works was forgotten, and the lights went out. You are a newcomer who found the gate at the edge of the forest, and you restore it room by room, by doing the network's own job with real Linux networking commands. Every room you fix comes back to life: light, colour and life spread out from the very thing you repaired.
 
 ## What it wants to achieve
 - **Anyone can learn networking from zero.** One new idea per room, at most two new words, and nothing used before it's taught. Harder ideas get more rooms, not denser ones.

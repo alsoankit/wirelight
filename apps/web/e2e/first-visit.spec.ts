@@ -25,7 +25,7 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
   // clicks wait for a button to hold still over two frames). The game logic under test is the same.
   await page.goto(process.env.CI ? "/?tier=simple&scale=0.4&fps=6" : "/");
   await page
-    .getByRole("button", { name: /Explore the dungeon/ })
+    .getByRole("button", { name: /Enter the palace/ })
     .first()
     .click();
 

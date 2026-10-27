@@ -54,7 +54,7 @@ export const firstMessage: RoomText = {
     shown: "weavers laying the glowing cable; the corridor and both rooms light up on the world map",
   },
   fieldGuide: [
-    "Welcome to the dungeon",
+    "Welcome to the palace",
     "How a room is laid out",
     "Looking at things",
     "Getting around",
@@ -67,7 +67,7 @@ export const firstMessage: RoomText = {
     "Keys at a glance",
   ],
   voice: [
-    { id: "P-GIFT-01", speaker: "moss spirit", text: "Oh… you came. Welcome to the dungeon." },
+    { id: "P-GIFT-01", speaker: "moss spirit", text: "Oh… you came. Welcome to the palace." },
     {
       id: "P-GIFT-02",
       speaker: "moss spirit",
