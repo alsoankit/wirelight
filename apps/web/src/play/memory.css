@@ -521,181 +521,214 @@ section.glass.memory::after {
   }
 }
 
-/* The world map (0039): the way down. Readable everywhere: fog sits behind the words. */
+/* The world map (0039, 0088): the palace model beside the list of regions and floors. */
 .glass-world {
   flex: 1;
   min-height: 0;
-  overflow: auto;
   display: flex;
-  justify-content: center;
-  padding: 8px 16px;
+  padding: 8px 16px 12px;
 }
 
 .world-map {
-  width: 100%;
-  max-width: 1100px;
-  height: auto;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  gap: 16px;
 }
 
-.glass-world .world-map {
-  max-height: none;
+.world-model {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 320px;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 40%, #1a2230, #0a0c10 72%);
+  overflow: hidden;
+}
+
+.world-model-canvas {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.world-model-canvas:active {
+  cursor: grabbing;
+}
+
+.world-model-canvas:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: -2px;
+}
+
+.world-here-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(10, 12, 16, 0.8);
+  border: 1px solid rgba(255, 231, 176, 0.5);
+  color: #fff1d6;
+  font: 12px var(--sans);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.world-legend {
+  flex: 0 0 260px;
+  overflow: auto;
+  color: var(--text);
+  font: 14px / 1.45 var(--sans);
 }
 
 .world-title {
-  font: 22px var(--display);
-  fill: #f3e9dc;
-}
-
-.world-place {
-  fill: rgba(255, 220, 170, 0.04);
-  stroke: rgba(255, 220, 170, 0.16);
-}
-
-.world-region[data-state="restored"] .world-place {
-  fill: rgba(94, 224, 232, 0.07);
-  stroke: rgba(94, 224, 232, 0.45);
+  margin: 4px 0 10px;
+  font: 20px / 1.2 var(--display);
+  color: #f3e9dc;
 }
 
 .world-region-name {
-  font: 19px var(--display);
-  fill: #f3e9dc;
+  margin: 10px 0 4px;
+  font: 16px var(--display);
+  color: #f3e9dc;
 }
 
 .world-region[data-state="fog"] .world-region-name,
 .world-region[data-state="mist"] .world-region-name {
-  fill: #c4b8a6;
+  color: #b3a897;
 }
 
-.world-fog ellipse,
-.world-fog-deep {
-  fill: rgba(150, 160, 175, 0.18);
+.world-region ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.world-way {
-  fill: none;
-  stroke: rgba(255, 220, 170, 0.25);
-  stroke-width: 2;
-  stroke-dasharray: 4 6;
-}
-
-.world-way.lit {
-  stroke: rgba(94, 224, 232, 0.7);
-  stroke-dasharray: none;
+.world-floor {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  column-gap: 8px;
+  align-items: center;
+  margin: 3px 0;
 }
 
 .world-step {
-  fill: #23262d;
-  stroke: #7d7466;
-  stroke-width: 2;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #23262d;
+  border: 2px solid #7d7466;
 }
 
 .world-floor[data-state="restored"] .world-step,
 .world-floor[data-state="here"] .world-step {
-  fill: #5ee0e8;
-  stroke: #d8fbff;
+  background: #5ee0e8;
+  border-color: #d8fbff;
+}
+
+.world-floor[data-state="here"] .world-step {
+  box-shadow: 0 0 0 3px rgba(243, 233, 220, 0.6);
 }
 
 .world-floor[data-state="open"] .world-step {
-  fill: #3a2a16;
-  stroke: var(--amber);
-}
-
-.world-glow-in {
-  stop-color: #5ee0e8;
-  stop-opacity: 0.5;
-}
-
-.world-glow-out {
-  stop-color: #5ee0e8;
-  stop-opacity: 0;
-}
-
-.world-here {
-  fill: none;
-  stroke: #f3e9dc;
-  stroke-width: 2;
-}
-
-.world-mist {
-  fill: rgba(220, 225, 235, 0.35);
+  background: #3a2a16;
+  border-color: var(--amber);
 }
 
 .world-floor-name {
-  font: 16px var(--sans);
-  fill: #f3e9dc;
+  color: #f3e9dc;
 }
 
 .world-floor-state {
-  font: italic 13px var(--sans);
-  fill: #c4b8a6;
+  grid-column: 2;
+  font-style: italic;
+  font-size: 13px;
+  color: #c4b8a6;
 }
 
 .world-floor[data-state="fog"] .world-floor-name {
-  fill: #b3a897;
+  color: #b3a897;
 }
 
 .world-floor[data-state="restored"] .world-floor-state {
-  fill: #9debf0;
+  color: #9debf0;
 }
 
 .world-floor[data-state="open"] .world-floor-state {
-  fill: var(--amber);
+  color: var(--amber);
 }
 
-.world-deeper-name {
+.world-deeper-name,
+.world-turn {
+  margin: 12px 0 0;
   font: italic 13px var(--sans);
-  fill: #b3a897;
+  color: #b3a897;
 }
 
-/* In a memory: the same map, in the memory's grade. */
-.world-map[data-variant="memory"] {
-  max-height: calc(100vh - 250px);
+/* Narrow screens: the model above, the list below it. */
+@media (max-width: 760px) {
+  .world-map {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .world-model {
+    flex: 0 0 52vh;
+  }
+
+  .world-legend {
+    flex: none;
+    overflow: visible;
+  }
 }
 
-.world-map[data-variant="memory"] .world-title {
-  fill: #f6e6c4;
-}
-
-.world-map[data-variant="memory"] .world-region[data-state="restored"] .world-place {
-  fill: rgba(232, 201, 138, 0.08);
-  stroke: rgba(255, 231, 176, 0.5);
-}
-
-.world-map[data-variant="memory"] .world-way.lit {
-  stroke: rgba(255, 231, 176, 0.75);
-}
-
-.world-map[data-variant="memory"] .world-floor[data-state="restored"] .world-step {
-  fill: #ffe7b0;
-  stroke: #fff6dc;
-}
-
-.world-map[data-variant="memory"] .world-glow-in,
-.world-map[data-variant="memory"] .world-glow-out {
-  stop-color: #ffe7b0;
-}
-
-.world-map[data-variant="memory"] .world-floor[data-state="restored"] .world-floor-state {
-  fill: #ffe7b0;
-}
-
-/* The ending's backdrop (END1): the whole map, full screen, behind the ending card. */
+/* The ending's backdrop (END1): the whole palace, full screen, behind the ending card. */
 .world-backdrop {
   position: fixed;
   inset: 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
   background: radial-gradient(ellipse at 50% 60%, #12222a, #07090d 75%);
 }
 
-.world-backdrop .world-map {
+.world-backdrop .world-map,
+.world-backdrop .world-model {
+  flex: 1;
   height: 100%;
-  width: auto;
-  max-width: 100%;
 }
 
-.world-map[data-variant="ending"] .world-fog-deep {
-  fill: rgba(94, 224, 232, 0.16);
+.world-map[data-variant="ending"] .world-model {
+  background: none;
+  pointer-events: none;
+}
+
+/* In a memory: the same palace, in the memory's warm grade (the network's cyan turns gold with it). */
+.world-map[data-variant="memory"] {
+  width: 100%;
+  max-height: calc(100vh - 250px);
+}
+
+.world-map[data-variant="memory"] .world-model canvas {
+  filter: sepia(0.55) saturate(1.2);
+}
+
+.world-map[data-variant="memory"] .world-model {
+  background: radial-gradient(ellipse at 50% 40%, #2a2014, #0e0a06 72%);
+}
+
+.world-map[data-variant="memory"] .world-title {
+  color: #f6e6c4;
+}
+
+.world-map[data-variant="memory"] .world-floor[data-state="restored"] .world-step {
+  background: #ffe7b0;
+  border-color: #fff6dc;
+}
+
+.world-map[data-variant="memory"] .world-floor[data-state="restored"] .world-floor-state {
+  color: #ffe7b0;
 }

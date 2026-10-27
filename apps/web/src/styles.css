@@ -549,7 +549,7 @@ html:has(.landing) {
   }
 }
 
-/* The descent (ONB-05): the page's text steps aside, and the scene takes the whole screen. */
+/* The approach (ONB-05, 0088): the page's text steps aside, and the scene takes the whole screen. */
 .landing[data-descending="yes"] .landing-hero,
 .landing[data-fading="yes"] .landing-hero {
   opacity: 0;
@@ -569,7 +569,7 @@ html:has(.landing) {
   transition: opacity 0.3s ease;
 }
 
-/* Arriving in the room: dark at first (the shaft's end), then the room brightens as it settles. */
+/* Arriving in the room: dark at first (where the approach faded to), then the room brightens as it settles. */
 .arrival-veil {
   position: fixed;
   inset: 0;
@@ -2780,9 +2780,8 @@ body:has(.menu, .gift-stage, .tour) .dev-toggle {
   pointer-events: none;
 }
 
-.ending-stage .world-backdrop svg {
-  max-width: 100%;
-  max-height: 100%;
+.ending-stage .world-backdrop .world-map {
+  align-self: stretch;
 }
 
 .ending-stage .ending-card {
