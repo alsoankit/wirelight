@@ -149,7 +149,7 @@ export const guide: GuideTopic[] = [
     },
     body: [
       "The Glass shows the whole floor from above: every room, every corridor, and every message moving through it. Press [[G]] to open it from anywhere, or click the small map in the corner.",
-      "The Deep Network tab shows the whole palace: the floors you've restored glowing, the next one in mist, and fog over everything further on.",
+      "The palace tab shows the whole palace: the floors you've restored glowing, the next one in mist, and fog over everything further on.",
       "You can watch anything through the Glass, but you can't change anything through it. To do something, go to the room where it belongs.",
     ],
   },

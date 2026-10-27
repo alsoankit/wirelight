@@ -15,6 +15,7 @@ import {
 } from "react";
 import { AudioDriver } from "../audio/AudioDriver";
 import { DevPanel } from "../dev/DevPanel";
+import { PlaytestButton } from "../dev/PlaytestButton";
 import { EngineDriver } from "../engine/EngineDriver";
 import { ask, useSession } from "../engine/store";
 import { useHydrated, useProgress } from "../progress/progress";
@@ -257,6 +258,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <Keyboard />
         <AudioDriver />
         <DevPanel />
+        <PlaytestButton />
         <SettingsApplied />
         <RoomHud />
         <PlatePanel />

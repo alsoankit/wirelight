@@ -299,7 +299,7 @@ export const voice = {
     open: "Open the Scrying Glass (G)",
     floorMap: "A live map of this floor: every machine, every cable and the messages on them.",
     thisFloor: "This floor",
-    world: "The Deep Network",
+    world: "The palace",
     close: "Close",
     states: { restored: "restored", here: "you are here", open: "open", mist: "in the mist", fog: "under fog" },
   },
@@ -512,6 +512,13 @@ export const voice = {
   /** When this browser can't draw the 3D world (no WebGPU and no WebGL2), or the drawing fails. */
   /** The loading screen (play/LoadingScreen.tsx): under the region's name, beside the percentage. */
   loading: { label: "Loading" },
+  /** The playtest log button (dev/PlaytestButton.tsx), shown only with ?playtest=1 in the address. */
+  playtest: {
+    one: "Playtest log: 1 room",
+    many: "Playtest log: {n} rooms",
+    export: "Export",
+    exportTitle: "Download this playtest as a file",
+  },
   cannotDraw: {
     title: "This browser can't draw the Deep Network",
     body: "Wirelight needs 3D drawing (WebGL2 or WebGPU), and it couldn't start here. Nothing is lost: your progress is saved in this browser.",
