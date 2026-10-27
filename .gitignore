@@ -38,3 +38,4 @@ assets-src/bake/out/
 
 # Screenshots from play scripts run without an output folder (older runs)
 tools/shots/play/undefined/
+assets-src/rework/

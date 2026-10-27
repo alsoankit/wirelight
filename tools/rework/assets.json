@@ -1,0 +1,220 @@
+[
+  {
+    "slug": "keeper-mourner",
+    "zip": "1-characters/1958.66_mourner_from_the_tomb_of_philip_the_bold.zip",
+    "role": "character",
+    "tris": 9000,
+    "height": 1.7,
+    "licence": "CC0",
+    "credit": "Cleveland Museum of Art, 1958.66 Mourner from the Tomb of Philip the Bold",
+    "up": "Z"
+  },
+  {
+    "slug": "owl-carved",
+    "zip": "1-characters/owl.zip",
+    "role": "character",
+    "tris": 9000,
+    "height": 1.1,
+    "licence": "CC BY 4.0",
+    "credit": "Owl by Maxmalow"
+  },
+  {
+    "slug": "owl-zun",
+    "zip": "1-characters/owl-zun-wine-vessel-13th-12th-century-bce.zip",
+    "role": "statue",
+    "tris": 6000,
+    "height": 0.9,
+    "licence": "CC0",
+    "credit": "Cleveland Museum of Art, Owl 'Zun' wine vessel"
+  },
+  {
+    "slug": "warden-grab",
+    "zip": "1-characters/grab-albrechtsdorfer.zip",
+    "role": "character",
+    "tris": 20000,
+    "height": 2.4,
+    "licence": "CC0",
+    "credit": "Grab Albrechtsdorfer, www.noe-3d.at",
+    "up": "Z"
+  },
+  {
+    "slug": "lantern",
+    "zip": "1-characters/Lantern_01_4k.blend.zip",
+    "role": "prop",
+    "tris": 3000,
+    "height": 0.45,
+    "licence": "CC0",
+    "credit": "Lantern 01, Poly Haven"
+  },
+  {
+    "slug": "engel-seated",
+    "zip": "2-statues/engel.zip",
+    "role": "statue",
+    "tris": 16000,
+    "height": 2.2,
+    "licence": "CC0",
+    "credit": "Engel, www.noe-3d.at"
+  },
+  {
+    "slug": "engel-wings",
+    "zip": "mypicks/engel.zip",
+    "role": "statue",
+    "tris": 16000,
+    "height": 2.4,
+    "licence": "CC0",
+    "credit": "Engel, www.noe-3d.at"
+  },
+  {
+    "slug": "frauenfigur",
+    "zip": "mypicks/frauenfigur.zip",
+    "role": "statue",
+    "tris": 16000,
+    "height": 2.0,
+    "licence": "CC BY 4.0",
+    "credit": "Frauenfigur, www.noe-3d.at"
+  },
+  {
+    "slug": "gothic-statue",
+    "zip": "2-statues/gothic_statue_4k.blend.zip",
+    "role": "statue",
+    "tris": 9000,
+    "height": 1.9,
+    "licence": "CC0",
+    "credit": "Gothic Statue, Poly Haven"
+  },
+  {
+    "slug": "praying-monk",
+    "zip": "2-statues/praying-monk-sculpture.zip",
+    "role": "statue",
+    "tris": 8000,
+    "height": 1.2,
+    "licence": "CC BY 4.0",
+    "credit": "Praying Monk Sculpture by visionsbymicael"
+  },
+  {
+    "slug": "stone-angel",
+    "zip": "2-statues/stone-angel.zip",
+    "role": "statue",
+    "tris": 8000,
+    "height": 1.3,
+    "licence": "CC BY 4.0",
+    "credit": "Stone Angel by GregorPanda"
+  },
+  {
+    "slug": "angel-marble",
+    "zip": "1-characters/angel-old-marble-version.zip",
+    "role": "statue",
+    "tris": 6000,
+    "height": 2.0,
+    "licence": "CC BY 4.0",
+    "credit": "Angel (old marble version) by SebastianSosnowski"
+  },
+  {
+    "slug": "angels-scanned",
+    "zip": "1-characters/scanned-angel-statue-collection.zip",
+    "role": "statue",
+    "tris": 8000,
+    "height": 1.4,
+    "licence": "CC BY 4.0",
+    "credit": "Scanned Angel Statue Collection by z.bille"
+  },
+  {
+    "slug": "tomb-phelim",
+    "zip": "3-cathedral/phelim-oconor-tomb-roscommon-abbey.zip",
+    "role": "statue",
+    "tris": 16000,
+    "height": 1.3,
+    "licence": "CC0",
+    "credit": "Phelim O'Conor Tomb, Roscommon Abbey, roscommon3d"
+  },
+  {
+    "slug": "tomb-fuerty",
+    "zip": "mypicks/fuerty-table-tomb.zip",
+    "role": "statue",
+    "tris": 10000,
+    "height": 0.9,
+    "licence": "CC0",
+    "credit": "Fuerty table tomb, galway3d"
+  },
+  {
+    "slug": "priory-vaults",
+    "zip": "3-cathedral/priory-lodge-vaults-reupload.zip",
+    "role": "ruin",
+    "tris": 24000,
+    "height": 4.0,
+    "licence": "CC BY 4.0",
+    "credit": "Priory Lodge: Vaults by alban"
+  },
+  {
+    "slug": "chapel-ruin",
+    "zip": "mypicks/collapsed-gothic-chapel-ruin.zip",
+    "role": "ruin",
+    "tris": 30000,
+    "height": 5.0,
+    "licence": "CC BY 4.0",
+    "credit": "Collapsed Gothic Chapel Ruin by s8819296 (AI-generated)"
+  },
+  {
+    "slug": "courtyard-ruin",
+    "zip": "mypicks/overgrown-courtyard-patio-ruin.zip",
+    "role": "ruin",
+    "tris": 30000,
+    "height": 3.0,
+    "licence": "CC BY 4.0",
+    "credit": "Overgrown Courtyard Patio Ruin by s8819296 (AI-generated)"
+  },
+  {
+    "slug": "aqueduct",
+    "zip": "mypicks/ruined-aqueduct-arches-segment.zip",
+    "role": "ruin",
+    "tris": 24000,
+    "height": 5.0,
+    "licence": "CC BY 4.0",
+    "credit": "Ruined Aqueduct Arches Segment by s8819296 (AI-generated)"
+  },
+  {
+    "slug": "stone-bridge",
+    "zip": "mypicks/ruined-stone-bridge-broken-arch.zip",
+    "role": "ruin",
+    "tris": 24000,
+    "height": 3.0,
+    "licence": "CC BY 4.0",
+    "credit": "Ruined Stone Bridge, Broken Arch by s8819296 (AI-generated)"
+  },
+  {
+    "slug": "stone-gate",
+    "zip": "mypicks/ancient-stone-gate-ruin-moss-covered.zip",
+    "role": "ruin",
+    "tris": 24000,
+    "height": 4.0,
+    "licence": "CC BY 4.0",
+    "credit": "Ancient Stone Gate Ruin - Moss Covered by s8819296 (AI-generated)"
+  },
+  {
+    "slug": "rune-monolith",
+    "zip": "mypicks/floating-rune-monolith-ancient-stone.zip",
+    "role": "prop",
+    "tris": 10000,
+    "height": 2.4,
+    "licence": "CC BY 4.0",
+    "credit": "Floating Rune Monolith - Ancient Stone by s8819296 (AI-generated)"
+  },
+  {
+    "slug": "candle-altar",
+    "zip": "mypicks/gothic-candle-altar-wax-ritual-book.zip",
+    "role": "prop",
+    "tris": 12000,
+    "height": 1.1,
+    "licence": "CC BY 4.0",
+    "credit": "Gothic Candle Altar Wax Ritual Book by s8819296 (AI-generated)"
+  },
+  {
+    "slug": "ancient-ruin-c",
+    "zip": "mypicks/ancient-ruin-c.zip",
+    "role": "ruin",
+    "tris": 30000,
+    "height": 4.0,
+    "licence": "CC BY 4.0",
+    "credit": "Ancient-Ruin C by XX-XX (AI-generated)"
+  }
+]
