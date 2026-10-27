@@ -7,7 +7,6 @@
       "!**/dist",
       "!assets-src",
       "!apps/web/public",
-      "!_reference",
       "!packages/shell/test/golden",
       "!packages/sim/src/data"
     ]
