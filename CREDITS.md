@@ -12,6 +12,9 @@
 - **1958.66 Mourner from the Tomb of Philip the Bold** and **1940.129 Mourner from Tomb of John the Fearless** — [Cleveland Museum of Art](https://sketchfab.com/clevelandart), CC0. The keeper and the Lamplighter.
 - **Grab Albrechtsdorfer** — by [www.noe-3d.at](https://sketchfab.com/3d-models/grab-albrechtsdorfer-35da9b9d876d4db584ee9b1c472ab5a8), CC0. The stone warden (Region 4's Guardian).
 - **Lantern 01** — [Poly Haven](https://polyhaven.com/a/Lantern_01), CC0. The Lamplighter's lantern.
+- **Stone Angel** — by [GregorPanda](https://sketchfab.com/3d-models/stone-angel-387f363fcf864e9f81b2ed95b8eb6b5a), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Decimated, rebaked and recoloured: a mossy statue in the Observatory (Region 1).
+- **Praying Monk Sculpture** — by [visionsbymicael](https://sketchfab.com/3d-models/praying-monk-sculpture-7c77c2f2db624225a7b30b1507869e77), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Decimated, rebaked and recoloured: a statue in the Observatory (Region 3).
+- **Owl 'Zun' wine vessel** — [Cleveland Museum of Art](https://sketchfab.com/clevelandart), CC0, and **Gothic Statue** — [Poly Haven](https://polyhaven.com/a/gothic_statue), CC0: statues in the Observatory (Regions 2 and 4).
 
 ## Sound effects and ambience
 - **Interface Sounds**, **UI Audio**, **Impact Sounds** and **RPG Audio** — by [Kenney](https://kenney.nl/assets?q=audio) (www.kenney.nl), CC0 1.0. Licence files and source pages in `assets-src/licenses/kenney-*`. Clicks, switches, latches, the key jingle, doors, footsteps, creaks and the far bell, softened and levelled by `tools/audio/make-sfx.sh`.

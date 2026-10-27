@@ -8,6 +8,7 @@ import { EMBLEM_ASPECT, emblemUrl } from "../room/emblems";
 import { Board, Desk } from "../room/Furniture";
 import { Guardian, type GuardianPlace } from "../room/Guardian";
 import { MachineScene } from "../room/MachineScene";
+import { Statue } from "../room/Statue";
 import { WallArt, type WallArtMark } from "../room/WallArt";
 import { KnightCorner } from "./KnightCorner";
 import { KnightLetter } from "./KnightLetter";
@@ -65,6 +66,49 @@ const GUARDIAN_AT: Record<number, GuardianPlace> = {
   4: { at: [3.0, 0, -2.9], turn: 3.9 },
 };
 
+/**
+ * Set dressing (0089, 0094): one carved statue per region, in the back-left corner, clear of the
+ * keeper, the doors, the boards and the Guardian. Reworked models face +z: turned about 0.8 they face
+ * the camera and the room.
+ */
+const DRESSING_AT: Record<number, Parameters<typeof Statue>[0]> = {
+  // A kneeling angel, half taken by the moss.
+  1: {
+    slug: "stone-angel",
+    position: [-3.35, 0, -1.35],
+    turn: 0.8,
+    scale: 0.75,
+    tint: { restored: "#BDB6A7", ruined: "#6A6F78" },
+    moss: 0.8,
+  },
+  // The bronze owl vessel on the floor, by the back wall.
+  2: {
+    slug: "owl-zun",
+    position: [-3.35, 0, -1.35],
+    turn: 0.8,
+    scale: 1.0,
+    tint: { restored: "#A98245", ruined: "#5A5550" },
+    metalness: 0.6,
+    roughness: 0.5,
+  },
+  // A small praying monk in the corner.
+  3: {
+    slug: "praying-monk",
+    position: [-3.35, 0, -1.35],
+    turn: 0.8,
+    scale: 0.7,
+    tint: { restored: "#C8B89C", ruined: "#6D6F76" },
+  },
+  // A gothic figure by the back wall, left of the door.
+  4: {
+    slug: "gothic-statue",
+    position: [-3.35, 0, -1.35],
+    turn: 0.8,
+    scale: 0.6,
+    tint: { restored: "#D2C2A2", ruined: "#7A7B80" },
+  },
+};
+
 export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
   const roomId = useSession((s) => s.roomId);
   const barred = useBarred();
@@ -97,6 +141,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
       )}
       <KnightCorner along={KNIGHT_AT[region] ?? 0.15} />
       {GUARDIAN_AT[region] && <Guardian region={region} place={GUARDIAN_AT[region] as GuardianPlace} />}
+      {DRESSING_AT[region] && <Statue {...(DRESSING_AT[region] as Parameters<typeof Statue>[0])} />}
       {region === 4 && <Runes set="chapel" />}
       <KnightLetter position={LETTER} />
       <ScryingGlass position={[2.4, 0, 1.6]} region={region} />
