@@ -31,6 +31,15 @@ export function loadingProgress(progress: number): void {
   useLoading.setState((s) => ({ progress: Math.max(s.progress, Math.min(progress, 1)) }));
 }
 
+/**
+ * A load that was abandoned (the room left before it was ready: a corridor, another room): the screen
+ * goes at once, so it can never stay up over a room that isn't loading. A new room's load shows it again.
+ */
+export function loadingCancel(): void {
+  clearTimeout(showTimer);
+  useLoading.setState({ shown: false });
+}
+
 export function loadingDone(): void {
   clearTimeout(showTimer);
   useLoading.setState({ progress: 1 });

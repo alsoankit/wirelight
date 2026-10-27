@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { Camera, Object3D, Scene } from "three";
 import { useSession } from "../engine/store";
 import { preloadNeighbours } from "../world/room/preloadNext";
-import { loadingBegin, loadingDone, loadingProgress } from "./loading";
+import { loadingBegin, loadingCancel, loadingDone, loadingProgress } from "./loading";
 
 // Entering a room without the freeze (tech/rendering.md, loading; perf pass 2026-10-13).
 //
@@ -167,6 +167,7 @@ export function RoomWarmup({ roomId, here }: { roomId: string; here: string }) {
     loadingBegin(roomId);
     const started = performance.now();
     let cancelled = false;
+    let lifted = false;
     let frame = 0;
     const hidden: Object3D[] = [];
     const reveal = () => {
@@ -182,6 +183,7 @@ export function RoomWarmup({ roomId, here }: { roomId: string; here: string }) {
         if (left-- > 0) frame = requestAnimationFrame(tick);
         else {
           liftVeil(canvas);
+          lifted = true;
           loadingDone();
           performance.measure("wl:room-ready", { start: started, end: performance.now() });
           // Then the rooms the player can walk to next: their models, while this one is played.
@@ -218,6 +220,7 @@ export function RoomWarmup({ roomId, here }: { roomId: string; here: string }) {
       cancelled = true;
       cancelAnimationFrame(frame);
       reveal();
+      if (!lifted) loadingCancel();
     };
   }, [get, roomId, here]);
   return null;
