@@ -22,7 +22,17 @@ const walk = async (...rooms) => {
         .catch(() => false);
       if (clicked) break;
       if (await isWon()) return;
-      if (tries === 15) throw new Error(`walk: no way through to ${to} after a minute`);
+      if (tries === 15) {
+        // Say what stood in the way, and keep a picture of it.
+        const why = await p.click(`text=→ ${to} >> nth=0`, { timeout: 3000 }).catch((e) =>
+          e.message
+            .split("\n")
+            .filter((l) => /intercepts|visible|stable|outside/.test(l))
+            .join(" | "),
+        );
+        await p.screenshot({ path: `/tmp/walk-${to}.png` }).catch(() => {});
+        throw new Error(`walk: no way through to ${to} after a minute: ${why}`);
+      }
     }
     await arrived(p, to);
     await tidy(p);

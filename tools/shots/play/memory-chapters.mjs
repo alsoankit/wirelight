@@ -16,15 +16,19 @@ if (size) {
   await p.setViewportSize({ width: w, height: h });
 }
 const overlaps = [];
-// Words drawn on the map that overprint each other (both visible, boxes crossing by more than 3px).
+// Words on the maps that overprint each other (both visible, boxes crossing by more than 3px): the
+// memory maps' SVG labels, and the world map's legend beside the palace model (HTML: title, region
+// names, each floor's name and state, the deeper note).
+const worldWords =
+  ".world-map .world-legend :is(.world-title, .world-region-name, .world-floor-name, .world-floor-state, .world-deeper-name, .world-turn)";
 const checkLabels = async (name) => {
-  const found = await p.evaluate(() => {
+  const found = await p.evaluate((worldWords) => {
     const seen = (el) => {
       for (let e = el; e && e.tagName !== "svg"; e = e.parentElement)
         if (Number(getComputedStyle(e).opacity) < 0.35 || Number(e.getAttribute("opacity") ?? 1) < 0.35) return false;
       return true;
     };
-    const boxes = [...document.querySelectorAll(".mem-map text, .world-map text")]
+    const boxes = [...document.querySelectorAll(`.mem-map text, ${worldWords}`)]
       .filter((t) => t.textContent.trim() && seen(t) && !t.classList.contains("mem-msg-mark"))
       .map((t) => ({ t: t.textContent.trim(), r: t.getBoundingClientRect() }));
     const out = [];
@@ -38,7 +42,7 @@ const checkLabels = async (name) => {
         if (w > 3 && h > 3 && boxes[i].t !== boxes[j].t) out.push(`${boxes[i].t} × ${boxes[j].t}`);
       }
     return out;
-  });
+  }, worldWords);
   for (const f of found) overlaps.push(`${name}: ${f}`);
 };
 const shot = async (n) => {
