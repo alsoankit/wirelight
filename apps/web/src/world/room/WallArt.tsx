@@ -1,5 +1,5 @@
 import { useTexture } from "@react-three/drei";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { PlaneGeometry, SRGBColorSpace, type Texture } from "three";
 import { dot, float, min, mix, mx_noise_float, smoothstep, texture, uv, vec2, vec3 } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
@@ -70,7 +70,19 @@ export function paintedMaterial(map: Texture, { edges = "shape", aspect = 1, see
   return m;
 }
 
-export function WallArt({ url, wall, along, y, width, aspect, edges = "shape", seed = 0 }: WallArtMark) {
+/**
+ * Waits for its own picture (its own Suspense): loading it never suspends the room around it, which
+ * remounted the room and left the scene's background unset (three.js then failed every frame).
+ */
+export function WallArt(props: WallArtMark) {
+  return (
+    <Suspense fallback={null}>
+      <Painted {...props} />
+    </Suspense>
+  );
+}
+
+function Painted({ url, wall, along, y, width, aspect, edges = "shape", seed = 0 }: WallArtMark) {
   const map = useTexture(url);
   const { geometry, material } = useMemo(
     () => ({

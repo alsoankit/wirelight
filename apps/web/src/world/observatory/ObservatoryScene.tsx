@@ -4,6 +4,7 @@ import { roomById } from "@wirelight/rooms";
 import { useCallback, useMemo } from "react";
 import { useSession } from "../../engine/store";
 import { useRegion } from "../region";
+import { EMBLEM_ASPECT, emblemUrl } from "../room/emblems";
 import { Board, Desk } from "../room/Furniture";
 import { MachineScene } from "../room/MachineScene";
 import { WallArt, type WallArtMark } from "../room/WallArt";
@@ -31,15 +32,15 @@ export function useBarred(): (peer: string) => string | undefined {
   );
 }
 
-/** Each region's emblem on a shield painted on the Observatory's wall (0091), clear of runes and lamps. */
-const EMBLEM = { width: 1.1, aspect: 512 / 600 } as const;
-const EMBLEMS: Record<number, WallArtMark> = {
-  1: { ...EMBLEM, url: "/art/emblem-r1.webp", wall: "left", along: -2.0, y: 1.9 },
-  2: { ...EMBLEM, url: "/art/emblem-r2.webp", wall: "left", along: -2.1, y: 1.65 },
+/** Where each region's emblem hangs on the Observatory's wall (0091), clear of runes, lamps and posts. */
+const EMBLEM_AT: Record<number, Omit<WallArtMark, "url" | "aspect">> = {
+  1: { wall: "left", along: -2.0, y: 1.95, width: 1.0 },
+  // Region 2: where the round hatch was, below the gauge.
+  2: { wall: "left", along: -2.1, y: 1.7, width: 1.0 },
   // Region 3: in the plaster panel between the corner and the first timber post.
-  3: { ...EMBLEM, url: "/art/emblem-r3.webp", wall: "left", along: -3.0, y: 1.9 },
+  3: { wall: "left", along: -3.0, y: 1.95, width: 1.0 },
   // Region 4: in the plain bay before the tall window.
-  4: { ...EMBLEM, url: "/art/emblem-r4.webp", wall: "left", along: -3.0, y: 1.9 },
+  4: { wall: "left", along: -3.0, y: 1.95, width: 1.0 },
 };
 
 /**
@@ -59,6 +60,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
   }, [roomId]);
   const region = useRegion();
   const layout = useMemo(() => observatoryLayout(doorCount, region), [doorCount, region]);
+  const room = roomId ? roomById(roomId) : undefined;
 
   return (
     <MachineScene
@@ -71,7 +73,13 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
       {/* The weavers' runes are Region 1's light; other regions bring their own (layout.glows). */}
       {region === 1 && <Runes />}
       {/* The region's emblem, painted by its people (0091); the Knight's corner below his portrait. */}
-      {EMBLEMS[region] && <WallArt {...(EMBLEMS[region] as WallArtMark)} />}
+      {EMBLEM_AT[region] && room && (
+        <WallArt
+          {...(EMBLEM_AT[region] as WallArtMark)}
+          url={emblemUrl(region, room.id, room.playerDevice)}
+          aspect={EMBLEM_ASPECT}
+        />
+      )}
       <KnightCorner along={KNIGHT_AT[region] ?? 0.15} />
       {region === 4 && <Runes set="chapel" />}
       <KnightLetter position={LETTER} />

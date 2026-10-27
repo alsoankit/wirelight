@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="640" viewBox="0 0 512 640">
+<!-- Region 4, variant 7: banner, motif 1, field #2F3656, bordure. Made by tools/art/emblems.mjs. -->
+<defs>
+  <clipPath id="shape"><path d="M76 74 H436 V586 L256 512 L76 586 Z"/></clipPath>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#F6DA86"/><stop offset="0.5" stop-color="#D9A640"/><stop offset="1" stop-color="#A9782E"/>
+  </linearGradient>
+  <linearGradient id="shade" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.16"/><stop offset="0.45" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity="0.32"/>
+  </linearGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#e1d6c6"/><stop offset="0.45" stop-color="#C9B497"/><stop offset="1" stop-color="#5a5144"/>
+  </linearGradient>
+  <!-- Painted relief: a highlight from the top left on every raised edge, a soft shadow below. -->
+  <filter id="relief" x="-15%" y="-15%" width="130%" height="130%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+    <feSpecularLighting in="blur" surfaceScale="5" specularConstant="0.75" specularExponent="16" lighting-color="#fff" result="spec">
+      <feDistantLight azimuth="225" elevation="40"/>
+    </feSpecularLighting>
+    <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
+    <feComposite in="SourceGraphic" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="0.6" k4="0" result="lit"/>
+    <feOffset in="SourceAlpha" dx="4" dy="7" result="off"/>
+    <feGaussianBlur in="off" stdDeviation="5" result="offBlur"/>
+    <feFlood flood-color="#000" flood-opacity="0.45"/>
+    <feComposite in2="offBlur" operator="in" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="lit"/></feMerge>
+  </filter>
+  <filter id="grain" x="0" y="0" width="1" height="1">
+    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="59"/>
+    <feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.24  0 0 0 0 0.17  0 0 0 0.14 0"/>
+    <feComposite in2="SourceGraphic" operator="in"/>
+  </filter>
+</defs>
+<g filter="url(#relief)"><rect x="52" y="58" width="408" height="18" rx="9" fill="#5A4636" stroke="#2A211A" stroke-width="5"/><circle cx="52" cy="67" r="15" fill="url(#rim)" stroke="#2A211A" stroke-width="4"/><circle cx="460" cy="67" r="15" fill="url(#rim)" stroke="#2A211A" stroke-width="4"/></g>
+<g filter="url(#relief)">
+  <g clip-path="url(#shape)">
+    <rect width="512" height="640" fill="#2F3656"/>
+    
+    <rect width="512" height="640" fill="url(#shade)"/>
+    <rect width="512" height="640" fill="#fff" filter="url(#grain)"/>
+  </g>
+  <path d="M76 74 H436 V586 L256 512 L76 586 Z" fill="none" stroke="url(#rim)" stroke-width="34"/>
+  <path d="M76 74 H436 V586 L256 512 L76 586 Z" fill="none" stroke="#2A211A" stroke-width="5"/>
+</g>
+<g filter="url(#relief)" transform="translate(256 296) scale(0.95)">
+        <g stroke="#E3D6B8" stroke-width="30" stroke-linecap="round"><path d="M-150 0 H150"/><path d="M0 -150 V150"/></g>
+        <g stroke="#2A211A" stroke-width="4" stroke-dasharray="14 12"><path d="M-136 0 H-40 M40 0 H136"/><path d="M0 -136 V-40 M0 40 V136"/></g>
+        <circle cx="-150" cy="0" r="20" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/><circle cx="150" cy="0" r="20" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/><circle cx="0" cy="-150" r="20" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/><circle cx="0" cy="150" r="20" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/>
+        <path d="M0 -58 L14 -14 L58 0 L14 14 L0 58 L-14 14 L-58 0 L-14 -14Z" fill="url(#gold)" stroke="#2A211A" stroke-width="6"/></g>
+</svg>

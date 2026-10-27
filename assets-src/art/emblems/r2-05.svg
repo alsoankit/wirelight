@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="640" viewBox="0 0 512 640">
+<!-- Region 2, variant 5: roundel, motif 2, field #5E2B27, pale. Made by tools/art/emblems.mjs. -->
+<defs>
+  <clipPath id="shape"><path d="M256 92 A220 220 0 1 1 255.9 92 Z"/></clipPath>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#F6DA86"/><stop offset="0.5" stop-color="#D9A640"/><stop offset="1" stop-color="#A9782E"/>
+  </linearGradient>
+  <linearGradient id="shade" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.16"/><stop offset="0.45" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity="0.32"/>
+  </linearGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#cfba95"/><stop offset="0.45" stop-color="#A8823F"/><stop offset="1" stop-color="#4c3b1c"/>
+  </linearGradient>
+  <!-- Painted relief: a highlight from the top left on every raised edge, a soft shadow below. -->
+  <filter id="relief" x="-15%" y="-15%" width="130%" height="130%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+    <feSpecularLighting in="blur" surfaceScale="5" specularConstant="0.75" specularExponent="16" lighting-color="#fff" result="spec">
+      <feDistantLight azimuth="225" elevation="40"/>
+    </feSpecularLighting>
+    <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
+    <feComposite in="SourceGraphic" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="0.6" k4="0" result="lit"/>
+    <feOffset in="SourceAlpha" dx="4" dy="7" result="off"/>
+    <feGaussianBlur in="off" stdDeviation="5" result="offBlur"/>
+    <feFlood flood-color="#000" flood-opacity="0.45"/>
+    <feComposite in2="offBlur" operator="in" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="lit"/></feMerge>
+  </filter>
+  <filter id="grain" x="0" y="0" width="1" height="1">
+    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="31"/>
+    <feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.24  0 0 0 0 0.17  0 0 0 0.14 0"/>
+    <feComposite in2="SourceGraphic" operator="in"/>
+  </filter>
+</defs>
+
+<g filter="url(#relief)">
+  <g clip-path="url(#shape)">
+    <rect width="512" height="640" fill="#5E2B27"/>
+    <rect x="256" y="0" width="256" height="640" fill="#754945"/>
+    <rect width="512" height="640" fill="url(#shade)"/>
+    <rect width="512" height="640" fill="#fff" filter="url(#grain)"/>
+  </g>
+  <path d="M256 92 A220 220 0 1 1 255.9 92 Z" fill="none" stroke="url(#rim)" stroke-width="22"/>
+  <path d="M256 92 A220 220 0 1 1 255.9 92 Z" fill="none" stroke="#2A211A" stroke-width="5"/>
+</g>
+<g filter="url(#relief)" transform="translate(256 312) scale(0.92)">
+        <path d="M69.8 61.0 L69.8 71.0 L55.3 74.5 L53.6 82.3 L65.1 91.8 L60.7 100.8 L46.2 97.7 L41.2 104.0 L47.5 117.5 L39.6 123.7 L27.9 114.6 L20.6 118.1 L20.4 133.0 L10.6 135.2 L4.0 121.9 L-4.0 121.9 L-10.6 135.2 L-20.4 133.0 L-20.6 118.1 L-27.9 114.6 L-39.6 123.7 L-47.5 117.5 L-41.2 104.0 L-46.2 97.7 L-60.7 100.8 L-65.1 91.8 L-53.6 82.3 L-55.3 74.5 L-69.8 71.0 L-69.8 61.0 L-55.3 57.5 L-53.6 49.7 L-65.1 40.2 L-60.7 31.2 L-46.2 34.3 L-41.2 28.0 L-47.5 14.5 L-39.6 8.3 L-27.9 17.4 L-20.6 13.9 L-20.4 -1.0 L-10.6 -3.2 L-4.0 10.1 L4.0 10.1 L10.6 -3.2 L20.4 -1.0 L20.6 13.9 L27.9 17.4 L39.6 8.3 L47.5 14.5 L41.2 28.0 L46.2 34.3 L60.7 31.2 L65.1 40.2 L53.6 49.7 L55.3 57.5Z" fill="#CDBB94" stroke="#2A211A" stroke-width="6"/><circle cx="0" cy="66" r="22" fill="#3C3330" stroke="#2A211A" stroke-width="5"/>
+        <path d="M-140 -60 V-110 C -140 -140 -80 -140 -80 -110 V-60Z" fill="#3C3330" stroke="#E3D6B8" stroke-width="7"/><path d="M-30 -60 V-110 C -30 -140 30 -140 30 -110 V-60Z" fill="#3C3330" stroke="#E3D6B8" stroke-width="7"/><path d="M80 -60 V-110 C 80 -140 140 -140 140 -110 V-60Z" fill="#3C3330" stroke="#E3D6B8" stroke-width="7"/>
+        <g fill="none" stroke="url(#gold)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M-14 20 L-96 -44 M-96 -44 L-70 -44 M-96 -44 L-92 -20"/><path d="M0 12 V-48 M0 -48 L-16 -30 M0 -48 L16 -30"/><path d="M14 20 L96 -44 M96 -44 L70 -44 M96 -44 L92 -20"/>
+        </g></g>
+</svg>

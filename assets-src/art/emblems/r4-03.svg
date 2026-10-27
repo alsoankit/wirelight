@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="640" viewBox="0 0 512 640">
+<!-- Region 4, variant 3: roundel, motif 0, field #553030, bordure. Made by tools/art/emblems.mjs. -->
+<defs>
+  <clipPath id="shape"><path d="M256 92 A220 220 0 1 1 255.9 92 Z"/></clipPath>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#F6DA86"/><stop offset="0.5" stop-color="#D9A640"/><stop offset="1" stop-color="#A9782E"/>
+  </linearGradient>
+  <linearGradient id="shade" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.16"/><stop offset="0.45" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity="0.32"/>
+  </linearGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#e1d6c6"/><stop offset="0.45" stop-color="#C9B497"/><stop offset="1" stop-color="#5a5144"/>
+  </linearGradient>
+  <!-- Painted relief: a highlight from the top left on every raised edge, a soft shadow below. -->
+  <filter id="relief" x="-15%" y="-15%" width="130%" height="130%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+    <feSpecularLighting in="blur" surfaceScale="5" specularConstant="0.75" specularExponent="16" lighting-color="#fff" result="spec">
+      <feDistantLight azimuth="225" elevation="40"/>
+    </feSpecularLighting>
+    <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
+    <feComposite in="SourceGraphic" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="0.6" k4="0" result="lit"/>
+    <feOffset in="SourceAlpha" dx="4" dy="7" result="off"/>
+    <feGaussianBlur in="off" stdDeviation="5" result="offBlur"/>
+    <feFlood flood-color="#000" flood-opacity="0.45"/>
+    <feComposite in2="offBlur" operator="in" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="lit"/></feMerge>
+  </filter>
+  <filter id="grain" x="0" y="0" width="1" height="1">
+    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="55"/>
+    <feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.24  0 0 0 0 0.17  0 0 0 0.14 0"/>
+    <feComposite in2="SourceGraphic" operator="in"/>
+  </filter>
+</defs>
+
+<g filter="url(#relief)">
+  <g clip-path="url(#shape)">
+    <rect width="512" height="640" fill="#553030"/>
+    
+    <rect width="512" height="640" fill="url(#shade)"/>
+    <rect width="512" height="640" fill="#fff" filter="url(#grain)"/>
+  </g>
+  <path d="M256 92 A220 220 0 1 1 255.9 92 Z" fill="none" stroke="url(#rim)" stroke-width="34"/>
+  <path d="M256 92 A220 220 0 1 1 255.9 92 Z" fill="none" stroke="#2A211A" stroke-width="5"/>
+</g>
+<g filter="url(#relief)" transform="translate(256 312) scale(0.92)">
+        <path d="M-60 20 C -106 -30 -160 -30 -196 -66 C -164 -10 -164 20 -136 42 C -156 50 -172 50 -186 46 C -146 80 -96 76 -60 60Z" fill="#E3D6B8" stroke="#2A211A" stroke-width="6"/>
+        <path d="M60 20 C 106 -30 160 -30 196 -66 C 164 -10 164 20 136 42 C 156 50 172 50 186 46 C 146 80 96 76 60 60Z" fill="#E3D6B8" stroke="#2A211A" stroke-width="6"/>
+        <path d="M-60 150 V-30 C -60 -100 0 -150 0 -150 C 0 -150 60 -100 60 -30 V150Z" fill="#E3D6B8" stroke="#2A211A" stroke-width="7"/>
+        <path d="M-34 150 V-20 C -34 -70 0 -106 0 -106 C 0 -106 34 -70 34 -20 V150Z" fill="#2F3656" stroke="#2A211A" stroke-width="5"/>
+        <path d="M-160 110 C -56 70 56 70 160 110" fill="none" stroke="url(#gold)" stroke-width="12" stroke-linecap="round"/></g>
+</svg>

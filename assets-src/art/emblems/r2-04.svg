@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="640" viewBox="0 0 512 640">
+<!-- Region 2, variant 4: roundel, motif 1, field #6E4A2A, plain. Made by tools/art/emblems.mjs. -->
+<defs>
+  <clipPath id="shape"><path d="M256 92 A220 220 0 1 1 255.9 92 Z"/></clipPath>
+  <linearGradient id="gold" x1="0" y1="0" x2="0.4" y2="1">
+    <stop offset="0" stop-color="#F6DA86"/><stop offset="0.5" stop-color="#D9A640"/><stop offset="1" stop-color="#A9782E"/>
+  </linearGradient>
+  <linearGradient id="shade" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.16"/><stop offset="0.45" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity="0.32"/>
+  </linearGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#cfba95"/><stop offset="0.45" stop-color="#A8823F"/><stop offset="1" stop-color="#4c3b1c"/>
+  </linearGradient>
+  <!-- Painted relief: a highlight from the top left on every raised edge, a soft shadow below. -->
+  <filter id="relief" x="-15%" y="-15%" width="130%" height="130%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+    <feSpecularLighting in="blur" surfaceScale="5" specularConstant="0.75" specularExponent="16" lighting-color="#fff" result="spec">
+      <feDistantLight azimuth="225" elevation="40"/>
+    </feSpecularLighting>
+    <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
+    <feComposite in="SourceGraphic" in2="specIn" operator="arithmetic" k1="0" k2="1" k3="0.6" k4="0" result="lit"/>
+    <feOffset in="SourceAlpha" dx="4" dy="7" result="off"/>
+    <feGaussianBlur in="off" stdDeviation="5" result="offBlur"/>
+    <feFlood flood-color="#000" flood-opacity="0.45"/>
+    <feComposite in2="offBlur" operator="in" result="shadow"/>
+    <feMerge><feMergeNode in="shadow"/><feMergeNode in="lit"/></feMerge>
+  </filter>
+  <filter id="grain" x="0" y="0" width="1" height="1">
+    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="30"/>
+    <feColorMatrix values="0 0 0 0 0.3  0 0 0 0 0.24  0 0 0 0 0.17  0 0 0 0.14 0"/>
+    <feComposite in2="SourceGraphic" operator="in"/>
+  </filter>
+</defs>
+
+<g filter="url(#relief)">
+  <g clip-path="url(#shape)">
+    <rect width="512" height="640" fill="#6E4A2A"/>
+    
+    <rect width="512" height="640" fill="url(#shade)"/>
+    <rect width="512" height="640" fill="#fff" filter="url(#grain)"/>
+  </g>
+  <path d="M256 92 A220 220 0 1 1 255.9 92 Z" fill="none" stroke="url(#rim)" stroke-width="22"/>
+  <path d="M256 92 A220 220 0 1 1 255.9 92 Z" fill="none" stroke="#2A211A" stroke-width="5"/>
+</g>
+<g filter="url(#relief)" transform="translate(256 312) scale(0.92)">
+        <path d="M45.8 -121.8 L45.8 -114.2 L35.4 -111.6 L33.9 -105.8 L41.6 -98.4 L37.8 -91.7 L27.5 -94.8 L23.2 -90.5 L26.3 -80.2 L19.6 -76.4 L12.2 -84.1 L6.4 -82.6 L3.8 -72.2 L-3.8 -72.2 L-6.4 -82.6 L-12.2 -84.1 L-19.6 -76.4 L-26.3 -80.2 L-23.2 -90.5 L-27.5 -94.8 L-37.8 -91.7 L-41.6 -98.4 L-33.9 -105.8 L-35.4 -111.6 L-45.8 -114.2 L-45.8 -121.8 L-35.4 -124.4 L-33.9 -130.2 L-41.6 -137.6 L-37.8 -144.3 L-27.5 -141.2 L-23.2 -145.5 L-26.3 -155.8 L-19.6 -159.6 L-12.2 -151.9 L-6.4 -153.4 L-3.8 -163.8 L3.8 -163.8 L6.4 -153.4 L12.2 -151.9 L19.6 -159.6 L26.3 -155.8 L23.2 -145.5 L27.5 -141.2 L37.8 -144.3 L41.6 -137.6 L33.9 -130.2 L35.4 -124.4Z" fill="#CDBB94" stroke="#2A211A" stroke-width="6"/>
+        <rect x="-120" y="-80" width="240" height="210" rx="10" fill="#4A3628" stroke="#2A211A" stroke-width="7"/>
+        <rect x="-104" y="-64" width="100" height="54" rx="6" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/><circle cx="-54" cy="-37" r="6" fill="#2A211A"/><rect x="4" y="-64" width="100" height="54" rx="6" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/><circle cx="54" cy="-37" r="6" fill="#2A211A"/><rect x="-104" y="0" width="100" height="54" rx="6" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/><circle cx="-54" cy="27" r="6" fill="#2A211A"/><rect x="4" y="0" width="100" height="54" rx="6" fill="url(#gold)" stroke="#2A211A" stroke-width="5"/><circle cx="54" cy="27" r="6" fill="#2A211A"/><rect x="-104" y="64" width="100" height="54" rx="6" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/><circle cx="-54" cy="91" r="6" fill="#2A211A"/><rect x="4" y="64" width="100" height="54" rx="6" fill="#CDBB94" stroke="#2A211A" stroke-width="5"/><circle cx="54" cy="91" r="6" fill="#2A211A"/></g>
+</svg>

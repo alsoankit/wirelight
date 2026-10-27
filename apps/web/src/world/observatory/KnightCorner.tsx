@@ -1,5 +1,5 @@
 import { useTexture } from "@react-three/drei";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { BoxGeometry, CylinderGeometry, ExtrudeGeometry, Shape, SphereGeometry } from "three";
 import { color, mix, vec3 } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
@@ -103,7 +103,10 @@ export function KnightCorner({ along = 1.2 }: { along?: number }) {
   return (
     <>
       <WallArt url="/art/knight-portrait.webp" wall="left" along={along} y={2.05} width={0.95} aspect={512 / 768} />
-      <Shield along={along - 0.1} />
+      {/* The shield waits for its painted face on its own, like the wall art. */}
+      <Suspense fallback={null}>
+        <Shield along={along - 0.1} />
+      </Suspense>
       <Sword along={along - 0.55} />
     </>
   );
