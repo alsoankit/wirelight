@@ -263,18 +263,18 @@ export const lightsOut: RoomText = {
   fieldGuide: ["The console", "Typing commands", "Command book"],
   voice: [
     { id: "F2-NOTE-01", speaker: "Knight", text: "That switch is finished. It won't move again." },
-    { id: "F2-GIFT-01", speaker: "moss spirit", text: "Its switch is broken. So many of them are, now." },
+    { id: "F2-GIFT-01", speaker: "Gardener", text: "Its switch is broken. So many of them are, now." },
     {
       id: "F2-GIFT-02",
-      speaker: "moss spirit",
+      speaker: "Gardener",
       text: "But a machine never forgets its own voice. If you speak to it in its own words, it will listen.",
     },
     {
       id: "F2-GIFT-03",
-      speaker: "moss spirit",
+      speaker: "Gardener",
       text: "I gave you the sight to see their messages. Now I'll give you the voice, to speak to them.",
     },
-    { id: "F2-GIFT-04", speaker: "moss spirit", text: "The words are old. Start by asking it about its doors." },
+    { id: "F2-GIFT-04", speaker: "Gardener", text: "The words are old. Start by asking it about its doors." },
   ],
 };
 
@@ -329,8 +329,8 @@ export const silentLine: RoomText = {
   voice: [
     {
       id: "F2-BOSS-01",
-      speaker: "moss spirit",
-      text: "Down here, at the very bottom of the old halls, someone has been calling since before I can remember. Nobody has ever answered.",
+      speaker: "Gardener",
+      text: "Out here, at the far end of the old gardens, someone has been calling since before I can remember. Nobody has ever answered.",
     },
   ],
 };
@@ -370,7 +370,7 @@ export const floor2: FloorText = {
   },
   farewell: {
     id: "F2-BYE-01",
-    speaker: "moss spirit",
-    text: "The owl below will remember the rest, I think. Thank you for answering moth. Thank you for answering all of us.",
+    speaker: "Gardener",
+    text: "The owl further in will remember the rest, I think. Thank you for answering moth. Thank you for answering all of us.",
   },
 };

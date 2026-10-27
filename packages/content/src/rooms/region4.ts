@@ -47,7 +47,7 @@ export const firstReleaseEnding: {
   lines: [
     { id: "END1-01", speaker: "stone warden", text: "There it is. I remember now." },
     { id: "END1-02", speaker: "stone warden", text: "Thank you." },
-    { id: "END1-03", speaker: "moss spirit", text: "You answered us all." },
+    { id: "END1-03", speaker: "Gardener", text: "You answered us all." },
     {
       id: "END1-04",
       speaker: "Knight",

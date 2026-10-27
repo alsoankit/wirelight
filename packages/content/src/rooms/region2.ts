@@ -17,7 +17,7 @@ export const region2Arrival: { id: string; speaker: string; text: string }[] = [
   {
     id: "R2-ARRIVE-02",
     speaker: "owl",
-    text: "The moss spirit sent word you were coming. I'm the keeper of keepers in the Sorting Works. Or I was.",
+    text: "The Gardener sent word you were coming. I'm the keeper of keepers in the Sorting Works. Or I was.",
   },
   {
     id: "R2-ARRIVE-03",

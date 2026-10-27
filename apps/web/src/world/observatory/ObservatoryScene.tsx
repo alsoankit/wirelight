@@ -6,6 +6,7 @@ import { useSession } from "../../engine/store";
 import { useRegion } from "../region";
 import { EMBLEM_ASPECT, emblemUrl } from "../room/emblems";
 import { Board, Desk } from "../room/Furniture";
+import { Guardian, type GuardianPlace } from "../room/Guardian";
 import { MachineScene } from "../room/MachineScene";
 import { WallArt, type WallArtMark } from "../room/WallArt";
 import { KnightCorner } from "./KnightCorner";
@@ -50,6 +51,20 @@ const EMBLEM_AT: Record<number, Omit<WallArtMark, "url" | "aspect">> = {
  */
 const KNIGHT_AT: Record<number, number> = { 1: 0.15, 2: 0.15, 3: 1.0, 4: 0.6 };
 
+/**
+ * Where each region's Guardian stands in the Observatory (0094), clear of the doorway and the boards.
+ * The scans of the Gardener, the owl and the warden face −z: turned about 3.9 they face the camera.
+ */
+const GUARDIAN_AT: Record<number, GuardianPlace> = {
+  // In the open, clear of the fallen column and the ferns, facing the room.
+  1: { at: [2.5, 0, -1.9], turn: 3.7 },
+  // Perched on the sorters' card cabinet, right of the door.
+  2: { at: [2.95, 1.73, -3.55], turn: 3.9 },
+  3: { at: [3.0, 0, -1.6], turn: 0.4 },
+  // Where the code-made statue stood, in the far corner.
+  4: { at: [3.0, 0, -2.9], turn: 3.9 },
+};
+
 export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
   const roomId = useSession((s) => s.roomId);
   const barred = useBarred();
@@ -81,6 +96,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
         />
       )}
       <KnightCorner along={KNIGHT_AT[region] ?? 0.15} />
+      {GUARDIAN_AT[region] && <Guardian region={region} place={GUARDIAN_AT[region] as GuardianPlace} />}
       {region === 4 && <Runes set="chapel" />}
       <KnightLetter position={LETTER} />
       <ScryingGlass position={[2.4, 0, 1.6]} region={region} />

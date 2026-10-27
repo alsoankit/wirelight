@@ -3,6 +3,7 @@ import { useBarred } from "../observatory/ObservatoryScene";
 import { Runes } from "../observatory/Runes";
 import { useRegion } from "../region";
 import { Board } from "../room/Furniture";
+import { Guardian, SIDE_PLACE } from "../room/Guardian";
 import { MachineScene } from "../room/MachineScene";
 import { houseLayout } from "./layout";
 import { HouseTraits } from "./Traits";
@@ -23,6 +24,7 @@ export function HouseScene({ device }: { device: string }) {
       <Board device={device} kind="ledger" at={[-2.6, 0, 1.9]} turn={0.7} />
       <HouseTraits device={device} region={region} />
       {layout.runes && <Runes marks={layout.runes} />}
+      <Guardian region={region} place={SIDE_PLACE(region)} />
     </MachineScene>
   );
 }

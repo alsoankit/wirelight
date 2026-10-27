@@ -10,7 +10,7 @@ const out = outArg ?? `${(await import("node:os")).tmpdir()}/wirelight-memories`
 const { browser, page: p, errors } = await launch();
 const shot = (n) => p.screenshot({ path: `${out}/${n}.png` });
 
-// 1. A real debrief: win 1.B, then "The moss spirit remembers".
+// 1. A real debrief: win 1.B, then "The Gardener remembers".
 await open(p, base, "f1.boss-dark-corridor");
 await plateSwitch(p);
 await p.click("text=→ lantern");
@@ -21,7 +21,7 @@ await p.waitForTimeout(600);
 await plateSwitch(p);
 await won(p, "1.B");
 await tidy(p);
-await p.click("text=The moss spirit remembers");
+await p.click("text=The Gardener remembers");
 await p.waitForSelector(".glass.memory");
 await p.waitForTimeout(500);
 await shot("f1-ch1");

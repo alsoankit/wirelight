@@ -14,7 +14,7 @@ export interface FloorInfo {
 }
 
 export const regions: Record<number, RegionInfo> = {
-  1: { n: 1, name: "The Overgrown Halls", guardian: "the moss spirit" },
+  1: { n: 1, name: "The Overgrown Halls", guardian: "the Gardener" },
   2: { n: 2, name: "The Sorting Works", guardian: "the clockwork owl" },
   3: { n: 3, name: "The Lantern Town", guardian: "the Lamplighter" },
   4: { n: 4, name: "The Cathedral of Crossings", guardian: "the stone warden" },

@@ -67,22 +67,22 @@ export const firstMessage: RoomText = {
     "Keys at a glance",
   ],
   voice: [
-    { id: "P-GIFT-01", speaker: "moss spirit", text: "Oh… you came. Welcome to the palace." },
+    { id: "P-GIFT-01", speaker: "Gardener", text: "Oh… you came. Welcome to the palace." },
     {
       id: "P-GIFT-02",
-      speaker: "moss spirit",
+      speaker: "Gardener",
       text: "I've watched over the Knight's Observatory since he left. I've been waiting a long time for someone like you.",
     },
     {
       id: "P-GIFT-03",
-      speaker: "moss spirit",
+      speaker: "Gardener",
       text: "Most people can't see the messages that travel these cables. Let me give you something.",
     },
     {
       id: "P-GIFT-04",
-      speaker: "moss spirit",
+      speaker: "Gardener",
       text: "There. From now on you'll see them as small lights moving through the rooms and corridors. Watch them closely. Where they go, and where they stop, will tell you what's wrong.",
     },
-    { id: "P-PATH-01", speaker: "moss spirit", text: "Before we begin… how much do you already know?" },
+    { id: "P-PATH-01", speaker: "Gardener", text: "Before we begin… how much do you already know?" },
   ],
 };

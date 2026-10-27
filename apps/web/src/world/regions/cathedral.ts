@@ -190,36 +190,6 @@ function shaft(bag: Bag, wall: Wall, along: number) {
 }
 
 /**
- * A winged statue of the stone warden's kin (region-4 brief): a tall robed figure on a plinth, its
- * hood bowed, two great wings folded behind it rising above its head, and a faint light in its eyes
- * (the glass material: an ember in ruin, warm gold restored). Never a doll: no face, no arms.
- */
-function wardenStatue(bag: Bag, at: V3, turn: number) {
-  const [x, y, z] = at;
-  const r = (g: BufferGeometry) => g.rotateY(turn).translate(x, y, z);
-  addTo(bag, "Stone", r(box([0.8, 0.5, 0.7], [0, 0.25, 0])));
-  addTo(bag, "Highlights", r(box([0.9, 0.08, 0.8], [0, 0.52, 0])));
-  // The robe, falling in a long taper, and the bowed, hooded head.
-  addTo(bag, "Stone", r(rod([0, 0.56, 0], [0, 1.75, 0], 0.3, 10, 0.17)));
-  addTo(bag, "Stone", r(placed(ball([0, 0, 0], 1, 10), [0, 1.9, 0.04], [0.25, 0, 0], [0.16, 0.2, 0.17])));
-  // The wings: long folded feathers of stone, tips rising above the head, spreading a little.
-  for (const side of [-1, 1]) {
-    addTo(
-      bag,
-      "Stone",
-      r(placed(ball([0, 0, 0], 1, 10), [side * 0.24, 1.55, -0.2], [0.1, side * 0.3, side * -0.18], [0.07, 0.95, 0.3])),
-    );
-    addTo(
-      bag,
-      "Highlights",
-      r(placed(ball([0, 0, 0], 1, 8), [side * 0.32, 1.25, -0.24], [0.08, side * 0.35, side * -0.3], [0.05, 0.6, 0.22])),
-    );
-  }
-  // A faint light in its eyes.
-  for (const side of [-1, 1]) addTo(bag, "GlassGold", r(ball([side * 0.055, 1.88, 0.18], 0.018, 6)));
-}
-
-/**
  * At most three room lights (`glows`): a fourth point light blanked the whole static room on WebGPU
  * (measured 2026-10-13, the crossing hall with a rose, two lancets and candles). Windows beyond the
  * third glow by their own emission and shafts only.
@@ -282,7 +252,7 @@ export function cathedralObservatory(secondDoor: boolean) {
   );
   room.kit.push(...floor("floor_01"), ...piers(), fallenColumn([-3.25, 0.4]));
   candles(room, [-3.1, -3.15]);
-  wardenStatue(room.bag, [3.0, 0, -2.9], -0.5);
+  // The warden herself stands here now, a statue of her own (room/Guardian.tsx, 0094).
   return { placements: cathedralObservatoryPieces(secondDoor), ...finish(room) };
 }
 

@@ -1,11 +1,12 @@
 import { useFrame } from "@react-three/fiber";
-import { type RefObject, useMemo, useRef } from "react";
+import { type RefObject, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   AdditiveBlending,
   BufferGeometry,
   DoubleSide,
   type Group,
   LatheGeometry,
+  type Matrix4,
   type Object3D,
   Quaternion,
   Vector2,
@@ -14,8 +15,10 @@ import {
 import { color, float, frontFacing, mix, mx_noise_float, positionLocal, smoothstep, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial, MeshStandardNodeMaterial } from "three/webgpu";
 import { noise3 } from "../kit/bake";
+import { carvedMaterial } from "../kit/carved";
 import { regionMaterial } from "../kit/regionMaterials";
 import type { RegionId } from "../region";
+import { useModel } from "../room/Statue";
 import { ruinHere } from "../ruin";
 import { BREEZE, gust, windDirection } from "../wind";
 import type { KeeperCue } from "./Messages";
@@ -240,7 +243,59 @@ function Beam() {
   );
 }
 
+/** The mourner's height in the game (the model stands 1.7 m): a little taller than a person. */
+const MOURNER_SCALE = 1.1;
+/** The mourner model faces this way about the vertical (its front turned to the keeper's +z). */
+const MOURNER_TURN = 0;
+
+type Fit = { eye: [number, number, number]; lantern: [number, number, number] };
+
+/**
+ * Where the model's face and hands are: the front-most point at face height (the eye glows just
+ * inside it) and at hand height (the lantern hangs just before it). Found in the mesh, not guessed.
+ */
+function fitOf(geometry: BufferGeometry, matrix: Matrix4, scale: number): Fit {
+  // The positions are quantised: read them through the attribute and the node's transform.
+  const attribute = geometry.getAttribute("position");
+  const v = new Vector3();
+  const points: [number, number][] = [];
+  for (let i = 0; i < attribute.count; i++) {
+    v.fromBufferAttribute(attribute, i).applyMatrix4(matrix);
+    points.push([v.y, v.z]);
+  }
+  let top = 0;
+  for (const [y] of points) top = Math.max(top, y);
+  const frontAt = (lo: number, hi: number) => {
+    let z = -1;
+    for (const [y, pz] of points) if (y > top * lo && y < top * hi) z = Math.max(z, pz);
+    return z;
+  };
+  return {
+    eye: [0, top * 0.875 * scale, (frontAt(0.84, 0.9) - 0.04) * scale],
+    lantern: [0, top * 0.6 * scale, (frontAt(0.55, 0.65) + 0.12) * scale],
+  };
+}
+
+/** The keeper's body: the hooded mourner (decision 0092), in its region's cloth. */
+function Mourner({ region, onFit }: { region: RegionId; onFit: (fit: Fit) => void }) {
+  const { geometry, source, matrix } = useModel("keeper-mourner");
+  const material = useMemo(
+    () => carvedMaterial(source, { tint: CLOTH[region], detail: 0.25, roughness: 1, sway: 0.06, hem: 0.9 }),
+    [source, region],
+  );
+  useEffect(() => onFit(fitOf(geometry, matrix, MOURNER_SCALE)), [geometry, matrix, onFit]);
+  return (
+    <group scale={MOURNER_SCALE} rotation={[0, MOURNER_TURN, 0]}>
+      <mesh geometry={geometry} material={material} matrix={matrix} matrixAutoUpdate={false} castShadow />
+    </group>
+  );
+}
+
 export function Keeper({ position, rest, watch, cue, region = 1, asleep = false }: Props) {
+  // Until the mourner has loaded, the code-made robe stands in; then the eye and lantern move to it.
+  const [fit, setFit] = useState<Fit>({ eye: EYE, lantern: LANTERN_RING });
+  const eyeAtFit = useRef(fit.eye);
+  eyeAtFit.current = fit.eye;
   const robe = useMemo(buildRobe, []);
   const cloth = useMemo(() => clothMaterial(region), [region]);
   const eye = useMemo(() => {
@@ -299,7 +354,7 @@ export function Keeper({ position, rest, watch, cue, region = 1, asleep = false 
       if (on) {
         const x = sinceDeparture / BEAM_SECONDS;
         beamLevel.value = Math.min(x / 0.12, 1) * (1 - Math.max(0, (x - 0.12) / 0.88)) ** 1.5;
-        f.localToWorld(eyeAt.set(...EYE));
+        f.localToWorld(eyeAt.set(...eyeAtFit.current));
         const from = root.worldToLocal(eyeAt.clone());
         const to = root.worldToLocal(door.clone());
         const dir = to.clone().sub(from);
@@ -314,15 +369,23 @@ export function Keeper({ position, rest, watch, cue, region = 1, asleep = false 
     <group position={position}>
       {/* turned half round so its front (+z) faces the doorway (−z in the room) */}
       <group ref={figure} rotation={[0, Math.PI, 0]}>
-        <mesh geometry={robe} material={cloth} />
-        <mesh position={EYE}>
+        <Suspense
+          fallback={
+            <>
+              <mesh geometry={robe} material={cloth} />
+              {/* loose sleeves meeting in front, the lantern hanging from where they meet */}
+              <Sleeve from={new Vector3(-0.3, 1.38, 0)} to={new Vector3(-0.08, 1.12, 0.3)} material={cloth} />
+              <Sleeve from={new Vector3(0.3, 1.38, 0)} to={new Vector3(0.08, 1.12, 0.3)} material={cloth} />
+            </>
+          }
+        >
+          <Mourner region={region} onFit={setFit} />
+        </Suspense>
+        <mesh position={fit.eye}>
           <sphereGeometry args={[0.022, 12, 8]} />
           <primitive object={eye} attach="material" />
         </mesh>
-        {/* loose sleeves meeting in front, the lantern hanging from where they meet */}
-        <Sleeve from={new Vector3(-0.3, 1.38, 0)} to={new Vector3(-0.08, 1.12, 0.3)} material={cloth} />
-        <Sleeve from={new Vector3(0.3, 1.38, 0)} to={new Vector3(0.08, 1.12, 0.3)} material={cloth} />
-        <mesh position={[0, 1.07, 0.34]} material={regionMaterial("Iron")}>
+        <mesh position={[fit.lantern[0], fit.lantern[1] + 0.07, fit.lantern[2]]} material={regionMaterial("Iron")}>
           <cylinderGeometry args={[0.008, 0.008, 0.12, 6]} />
         </mesh>
         {region === 4 && (
@@ -336,7 +399,7 @@ export function Keeper({ position, rest, watch, cue, region = 1, asleep = false 
             </mesh>
           </>
         )}
-        <group ref={lantern} position={LANTERN_RING}>
+        <group ref={lantern} position={fit.lantern}>
           <Lantern />
         </group>
       </group>

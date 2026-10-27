@@ -46,6 +46,6 @@ export const BAKES: Record<string, BakeEntry> = {
   "36a7f612": { id: "r4-hall-d4-kit", size: 1024, signature: "ea102d5f", v: "fbe517ba" },
   "49e02475": { id: "r4-house-d1", size: 512, signature: "4cb6558b", v: "31b894a7" },
   "00c97612": { id: "r4-house-d1-kit", size: 1024, signature: "85954714", v: "006a273a" },
-  "3469853b": { id: "r4-observatory-d1", size: 512, signature: "92f39166", v: "1c462bd3" },
-  f6d5226f: { id: "r4-observatory-d1-kit", size: 1024, signature: "ddfe3086", v: "f7c8f75b" },
+  "013721ea": { id: "r4-observatory-d1", size: 512, signature: "91b9e8a1", v: "463c8c72" },
+  f6d5226f: { id: "r4-observatory-d1-kit", size: 1024, signature: "ddfe3086", v: "bdd5cb70" },
 };

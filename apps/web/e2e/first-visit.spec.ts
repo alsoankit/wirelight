@@ -29,7 +29,7 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
     .first()
     .click();
 
-  // The gift of sight: the moss spirit's lines, until the path choice comes. Not "while a line shows":
+  // The gift of sight: the Gardener's lines, until the path choice comes. Not "while a line shows":
   // between one line and the next nothing shows for a moment, and a slow machine can land in that gap.
   await expect(page.locator(".lines")).toBeVisible({ timeout: 60_000 });
   const path = page.locator(".path-options button").first();

@@ -198,7 +198,7 @@ export const darkCorridor: RoomText = {
   voice: [
     {
       id: "F1-BOSS-01",
-      speaker: "moss spirit",
+      speaker: "Gardener",
       text: "This is the longest corridor in the old halls. It's been dark for as long as I can remember.",
     },
   ],
