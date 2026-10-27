@@ -23,6 +23,10 @@ DOWNLOADS = ROOT / "assets-src/_downloads"
 OUT_ROOT = ROOT / "assets-src/rework"
 MODELS = [".blend", ".glb", ".gltf", ".fbx", ".obj", ".dae", ".ply", ".stl"]
 TEXTURE_SIZE = {"character": 1024, "statue": 1024, "ruin": 1024, "prop": 512}
+# --final: bake twice as big (ship.mjs shrinks them: cleaner maps, same download), smoother AO.
+FINAL = "--final" in sys.argv
+AO_SAMPLES = 256 if FINAL else 48
+MARGIN = 16 if FINAL else 8
 
 
 def log(*parts):
@@ -91,9 +95,18 @@ def colour_texture(folder: pathlib.Path):
     return max(pool, key=lambda p: p.stat().st_size) if pool else None
 
 
-def ensure_colour(obj, folder: pathlib.Path):
+def ensure_colour(obj, folder: pathlib.Path, use_texture: bool = True):
+    """A colour picture that loads (a missing one renders magenta), or a plain stone grey."""
+    if not use_texture:
+        # "colour": "none": the model's only picture isn't its colour (a shine map): plain grey.
+        mat = bpy.data.materials.new("grey")
+        mat.use_nodes = True
+        mat.node_tree.nodes.get("Principled BSDF").inputs["Base Color"].default_value = (0.62, 0.6, 0.57, 1)
+        obj.data.materials.clear()
+        obj.data.materials.append(mat)
+        return
     has_image = any(
-        n.type == "TEX_IMAGE" and n.image is not None
+        n.type == "TEX_IMAGE" and n.image is not None and n.image.size[0] > 0
         for slot in obj.material_slots
         if slot.material and slot.material.use_nodes
         for n in slot.material.node_tree.nodes
@@ -220,8 +233,8 @@ def bake_maps(high, low, size: int, height: float, out: pathlib.Path) -> dict:
     bake.use_selected_to_active = True
     bake.cage_extrusion = 0.015 * height
     bake.max_ray_distance = 0.04 * height
-    bake.margin = 8
-    for kind, samples in (("normal", 1), ("ao", 48), ("colour", 1)):
+    bake.margin = MARGIN
+    for kind, samples in (("normal", 1), ("ao", AO_SAMPLES), ("colour", 1)):
         target.image = images[kind]
         nodes.active = target
         scene.cycles.samples = samples
@@ -317,14 +330,26 @@ def main():
     if spec.get("rotate"):
         high.rotation_euler = [math.radians(a) for a in spec["rotate"]]
         bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
-    ensure_colour(high, folder)
+    ensure_colour(high, folder, spec.get("colour") != "none")
     stand(high, spec["height"])
+    if spec.get("clean"):
+        # Doubled or flipped faces (some glTF scans) make the bake's rays hit the wrong side: speckles.
+        bpy.ops.object.select_all(action="DESELECT")
+        high.select_set(True)
+        bpy.context.view_layer.objects.active = high
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.mesh.remove_doubles(threshold=0.0005 * spec["height"])
+        bpy.ops.mesh.normals_make_consistent(inside=False)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        if high.data.has_custom_normals:
+            bpy.ops.mesh.customdata_custom_splitnormals_clear()
     high_tris = tris(high)
     log(f"high: {high_tris} triangles")
     low = make_low(high, spec["tris"])
     low_tris = tris(low)
     log(f"low: {low_tris} triangles")
-    size = TEXTURE_SIZE.get(spec["role"], 1024)
+    size = TEXTURE_SIZE.get(spec["role"], 1024) * (2 if FINAL else 1)
     bake_maps(high, low, size, spec["height"], out)
     export_low(low, out)
     preview(low, spec["height"], out)
@@ -334,6 +359,7 @@ def main():
         "high_tris": high_tris,
         "low_tris": low_tris,
         "texture": size,
+        "final": FINAL,
         "glb_kb": round((out / "low.glb").stat().st_size / 1024),
         "seconds": round(time.time() - started),
         "licence": spec["licence"],
