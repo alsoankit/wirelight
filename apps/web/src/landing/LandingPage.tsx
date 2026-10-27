@@ -12,10 +12,10 @@ const GateCanvas = lazy(() => import("./GateCanvas").then((m) => ({ default: m.G
 // works and what you'll learn. All text is HTML (crisp at every tier) from packages/content.
 
 type Props = {
-  /** The main button: "Explore the dungeon", or "Play <room>" for a link to a room (0044). */
+  /** The main button: "Enter the palace", or "Play <room>" for a link to a room (0044). */
   main: string;
   onStart: (skipIntro: boolean) => void;
-  /** Set once the player has gone in: the descent plays (quickly after Skip intro), then `onArrived`. */
+  /** Set once the player has gone in: the approach plays (quickly after Skip intro), then `onArrived`. */
   descending: { quick: boolean } | null;
   onArrived: () => void;
   /** Reduced motion: no camera move, the page just fades out. */
@@ -35,7 +35,7 @@ function PhoneNote() {
 }
 
 export function LandingPage({ main, onStart, descending, onArrived, fading = false }: Props) {
-  // ONB-06: a click or key during the descent speeds it up.
+  // ONB-06: a click or key during the approach speeds it up.
   const hurried = useRef(false);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

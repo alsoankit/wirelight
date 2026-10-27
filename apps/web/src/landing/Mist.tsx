@@ -17,9 +17,9 @@ export function Mist() {
         const thick = smoothstep(-0.25, 0.7, mx_noise_float(p));
         // Thicker toward the trees, thin on the path near the camera.
         const away = smoothstep(4, 14, positionWorld.xz.sub(vec3(0, 0, 4).xz).length());
-        // Lit cyan-teal where it drifts near the glowing arch.
-        const nearArch = float(1).sub(smoothstep(0.5, 5.5, positionWorld.xz.sub(vec3(0, 0, 1.2).xz).length()));
-        m.colorNode = mix(color("#4f5f82"), color("#57d5de"), nearArch.mul(0.7));
+        // Faintly teal where it drifts over the rune-line at the gate.
+        const nearGate = float(1).sub(smoothstep(0.5, 3.5, positionWorld.xz.sub(vec3(0, 0, 1.5).xz).length()));
+        m.colorNode = mix(color("#4f5f82"), color("#57d5de"), nearGate.mul(0.25));
         m.opacityNode = thick.mul(float(0.16).add(away.mul(0.22))).mul(1 - i * 0.25);
         return m;
       }),
