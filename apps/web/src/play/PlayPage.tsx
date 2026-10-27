@@ -33,6 +33,7 @@ import { Gift } from "./Gift";
 import { Glass } from "./Glass";
 import { Keyboard } from "./Keyboard";
 import { isTyping, withModifier } from "./keys";
+import { LoadingScreen } from "./LoadingScreen";
 import { Menu } from "./Menu";
 import { Ending, JournalPage, KeyFlight, KnightMoments, MomentsDriver, WayBack } from "./Moments";
 import { Onboarding } from "./Onboarding";
@@ -283,6 +284,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         )}
       </StrictMode>
       {arriving && <div className="arrival-veil" />}
+      <LoadingScreen />
     </QualityContext.Provider>
   );
 }

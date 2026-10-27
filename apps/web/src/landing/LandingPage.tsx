@@ -1,6 +1,7 @@
 import { landing } from "@wirelight/content/intro";
 import { lazy, Suspense, useEffect, useMemo, useRef } from "react";
 import type { Descent } from "./GateScene";
+import { onPhone } from "./phone";
 
 // The landing's text comes from content's small `intro` entry (not every room's text), and the 3D
 // gate loads after it, in its own chunk with three.js and the renderer: the text shows first.
@@ -21,13 +22,25 @@ type Props = {
   fading?: boolean;
 };
 
+const PHONE = onPhone();
+
+/** On a phone: what Wirelight needs, in place of the buttons that go in. */
+function PhoneNote() {
+  return (
+    <div className="landing-phone" role="note">
+      <strong>{landing.phone.title}</strong>
+      <p>{landing.phone.body}</p>
+    </div>
+  );
+}
+
 export function LandingPage({ main, onStart, descending, onArrived, fading = false }: Props) {
   // ONB-06: a click or key during the descent speeds it up.
   const hurried = useRef(false);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (descending) hurried.current = true;
-      else if (e.key === "Enter" && !(e.target instanceof HTMLButtonElement)) onStart(false);
+      else if (e.key === "Enter" && !PHONE && !(e.target instanceof HTMLButtonElement)) onStart(false);
     };
     const onClick = () => {
       if (descending) hurried.current = true;
@@ -46,11 +59,19 @@ export function LandingPage({ main, onStart, descending, onArrived, fading = fal
   );
 
   return (
-    <div className="landing" data-descending={descending ? "yes" : "no"} data-fading={fading ? "yes" : "no"}>
+    <div
+      className="landing"
+      data-descending={descending ? "yes" : "no"}
+      data-fading={fading ? "yes" : "no"}
+      data-phone={PHONE ? "yes" : "no"}
+    >
+      {/* On a phone, a still picture instead of the 3D gate. */}
       <div className="landing-scene" aria-hidden="true">
-        <Suspense fallback={null}>
-          <GateCanvas descent={descent} />
-        </Suspense>
+        {!PHONE && (
+          <Suspense fallback={null}>
+            <GateCanvas descent={descent} />
+          </Suspense>
+        )}
       </div>
 
       <section className="landing-hero">
@@ -62,17 +83,23 @@ export function LandingPage({ main, onStart, descending, onArrived, fading = fal
               <li key={f}>{f}</li>
             ))}
           </ul>
-          <div className="landing-actions">
-            <button type="button" className="landing-main" onClick={() => onStart(false)}>
-              {main}
-            </button>
-            <button type="button" className="landing-skip" onClick={() => onStart(true)}>
-              {landing.skip}
-            </button>
-          </div>
-          <p className="landing-enter">
-            <kbd>{landing.enter}</kbd> {landing.enterHint}
-          </p>
+          {PHONE ? (
+            <PhoneNote />
+          ) : (
+            <>
+              <div className="landing-actions">
+                <button type="button" className="landing-main" onClick={() => onStart(false)}>
+                  {main}
+                </button>
+                <button type="button" className="landing-skip" onClick={() => onStart(true)}>
+                  {landing.skip}
+                </button>
+              </div>
+              <p className="landing-enter">
+                <kbd>{landing.enter}</kbd> {landing.enterHint}
+              </p>
+            </>
+          )}
         </div>
         <a className="landing-more" href="#how">
           {landing.more} ↓
@@ -100,9 +127,13 @@ export function LandingPage({ main, onStart, descending, onArrived, fading = fal
           ))}
         </ul>
         <p className="landing-closing">{landing.closing}</p>
-        <button type="button" className="landing-main" onClick={() => onStart(false)}>
-          {main}
-        </button>
+        {PHONE ? (
+          <PhoneNote />
+        ) : (
+          <button type="button" className="landing-main" onClick={() => onStart(false)}>
+            {main}
+          </button>
+        )}
       </section>
     </div>
   );

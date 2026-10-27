@@ -14,6 +14,11 @@ export const landing = {
   /** A link to a room: `Play <room title>` (0044). */
   playPrefix: "Play",
   skip: "Skip intro",
+  /** On a phone or a tablet without a keyboard: what Wirelight needs, in place of the way in. */
+  phone: {
+    title: "Made for a computer",
+    body: "Wirelight is played with a keyboard on a bigger screen: you type real commands and watch the messages move through the rooms. Open this page on a laptop or desktop computer to play.",
+  },
   enter: "Enter",
   enterHint: "to begin",
   more: "How it works",

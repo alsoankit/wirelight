@@ -323,6 +323,95 @@ html:has(.landing) {
   vertical-align: 2px;
 }
 
+/* The loading screen (play/LoadingScreen.tsx): over everything while a room loads. */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: #06070a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.loading-screen[data-shown="yes"] {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.15s ease;
+}
+
+.loading-card {
+  width: min(360px, 80vw);
+  text-align: center;
+}
+
+.loading-region {
+  margin: 0 0 18px;
+  font: 600 22px / 1.2 var(--display);
+  letter-spacing: 0.08em;
+  color: #e9dcc5;
+}
+
+.loading-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(233, 220, 197, 0.12);
+  overflow: hidden;
+}
+
+.loading-bar span {
+  display: block;
+  height: 100%;
+  background: var(--amber);
+  transition: width 0.25s ease;
+}
+
+.loading-label {
+  margin: 12px 0 0;
+  color: #b9ad9c;
+  font: 13px / 1 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-screen,
+  .loading-bar span {
+    transition: none;
+  }
+}
+
+/* On a phone: a still of the world behind the text, and a note in place of the way in. */
+.landing[data-phone="yes"] .landing-scene {
+  /* The preview image's own title line sits along its bottom: faded out under the text. */
+  background:
+    linear-gradient(to bottom, transparent 35%, #0b0d12 70%),
+    #0b0d12 url("/og.jpg") center top / cover no-repeat;
+  opacity: 0.55;
+}
+
+.landing-phone {
+  margin-top: 28px;
+  padding: 16px 18px;
+  border: 1px solid var(--amber);
+  border-radius: 10px;
+  background: rgba(11, 13, 18, 0.82);
+}
+
+.landing-phone strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+  font: 600 17px / 1.3 var(--sans);
+}
+
+.landing-phone p {
+  margin: 0;
+  color: #b9ad9c;
+  font: 15px / 1.5 var(--sans);
+}
+
 .landing-actions {
   display: flex;
   flex-wrap: wrap;

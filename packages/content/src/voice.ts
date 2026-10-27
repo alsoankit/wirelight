@@ -510,6 +510,8 @@ export const voice = {
   here: "You are in: {machine}",
   hereCorridor: "You are in: the {a}–{b} corridor",
   /** When this browser can't draw the 3D world (no WebGPU and no WebGL2), or the drawing fails. */
+  /** The loading screen (play/LoadingScreen.tsx): under the region's name, beside the percentage. */
+  loading: { label: "Loading" },
   cannotDraw: {
     title: "This browser can't draw the Deep Network",
     body: "Wirelight needs 3D drawing (WebGL2 or WebGPU), and it couldn't start here. Nothing is lost: your progress is saved in this browser.",

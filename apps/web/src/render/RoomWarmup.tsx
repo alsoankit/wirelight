@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Camera, Object3D, Scene } from "three";
 import { useSession } from "../engine/store";
 import { preloadNeighbours } from "../world/room/preloadNext";
+import { loadingBegin, loadingDone, loadingProgress } from "./loading";
 
 // Entering a room without the freeze (tech/rendering.md, loading; perf pass 2026-10-13).
 //
@@ -16,8 +17,11 @@ import { preloadNeighbours } from "../world/room/preloadNext";
 
 /** Frames the room draws, hidden by the veil, before it lifts (the pipelines' first use). */
 const SETTLE_FRAMES = 3;
-/** Longest the veil waits for models and shaders before lifting anyway. */
-const MAX_WAIT_MS = 2500;
+/**
+ * Longest the veil waits for models and shaders before lifting anyway. Long: a room loading shows the
+ * loading screen with its progress (render/loading.ts), and appears whole rather than piece by piece.
+ */
+const MAX_WAIT_MS = 20_000;
 /** After the veil lifts, when to start fetching the next rooms' models. */
 const NEXT_DELAY_MS = 1500;
 /** How long the veil takes to lift. */
@@ -129,11 +133,15 @@ function isDrawable(o: Object3D): boolean {
 
 type Compiler = { compileAsync?: (scene: Object3D, camera: Camera, target?: Scene | null) => Promise<unknown> };
 
-/** Waits until no model is loading (drei's loading tracker), or `ms` at most. */
+/** Loading the files is most of the bar; building the shaders and the first frames, the rest. */
+const FILES_SHARE = 0.8;
+
+/** Waits until no model is loading (drei's loading tracker), or `ms` at most; reports its progress. */
 function modelsLoaded(ms: number): Promise<void> {
   return new Promise((resolve) => {
     if (!useProgress.getState().active) return resolve();
     const stop = useProgress.subscribe((s) => {
+      if (s.total > 0) loadingProgress((FILES_SHARE * s.loaded) / s.total);
       if (s.active) return;
       stop();
       clearTimeout(timer);
@@ -156,6 +164,7 @@ export function RoomWarmup({ roomId, here }: { roomId: string; here: string }) {
     const { gl, scene, camera } = get();
     const canvas = gl.domElement;
     showVeil(canvas);
+    loadingBegin(roomId);
     const started = performance.now();
     let cancelled = false;
     let frame = 0;
@@ -173,6 +182,7 @@ export function RoomWarmup({ roomId, here }: { roomId: string; here: string }) {
         if (left-- > 0) frame = requestAnimationFrame(tick);
         else {
           liftVeil(canvas);
+          loadingDone();
           performance.measure("wl:room-ready", { start: started, end: performance.now() });
           // Then the rooms the player can walk to next: their models, while this one is played.
           setTimeout(() => preloadNeighbours(roomId, here), NEXT_DELAY_MS);
@@ -182,6 +192,7 @@ export function RoomWarmup({ roomId, here }: { roomId: string; here: string }) {
     };
     const warm = async () => {
       await modelsLoaded(MAX_WAIT_MS);
+      loadingProgress(FILES_SHARE);
       // One frame so that what finished loading has mounted (and baked) before compiling.
       await new Promise((r) => requestAnimationFrame(r));
       const compiler = gl as unknown as Compiler;
@@ -195,6 +206,7 @@ export function RoomWarmup({ roomId, here }: { roomId: string; here: string }) {
       for (const o of hidden) o.visible = false;
       const left = Math.max(0, MAX_WAIT_MS - (performance.now() - started));
       await Promise.race([compiling.catch(() => undefined), new Promise((r) => setTimeout(r, left))]);
+      loadingProgress(0.95);
     };
     warm()
       .catch(() => undefined)
