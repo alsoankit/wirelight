@@ -120,7 +120,7 @@ export const askForAnAddress: RoomText = {
     },
     {
       q: "What else does the registry give?",
-      a: "Directions out of the street, if there are any. You'll want those, further down.",
+      a: "Directions out of the street, if there are any. You'll want those, further up.",
     },
   ],
   fieldGuide: ["Getting an address", "Command book: `dhclient`"],
@@ -204,8 +204,8 @@ export const floor7: FloorText = {
     {
       id: "F7-FM-04",
       title: "What's next",
-      text: "But other streets… to reach them you need someone at the crossing who knows the way. The cathedral folk below built the crossings. A stone warden watches them, I think. Mind you, she doesn't talk much.",
-      shown: "the world map: the Lantern Town fully lit; the Cathedral of Crossings rising through mist below",
+      text: "But other streets… to reach them you need someone at the crossing who knows the way. The cathedral folk above built the crossings. A stone warden watches them, I think. Mind you, she doesn't talk much.",
+      shown: "the world map: the Lantern Town fully lit; the Cathedral of Crossings rising through mist above",
     },
   ],
   journal: {

@@ -266,7 +266,7 @@ export const floor9: FloorText = {
     {
       id: "F9-FM-04",
       title: "What's next",
-      text: "Below us the roads become a maze. Stairs that go up and arrive lower down. Someone made a tool to find the way through. The Knight went looking for it.",
+      text: "Above us the roads become a maze. Stairs that go up and arrive lower down. Someone made a tool to find the way through. The Knight went looking for it.",
       shown: "leads into the first release's ending (END1)",
     },
   ],
@@ -274,6 +274,6 @@ export const floor9: FloorText = {
     page: 9,
     title: "Someone made a tool",
     where: "on arch's lectern in 9.3 (glows after the win)",
-    text: "I spent a whole day sending pings that died one step further each time, writing down who sent the notes. Then I found scratches on the wall of the next stair down. Someone made a tool that does it all at once. I'm going down to find it.",
+    text: "I spent a whole day sending pings that died one step further each time, writing down who sent the notes. Then I found scratches on the wall of the next stair up. Someone made a tool that does it all at once. I'm going up to find it.",
   },
 };

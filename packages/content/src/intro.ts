@@ -78,7 +78,7 @@ export const tour = {
     },
     {
       title: "Someone tried before you",
-      body: "Long ago a Knight came down here to restore it. He never finished, but he left his tools, his notes, and his base: this room, the Observatory. When you're stuck, read his notes, like this one.",
+      body: "Long ago a Knight came up here to restore it. He never finished, but he left his tools, his notes, and his base: this room, the Observatory. When you're stuck, read his notes, like this one.",
       target: "notes",
     },
     {

@@ -58,7 +58,7 @@ export const binaryBehind24: RoomText = {
     },
     {
       q: "Why would anyone cut a street in half?",
-      a: "When a town gets too big for one street, you split it. You'll see streets of every size, further down.",
+      a: "When a town gets too big for one street, you split it. You'll see streets of every size, further up.",
     },
   ],
 };

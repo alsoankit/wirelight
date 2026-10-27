@@ -8,7 +8,7 @@ export const why48Bits: RoomText = {
   title: "Why 48 Bits?",
   mission: "Behind a narrow door in the corridor, one machine still wears its maker's name. Get it to answer you.",
   access: { relic: "Sealed. It answers what's sent to it, by name." },
-  notes: ["Found a door down here that nobody named by hand. Its name doesn't start with 02. Somebody made this one."],
+  notes: ["Found a door out here that nobody named by hand. Its name doesn't start with 02. Somebody made this one."],
   hints: [
     { text: "You don't know its name yet. How did you learn quill's?" },
     { text: "Call everyone out of the door the relic is behind, then read who answered." },

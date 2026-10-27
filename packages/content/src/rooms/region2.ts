@@ -561,8 +561,9 @@ const floor4: FloorText = {
     {
       id: "F4-FM-04",
       title: "What they did, and what's next",
-      text: "Afterwards, the clockwork folk taught the switches to talk to each other, so they'd switch off any path that made a circle. But the halls had grown too big for names alone. Below us, the lantern people gave every machine an address…",
-      shown: "the world map: the Sorting Works fully restored; the Lantern Town appears through thin mist below",
+      text: "Afterwards, the clockwork folk taught the switches to talk to each other, so they'd switch off any path that made a circle. But the halls had grown too big for names alone. Up the hill, the lantern people gave every machine an address…",
+      shown:
+        "the world map: the Sorting Works fully restored; the Lantern Town appears through thin mist on the terraces above",
     },
   ],
   journal: {
@@ -574,7 +575,7 @@ const floor4: FloorText = {
   farewell: {
     id: "F4-BYE-01",
     speaker: "owl",
-    text: "Thank you. The Works can hear themselves think again. The Lamplighter below will be glad of you. She always did like company.",
+    text: "Thank you. The Works can hear themselves think again. The Lamplighter up the hill will be glad of you. She always did like company.",
   },
 };
 

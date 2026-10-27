@@ -15,7 +15,7 @@ export const REGION_3_ARRIVAL = [
   {
     id: "R3-ARRIVE-02",
     speaker: "Lamplighter",
-    text: "The owl tells me you're good with doors and names. Down here, every house had an address too. I used to know them all by heart.",
+    text: "The owl tells me you're good with doors and names. Up here, every house had an address too. I used to know them all by heart.",
   },
   {
     id: "R3-ARRIVE-03",
@@ -254,6 +254,6 @@ export const floor5: FloorText = {
     page: 5,
     title: "Addresses",
     where: "on the square's notice board in 5.2",
-    text: "Everyone down here has two names: the one on their door, and the one on their house. I kept writing to doors. The Lamplighter laughed at me for a week.",
+    text: "Everyone up here has two names: the one on their door, and the one on their house. I kept writing to doors. The Lamplighter laughed at me for a week.",
   },
 };

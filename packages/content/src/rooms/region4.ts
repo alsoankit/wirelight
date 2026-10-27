@@ -29,7 +29,7 @@ type Line = { id: string; speaker: string; text: string };
 export const region4Arrival: { guardian: string; lines: Line[] } = {
   guardian: "stone warden",
   lines: [
-    { id: "R4-ARRIVE-01", speaker: "stone warden", text: "…You came down through the town." },
+    { id: "R4-ARRIVE-01", speaker: "stone warden", text: "…You came up through the town." },
     { id: "R4-ARRIVE-02", speaker: "stone warden", text: "I keep the crossings. Streets meet here. Or they did." },
     {
       id: "R4-ARRIVE-03",
@@ -51,7 +51,7 @@ export const firstReleaseEnding: {
     {
       id: "END1-04",
       speaker: "Knight",
-      text: "If you've read this far, you've done more than I did. I'm further down. Come and find me.",
+      text: "If you've read this far, you've done more than I did. I'm further up. Come and find me.",
     },
   ],
   card: {

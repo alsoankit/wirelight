@@ -358,15 +358,15 @@ export const floor2: FloorText = {
     {
       id: "F2-FM-04",
       title: "What they couldn't solve",
-      text: "But one machine with many doors, and many machines on each… the weavers couldn't keep up. Below us, the clockwork folk built something cleverer. I hear its gears, sometimes.",
-      shown: "the world map: the Overgrown Halls fully restored; the Sorting Works below through thin mist",
+      text: "But one machine with many doors, and many machines on each… the weavers couldn't keep up. Further in, the clockwork folk built something cleverer. I hear its gears, sometimes.",
+      shown: "the world map: the Overgrown Halls fully restored; the Sorting Works further in through thin mist",
     },
   ],
   journal: {
     page: 2,
     title: "Names",
     where: "tucked under the workbench in 2.3 (glows after the win)",
-    text: "Every door down here has a name burned into it. They all start with 02, the way they do when somebody chose them by hand instead of the factory. I wonder who sat down and named them all.",
+    text: "Every door out here has a name burned into it. They all start with 02, the way they do when somebody chose them by hand instead of the factory. I wonder who sat down and named them all.",
   },
   farewell: {
     id: "F2-BYE-01",

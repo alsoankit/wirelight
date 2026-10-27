@@ -51,7 +51,7 @@ export const insideYourHomeRouter: RoomText = {
     { q: "Who is the world?", a: "Everyone outside your door. Here, one machine plays them all." },
     {
       q: "How does the world find its way back?",
-      a: "Here, it was told. Real home boxes do something cleverer. You'll meet it further down.",
+      a: "Here, it was told. Real home boxes do something cleverer. You'll meet it further up.",
     },
   ],
 };

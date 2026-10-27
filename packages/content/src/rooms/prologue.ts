@@ -50,7 +50,7 @@ export const firstMessage: RoomText = {
   ],
   building: {
     id: "P-BLD-01",
-    text: "I remember now… two machines, far apart, that wanted to talk. The first weavers dug a tunnel between them and laid a copper thread along its floor. Whatever one machine said, the thread carried to the other.",
+    text: "I remember now… two machines, far apart, that wanted to talk. The first weavers built a passage between them and laid a copper thread along its floor. Whatever one machine said, the thread carried to the other.",
     shown: "weavers laying the glowing cable; the corridor and both rooms light up on the world map",
   },
   fieldGuide: [
