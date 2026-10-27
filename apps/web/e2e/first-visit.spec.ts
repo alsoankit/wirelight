@@ -20,19 +20,26 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
   page.on("pageerror", (e) => errors.push(e.message));
 
   // CI has no GPU: software drawing is slow, so it plays on the simplest graphics (the tier the game's
-  // own auto quality would settle on there). The game logic under test is the same on every tier.
-  await page.goto(process.env.CI ? "/?tier=simple" : "/");
+  // own auto quality would settle on there), drawn at 40% of the screen's resolution (time grows with
+  // the pixels), at most 6 frames a second (each drawn frame takes about half a second there, and
+  // clicks wait for a button to hold still over two frames). The game logic under test is the same.
+  await page.goto(process.env.CI ? "/?tier=simple&scale=0.4&fps=6" : "/");
   await page
     .getByRole("button", { name: /Explore the dungeon/ })
     .first()
     .click();
 
-  // The gift of sight: the moss spirit's lines.
+  // The gift of sight: the moss spirit's lines, until the path choice comes. Not "while a line shows":
+  // between one line and the next nothing shows for a moment, and a slow machine can land in that gap.
   await expect(page.locator(".lines")).toBeVisible({ timeout: 60_000 });
-  while (await page.locator(".lines").isVisible()) await page.locator(".lines button").click();
+  const path = page.locator(".path-options button").first();
+  await expect(async () => {
+    if (await page.locator(".lines").isVisible()) await page.locator(".lines button").click();
+    await expect(path).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 120_000 });
 
   // The path, then the tour.
-  await page.locator(".path-options button").first().click();
+  await path.click();
   for (let i = 0; i < 5; i++) await page.locator(".tour-card .panel-actions button:not(.quiet)").click();
   await tidy(page);
 

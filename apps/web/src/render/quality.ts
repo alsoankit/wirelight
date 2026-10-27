@@ -23,6 +23,24 @@ export const QUALITY: Record<Tier, QualitySettings> = {
   simple: { dpr: 0.75, bloom: false, moonbeams: false, fireflies: false, dust: false },
 };
 
+/**
+ * `?scale=0.4`: draw the 3D at that fraction of the screen's resolution, whatever the tier (0.1–1).
+ * For machines drawing in software, such as CI's GPU-less runner, where time grows with the pixels.
+ */
+export function scaleFromUrl(): number | undefined {
+  const value = Number(new URLSearchParams(window.location.search).get("scale"));
+  return value > 0 ? Math.min(Math.max(value, 0.1), 1) : undefined;
+}
+
+/**
+ * `?fps=6`: draw the 3D at most that many times a second (2–60), so the page's other frames stay
+ * quick. For tests on machines drawing in software, where every drawn frame takes half a second.
+ */
+export function fpsFromUrl(): number | undefined {
+  const value = Number(new URLSearchParams(window.location.search).get("fps"));
+  return value > 0 ? Math.min(Math.max(value, 2), 60) : undefined;
+}
+
 export function tierFromUrl(): Tier | undefined {
   const value = new URLSearchParams(window.location.search).get("tier");
   return TIERS.find((t) => t === value);

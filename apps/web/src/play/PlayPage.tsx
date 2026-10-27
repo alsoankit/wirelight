@@ -20,8 +20,9 @@ import { ask, useSession } from "../engine/store";
 import { useHydrated, useProgress } from "../progress/progress";
 import { AutoQuality } from "../render/AutoQuality";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
+import { FPS, FrameCap } from "../render/FrameCap";
 import { loadConsole, usePrefetchLater } from "../render/preload";
-import { QUALITY, QualityContext, TIERS, type Tier, tierFromUrl } from "../render/quality";
+import { QUALITY, QualityContext, scaleFromUrl, TIERS, type Tier, tierFromUrl } from "../render/quality";
 import { HALL_PIECES } from "../world/hall/layout";
 import { HOUSE_PIECES } from "../world/house/layout";
 import { pieceUrl } from "../world/kit/Piece";
@@ -168,12 +169,14 @@ const WorldCanvas = memo(function WorldCanvas({
         if (e.type === "click" && e.target instanceof HTMLCanvasElement) useSession.getState().closePanel();
       }}
       gl={nodeRendererFactory(backend)}
+      frameloop={FPS ? "demand" : "always"}
       // Dev aid: the renderer, for reading draw calls and triangles from scripts.
       onCreated={(state) => {
         (window as unknown as { __renderer?: unknown }).__renderer = state.gl;
       }}
     >
       <Resolution scale={dpr} />
+      <FrameCap />
       {/* Steps down when frames stay slow and back up when they recover (agent C: render/AutoQuality). */}
       <AutoQuality auto={auto} setTier={setTier} ceiling={backend === "webgpu" ? "high" : "medium"} />
       <EngineDriver />
@@ -242,7 +245,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
       <WorldCanvas
         key={backend}
         backend={backend}
-        dpr={quality.dpr}
+        dpr={scaleFromUrl() ?? quality.dpr}
         auto={auto}
         setTier={setTier}
         arriving={arriving}

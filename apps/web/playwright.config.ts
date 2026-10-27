@@ -7,8 +7,9 @@ const channel = process.env.PW_CHANNEL;
 
 export default defineConfig({
   testDir: "e2e",
-  // Six minutes: CI has no GPU and draws in software (about two minutes on the simplest tier).
-  timeout: 360_000,
+  // Ten minutes: CI has no GPU and draws in software. On two cores the first visit takes about 3.5
+  // minutes (simplest tier, 40% resolution, 6 frames a second); GitHub's runner is slower still.
+  timeout: 600_000,
   retries: process.env.CI ? 1 : 0,
   use: {
     baseURL: "http://localhost:4173",
