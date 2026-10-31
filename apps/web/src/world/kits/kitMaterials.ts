@@ -2,11 +2,13 @@ import { Color, type Material, type MeshStandardMaterial, type Texture } from "t
 import { attribute, color, dot, float, mix, normalWorld, smoothstep, texture, vec3 } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
 import { bakedLightNodes, type Lightmaps } from "../bake/lightmap";
+import { carvedMaterial } from "../kit/carved";
 import { regionMaterial } from "../kit/regionMaterials";
 import { TO_MOON } from "../moon";
 import { LOOKS, type RegionId } from "../region";
 import { ruinHere } from "../ruin";
 import { THIN_MATERIAL } from "./assembleKit";
+import { CARVED } from "./carvedKit";
 import { KITS, type MaterialMaps } from "./catalog";
 
 // The textured kits' materials (KitRoom): the kit's own texture × its vertex colour, on the ruin dial
@@ -69,10 +71,26 @@ export function ages(kit: string, name: string): boolean {
   return !UNAGED_KITS.has(kit) && !THIN_MATERIAL.test(name) && !SWATCHES[kit]?.[name];
 }
 
+/** A reworked model as room geometry: the carved look in the region's colour, with its baked light. */
+function carvedKitMaterial(original: Material, { region, lightmaps }: KitMaterialOptions): Material {
+  const key = `${CARVED}|${original.uuid}|${region}|${lightmaps?.lit.uuid ?? ""}`;
+  const known = cache.get(key);
+  if (known) return known;
+  const m = carvedMaterial(original as MeshStandardMaterial, LOOKS[region].carved);
+  if (lightmaps) {
+    const { light, ao } = bakedLightNodes(lightmaps);
+    m.emissiveNode = (m.colorNode as ReturnType<typeof color>).mul(light);
+    m.aoNode = ao;
+  }
+  cache.set(key, m);
+  return m;
+}
+
 export function kitMaterial(kit: string, original: Material, options: KitMaterialOptions): Material {
   const { region, glow, detail, vertexColour } = options;
   const swatch = SWATCHES[kit]?.[original.name];
   if (swatch) return regionMaterial(swatch, region);
+  if (kit === CARVED) return carvedKitMaterial(original, options);
   const aged = options.ageing && !glow && ages(kit, original.name);
   const key = `${kit}|${original.name}|${region}|${glow}|${detail}|${vertexColour}|${aged}|${options.lightmaps?.lit.uuid ?? ""}`;
   const known = cache.get(key);
@@ -91,6 +109,16 @@ export function kitMaterial(kit: string, original: Material, options: KitMateria
   let base = map ? texture(map).rgb : vec3(1, 1, 1);
   base = vertexColour ? base.mul(attribute("color", "vec3")) : base.mul(color(source.color ?? new Color(1, 1, 1)));
   const lum = dot(base, vec3(0.2126, 0.7152, 0.0722));
+  // A colour at the texture's own brightness: its chroma replaced, its courses, joints and wear kept.
+  const toned = (hex: string, gamma = 1) => {
+    const c = new Color(hex);
+    const cl = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+    return vec3(lum, lum, lum)
+      .pow(vec3(gamma, gamma, gamma))
+      .mul(vec3(c.r / cl, c.g / cl, c.b / cl));
+  };
+  const tone = look.kitTones?.find((t) => t.material === original.name);
+  if (tone) base = mix(base, toned(tone.colour, tone.gamma), tone.amount);
 
   // Ruined: grey, darker and cooled toward the region's ruined light (its hue, not its brightness).
   const sky = new Color(look.sky.ruined);
@@ -101,21 +129,15 @@ export function kitMaterial(kit: string, original: Material, options: KitMateria
   let restored = base.mul(vec3(warmth.r, warmth.g, warmth.b));
   const stone = look.kitStone;
   if (stone && stone.material === original.name) {
-    // The region's stone colour at the texture's own brightness (its chroma replaced, its courses,
-    // joints and wear kept), lifted a little: the Cathedral's trim sheet is red brick and grey
+    // The region's stone colour, lifted a little: the Cathedral's trim sheet is red brick and grey
     // ashlar, which read as one orange-brown under warm light; the brief's stone is sandstone.
-    const c = new Color(stone.colour);
-    const cl = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
-    const toned = vec3(lum, lum, lum)
-      .pow(vec3(stone.gamma ?? 1, stone.gamma ?? 1, stone.gamma ?? 1))
-      .mul(vec3(c.r / cl, c.g / cl, c.b / cl));
     // Floors (faces that look up) keep more of their own grey, so the floor and walls part.
     const amount = mix(
       float(stone.amount),
       float(stone.floorAmount ?? stone.amount),
       smoothstep(0.6, 0.9, normalWorld.y),
     );
-    restored = mix(restored, toned, amount);
+    restored = mix(restored, toned(stone.colour, stone.gamma), amount);
   }
   let tint = mix(restored, ruined, ruinHere);
 

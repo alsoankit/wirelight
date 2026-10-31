@@ -2,27 +2,31 @@ import type { BufferGeometry } from "three";
 import { type CorridorDressing, corridorFloor } from "../corridor/frame";
 import { FLOORS, makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
-import { addTo, box, extras, rod, type V3 } from "../kit/shapes";
+import { addTo, box, extras, gable, placed, rod, type V3 } from "../kit/shapes";
 import type { KitPlacement } from "../kits/placement";
 import type { Glow, Wall } from "../room/layout";
 
-// Region 3, the Lantern Town (world/art-briefs/region-3-lantern-town.md): a storybook town asleep
-// under lanterns. Built from Quaternius' Medieval Village and Fantasy Props kits (0072; KitRoom draws
-// them): plaster and timber walls, round-headed doorways, arched windows with their shutters, tiled
-// gable roofs, and the rest of the town beyond the walls as smaller houses whose windows light as the
-// restoration wave reaches them (nearest street first: the region's victory, street by street).
-// Made in code still: the floors (cobbles, floorboards: 0053), the lanterns (a kit lantern read as a
-// cage on a gallows at this size) and the lamp posts. Ruin: grey plaster, slate-grey roofs, lanterns
-// and windows dark (the kit materials' ruin dial). Restored: the kit's own cream plaster and
-// terracotta, lanterns and windows warm. Palette for the code-made parts: town/palette.ts.
-// A left world (0052): the houses stand; nobody is home.
+// Region 3, the Lantern Town (world/art-briefs/region-3-lantern-town.md; 0095): the courtiers' quarter
+// on the palace terraces, asleep under lanterns. Quaternius' Medieval Village and Fantasy Props kits
+// (0072; KitRoom draws them) in the palace's colours (town/palette.ts `kitTones`): plaster over ashlar,
+// round-headed arcades in carved stone, one long slate roof with dormers along each row of residences.
+// The Modular Cathedral kit gives the balustrades and the upper terrace. Beyond the walls stands the
+// palace itself, whose windows light as the restoration wave reaches them (nearest terrace first: the
+// region's victory, street by street).
+// Made in code still: the floors (cobbles, paving: 0053), the cornices and pilasters, the towers and
+// keep, the lanterns (a kit lantern read as a cage on a gallows at this size) and the lamp posts.
+// Ruin: grey plaster and stone, dark slate, lanterns and windows dark (the kit materials' ruin dial).
+// Restored: cream plaster, sandstone, slate blue, lanterns and windows warm.
+// A left world (0052): the residences stand; nobody is home.
 
 const LANTERN = "#FFCB70";
 const VILLAGE = "region-3/village";
 const PROPS = "region-3/props";
+const CATH = "region-4/cathedral";
+const QUARTER = Math.PI / 2;
 /** A village wall's face stands this far in front of its pivot (catalog: face at z ≈ +0.093). */
 const FACE = 0.093;
-/** Where a storey's walls end and the gable starts (the kit's walls are 3.12 m with their top beam). */
+/** Where a storey's walls end and the roof starts (the kit's walls are 3.12 m with their top beam). */
 const STOREY = 3.0;
 
 type Bag = Record<string, BufferGeometry[]>;
@@ -70,22 +74,22 @@ function cobbles(seed: number): Extra[] {
   ];
 }
 
-// Inside a house: long floorboards laid in rows.
-function boards(seed: number): Extra[] {
+// Inside a residence: dressed stone paving, square slabs laid in even rows.
+function paving(seed: number): Extra[] {
   return [
     {
-      name: "Boards",
+      name: "Paving",
       geometry: makeFlagstones({
         size: 8.4,
         seed,
-        course: [0.19, 0.21],
-        slab: [1.6, 2.8],
-        long: 0.1,
-        chipped: 0.05,
-        cracked: 0.02,
-        sunk: 0.05,
-        missing: 0.012,
-        bevel: 0.012,
+        course: [0.78, 0.82],
+        slab: [0.78, 0.82],
+        long: 0,
+        chipped: 0.06,
+        cracked: 0.05,
+        sunk: 0.03,
+        missing: 0.01,
+        bevel: 0.016,
         gap: 0.012,
       }),
     },
@@ -160,17 +164,34 @@ function stream(seed: number) {
   };
 }
 
+const sized = (k: number) => (Math.abs(k - 1) < 1e-6 ? undefined : k);
+
+/** A point in the room: `along` a wall, `out` in front of its face at −4, `y` up. */
+function onWallAt(wall: Wall, along: number, out: number, y: number): V3 {
+  return wall === "back" ? [along, y, -4 + out] : [-4 + out, y, along];
+}
+
+/** A stone block on a wall: `width` along it, `depth` out from it. */
+function wallBlock(wall: Wall, along: number, out: number, y: number, [width, height, depth]: V3) {
+  return box(wall === "back" ? [width, height, depth] : [depth, height, width], onWallAt(wall, along, out, y));
+}
+
+/** A stone pilaster on a wall: a base, a flat shaft and a capital. */
+function pilaster(bag: Bag, wall: Wall, along: number, height = STOREY) {
+  addTo(
+    bag,
+    "Stone",
+    wallBlock(wall, along, 0.05, height / 2, [0.2, height, 0.1]),
+    wallBlock(wall, along, 0.07, 0.17, [0.28, 0.34, 0.14]),
+    wallBlock(wall, along, 0.07, height - 0.08, [0.28, 0.16, 0.14]),
+  );
+}
+
 /**
- * A house front facing the room, 2 m wide × one storey (at `scale`), with a gable and a tiled roof
- * running back from it: the square's houses at full size, the rest of the town smaller. `face` is the
- * wall piece (a doorway or a window); a window gets its glass (lit when restored) and its shutters,
- * open or (`closed`) shut. The gable and roof are drawn at `roof` × the house's scale (0.78 keeps a
- * 2 m front's gable inside its own width, so neighbours' roofs meet in a valley, never overlap), and
- * `lift` brings them forward a hair so two neighbours never share a plane. `short` uses the short
- * 2 m roof (the far town: only its front shows). `y` stands the house a little up the hill; a
- * `chimney` rises from the roof's slope, to one side of the ridge.
+ * One residence's front facing the room, 2 m wide × one storey (at `scale`): a doorway or a window
+ * (`face`) in its carved arch. A window gets its glass, lit when restored, or (`closed`) its shutters.
  */
-function houseFront(
+function front(
   out: KitPlacement[],
   wall: Wall,
   along: number,
@@ -178,152 +199,235 @@ function houseFront(
   {
     behind = 0,
     scale = 1,
-    roof = 0.78,
-    lift = 0,
-    closed = false,
-    short = false,
     y = 0,
-    chimney = 0,
-  }: {
-    behind?: number;
-    scale?: number;
-    roof?: number;
-    lift?: number;
-    closed?: boolean;
-    short?: boolean;
-    y?: number;
-    /** −1 or 1: a chimney on that side of the ridge (0: none). */
-    chimney?: number;
-  } = {},
+    closed = false,
+  }: { behind?: number; scale?: number; y?: number; closed?: boolean } = {},
 ) {
-  const s = scale;
-  const at = -behind - FACE * s;
-  const sized = (k: number) => (Math.abs(k - 1) < 1e-6 ? undefined : k);
-  out.push(onWallKit(wall, face, along, { out: at, y, scale: sized(s) }));
+  const at = -behind - FACE * scale;
+  const s = sized(scale);
+  out.push(onWallKit(wall, face, along, { out: at, y, scale: s }));
   const kind = /Window_Wide/.test(face) ? "Wide" : /Window_Thin/.test(face) ? "Thin" : null;
-  if (kind) {
-    if (!closed) out.push(onWallKit(wall, `Window_${kind}_Round1`, along, { out: at, y, scale: sized(s), glow: true }));
-    const shutters = `WindowShutters_${kind}_Round_${closed ? "Closed" : "Open"}`;
-    out.push(onWallKit(wall, shutters, along, { out: at, y, scale: sized(s) }));
-  }
-  const r = s * roof;
-  const top = y + STOREY * s;
-  out.push(onWallKit(wall, "Roof_Front_Brick2", along, { out: at + lift * s + 0.05 * s, y: top, scale: sized(r) }));
-  if (short)
-    out.push(
-      onWallKit(wall, "Roof_RoundTile_2x1", along, {
-        out: at + lift * s - 0.2 * r,
-        y: top,
-        scale: sized(r),
-        turn: Math.PI,
-      }),
-    );
-  else
-    out.push(onWallKit(wall, "Roof_2x4_RoundTile", along, { out: at + lift * s - 1.75 * r, y: top, scale: sized(r) }));
-  if (chimney)
-    out.push(
-      onWallKit(wall, "Prop_Chimney2", along + chimney * 0.62 * s, {
-        out: at - (short ? 0.75 : 1.4) * s,
-        y: top - 0.1 * s,
-        scale: s * 0.42,
-      }),
-    );
+  if (!kind) return;
+  if (closed) out.push(onWallKit(wall, `WindowShutters_${kind}_Round_Closed`, along, { out: at, y, scale: s }));
+  else out.push(onWallKit(wall, `Window_${kind}_Round1`, along, { out: at, y, scale: s, glow: true }));
+}
+
+/** A triangle of stone closing the end of a wing's roof (`eaves` is the roof's centre line, as `out`). */
+function wingEnd(wall: Wall, along: number, eaves: number, y: number, r: number) {
+  const { wall: end } = gable(3.05 * r, 2.05 * r, 0.14, 0);
+  return placed(end, onWallAt(wall, along, eaves, y), [0, wall === "back" ? QUARTER : 0, 0]);
 }
 
 /**
- * The rest of the town beyond a room's walls: two streets of smaller houses, roofs, chimneys and lit
- * windows showing over the walls, with an alley here and there. The nearer street lights first as
- * the restoration wave spreads (the region's victory: the town lights up street by street). Two
- * streets, not three: a third stood so high over the room it read as a wall of gables.
+ * What crowns a row of residences from `from` to `to`: a stone cornice, a balustrade, and one long slate
+ * roof with its ridge along the row (a palace wing, not a row of gabled cottages), with a dormer at
+ * each of `dormers` and a stone chimney at each of `chimneys`.
  */
-function farTown(seed: number, start = 2.4, scale = 0.42): KitPlacement[] {
+function wing(
+  out: KitPlacement[],
+  bag: Bag,
+  wall: Wall,
+  {
+    from = -4,
+    to = 4,
+    behind = 0,
+    scale = 1,
+    y = 0,
+    dormers = [],
+    chimneys = [],
+  }: {
+    from?: number;
+    to?: number;
+    behind?: number;
+    scale?: number;
+    y?: number;
+    dormers?: number[];
+    chimneys?: number[];
+  } = {},
+) {
+  const top = y + STOREY * scale;
+  const r = scale * 0.78;
+  addTo(
+    bag,
+    "Stone",
+    wallBlock(wall, (from + to) / 2, 0.02 - behind, top + 0.06 * scale, [to - from, 0.12 * scale, 0.3 * scale]),
+  );
+  // The balustrade: whole four-metre lengths, the last one pinned to the row's end.
+  const rail = 4 * scale;
+  for (let a = from + rail / 2; ; a += rail) {
+    const along = Math.min(a, to - rail / 2);
+    out.push(
+      onWallKit(wall, "railing_01", along, {
+        kit: CATH,
+        out: 0.12 * scale - behind,
+        y: top + 0.12 * scale,
+        scale: sized(scale),
+      }),
+    );
+    if (a >= to - rail / 2) break;
+  }
+  // The roof: 2 × 4 pieces turned to run along the row, its eaves behind the balustrade.
+  const length = 4.1 * r;
+  const count = Math.ceil((to - from) / length);
+  const eaves = -behind - 0.1 * scale - 1.65 * r;
+  for (let k = 0; k < count; k++) {
+    const along = from + ((k + 0.5) * (to - from)) / count;
+    out.push(
+      onWallKit(wall, "Roof_2x4_RoundTile", along, {
+        out: eaves,
+        y: top + 0.1 * scale,
+        scale: sized(r),
+        turn: QUARTER,
+      }),
+    );
+  }
+  // Stone end walls under the roof's gables (the kit's roofs are open at the ends).
+  for (const along of [from - 0.02, to + 0.02]) addTo(bag, "Stone", wingEnd(wall, along, eaves, top + 0.05 * scale, r));
+  for (const along of dormers)
+    out.push(
+      onWallKit(wall, "Roof_Dormer_RoundTile", along, {
+        out: eaves + 0.4 * r,
+        y: top + 0.3 * scale,
+        scale: r * 0.46,
+        turn: -QUARTER,
+        glow: true,
+      }),
+    );
+  for (const along of chimneys)
+    out.push(
+      onWallKit(wall, "Prop_Chimney2", along, { out: eaves - 0.5 * r, y: top + 0.5 * scale, scale: scale * 0.42 }),
+    );
+}
+
+/** A round tower beyond the walls: stone, a lit slit or two facing the room, a slate cone. */
+function tower(bag: Bag, wall: Wall, along: number, behind: number, base: number, height: number, radius: number) {
+  const [x, , z] = onWallAt(wall, along, -behind, 0);
+  const top = base + height;
+  addTo(bag, "Stone", rod([x, base, z], [x, top, z], radius, 12));
+  addTo(bag, "Stone", rod([x, top, z], [x, top + 0.12, z], radius * 1.18, 12));
+  addTo(bag, "Slate", rod([x, top + 0.12, z], [x, top + 0.12 + radius * 2.6, z], radius * 1.14, 12, 0.01));
+  const slit = (y: number) =>
+    wall === "back"
+      ? box([radius * 0.26, radius * 0.7, 0.03], [x + radius * 0.3, y, z + radius * 0.96])
+      : box([0.03, radius * 0.7, radius * 0.26], [x + radius * 0.96, y, z + radius * 0.3]);
+  addTo(bag, "Window", slit(top - radius * 0.9), slit(top - radius * 2.4));
+}
+
+/**
+ * The palace beyond a room's walls: a lower wing of residences, then the upper terrace with its
+ * colonnade and its towers, the great tower among them standing for the keep (the fixed camera can't
+ * frame anything taller). The nearer terrace lights first as the restoration wave spreads (the
+ * region's victory: the quarter lights up street by street).
+ */
+function farPalace(bag: Bag, seed: number, start = 2.4, scale = 0.42): KitPlacement[] {
   const random = stream(seed);
   const out: KitPlacement[] = [];
+  const reach = 4.8;
+  const upper = start + 1.95;
+  const terrace = 0.8;
+  const big = scale * 1.3;
+  const column = (STOREY * big) / 9.016 / 0.5;
   for (const wall of ["back", "left"] as const) {
-    for (const row of [0, 1]) {
-      // The far street a little bigger and up the hill, so it shows over the near street's roofs.
-      const s = scale * (1 + row * 0.12);
-      const behind = start + row * 2.3;
-      const hill = row * 0.3;
-      let k = 0;
-      for (let a = -4.6 + random() * 0.4 + row * s; a < 4.6; a += 2 * s + random() * 0.12) {
-        // An alley between two houses now and then.
-        if (k > 0 && random() < 0.16) {
-          a += 0.7 * s;
-          k = 0;
-          continue;
-        }
-        const pick = random();
-        const face =
-          pick < 0.18
-            ? "Wall_UnevenBrick_Window_Wide_Round"
-            : pick < 0.6
-              ? "Wall_Plaster_Window_Thin_Round"
-              : "Wall_Plaster_Window_Wide_Round";
-        const chimney = random();
-        houseFront(out, wall, a, face, {
-          behind,
-          scale: s,
-          lift: (k % 2) * 0.05,
-          closed: random() < 0.2,
-          short: true,
-          y: hill + random() * 0.12,
-          chimney: chimney < 0.2 ? -1 : chimney > 0.8 ? 1 : 0,
-        });
-        k++;
-      }
+    // The lower wing, on the plinth of its terrace.
+    addTo(bag, "Stone", wallBlock(wall, 0, 0.04 - start, -0.3, [reach * 2, 0.6, 0.2]));
+    const fronts = Math.floor((reach * 2) / (2 * scale));
+    const dormers: number[] = [];
+    for (let k = 0; k < fronts; k++) {
+      const along = -reach + (k + 0.5) * 2 * scale;
+      const pick = random();
+      const face =
+        k % 5 === 2
+          ? "Wall_Plaster_Door_Round"
+          : pick < 0.5
+            ? "Wall_Plaster_Window_Thin_Round"
+            : "Wall_Plaster_Window_Wide_Round";
+      front(out, wall, along, face, { behind: start, scale, closed: random() < 0.15 });
+      if (k % 3 === 1) dormers.push(along);
     }
+    wing(out, bag, wall, { from: -reach, to: reach, behind: start, scale, dormers });
+
+    // The upper terrace: a wing of tall windows behind its colonnade.
+    addTo(bag, "Stone", wallBlock(wall, 0, -upper + 0.2, terrace / 2 - 0.3, [reach * 2, terrace + 0.6, 0.6]));
+    const bays = Math.floor((reach * 2) / (2 * big));
+    for (let k = 0; k < bays; k++) {
+      const along = -reach + (k + 0.5) * 2 * big;
+      front(out, wall, along, "Wall_Plaster_Window_Thin_Round", {
+        behind: upper,
+        scale: big,
+        y: terrace,
+        closed: random() < 0.1,
+      });
+      out.push(
+        onWallKit(wall, "column_small_01", along + big, {
+          kit: CATH,
+          out: -upper + 0.32,
+          y: terrace,
+          scale: column,
+        }),
+      );
+    }
+    addTo(bag, "Stone", wallBlock(wall, 0, -upper + 0.2, terrace + STOREY * big + 0.04, [reach * 2, 0.1, 0.5]));
+    wing(out, bag, wall, { from: -reach, to: reach, behind: upper, scale: big, y: terrace + 0.08 });
+
+    // The towers rise from the terrace's edge, the great one on the back wall's far side.
+    const towerAt = upper - 0.75;
+    tower(bag, wall, -3.5 + random() * 0.5, towerAt, terrace, 2.3, 0.3);
+    if (wall === "back") tower(bag, wall, 3.1, towerAt, terrace, 3.1, 0.55);
+    else tower(bag, wall, 3.3, towerAt, terrace, 2.6, 0.34);
   }
   return out;
 }
 
 // ---------------------------------------------------------------------------------------------------
-// The Observatory (the Knight's lodging in the town) and the other houses: small plaster interiors in
-// the square's own colours, timber framed, with floorboards, lanterns and a window or two.
+// The Observatory (the Knight's lodging in the quarter) and the other residences: plaster rooms over a
+// carved plinth, stone pilasters and cornice, dressed paving, lanterns and a tall window or two.
 
-/** A dark timber frame round a round-headed doorway (the doors read first in every room). */
+/** A carved stone frame round a round-headed doorway (the doors read first in every room). */
 function doorFrame(wall: Wall, along: number, behind = 0): KitPlacement {
   return onWallKit(wall, "DoorFrame_Round_WoodDark", along, { out: -behind - FACE });
 }
 
 /**
- * A timber beam along the top of both walls: the kit's walls are open on top (they wait for a roof),
+ * A stone cornice along the top of both walls: the kit's walls are open on top (they wait for a roof),
  * which showed as a black slot from the camera.
  */
 function wallCaps(bag: Bag) {
-  addTo(bag, "Timber", box([8.5, 0.1, 0.5], [0.05, 3.17, -4.19]));
-  addTo(bag, "Timber", box([0.5, 0.1, 8.19], [-4.19, 3.17, 0.155]));
+  addTo(bag, "Stone", box([8.5, 0.1, 0.5], [0.05, 3.17, -4.19]));
+  addTo(bag, "Stone", box([0.5, 0.1, 8.19], [-4.19, 3.17, 0.155]));
+  addTo(bag, "Stone", box([8.5, 0.06, 0.62], [0.05, 3.25, -4.13]));
+  addTo(bag, "Stone", box([0.62, 0.06, 8.19], [-4.13, 3.25, 0.155]));
 }
 
 /**
  * A room's two walls from the inside: the back wall with its doorway at x = 0 (between whole pieces,
  * the gaps filled by plain pieces set a hair behind), the left wall plain with a window or two.
- * Posts of timber cover each joint.
  */
 function interiorWalls(windowsBack: number[], windowsLeft: number[]): KitPlacement[] {
   const out: KitPlacement[] = [];
-  const plain = (at: number) => (Math.round(at) % 2 === 0 ? "Wall_Plaster_WoodGrid" : "Wall_Plaster_Straight");
   // Back wall: the doorway, plain pieces at either end, fillers between (behind, so their edges hide).
   out.push(wallPiece("back", "Wall_Plaster_Door_Round", 0));
   out.push(doorFrame("back", 0));
   for (const at of [-3, 3]) {
     out.push(
-      wallPiece("back", windowsBack.includes(at) ? "Wall_Plaster_Window_Wide_Round" : "Wall_Plaster_Straight", at),
+      wallPiece("back", windowsBack.includes(at) ? "Wall_Plaster_Window_Wide_Round" : "Wall_Plaster_Straight_Base", at),
     );
     if (windowsBack.includes(at)) out.push(onWallKit("back", "Window_Wide_Round1", at, { out: -FACE }));
   }
-  for (const at of [-1.55, 1.55]) out.push(wallPiece("back", "Wall_Plaster_Straight", at, -0.015));
+  for (const at of [-1.55, 1.55]) out.push(wallPiece("back", "Wall_Plaster_Straight_Base", at, -0.015));
   // Left wall: four pieces.
   for (const at of [-3, -1, 1, 3]) {
     const window = windowsLeft.includes(at);
-    out.push(wallPiece("left", window ? "Wall_Plaster_Window_Thin_Round" : plain(at), at));
+    out.push(wallPiece("left", window ? "Wall_Plaster_Window_Thin_Round" : "Wall_Plaster_Straight_Base", at));
     if (window) out.push(onWallKit("left", "Window_Thin_Round1", at, { out: -FACE }));
   }
-  // Timber posts on the joints and in the corner.
-  for (const x of [-2, -1, 1, 2]) out.push(onWallKit("back", "Corner_Exterior_Wood", x, { out: 0.02 }));
-  for (const z of [-2, 0, 2]) out.push(onWallKit("left", "Corner_Exterior_Wood", z, { out: 0.02 }));
-  out.push({ kit: VILLAGE, piece: "Corner_ExteriorWide_Wood", position: [-3.95, 0, -3.95] });
   return out;
+}
+
+/** The pilasters on an interior's joints, and the pier in its corner. */
+function interiorStone(bag: Bag) {
+  for (const x of [-2, -1, 1, 2]) pilaster(bag, "back", x);
+  for (const z of [-2, 0, 2]) pilaster(bag, "left", z);
+  addTo(bag, "Stone", box([0.3, STOREY, 0.3], [-3.92, STOREY / 2, -3.92]));
 }
 
 const OBSERVATORY_KIT: KitPlacement[] = [
@@ -331,7 +435,7 @@ const OBSERVATORY_KIT: KitPlacement[] = [
   // A crate left by the wall, a broken pot, loose bricks (one weighs down the Knight's letter). No
   // whole pots (0052).
   prop("Vase_Rubble_Medium", 3.0, -3.2, 2.2),
-  prop("Prop_Crate", 3.0, -1.9, 0.5, 0.55, VILLAGE),
+  prop("Crate_Wooden", 3.0, -1.9, 0.5, 0.6),
   prop("Prop_Brick1", 1.9, 2.2, 0.7, undefined, VILLAGE),
   prop("Prop_Brick2", 1.75, 2.55, 2.0, undefined, VILLAGE),
 ];
@@ -345,12 +449,13 @@ export function townObservatory(_secondDoor: boolean) {
   const bag: Bag = {};
   const glows: Glow[] = [];
   wallCaps(bag);
+  interiorStone(bag);
   wallLantern(bag, glows, "back", -2.0, 1.75);
   wallLantern(bag, glows, "left", 0.0, 1.75);
   return {
     placements: townObservatoryPieces(_secondDoor),
-    kitPieces: [...OBSERVATORY_KIT, ...farTown(5)],
-    extras: [...boards(1103), ...extras(bag)],
+    kitPieces: [...OBSERVATORY_KIT, ...farPalace(bag, 5)],
+    extras: [...paving(1103), ...extras(bag)],
     glows,
   };
 }
@@ -363,19 +468,20 @@ export function townHouse() {
   const bag: Bag = {};
   const glows: Glow[] = [];
   wallCaps(bag);
+  interiorStone(bag);
   wallLantern(bag, glows, "back", 2.4, 1.75);
   wallLantern(bag, glows, "left", 0.0, 1.75, 1.4);
   return {
     placements: TOWN_HOUSE_PIECES,
-    kitPieces: [...HOUSE_KIT, ...farTown(11)],
-    extras: [...boards(2207), ...extras(bag)],
+    kitPieces: [...HOUSE_KIT, ...farPalace(bag, 11)],
+    extras: [...paving(2207), ...extras(bag)],
     glows,
   };
 }
 
 // ---------------------------------------------------------------------------------------------------
-// The town square (a switch): every doorway is a house's front door; the other places are house
-// fronts with a window. Gable roofs above, lamp posts in the square, cobbles underfoot.
+// The town square (a switch): every doorway is a residence's front door; the other places are fronts
+// with a window. One wing along each side, lamp posts in the square, cobbles underfoot.
 
 export function townSquare(used: { wall: Wall; at: number }[]) {
   const bag: Bag = {};
@@ -393,30 +499,32 @@ export function townSquare(used: { wall: Wall; at: number }[]) {
         : k % 2 === 0
           ? "Wall_Plaster_Window_Wide_Round"
           : "Wall_Plaster_Window_Thin_Round";
-      houseFront(kit, wall, at, face, { lift: (k % 2) * 0.04, closed: !door && k % 4 === 3 });
+      front(kit, wall, at, face, { closed: !door && k % 4 === 3 });
       if (door) kit.push(doorFrame(wall, at));
       k++;
     }
+    wing(kit, bag, wall, { dormers: [-3, -1, 1, 3], chimneys: [wall === "back" ? -2 : 2] });
+    for (const at of [-2, 0, 2]) pilaster(bag, wall, at);
   }
   // A barrel and a crate by the houses (the street's, not a home's), a broken pot. No whole pots (0052).
   kit.push(prop("Barrel", 2.45, -3.55, 0.4));
   kit.push(prop("Crate_Wooden", -3.5, 2.5, 0.3));
   kit.push(prop("Vase_Rubble_Medium", 3.2, 2.9, 1.2));
-  // The corner where the two rows of houses meet.
-  addTo(bag, "Timber", box([0.45, STOREY + 0.2, 0.45], [-4.15, (STOREY + 0.2) / 2, -4.15]));
+  // The corner where the two rows of residences meet.
+  addTo(bag, "Stone", box([0.45, STOREY + 0.2, 0.45], [-4.15, (STOREY + 0.2) / 2, -4.15]));
   // Lamp posts in the square's two open corners, beyond the end doors as the camera sees them (never
   // in front of a doorway or a board); none in the foreground, where one cut the view in two.
   lampPost(bag, glows, 3.95, -3.65);
   lampPost(bag, glows, -3.65, 3.95);
-  return { kitPieces: [...kit, ...farTown(23, 3.6, 0.5)], extras: [...cobbles(3301), ...extras(bag)], glows };
+  return { kitPieces: [...kit, ...farPalace(bag, 23, 3.6, 0.5)], extras: [...cobbles(3301), ...extras(bag)], glows };
 }
 
 export const TOWN_SQUARE_PIECES: Placement[] = [];
 
 // ---------------------------------------------------------------------------------------------------
-// A corridor (0081): a cobbled lane between houses (region-3 brief). House fronts along the back,
-// windows lit when restored, wall lanterns, the rest of the town's roofs beyond; the rune-line runs
-// down the middle of the lane. Room coordinates: back wall on z = −4, x from −5 to 5.
+// A corridor (0081): a cobbled lane along a wing of residences (region-3 brief, 0095). Fronts along the
+// back, windows lit when restored, wall lanterns, the palace beyond; the rune-line runs down the
+// middle of the lane. Room coordinates: back wall on z = −4, x from −5 to 5.
 
 export function townCorridor(): CorridorDressing {
   const bag: Bag = {};
@@ -430,13 +538,11 @@ export function townCorridor(): CorridorDressing {
     "Wall_Plaster_Window_Wide_Round",
   ];
   [-4, -2, 0, 2, 4].forEach((at, k) => {
-    houseFront(kit, "back", at, faces[k] as string, {
-      lift: (k % 2) * 0.04,
-      closed: k === 3,
-      chimney: k === 1 ? 1 : 0,
-    });
+    front(kit, "back", at, faces[k] as string, { closed: k === 3 });
   });
-  // The lane's one house door is shut (a strapped door in its frame): the way on is the arches at the
+  wing(kit, bag, "back", { from: -5, to: 5, dormers: [-4, -2, 2, 4], chimneys: [-1] });
+  for (const at of [-3, -1, 1, 3]) pilaster(bag, "back", at);
+  // The lane's one residence door is shut (a strapped door in its frame): the way on is the arches at the
   // ends, never a dark doorway in the middle of the lane.
   kit.push(doorFrame("back", 0));
   kit.push(onWallKit("back", "Door_4_Round", -0.53, { out: -0.2 }));
@@ -446,7 +552,7 @@ export function townCorridor(): CorridorDressing {
   wallLantern(bag, glows, "back", 3.0, 1.75);
   return {
     placements: [],
-    kitPieces: [...kit, ...farTown(41, 3.6, 0.5)],
+    kitPieces: [...kit, ...farPalace(bag, 41, 3.6, 0.5)],
     extras: [...corridorFloor(3, "Cobble", 5301), ...extras(bag)],
     glows,
   };

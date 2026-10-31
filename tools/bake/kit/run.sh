@@ -1,38 +1,49 @@
 #!/usr/bin/env bash
-# Bakes every layout in in/ into out/, then checks the results.
-#   ./run.sh [--quality draft|final] [--only id,id] [--force] [--cpu]
-# Resumable: rerun after a failure or an interruption and finished layouts are skipped.
+# One command for the whole job: unpacks the Blender in this kit, bakes every layout in in/ into out/
+# at best quality on the CPU, checks the results and, when they pass, packs wirelight-bake-results.zip.
+#   bash run.sh [--quality draft|final|best] [--only id,id] [--force]
+# Resumable: run it again after a stop or a failure and finished layouts are skipped.
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 cd "$here"
 
-find_blender() {
-  if [[ -n "${BLENDER:-}" && -x "${BLENDER}" ]]; then echo "$BLENDER"; return; fi
-  if command -v blender >/dev/null 2>&1; then command -v blender; return; fi
-  for b in /opt/blender*/blender /usr/local/blender*/blender "$HOME"/blender*/blender "$HOME"/Applications/blender*/blender \
-    /snap/bin/blender /Applications/Blender.app/Contents/MacOS/Blender; do
-    [[ -x "$b" ]] && { echo "$b"; return; }
-  done
-  return 1
-}
-
-blender="$(find_blender)" || { echo "Blender not found: install Blender 4.2 or later, or set BLENDER=/path/to/blender"; exit 2; }
-version="$("$blender" --version 2>/dev/null | head -1)"
-echo "Using $blender ($version)"
-major="$(echo "$version" | sed -nE 's/^Blender ([0-9]+)\.([0-9]+).*/\1/p')"
-minor="$(echo "$version" | sed -nE 's/^Blender ([0-9]+)\.([0-9]+).*/\2/p')"
-if [[ -n "$major" ]] && (( major < 4 || (major == 4 && minor < 2) )); then
-  echo "Blender $major.$minor is too old: 4.2 or later is needed"; exit 2
+archive="$(ls blender/blender-*-linux-x64.tar.xz | head -1)"
+bundled="$here/blender/$(basename "$archive" .tar.xz)/blender"
+if [[ ! -x "$bundled" ]]; then
+  echo "Unpacking $archive…"
+  tar -xf "$archive" -C blender
 fi
-if command -v nvidia-smi >/dev/null 2>&1; then nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader || true; fi
+
+# $BLENDER if set, else the kit's own, else one already on this machine.
+works() { [[ -n "$1" ]] && "$1" -b --factory-startup --version >/dev/null 2>&1; }
+blender=""
+for candidate in "${BLENDER:-}" "$bundled" "$(command -v blender || true)"; do
+  if works "$candidate"; then blender="$candidate"; break; fi
+done
+if [[ -z "$blender" ]]; then
+  echo "Blender won't start. Its libraries are probably missing; this usually fixes it:"
+  echo "  sudo apt-get install -y libx11-6 libxi6 libxxf86vm1 libxfixes3 libxrender1 libxkbcommon0 libsm6 libgl1 libegl1"
+  "$bundled" --version 2>&1 | tail -3 || true
+  exit 2
+fi
+echo "Using $blender ($("$blender" -b --factory-startup --version 2>/dev/null | grep -m1 '^Blender'))"
 
 mkdir -p out
 start=$(date +%s)
+# Keep the machine awake through a long run.
+awake=()
+command -v systemd-inhibit >/dev/null 2>&1 && awake=(systemd-inhibit --what=idle:sleep --who=wirelight-bake --why="Lightmap bake")
 # Blender's own exit status (not the filter's): read PIPESTATUS before anything else runs.
 set +e
-"$blender" -b --factory-startup --python bake.py -- --in in --out out "$@" 2>&1 | tee -a out/bake.log | grep --line-buffered -E '^\[bake\]|Error|error'
+"${awake[@]}" "$blender" -b --factory-startup --python bake.py -- --in in --out out --quality best --cpu "$@" 2>&1 |
+  tee -a out/bake.log | grep --line-buffered -E '^\[bake\]|Traceback'
 status=${PIPESTATUS[0]}
 set -e
 echo "Bake finished in $(( ($(date +%s) - start) / 60 )) min (exit $status)"
-"$blender" -b --factory-startup --python verify.py -- --in in --out out 2>&1 | grep -E '^\[verify\]' || true
-exit "$status"
+"$blender" -b --factory-startup --python verify.py -- --in in --out out 2>&1 | grep -E '^\[verify\]' | tee -a out/bake.log || true
+if [[ "$status" == 0 ]] && grep -q '"ok": true' out/report.json; then
+  "$blender" -b --factory-startup --python pack.py 2>&1 | grep -E '^\[pack\]' | tee -a out/bake.log
+else
+  echo "Not packed: fix what's listed above, then run this again."
+  exit 1
+fi

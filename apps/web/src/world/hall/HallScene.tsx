@@ -4,9 +4,10 @@ import { useSession } from "../../engine/store";
 import { useBarred } from "../observatory/ObservatoryScene";
 import { useRegion } from "../region";
 import { Board, Desk } from "../room/Furniture";
-import { Guardian, SIDE_PLACE } from "../room/Guardian";
+import { Guardian } from "../room/Guardian";
 import { doorGeometry } from "../room/layout";
 import { MachineScene } from "../room/MachineScene";
+import { SIDE_PLACE } from "../room/standing";
 import { TownSquare } from "../town/TownSquare";
 import { HALL_SLOTS, hallLayout } from "./layout";
 

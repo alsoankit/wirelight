@@ -3,8 +3,9 @@ import { useBarred } from "../observatory/ObservatoryScene";
 import { Runes } from "../observatory/Runes";
 import { useRegion } from "../region";
 import { Board } from "../room/Furniture";
-import { Guardian, SIDE_PLACE } from "../room/Guardian";
+import { Guardian } from "../room/Guardian";
 import { MachineScene } from "../room/MachineScene";
+import { SIDE_PLACE } from "../room/standing";
 import { houseLayout } from "./layout";
 import { HouseTraits } from "./Traits";
 

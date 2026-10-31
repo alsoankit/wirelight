@@ -181,7 +181,7 @@ function worksByTheDoor(bag: Bag, kind: number) {
 /**
  * The Lantern Town's version (region-3 brief, 0052): what the townsfolk left is the town's own work,
  * never a home's furniture: the post's sack and spilled letters, the lamplighter's ladder and spare
- * lantern frames, crates and a sack, or a fallen shutter and broken roof tiles; by the door a ladder
+ * lantern frames, crates and a sack, or a fallen shutter and broken roof slates; by the door a ladder
  * against the wall, ledgers, an empty lantern frame or a bundle of letters.
  */
 function lettersAt(bag: Bag, x: number, z: number, n: number, seed: number) {
@@ -241,7 +241,7 @@ function lanternFrame(bag: Bag, at: V3, onSide = false) {
 function townLeftBehind(bag: Bag, kind: number) {
   const [cx, cz] = [2.85, -1.5];
   if (kind === 0) {
-    // The post's sack, slumped, its letters spilled across the boards.
+    // The post's sack, slumped, its letters spilled across the floor.
     addTo(bag, "Cloth", rod([cx, 0, cz], [cx, 0.42, cz], 0.26, 10, 0.16));
     addTo(bag, "Cloth", rod([cx, 0.42, cz], [cx + 0.05, 0.55, cz - 0.03], 0.09, 8, 0.05));
     lettersAt(bag, cx - 0.55, cz + 0.35, 7, 3);
@@ -257,7 +257,7 @@ function townLeftBehind(bag: Bag, kind: number) {
     addTo(bag, "Timber", box([0.55, 0.45, 0.55], [cx - 0.3, 0.225, cz + 0.6], [0, 0.6, 0]));
     addTo(bag, "Cloth", rod([cx + 0.4, 0, cz + 0.7], [cx + 0.4, 0.5, cz + 0.7], 0.22, 8, 0.12));
   } else {
-    // A shutter fallen from its window, and broken roof tiles.
+    // A shutter fallen from its window, and broken roof slates.
     for (let i = 0; i < 4; i++)
       addTo(bag, "Timber", box([0.15, 0.04, 1.1], [cx - 0.24 + i * 0.16, 0.03, cz], [0, 0.35, 0]));
     addTo(bag, "Timber", box([0.66, 0.05, 0.07], [cx, 0.07, cz - 0.3], [0, 0.35, 0]));
@@ -269,7 +269,7 @@ function townLeftBehind(bag: Bag, kind: number) {
     ] as const)
       addTo(
         bag,
-        "Roof",
+        "Slate",
         rod([cx + dx, 0.04, cz + dz], [cx + dx + Math.cos(a) * 0.3, 0.04, cz + dz + Math.sin(a) * 0.3], 0.06, 6),
       );
   }

@@ -10,6 +10,7 @@ import { type Corridor, useSession } from "../../engine/store";
 import { isTyping } from "../../play/keys";
 import { useReducedMotion } from "../../progress/motion";
 import { useQuality } from "../../render/quality";
+import { lampsBaked } from "../bake/lightmap";
 import { Dust } from "../Dust";
 import { StaticRoom } from "../kit/StaticRoom";
 import { KitRoom } from "../kits/KitRoom";
@@ -207,7 +208,11 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
       <CorridorCamera glide={glide} onArrive={arrive} distance={17 * (END / CORRIDOR.half) ** 0.8} />
       <color attach="background" args={[look.background]} />
       <RuinDial level={won} origin={[xOf(corridor.from), 1, Z]} />
-      <RoomLights glows={dressing.glows} region={region} />
+      <RoomLights
+        glows={dressing.glows}
+        region={region}
+        baked={lampsBaked(placements, dressing.extras, dressing.kitPieces, region)}
+      />
       <Suspense fallback={null}>
         <StaticRoom region={region} placements={placements} extras={dressing.extras} toCamera={VIEW_DIRECTION} />
       </Suspense>

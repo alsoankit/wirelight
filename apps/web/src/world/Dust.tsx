@@ -3,14 +3,15 @@ import { AdditiveBlending } from "three";
 import { color, float, hash, instanceIndex, mix, mod, positionLocal, sin, time, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { ruin } from "./ruin";
-import { windDirection, windTravel } from "./wind";
 
-// Dust in the air (0021): faint motes that hang and drift, carried along when a gust moves through.
+// Dust in the air (0021): faint motes that hang and drift slowly across the room (0101: no wind); through.
 // Most visible in ruin, where the moonlight catches them; barely there when restored. Background only.
 
 type Bounds = { min: [number, number, number]; max: [number, number, number] };
 
 const COUNT = 36;
+/** How the motes drift, metres a second: slow enough that nothing reads as wind. */
+const DRIFT = vec3(0.05, 0, 0.04);
 
 export function Dust({ bounds, colour = "#c8d2e6" }: { bounds: Bounds; colour?: string }) {
   const material = useMemo(() => {
@@ -29,9 +30,9 @@ export function Dust({ bounds, colour = "#c8d2e6" }: { bounds: Bounds; colour?: 
     const [x1, y1, z1] = bounds.max;
     const size = vec3(x1 - x0, y1 - y0, z1 - z0);
     const start = vec3(x0, y0, z0);
-    // Home, pushed downwind by how far the air has moved, wrapped to stay inside the room.
+    // Home, drifting slowly across the room, wrapped to stay inside it.
     const home = start.add(vec3(h1, h2, h3).mul(size));
-    const carried = home.add(windDirection.mul(windTravel.mul(h4.mul(0.6).add(0.7))));
+    const carried = home.add(DRIFT.mul(time.mul(h4.mul(0.6).add(0.7))));
     const wrapped = start.add(mod(carried.sub(start), size));
     // A slow hang and sink of its own.
     const hang = vec3(0, sin(time.mul(0.3).add(h4.mul(6.28))).mul(0.12), 0);

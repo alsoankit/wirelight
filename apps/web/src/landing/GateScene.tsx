@@ -6,7 +6,6 @@ import { useQuality } from "../render/quality";
 import { Fireflies } from "../world/Fireflies";
 import { makeFlagstones } from "../world/kit/floor";
 import { type Extra, StaticRoom } from "../world/kit/StaticRoom";
-import { WindDriver } from "../world/WindDriver";
 import { approachPose, DESCENT_SECONDS, fadeOut } from "./approach";
 import { Bird } from "./Bird";
 import { Doors } from "./Doors";
@@ -30,7 +29,7 @@ import { HORIZON, Sky } from "./Sky";
 // The landing's 3D scene (ONB-01, 0088): calm, hauntingly beautiful. The outer gate of the Palace of
 // a Thousand Doors at the edge of a night forest, its doors shut, the palace rising on its hill
 // behind. Moonlight is baked into the static gate, trees and ground once at load (0053); the sky,
-// mist, rune-line, bird, fireflies, wind and the palace's windows move. On the way in (the approach,
+// mist, rune-line, bird, fireflies and the palace's windows move. On the way in (the approach,
 // ONB-05) the doors open and the camera walks through them toward the palace.
 
 const PATH_HALF_WIDTH = 1.05;
@@ -188,7 +187,6 @@ export function GateScene({ descent }: { descent: Descent | null }) {
       <RuneLine points={RUNES} />
       <Mist />
       <Bird />
-      <WindDriver />
       {quality.fireflies && <Fireflies bounds={FIREFLIES} />}
       {quality.bloom && <CinematicPost />}
       <Fade progress={progress} />

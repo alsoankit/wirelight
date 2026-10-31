@@ -6,6 +6,7 @@ import type { Object3D } from "three";
 import { useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { useQuality } from "../../render/quality";
+import { lampsBaked } from "../bake/lightmap";
 import { Dust } from "../Dust";
 import { Fireflies } from "../Fireflies";
 import { StaticRoom } from "../kit/StaticRoom";
@@ -21,7 +22,6 @@ import { LOOKS, useRegion } from "../region";
 import { Gears } from "../regions/Gears";
 import { Haze } from "../regions/Haze";
 import { Steam } from "../regions/Steam";
-import { WindDriver } from "../WindDriver";
 import { BossPiece } from "./BossPiece";
 import { type DoorInfo, Doorway, EmptyDoor } from "./Doorway";
 import { doorGeometry, type RoomLayout, type Vec3 } from "./layout";
@@ -99,12 +99,14 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
   // Restoration spreads from the doorway (the door and its corridor are what rooms fix first).
   const origin: Vec3 = first ? [doorGeometry(first).doorway[0], 1, doorGeometry(first).doorway[2]] : [0, 1, 0];
 
+  const baked = useMemo(() => lampsBaked(layout.placements, layout.extras, layout.kitPieces, region), [layout, region]);
+
   return (
     <>
       <RoomCamera target={[0, 1.1, -0.6]} distance={19} settleFrom={arriving ? 9 : 0} />
       <color attach="background" args={[look.background]} />
       <RuinDial level={ruinLevel} origin={origin} />
-      <RoomLights glows={layout.glows ?? glows} region={region} />
+      <RoomLights glows={layout.glows ?? glows} region={region} baked={baked} />
       <Suspense fallback={null}>
         <StaticRoom region={region} placements={layout.placements} extras={layout.extras} toCamera={VIEW_DIRECTION} />
       </Suspense>
@@ -123,7 +125,6 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
           pools={layout.beams.pools}
         />
       )}
-      <WindDriver />
       {region === 4 && <Haze haze={quality.moonbeams} glass={layout.stainedGlass} />}
       {quality.fireflies && look.fireflies && <Fireflies bounds={layout.air} colour={look.fireflies} />}
       {quality.dust && <Dust bounds={layout.air} colour={look.dust} />}

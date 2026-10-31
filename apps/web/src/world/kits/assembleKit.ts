@@ -13,6 +13,7 @@ import {
   Vector3,
 } from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { CARVED } from "./carvedKit";
 import type { KitPlacement } from "./placement";
 
 // A room's textured kit pieces, merged into one geometry per material (glowing pieces apart from the
@@ -127,14 +128,15 @@ const WHITE = new Color(1, 1, 1);
 
 /**
  * Merges the static pieces. `scenes`: each piece's loaded scene by its URL; `urlOf` and `scaleOf`
- * read the catalogue. Skinned pieces are skipped (see isSkinned).
+ * read the catalogue. Skinned pieces are skipped (see isSkinned). Without `toCamera`, nothing is culled
+ * (the bake's shadow casters).
  */
 export function assembleKit(
   scenes: Map<string, Object3D | undefined>,
   pieces: KitPlacement[],
   urlOf: (p: KitPlacement) => string | undefined,
   scaleOf: (p: KitPlacement) => number,
-  toCamera: Vector3,
+  toCamera: Vector3 | null,
 ): KitPart[] {
   const byKey = new Map<string, Omit<KitPart, "geometry"> & { parts: BufferGeometry[] }>();
   const placement = new Matrix4();
@@ -152,7 +154,8 @@ export function assembleKit(
       if (p.tint) tint.multiply(new Color(p.tint));
       const part = floatCopy(o.geometry as BufferGeometry, tint);
       part.applyMatrix4(world.multiplyMatrices(placement, o.matrixWorld));
-      const name = material.name;
+      // Reworked models all call their material "carved"; each has its own maps.
+      const name = p.kit === CARVED ? `carved:${p.piece}` : material.name;
       const glow = !!p.glow;
       const key = glow ? `${name}|glow` : name;
       const entry = byKey.get(key) ?? { key, kit: p.kit, name, glow, original: material, parts: [] };
@@ -165,7 +168,7 @@ export function assembleKit(
     const geometry = mergeGeometries(parts);
     for (const part of parts) part.dispose();
     if (!geometry) continue;
-    const drawn = THIN_MATERIAL.test(entry.name) ? geometry : facingCamera(geometry, toCamera);
+    const drawn = !toCamera || THIN_MATERIAL.test(entry.name) ? geometry : facingCamera(geometry, toCamera);
     // A material whose every face looks away from the camera leaves nothing to draw or bake (an
     // empty glTF primitive is invalid: Blender refuses the whole layout).
     if (drawn.getAttribute("position").count === 0) continue;

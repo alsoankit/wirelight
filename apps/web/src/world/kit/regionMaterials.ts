@@ -6,12 +6,9 @@ import {
   mix,
   mx_noise_float,
   normalWorld,
-  positionLocal,
   positionWorld,
-  sin,
   smoothstep,
   step,
-  time,
   vec3,
 } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
@@ -19,7 +16,6 @@ import { bakedLightNodes, type Lightmaps } from "../bake/lightmap";
 import { LOOKS, type RegionId } from "../region";
 import { ruinHere as ruin } from "../ruin";
 import { TOWN_SWATCHES } from "../town/palette";
-import { BREEZE, gust, windDirection } from "../wind";
 
 // Restyles a kit piece in its region's palette (world/art-briefs/region-*.md). Every kit material with
 // the same name shares one node material per region, whose colour blends from the ruined palette to
@@ -41,7 +37,6 @@ type Swatch = {
   ember?: number; // how much of the glow stays in ruin (default 0.15)
   aged?: boolean; // stone: weathering, grime and creeping moss
   verdigris?: boolean; // old brass: green-grey patina in patches
-  sway?: number; // plants: how far the top bends in a full gust, in metres per metre of height
   patchy?: string; // moss and ivy: broken into patches, the stone (this swatch) showing between them
   coursed?: [number, number]; // stone laid in courses on walls: [course height, block length] in metres
 };
@@ -59,8 +54,8 @@ const REGION_1: Record<string, Swatch> = {
   Black: { ruined: "#16181d", restored: "#221a14", roughness: 1 },
   // Moss on the walls comes in patches, never whole flat-green bricks (playtest).
   Leaf_Texture: { ruined: "#4a524b", restored: "#4f7a40", roughness: 1, patchy: "Highlights" },
-  Texture_Leaves: { ruined: "#3f4a42", restored: "#3E6B3A", roughness: 1, sway: 0.06 },
-  Green: { ruined: "#4d564d", restored: "#5f8f4c", roughness: 1, sway: 0.14, patchy: "Highlights" },
+  Texture_Leaves: { ruined: "#3f4a42", restored: "#3E6B3A", roughness: 1 },
+  Green: { ruined: "#4d564d", restored: "#5f8f4c", roughness: 1, patchy: "Highlights" },
   Bark: { ruined: "#3d3833", restored: "#5c4330", roughness: 1 },
   // The roots pushing in through the walls (regions/roots.ts): dry and grey in ruin (brief), a living
   // brown restored, moss gathering on their tops and where they lie on the floor.
@@ -222,15 +217,6 @@ function nodeMaterial(swatch: Swatch, region: RegionId, baked = false, lightmaps
     // Centuries of damp: patina gathers in patches across old brass.
     const patina = smoothstep(0.05, 0.4, mx_noise_float(positionWorld.mul(2.6).add(7.3))).mul(0.7);
     tint = mix(tint, mix(color(PATINA_RESTORED), color(PATINA_RUINED), ruin), patina);
-  }
-  if (swatch.sway) {
-    // Plants lean with the wind, more toward their tops, with a slow ripple of their own.
-    const height = positionLocal.y.clamp(0, 2);
-    const ripple = sin(time.mul(2.1).add(positionLocal.x.mul(3)).add(positionLocal.z.mul(2)))
-      .mul(0.4)
-      .add(0.6);
-    const lean = gust.add(BREEZE).mul(swatch.sway).mul(height).mul(ripple);
-    m.positionNode = positionLocal.add(vec3(windDirection.x, 0, windDirection.z).mul(lean));
   }
   m.colorNode = tint;
   m.roughness = swatch.roughness ?? 0.9;

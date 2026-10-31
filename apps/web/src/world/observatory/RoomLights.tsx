@@ -22,7 +22,16 @@ function pair(p: { ruined: string; restored: string }) {
   return { ruined: new Color(p.ruined), restored: new Color(p.restored) };
 }
 
-export function RoomLights({ glows, region = 1 }: { glows: Glow[]; region?: RegionId }) {
+export function RoomLights({
+  glows,
+  region = 1,
+  baked = false,
+}: {
+  glows: Glow[];
+  region?: RegionId;
+  /** The room's bake holds its lamps (0101): no live lamps, only the ambient fill and fog. */
+  baked?: boolean;
+}) {
   const { scene } = useThree();
   const c = useMemo(() => {
     const look = LOOKS[region];
@@ -68,7 +77,7 @@ export function RoomLights({ glows, region = 1 }: { glows: Glow[]; region?: Regi
     <>
       <ambientLight ref={ambient} />
       <hemisphereLight ref={fill} />
-      {glows.map((glow, i) => (
+      {(baked ? [] : glows).map((glow, i) => (
         <pointLight
           // biome-ignore lint/suspicious/noArrayIndexKey: a fixed list of lights
           key={i}

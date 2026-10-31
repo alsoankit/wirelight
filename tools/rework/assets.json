@@ -232,5 +232,726 @@
     "height": 4.0,
     "licence": "CC BY 4.0",
     "credit": "Ancient-Ruin C by XX-XX (AI-generated)"
+  },
+  {
+    "slug": "chandelier-03",
+    "zip": "5-palaces/Chandelier_03_4k.blend.zip",
+    "role": "prop",
+    "tris": 6000,
+    "height": 1.04,
+    "licence": "CC0",
+    "credit": "Chandelier 03, Poly Haven"
+  },
+  {
+    "slug": "chandelier-lantern",
+    "zip": "5-palaces/lantern_chandelier_01_4k.blend.zip",
+    "role": "prop",
+    "tris": 4000,
+    "height": 0.88,
+    "licence": "CC0",
+    "credit": "Lantern Chandelier 01, Poly Haven"
+  },
+  {
+    "slug": "castle-pillar",
+    "role": "statue",
+    "tris": 3000,
+    "height": 3.37,
+    "only": ["pCube733"],
+    "textures": {
+      "PillarRound_001": "PillarRound",
+      "Arc_001": "DefaltMT",
+      "Ceiling_001": "lambert1",
+      "FirePlace_001": "lambert1"
+    },
+    "folder": "kit-castle",
+    "zip": "5-palaces/modular-castle-assets-material.zip",
+    "licence": "CC BY 4.0",
+    "credit": "Modular Castle Assets Material by Hamidreza Oloumi"
+  },
+  {
+    "slug": "castle-arch",
+    "role": "ruin",
+    "tris": 1500,
+    "height": 1.92,
+    "only": ["pCube740"],
+    "textures": {
+      "PillarRound_001": "PillarRound",
+      "Arc_001": "DefaltMT",
+      "Ceiling_001": "lambert1",
+      "FirePlace_001": "lambert1"
+    },
+    "folder": "kit-castle",
+    "zip": "5-palaces/modular-castle-assets-material.zip",
+    "licence": "CC BY 4.0",
+    "credit": "Modular Castle Assets Material by Hamidreza Oloumi"
+  },
+  {
+    "slug": "gothic-bay",
+    "folder": "kit-gothic-structures",
+    "zip": "3-cathedral/gothic-structures-round-version.zip",
+    "role": "ruin",
+    "tris": 6000,
+    "height": 4.0,
+    "wedge": [-10, 30],
+    "licence": "CC BY 4.0",
+    "credit": "Gothic Structures - Round Version by Samuel F. Angrick-Johanns (Oneironauticus)"
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-arch",
+    "only": ["Stone_Archway"],
+    "height": 2
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-arch-broken",
+    "only": ["Stone_Archway_Broken"],
+    "height": 2
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-arch-tall",
+    "only": ["Tall_Pointed_Stone_Archway"],
+    "height": 4
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-wall-window-broken",
+    "only": ["Small_Stone_Wall_Window_Broken"],
+    "height": 2
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-wall-broken",
+    "only": ["Small_Stone_Wall_Plain_Broken"],
+    "height": 1.5
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-bridge-broken",
+    "only": ["Stone_Bridge_Arch_Broken"],
+    "height": 2
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-stairs",
+    "only": ["Stone_Stairs"],
+    "height": 2
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-stairs-broken",
+    "only": ["Stone_Stairs_Broken"],
+    "height": 2
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-pillar",
+    "only": ["Stone_Decorative_Pillar"],
+    "height": 2
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-pillar-broken",
+    "only": ["Stone_Decorative_Pillar_Broken"],
+    "height": 1.2
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-pillar-tall-broken",
+    "only": ["Stone_Pillar_Tall_Broken"],
+    "height": 2.8
+  },
+  {
+    "folder": "kit-temple",
+    "zip": "4-ruins/temple-ruins-asset-pack.zip",
+    "file": "source/Environment_Asset_Pack.fbx",
+    "role": "statue",
+    "tris": 4000,
+    "textures": {
+      "M_Stone1": "M_Stone1",
+      "M_Stone2": "M_Stone2"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Temple Ruins Asset Pack by Bl4ckGh0st",
+    "slug": "temple-pedestal-broken",
+    "only": ["Stone_Pedestal_Broken"],
+    "height": 0.64
+  },
+  {
+    "folder": "rock-moss-01",
+    "zip": "4-ruins/rock_moss_set_01_4k.blend.zip",
+    "role": "prop",
+    "tris": 3000,
+    "height": 1.0,
+    "licence": "CC0",
+    "credit": "Rock Moss Set 01, Poly Haven",
+    "slug": "rock-moss-a",
+    "only": ["rock_moss_set_01_rock01"]
+  },
+  {
+    "folder": "rock-moss-01",
+    "zip": "4-ruins/rock_moss_set_01_4k.blend.zip",
+    "role": "prop",
+    "tris": 3000,
+    "height": 1.0,
+    "licence": "CC0",
+    "credit": "Rock Moss Set 01, Poly Haven",
+    "slug": "rock-moss-b",
+    "only": ["rock_moss_set_01_rock04"]
+  },
+  {
+    "folder": "rock-moss-01",
+    "zip": "4-ruins/rock_moss_set_01_4k.blend.zip",
+    "role": "prop",
+    "tris": 3000,
+    "height": 1.0,
+    "licence": "CC0",
+    "credit": "Rock Moss Set 01, Poly Haven",
+    "slug": "rock-moss-c",
+    "only": ["rock_moss_set_01_rock05"]
+  },
+  {
+    "folder": "kit-dungeon",
+    "zip": "4-ruins/modular dungeon kit v1.0.zip",
+    "role": "statue",
+    "tris": 2000,
+    "licence": "CC0",
+    "credit": "Modular Dungeon Kit v1.0 by SigilsVault",
+    "slug": "dungeon-stairs",
+    "file": "modular dungeon kit/Modular Dungeon Pieces/GLB format/stairs_large_01.glb",
+    "height": 3
+  },
+  {
+    "folder": "kit-dungeon",
+    "zip": "4-ruins/modular dungeon kit v1.0.zip",
+    "role": "statue",
+    "tris": 2000,
+    "licence": "CC0",
+    "credit": "Modular Dungeon Kit v1.0 by SigilsVault",
+    "slug": "dungeon-door-arched",
+    "file": "modular dungeon kit/Modular Dungeon Pieces/GLB format/door_arched_01_001.glb",
+    "height": 3
+  },
+  {
+    "folder": "kit-dungeon",
+    "zip": "4-ruins/modular dungeon kit v1.0.zip",
+    "role": "statue",
+    "tris": 2000,
+    "licence": "CC0",
+    "credit": "Modular Dungeon Kit v1.0 by SigilsVault",
+    "slug": "dungeon-pillar",
+    "file": "modular dungeon kit/Modular Dungeon Pieces/GLB format/pillar_large_01.glb",
+    "height": 6
+  },
+  {
+    "folder": "kit-dungeon",
+    "zip": "4-ruins/modular dungeon kit v1.0.zip",
+    "role": "statue",
+    "tris": 2000,
+    "licence": "CC0",
+    "credit": "Modular Dungeon Kit v1.0 by SigilsVault",
+    "slug": "dungeon-barrel",
+    "file": "modular dungeon kit/Modular Dungeon Pieces/GLB format/barrel_ceiling_large_01.glb",
+    "height": 2
+  },
+  {
+    "folder": "kit-fantasy-ruins",
+    "zip": "4-ruins/Fantasy Ruins Pack.zip",
+    "up": "Z",
+    "colour": "none",
+    "licence": "CC0",
+    "credit": "3TD Fantasy Ruins Pack",
+    "slug": "fantasy-cathedral",
+    "file": "obj/CathedralRuins_01.obj",
+    "role": "ruin",
+    "tris": 3000,
+    "height": 6
+  },
+  {
+    "folder": "kit-fantasy-ruins",
+    "zip": "4-ruins/Fantasy Ruins Pack.zip",
+    "up": "Z",
+    "colour": "none",
+    "licence": "CC0",
+    "credit": "3TD Fantasy Ruins Pack",
+    "slug": "fantasy-temple-a",
+    "file": "obj/TempleRuin_01.obj",
+    "role": "ruin",
+    "tris": 3000,
+    "height": 3
+  },
+  {
+    "folder": "kit-fantasy-ruins",
+    "zip": "4-ruins/Fantasy Ruins Pack.zip",
+    "up": "Z",
+    "colour": "none",
+    "licence": "CC0",
+    "credit": "3TD Fantasy Ruins Pack",
+    "slug": "fantasy-temple-b",
+    "file": "obj/TempleRuin_02.obj",
+    "role": "ruin",
+    "tris": 3000,
+    "height": 5
+  },
+  {
+    "folder": "kit-fantasy-ruins",
+    "zip": "4-ruins/Fantasy Ruins Pack.zip",
+    "up": "Z",
+    "colour": "none",
+    "licence": "CC0",
+    "credit": "3TD Fantasy Ruins Pack",
+    "slug": "fantasy-arch",
+    "file": "obj/RuinArch_01.obj",
+    "role": "ruin",
+    "tris": 3000,
+    "height": 3
+  },
+  {
+    "folder": "kit-fantasy-ruins",
+    "zip": "4-ruins/Fantasy Ruins Pack.zip",
+    "up": "Z",
+    "colour": "none",
+    "licence": "CC0",
+    "credit": "3TD Fantasy Ruins Pack",
+    "slug": "fantasy-column",
+    "file": "obj/RomanTypeCol_01.obj",
+    "role": "statue",
+    "tris": 3000,
+    "height": 4
+  },
+  {
+    "folder": "kit-fantasy-ruins",
+    "zip": "4-ruins/Fantasy Ruins Pack.zip",
+    "up": "Z",
+    "colour": "none",
+    "licence": "CC0",
+    "credit": "3TD Fantasy Ruins Pack",
+    "slug": "fantasy-wall",
+    "file": "obj/RuinWallSegment_01.obj",
+    "role": "ruin",
+    "tris": 3000,
+    "height": 3
+  },
+  {
+    "slug": "ancient-ruin-f",
+    "zip": "mypicks/ancient-ruin-f.zip",
+    "role": "ruin",
+    "tris": 24000,
+    "height": 4.0,
+    "licence": "CC BY 4.0",
+    "credit": "Ancient Ruin F by -X-ScornGames (AI-generated)"
+  },
+  {
+    "slug": "lion-head",
+    "zip": "mypicks/lion_head_4k.blend.zip",
+    "role": "statue",
+    "tris": 4000,
+    "height": 0.5,
+    "licence": "CC0",
+    "credit": "Lion Head, Poly Haven"
+  },
+  {
+    "folder": "kit-pipes",
+    "zip": "6-clockwork/old-pipes-bundle-modular-industrial-pack.zip",
+    "role": "prop",
+    "tris": 3000,
+    "textures": {
+      "M_Pipes": "Pipes_Bundle_M_Pipes"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Old Pipes Bundle by Alex Krush",
+    "slug": "pipe-elbow",
+    "only": ["Pipe_1"],
+    "height": 0.5
+  },
+  {
+    "folder": "kit-pipes",
+    "zip": "6-clockwork/old-pipes-bundle-modular-industrial-pack.zip",
+    "role": "prop",
+    "tris": 3000,
+    "textures": {
+      "M_Pipes": "Pipes_Bundle_M_Pipes"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Old Pipes Bundle by Alex Krush",
+    "slug": "pipe-bend",
+    "only": ["Pipe_2"],
+    "height": 0.7
+  },
+  {
+    "folder": "kit-pipes",
+    "zip": "6-clockwork/old-pipes-bundle-modular-industrial-pack.zip",
+    "role": "prop",
+    "tris": 3000,
+    "textures": {
+      "M_Pipes": "Pipes_Bundle_M_Pipes"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Old Pipes Bundle by Alex Krush",
+    "slug": "pipe-straight",
+    "only": ["Pipe_6"],
+    "height": 0.28
+  },
+  {
+    "folder": "kit-pipes",
+    "zip": "6-clockwork/old-pipes-bundle-modular-industrial-pack.zip",
+    "role": "prop",
+    "tris": 3000,
+    "textures": {
+      "M_Pipes": "Pipes_Bundle_M_Pipes"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Old Pipes Bundle by Alex Krush",
+    "slug": "pipe-tee",
+    "only": ["Pipe_5"],
+    "height": 0.5
+  },
+  {
+    "folder": "kit-pipes",
+    "zip": "6-clockwork/old-pipes-bundle-modular-industrial-pack.zip",
+    "role": "prop",
+    "tris": 3000,
+    "textures": {
+      "M_Pipes": "Pipes_Bundle_M_Pipes"
+    },
+    "licence": "CC BY 4.0",
+    "credit": "Old Pipes Bundle by Alex Krush",
+    "slug": "pipe-valve",
+    "only": ["obturator"],
+    "height": 0.28
+  },
+  {
+    "folder": "kit-gears",
+    "zip": "6-clockwork/free-lowpoly-steampunk-gears-pack.zip",
+    "role": "prop",
+    "tris": 2600,
+    "height": 0.8,
+    "rotate": [90, 0, 0],
+    "licence": "CC BY 4.0",
+    "credit": "Free lowpoly steampunk gears pack by KapetS",
+    "slug": "gear-1-4",
+    "only": ["1.4"],
+    "textures": {
+      "1.4": "Gear1.4_1.4"
+    }
+  },
+  {
+    "folder": "kit-gears",
+    "zip": "6-clockwork/free-lowpoly-steampunk-gears-pack.zip",
+    "role": "prop",
+    "tris": 2600,
+    "height": 0.8,
+    "rotate": [90, 0, 0],
+    "licence": "CC BY 4.0",
+    "credit": "Free lowpoly steampunk gears pack by KapetS",
+    "slug": "gear-2-1",
+    "only": ["2.1"],
+    "textures": {
+      "2.1": "Gear2.1_2.1"
+    }
+  },
+  {
+    "folder": "kit-gears",
+    "zip": "6-clockwork/free-lowpoly-steampunk-gears-pack.zip",
+    "role": "prop",
+    "tris": 2600,
+    "height": 0.8,
+    "rotate": [90, 0, 0],
+    "licence": "CC BY 4.0",
+    "credit": "Free lowpoly steampunk gears pack by KapetS",
+    "slug": "gear-3-1",
+    "only": ["3.1"],
+    "textures": {
+      "3.1": "Gear3.1_3.1"
+    }
+  },
+  {
+    "folder": "kit-gears",
+    "zip": "6-clockwork/free-lowpoly-steampunk-gears-pack.zip",
+    "role": "prop",
+    "tris": 2600,
+    "height": 0.8,
+    "rotate": [90, 0, 0],
+    "licence": "CC BY 4.0",
+    "credit": "Free lowpoly steampunk gears pack by KapetS",
+    "slug": "gear-3-5",
+    "only": ["3.5"],
+    "textures": {
+      "3.5": "Gear3.5_3.5"
+    }
+  },
+  {
+    "folder": "kit-gears",
+    "zip": "6-clockwork/free-lowpoly-steampunk-gears-pack.zip",
+    "role": "prop",
+    "tris": 2600,
+    "height": 0.8,
+    "rotate": [90, 0, 0],
+    "licence": "CC BY 4.0",
+    "credit": "Free lowpoly steampunk gears pack by KapetS",
+    "slug": "gear-4-1",
+    "only": ["4.1"],
+    "textures": {
+      "4.1": "Gear4.1_4.1"
+    }
+  },
+  {
+    "folder": "kit-gears",
+    "zip": "6-clockwork/free-lowpoly-steampunk-gears-pack.zip",
+    "role": "prop",
+    "tris": 2600,
+    "height": 0.8,
+    "rotate": [90, 0, 0],
+    "licence": "CC BY 4.0",
+    "credit": "Free lowpoly steampunk gears pack by KapetS",
+    "slug": "gear-4-5",
+    "only": ["4.5"],
+    "textures": {
+      "4.5": "Gear4.5_4.5"
+    }
+  },
+  {
+    "slug": "escapement",
+    "zip": "6-clockwork/swiss-lever-escapement-mechanism.zip",
+    "file": "source/escapement_mechanism.blend.blend",
+    "role": "statue",
+    "tris": 12000,
+    "height": 2.0,
+    "rotate": [90, 0, 0],
+    "only": [
+      "Balance Axle",
+      "Balance Wheel",
+      "Hsp0",
+      "Impulse Pin",
+      "Pallets",
+      "Pin1",
+      "Pin2",
+      "escape wheel",
+      "escapement"
+    ],
+    "licence": "CC BY 4.0",
+    "credit": "Swiss lever escapement mechanism by C. Yamahata"
+  },
+  {
+    "slug": "pocket-watch",
+    "zip": "6-clockwork/hand-clock.zip",
+    "only": ["Circle", "Cube", "HandlerGold"],
+    "role": "prop",
+    "tris": 3000,
+    "height": 1.0,
+    "licence": "CC BY 4.0",
+    "credit": "Hand Clock by Kevin Lamoni"
+  },
+  {
+    "slug": "sign-board",
+    "zip": "7-town/old-medieval-sign-board.zip",
+    "role": "prop",
+    "tris": 4000,
+    "height": 1.6,
+    "licence": "CC BY 4.0",
+    "credit": "Old Medieval Sign Board by MaX3Dd"
+  },
+  {
+    "slug": "street-lamp",
+    "zip": "7-town/street_lamp_01_4k.blend.zip",
+    "role": "prop",
+    "tris": 5000,
+    "height": 3.2,
+    "licence": "CC0",
+    "credit": "Street Lamp 01, Poly Haven"
+  },
+  {
+    "slug": "wooden-lantern",
+    "zip": "7-town/wooden_lantern_01_4k.blend.zip",
+    "role": "prop",
+    "tris": 3000,
+    "height": 0.5,
+    "licence": "CC0",
+    "credit": "Wooden Lantern 01, Poly Haven"
+  },
+  {
+    "slug": "topiary",
+    "zip": "9-extras/topiary-bush-bell-shape-sceaux-park.zip",
+    "role": "statue",
+    "tris": 12000,
+    "height": 2.0,
+    "licence": "CC BY 4.0",
+    "credit": "Topiary bush - Bell shape - Sceaux Park by Luis 3D"
+  },
+  {
+    "slug": "wall-bosigran",
+    "zip": "9-extras/wall-at-bosigran-western-courtyard-houses-1.zip",
+    "role": "ruin",
+    "tris": 20000,
+    "height": 1.5,
+    "licence": "CC BY 4.0",
+    "credit": "Wall at Bosigran Western Courtyard Houses 1 by MelanieFrankell"
+  },
+  {
+    "slug": "balustrade",
+    "zip": "9-extras/balustrade-balcony.zip",
+    "role": "ruin",
+    "tris": 6000,
+    "height": 1.0,
+    "licence": "CC BY 4.0",
+    "credit": "Balustrade Balcony by Esther3D"
+  },
+  {
+    "slug": "steps-mossy",
+    "zip": "9-extras/steps.zip",
+    "role": "statue",
+    "tris": 3300,
+    "height": 1.5,
+    "licence": "CC BY 4.0",
+    "credit": "Steps by Virtua Con"
+  },
+  {
+    "slug": "water-wheel",
+    "zip": "9-extras/water-wheel.zip",
+    "role": "ruin",
+    "tris": 9000,
+    "height": 3.0,
+    "licence": "CC BY 4.0",
+    "credit": "Water Wheel by MaX3Dd"
+  },
+  {
+    "slug": "book-stack",
+    "zip": "9-extras/medieval-book-stack.zip",
+    "role": "prop",
+    "tris": 3000,
+    "height": 0.4,
+    "licence": "CC BY 4.0",
+    "credit": "Medieval Book Stack by GetDeadEntertainment"
+  },
+  {
+    "slug": "seal-letter",
+    "zip": "9-extras/seal-and-letter.zip",
+    "role": "prop",
+    "tris": 5000,
+    "height": 0.3,
+    "licence": "CC BY 4.0",
+    "credit": "seal and letter by Loïc",
+    "file": "model.obj",
+    "up": "Z"
+  },
+  {
+    "slug": "fallen-column",
+    "zip": "9-extras/fallen-column-apollonia.zip",
+    "role": "ruin",
+    "tris": 16000,
+    "height": 1.2,
+    "licence": "CC BY 4.0",
+    "credit": "Fallen Column - Apollonia by Moshe Caine"
   }
 ]

@@ -12,7 +12,7 @@ How the game reads them (apps/web/src/world/kit/regionMaterials.ts): a light map
 that the surface's colour is multiplied by and added (as the old vertex moonlight was), stored as
 sRGB(E / RANGE) so the darks keep their precision; the AO map is plain occlusion (1 = open).
 
-  blender -b --factory-startup --python bake.py -- --in in --out out [--quality draft|final]
+  blender -b --factory-startup --python bake.py -- --in in --out out [--quality draft|final|best]
           [--only id,id] [--force] [--calibrate]
 
 Resumable: a layout whose three maps already exist in the out folder is skipped (unless --force).
@@ -33,15 +33,17 @@ RANGE = 4.0  # light values stored up to this (sRGB-encoded / RANGE)
 PI = math.pi
 
 QUALITY = {
-    # samples: Cycles samples per texel; scale: bake at size × scale, then average down (smoother edges).
-    "draft": {"samples": 48, "ao_samples": 24, "scale": 1, "webp": 90},
-    "final": {"samples": 512, "ao_samples": 128, "scale": 1, "webp": 92},
+    # samples: Cycles samples per texel; scale: bake at size × scale, then average down (smoother edges);
+    # bounces: diffuse light bounces.
+    "draft": {"samples": 48, "ao_samples": 24, "scale": 1, "webp": 90, "bounces": 3},
+    "final": {"samples": 512, "ao_samples": 128, "scale": 1, "webp": 92, "bounces": 3},
+    "best": {"samples": 2048, "ao_samples": 512, "scale": 2, "webp": 95, "bounces": 8},
 }
 
 # The look, decided once (tune here, then rebake everything):
 SUN_ANGLE = math.radians(4.0)  # the moon's disc: how soft its shadow edges are
 LAMP_RADIUS = 0.12  # metres: how soft the lamps' shadows are
-LAMP_SHARE = 0.55  # how much of each lamp is baked (the game still lights with it, unshadowed)
+LAMP_SHARE = 0.55  # how much of each lamp is baked (the game still lights with it; at 1 a room drops its live lamps: 0102)
 BOUNCE = 1.0  # indirect light as baked (1 = physical)
 AO_DISTANCE = 0.9  # metres: how far contact occlusion reaches
 
@@ -125,8 +127,9 @@ def setup_render(quality, cpu_only):
     c = scene.cycles
     c.samples = quality["samples"]
     c.use_denoising = False
-    c.max_bounces = 4
-    c.diffuse_bounces = 3
+    bounces = quality.get("bounces", 3)
+    c.max_bounces = bounces + 1
+    c.diffuse_bounces = bounces
     c.glossy_bounces = 0
     c.transmission_bounces = 0
     c.transparent_max_bounces = 2
@@ -141,7 +144,7 @@ def setup_render(quality, cpu_only):
     scene.world = world
     world.light_settings.distance = AO_DISTANCE
     bake = scene.render.bake
-    bake.margin = 4
+    bake.margin = 4 * quality.get("scale", 1)
     bake.margin_type = "EXTEND"
     bake.use_clear = True
     bake.target = "IMAGE_TEXTURES"
@@ -180,7 +183,8 @@ def make_material(mat, colour_hex, emission_hex, emission, target):
 def import_layout(path):
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path)
-    objs = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+    # The "casters" mesh (live models) shadows the room and is never baked onto.
+    objs = [o for o in bpy.data.objects if o not in before and o.type == "MESH" and not o.name.startswith("casters")]
     for o in objs:
         # Lightmap UVs are the only UV map; make sure the bake writes through it.
         if o.data.uv_layers:
@@ -409,6 +413,7 @@ def bake_layout(meta, glb, out_dir, quality, device):
         "key": meta["key"],
         "kit": meta.get("kit"),
         "quality": quality,
+        "lamp_share": LAMP_SHARE,
         "device": device,
         "blender": bpy.app.version_string,
         "seconds": round(time.time() - started, 1),

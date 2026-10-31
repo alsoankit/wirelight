@@ -25,7 +25,7 @@ import {
 // - the Lamplighter's register on its board: every house on the street and its own address (5.1 on);
 // - the street sign on the corner post: which street this is (Floor 7 on, when streets are taught);
 // - the census board (7.B): the houses that must answer, a lamp for each lit as it answers;
-// - each house's number on its gable, above its door.
+// - each house's number on the balustrade above its door.
 // Made in code, warm wood, brass and paper, and lit so they're among the brightest things in the
 // square. A click opens a small card in the world; every value comes from the room (street.ts).
 
@@ -318,7 +318,7 @@ function StreetSign({ street, open, setOpen }: { street: string; open: boolean; 
   );
 }
 
-/** Each house's number on its gable, above its door in the square. */
+/** Each house's number on the balustrade, above its door in the square. */
 function HouseNumbers({ room, square }: { room: RoomDef; square: string }) {
   const order = useMemo(() => [...doorOrder(room, square).entries()], [room, square]);
   return (

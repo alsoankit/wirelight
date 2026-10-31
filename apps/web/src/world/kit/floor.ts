@@ -67,7 +67,7 @@ export const FLOORS: Record<1 | 2 | 3 | 4, Omit<FloorOptions, "size" | "seed">> 
   },
 };
 
-// mulberry32, as in WindDriver: deterministic, never Math.random.
+// mulberry32: deterministic, never Math.random.
 function seeded(seed: number) {
   let a = seed >>> 0;
   return () => {

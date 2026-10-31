@@ -54,6 +54,8 @@ const { rooms } = await load("@wirelight/rooms");
 const { assembleRoom, kitLayoutKey, layoutKey } = await load("src/world/bake/assemble.ts");
 const { assembleKit } = await load("src/world/kits/assembleKit.ts");
 const { KITS } = await load("src/world/kits/catalog.ts");
+const { CARVED, carvedPiece, carvedUrl } = await load("src/world/kits/carvedKit.ts");
+const { standing } = await load("src/world/room/standing.ts");
 const kitTest = process.argv.includes("--kittest") ? (await load("src/world/kits/kitTest.ts")).kitTestPieces : null;
 const { unwrapLightmap, geometrySignature } = await load("src/world/bake/lightmapUv.ts");
 const { atlasSize } = await load("src/world/bake/lightmapUv.ts");
@@ -169,7 +171,7 @@ async function scene(url) {
 }
 
 // A minimal GLB: one mesh, a primitive per material (POSITION, NORMAL, TEXCOORD_0 = lightmap UV).
-function writeGlb(file, parts, uvs, colourOf) {
+function writeGlb(file, parts, uvs, colourOf, casters = []) {
   const chunks = [];
   const accessors = [];
   const views = [];
@@ -213,13 +215,32 @@ function writeGlb(file, parts, uvs, colourOf) {
     });
     primitives.push({ attributes, material: materials.length - 1 });
   });
+  // Live models, in a mesh of their own: they cast shadows in the bake and take no lightmap.
+  const casterPrimitives = casters.map((geometry) => {
+    const pos = geometry.getAttribute("position").array;
+    const count = pos.length / 3;
+    const min = [Infinity, Infinity, Infinity];
+    const max = [-Infinity, -Infinity, -Infinity];
+    for (let k = 0; k < count; k++)
+      for (let a = 0; a < 3; a++) {
+        min[a] = Math.min(min[a], pos[k * 3 + a]);
+        max[a] = Math.max(max[a], pos[k * 3 + a]);
+      }
+    return {
+      attributes: {
+        POSITION: addView(new Float32Array(pos), "VEC3", count, { min, max }),
+        NORMAL: addView(new Float32Array(geometry.getAttribute("normal").array), "VEC3", count),
+      },
+    };
+  });
   const bin = Buffer.concat(chunks);
+  const withCasters = casterPrimitives.length > 0;
   const json = {
     asset: { version: "2.0", generator: "wirelight tools/bake/export.mjs" },
     scene: 0,
-    scenes: [{ nodes: [0] }],
-    nodes: [{ name: "room", mesh: 0 }],
-    meshes: [{ name: "room", primitives }],
+    scenes: [{ nodes: withCasters ? [0, 1] : [0] }],
+    nodes: [{ name: "room", mesh: 0 }, ...(withCasters ? [{ name: "casters", mesh: 1 }] : [])],
+    meshes: [{ name: "room", primitives }, ...(withCasters ? [{ name: "casters", primitives: casterPrimitives }] : [])],
     materials,
     accessors,
     bufferViews: views,
@@ -258,7 +279,7 @@ for (const entry of layouts()) {
   // Textured kit pieces (world/kits), drawn by KitRoom with an atlas of their own.
   // --kittest: add the kit test pieces (world/kits/kitTest.ts), to try the kit path before layouts use it.
   const kitPieces = [...(layout.kitPieces ?? []), ...(kitTest ? kitTest(region) : [])];
-  const kitUrl = (p) => KITS[p.kit]?.pieces?.[p.piece]?.url;
+  const kitUrl = (p) => (p.kit === CARVED ? carvedUrl(p) : KITS[p.kit]?.pieces?.[p.piece]?.url);
   const kitScenes = new Map();
   for (const p of kitPieces) {
     const url = kitUrl(p);
@@ -267,6 +288,15 @@ for (const entry of layouts()) {
   // As KitRoom draws them (world/kits/KitRoom.tsx: the catalogue's scale; the placement's own is
   // applied by assembleKit).
   const kitParts = assembleKit(kitScenes, kitPieces, kitUrl, (p) => KITS[p.kit]?.scaleToRuins ?? 1, VIEW_DIRECTION);
+  // The live models standing in the room (room/standing.ts): uncut, as they stand.
+  const standers = standing(entry.kind, region, layout.keeper).map((s) =>
+    carvedPiece(s.slug, s.position, { turn: s.turn, scale: s.scale }),
+  );
+  for (const p of standers) {
+    const url = kitUrl(p);
+    if (url && !kitScenes.has(url)) kitScenes.set(url, await scene(url));
+  }
+  const casters = assembleKit(kitScenes, standers, kitUrl, () => 1, null).map((p) => p.geometry);
   const geometries = parts.map((p) => p.geometry);
   const size = atlasSize(geometries);
   const t0 = performance.now();
@@ -307,6 +337,21 @@ for (const entry of layouts()) {
     if (c?.count) avg.setRGB((sum[0] / c.count) * 0.45, (sum[1] / c.count) * 0.43, (sum[2] / c.count) * 0.4);
     const hex = `#${avg.getHexString()}`;
     materials[`kit:${p.key}`] = { ruined: hex, restored: hex };
+    if (p.kit === CARVED) {
+      materials[`kit:${p.key}`] = { ...look.carved.tint };
+      continue;
+    }
+    // A recoloured material (`kitTones`, 0096) bounces its palette colour, greyed in ruin as the shader does.
+    const tone = look.kitTones?.find((t) => t.material === p.key);
+    if (tone) {
+      const restored = new THREE.Color(tone.colour);
+      const lum = 0.2126 * restored.r + 0.7152 * restored.g + 0.0722 * restored.b;
+      const ruined = restored
+        .clone()
+        .lerp(new THREE.Color(lum, lum, lum), look.kitRuinGrey ?? 0.72)
+        .multiplyScalar(0.8);
+      materials[`kit:${p.key}`] = { ruined: `#${ruined.getHexString()}`, restored: `#${restored.getHexString()}` };
+    }
   }
   const meta = {
     id: entry.id,
@@ -341,6 +386,7 @@ for (const entry of layouts()) {
     [...parts, ...kitParts.map((p) => ({ ...p, name: `kit:${p.key}` }))],
     [...unwrap.uvs, ...(kit?.uvs ?? [])],
     (n) => materials[n].ruined,
+    casters,
   );
   writeFileSync(join(out, `${entry.id}.json`), `${JSON.stringify(meta, null, 1)}\n`);
   list.push({

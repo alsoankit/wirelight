@@ -2,7 +2,7 @@ import { Vector3 } from "three";
 import { distance, float, mix, positionWorld, smoothstep, uniform } from "three/tsl";
 
 // The one dial (art-direction.md, 0021): 1 = deep ruin, 0 = fully restored. It drives materials,
-// light, fog, particles and wind together. It is derived from the room's failing health checks
+// light, fog and particles together. It is derived from the room's failing health checks
 // (CORE-38; RuinDial).
 //
 // Restoration spreads (CORE-39): when the dial changes, a wave front grows from the object that was

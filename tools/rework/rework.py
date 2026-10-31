@@ -15,6 +15,7 @@ import pathlib
 import sys
 import time
 
+import bmesh
 import bpy
 from mathutils import Vector
 
@@ -74,13 +75,15 @@ def import_model(path: pathlib.Path, up: str = "Y"):
 
 def fix_missing_images(folder: pathlib.Path):
     """Sketchfab OBJ/FBX often point at textures by a path that isn't where they landed: find them by name."""
-    files = {p.name.lower(): p for p in folder.rglob("*") if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".tga", ".webp", ".exr"}}
+    pictures = [p for p in folder.rglob("*") if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".tga", ".webp", ".exr"}]
+    files = {p.name.lower(): p for p in pictures} | {p.stem.lower(): p for p in pictures}
     for img in bpy.data.images:
         if img.source != "FILE" or not img.filepath:
             continue
         if pathlib.Path(bpy.path.abspath(img.filepath)).exists():
             continue
-        match = files.get(pathlib.Path(img.filepath.replace("\\", "/")).name.lower())
+        wanted = pathlib.Path(img.filepath.replace("\\", "/"))
+        match = files.get(wanted.name.lower()) or files.get(wanted.stem.lower())
         if match:
             img.filepath = str(match)
             img.reload()
@@ -129,10 +132,62 @@ def ensure_colour(obj, folder: pathlib.Path, use_texture: bool = True):
     log("hooked colour texture", pic.name)
 
 
+def hook_textures(folder: pathlib.Path, hooks: dict):
+    """Connects a material's colour and normal pictures (`<name>_BaseColor`, `<name>_Normal`) when the
+    model file carries none (an FBX exported without them): "textures": {"material": "name"}."""
+    pics = {p.name.lower(): p for p in folder.rglob("*.png")}
+
+    def picture(prefix: str, kind: str) -> pathlib.Path:
+        return next(path for name, path in pics.items() if name.startswith(f"{prefix.lower()}_") and any(k in name for k in kind))
+
+    for mat_name, prefix in hooks.items():
+        mat = bpy.data.materials.get(mat_name)
+        if mat is None:
+            continue
+        mat.use_nodes = True
+        nodes, links = mat.node_tree.nodes, mat.node_tree.links
+        bsdf = nodes.get("Principled BSDF")
+        col = nodes.new("ShaderNodeTexImage")
+        col.image = bpy.data.images.load(str(picture(prefix, ("base", "albedo"))))
+        links.new(col.outputs["Color"], bsdf.inputs["Base Color"])
+        nrm = nodes.new("ShaderNodeTexImage")
+        nrm.image = bpy.data.images.load(str(picture(prefix, ("normal",))))
+        nrm.image.colorspace_settings.name = "Non-Color"
+        nmap = nodes.new("ShaderNodeNormalMap")
+        links.new(nrm.outputs["Color"], nmap.inputs["Color"])
+        links.new(nmap.outputs["Normal"], bsdf.inputs["Normal"])
+
+
+def keep_only(names: list):
+    """One piece of a kit: every mesh not named goes ("only": ["object", …])."""
+    for o in list(bpy.context.scene.objects):
+        if o.type == "MESH" and o.name not in names:
+            bpy.data.objects.remove(o, do_unlink=True)
+
+
+def cut_wedge(obj, start: float, end: float):
+    """One bay of a round structure: keeps the wedge between two angles about its centre, in degrees
+    ("wedge": [start, end]), cut through the column axes so bays stand side by side."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    for angle, side in ((start, -1), (end, 1)):
+        a = math.radians(angle)
+        normal = Vector((-math.sin(a), math.cos(a), 0)) * side
+        geom = bm.verts[:] + bm.edges[:] + bm.faces[:]
+        bmesh.ops.bisect_plane(bm, geom=geom, plane_co=(0, 0, 0), plane_no=normal, clear_outer=True)
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+    bpy.context.view_layer.update()
+
+
 def join_all():
     meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
     if not meshes:
         raise SystemExit("no meshes imported")
+    for o in meshes:
+        if o.data.shape_keys:
+            o.shape_key_clear()  # animation we don't keep; decimating refuses them
     bpy.ops.object.select_all(action="DESELECT")
     for o in meshes:
         o.select_set(True)
@@ -302,7 +357,7 @@ def preview(low, height: float, out: pathlib.Path):
     scene.collection.objects.link(sun)
     cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam"))
     cam.data.lens = 50
-    d = height * 2.4
+    d = max(height, max(low.dimensions)) * 2.4
     cam.location = (d * 0.75, -d * 0.75, height * 0.75)
     direction = Vector((0, 0, height * 0.45)) - cam.location
     cam.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
@@ -316,16 +371,22 @@ def main():
     argv = sys.argv[sys.argv.index("--") + 1 :]
     slug = argv[argv.index("--slug") + 1]
     spec = next(a for a in json.loads((ROOT / "tools/rework/assets.json").read_text()) if a["slug"] == slug)
-    folder = DOWNLOADS / slug
+    folder = DOWNLOADS / spec.get("folder", slug)
     out = OUT_ROOT / slug
     out.mkdir(parents=True, exist_ok=True)
     started = time.time()
     clear_scene()
-    model = find_model(folder)
+    model = folder / spec["file"] if spec.get("file") else find_model(folder)
     log(slug, "importing", model.name)
     import_model(model, spec.get("up", "Y"))
     fix_missing_images(folder)
+    if spec.get("textures"):
+        hook_textures(folder, spec["textures"])
+    if spec.get("only"):
+        keep_only(spec["only"])
     high = join_all()
+    if spec.get("wedge"):
+        cut_wedge(high, *spec["wedge"])
     # Any further turn a model needs to stand upright and face the front (degrees about x, y, z).
     if spec.get("rotate"):
         high.rotation_euler = [math.radians(a) for a in spec["rotate"]]

@@ -6,9 +6,10 @@ import { useSession } from "../../engine/store";
 import { useRegion } from "../region";
 import { EMBLEM_ASPECT, emblemUrl } from "../room/emblems";
 import { Board, Desk } from "../room/Furniture";
-import { Guardian, type GuardianPlace } from "../room/Guardian";
+import { Guardian } from "../room/Guardian";
 import { MachineScene } from "../room/MachineScene";
 import { Statue } from "../room/Statue";
+import { DRESSING_AT, GUARDIAN_AT, type GuardianPlace } from "../room/standing";
 import { WallArt, type WallArtMark } from "../room/WallArt";
 import { KnightCorner } from "./KnightCorner";
 import { KnightLetter } from "./KnightLetter";
@@ -51,63 +52,6 @@ const EMBLEM_AT: Record<number, Omit<WallArtMark, "url" | "aspect">> = {
  * the plain bay after the window, clear of the shaft at 0.
  */
 const KNIGHT_AT: Record<number, number> = { 1: 0.15, 2: 0.15, 3: 1.0, 4: 0.6 };
-
-/**
- * Where each region's Guardian stands in the Observatory (0094), clear of the doorway and the boards.
- * The scans of the Gardener, the owl and the warden face −z: turned about 3.9 they face the camera.
- */
-const GUARDIAN_AT: Record<number, GuardianPlace> = {
-  // In the open, clear of the fallen column and the ferns, facing the room.
-  1: { at: [2.5, 0, -1.9], turn: 3.7 },
-  // Perched on the sorters' card cabinet, right of the door.
-  2: { at: [2.95, 1.73, -3.55], turn: 3.9 },
-  3: { at: [3.0, 0, -1.6], turn: 0.4 },
-  // Where the code-made statue stood, in the far corner.
-  4: { at: [3.0, 0, -2.9], turn: 3.9 },
-};
-
-/**
- * Set dressing (0089, 0094): one carved statue per region, in the back-left corner, clear of the
- * keeper, the doors, the boards and the Guardian. Reworked models face +z: turned about 0.8 they face
- * the camera and the room.
- */
-const DRESSING_AT: Record<number, Parameters<typeof Statue>[0]> = {
-  // A kneeling angel, half taken by the moss.
-  1: {
-    slug: "stone-angel",
-    position: [-3.35, 0, -1.35],
-    turn: 0.8,
-    scale: 0.75,
-    tint: { restored: "#BDB6A7", ruined: "#6A6F78" },
-    moss: 0.8,
-  },
-  // The bronze owl vessel on the floor, by the back wall.
-  2: {
-    slug: "owl-zun",
-    position: [-3.35, 0, -1.35],
-    turn: 0.8,
-    scale: 1.0,
-    tint: { restored: "#A98245", ruined: "#5A5550" },
-    metalness: 0.6,
-    roughness: 0.5,
-  },
-  // A small praying monk in the corner.
-  3: {
-    slug: "praying-monk",
-    position: [-3.35, 0, -1.35],
-    turn: 0.8,
-    scale: 0.7,
-    tint: { restored: "#C8B89C", ruined: "#6D6F76" },
-  },
-  // A gothic figure by the back wall, left of the door.
-  4: {
-    slug: "gothic-statue",
-    position: [-3.35, 0, -1.35],
-    turn: 0.8,
-    scale: 0.6,
-    tint: { restored: "#D2C2A2", ruined: "#7A7B80" },
-  },
-};
 
 export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
   const roomId = useSession((s) => s.roomId);

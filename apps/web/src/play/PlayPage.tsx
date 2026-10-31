@@ -22,6 +22,7 @@ import { useHydrated, useProgress } from "../progress/progress";
 import { AutoQuality } from "../render/AutoQuality";
 import { backendFromUrl, nodeRendererFactory } from "../render/backend";
 import { FPS, FrameCap } from "../render/FrameCap";
+import { PerfProbe, perfOn } from "../render/PerfProbe";
 import { loadConsole, usePrefetchLater } from "../render/preload";
 import { QUALITY, QualityContext, scaleFromUrl, TIERS, type Tier, tierFromUrl } from "../render/quality";
 import { HALL_PIECES } from "../world/hall/layout";
@@ -181,6 +182,7 @@ const WorldCanvas = memo(function WorldCanvas({
       <FrameCap />
       {/* Steps down when frames stay slow and back up when they recover (agent C: render/AutoQuality). */}
       <AutoQuality auto={auto} setTier={setTier} ceiling={backend === "webgpu" ? "high" : "medium"} />
+      {perfOn() && <PerfProbe />}
       <EngineDriver />
       {/* Door plates step aside from the labels they would cover (7.B's eight doors). */}
       <Declutter />

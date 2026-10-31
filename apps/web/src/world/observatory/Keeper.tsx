@@ -20,7 +20,6 @@ import { regionMaterial } from "../kit/regionMaterials";
 import type { RegionId } from "../region";
 import { useModel } from "../room/Statue";
 import { ruinHere } from "../ruin";
-import { BREEZE, gust, windDirection } from "../wind";
 import type { KeeperCue } from "./Messages";
 
 // The keeper (world/lore.md, CORE-24, 0051, 0052, proposed 0054): a mysterious figure, not a robot
@@ -71,10 +70,6 @@ function clothMaterial(region: RegionId) {
       .add(0.96),
   );
   m.colorNode = mix(color("#050506"), weave, float(frontFacing));
-  const low = float(1).sub(smoothstep(0.0, 0.9, positionLocal.y));
-  m.positionNode = positionLocal.add(
-    vec3(windDirection.x, 0, windDirection.z).mul(gust.add(BREEZE).mul(0.07).mul(low)),
-  );
   return m;
 }
 
@@ -280,7 +275,7 @@ function fitOf(geometry: BufferGeometry, matrix: Matrix4, scale: number): Fit {
 function Mourner({ region, onFit }: { region: RegionId; onFit: (fit: Fit) => void }) {
   const { geometry, source, matrix } = useModel("keeper-mourner");
   const material = useMemo(
-    () => carvedMaterial(source, { tint: CLOTH[region], detail: 0.25, roughness: 1, sway: 0.06, hem: 0.9 }),
+    () => carvedMaterial(source, { tint: CLOTH[region], detail: 0.25, roughness: 1 }),
     [source, region],
   );
   useEffect(() => onFit(fitOf(geometry, matrix, MOURNER_SCALE)), [geometry, matrix, onFit]);
@@ -341,8 +336,8 @@ export function Keeper({ position, rest, watch, cue, region = 1, asleep = false 
     f.position.y = Math.sin(now * (asleep ? 0.4 : 0.7)) * (asleep ? 0.012 : 0.005);
     eyeLevel.value = asleep ? 0.12 : 1 + bow * 0.5;
 
-    // The lantern sways on its chain and stirs in a gust.
-    l.rotation.z = Math.sin(now * 0.8) * 0.04 + gust.value * 0.1;
+    // The lantern sways a little on its chain.
+    l.rotation.z = Math.sin(now * 0.8) * 0.04;
     l.rotation.x = Math.sin(now * 0.55 + 1) * 0.03 + bow * 0.1;
 
     // An answer left: the beam from the eye toward the doorway.

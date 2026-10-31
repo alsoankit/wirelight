@@ -8,6 +8,7 @@ import { applyLightmapUv, findBake, useLightmaps } from "../bake/lightmap";
 import { bakeAgeing } from "../kit/bake";
 import type { RegionId } from "../region";
 import { assembleKit, isSkinned, placementMatrix } from "./assembleKit";
+import { CARVED, carvedUrl } from "./carvedKit";
 import { KITS, type KitPiece } from "./catalog";
 import { kitMaterial } from "./kitMaterials";
 import { kitTestPieces } from "./kitTest";
@@ -27,7 +28,7 @@ const CATALOGUE = KITS as unknown as Catalogue;
 function pieceOf(p: KitPlacement): KitPiece | undefined {
   return CATALOGUE[p.kit]?.pieces[p.piece];
 }
-const urlOf = (p: KitPlacement) => pieceOf(p)?.url;
+const urlOf = (p: KitPlacement) => (p.kit === CARVED ? carvedUrl(p) : pieceOf(p)?.url);
 const scaleOf = (p: KitPlacement) => CATALOGUE[p.kit]?.scaleToRuins ?? 1;
 
 /** The .glb files a set of placements needs (unknown pieces are skipped, with a warning in dev). */

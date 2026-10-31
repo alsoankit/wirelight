@@ -60,4 +60,4 @@ def found(into: pathlib.Path) -> list[str]:
 if __name__ == "__main__":
     assets = json.loads((ROOT / "tools/rework/assets.json").read_text())
     for a in assets:
-        print(a["slug"], unpack(a["slug"], a["zip"]))
+        print(a["slug"], unpack(a.get("folder", a["slug"]), a["zip"]))

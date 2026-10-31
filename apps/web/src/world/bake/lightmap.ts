@@ -1,6 +1,9 @@
 import { BufferAttribute, type BufferGeometry, LinearFilter, SRGBColorSpace, type Texture, TextureLoader } from "three";
 import { float, mix, texture, uv } from "three/tsl";
+import type { Extra, Placement } from "../kit/StaticRoom";
+import type { KitPlacement } from "../kits/placement";
 import { ruinHere } from "../ruin";
+import { kitLayoutKey, layoutKey } from "./assemble";
 import { geometrySignature, unwrapLightmap } from "./lightmapUv";
 import { BAKES, type BakeEntry } from "./manifest";
 
@@ -19,6 +22,18 @@ export type Lightmaps = { id: string; ruin: Texture; lit: Texture; ao: Texture; 
 const off = typeof location !== "undefined" && new URLSearchParams(location.search).get("bake") === "0";
 
 /** The bake for a layout key (bake/assemble.ts layoutKey or kitLayoutKey), if there is one. */
+/** Whether a room's bake holds its lamps, so it needs no live ones (0101; older bakes hold only part). */
+export function lampsBaked(
+  placements: Placement[],
+  extras: Extra[] | undefined,
+  pieces: KitPlacement[] | undefined,
+  region: number,
+): boolean {
+  const room = findBake(layoutKey(placements, extras ?? [], region));
+  const kit = pieces?.length ? findBake(kitLayoutKey(pieces, region)) : undefined;
+  return !!(room?.lamps || kit?.lamps);
+}
+
 export function findBake(key: string): BakeEntry | undefined {
   return off ? undefined : BAKES[key];
 }

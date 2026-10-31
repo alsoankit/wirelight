@@ -1,5 +1,6 @@
 import { roomById } from "@wirelight/rooms";
 import { useSession } from "../engine/store";
+import type { CarvedOptions } from "./kit/carved";
 import { TOWN_LOOK } from "./town/palette";
 
 // Which region the room belongs to (rooms carry it: `roomById(id).region`), and each region's light
@@ -49,6 +50,13 @@ export type RegionLook = {
    * look up; kits/kitMaterials.ts).
    */
   kitStone?: { material: string; colour: string; amount: number; gamma?: number; floorAmount?: number };
+  /**
+   * Kit materials re-coloured outright, ruined and restored alike: the colour at the texture's own
+   * brightness, mixed in by `amount`, so one kit can be built in another palette (0095).
+   */
+  kitTones?: { material: string; colour: string; amount: number; gamma?: number }[];
+  /** Reworked models built into a room (kits/carvedKit.ts): the region's carved stone. */
+  carved: CarvedOptions;
 };
 
 export const LOOKS: Record<RegionId, RegionLook> = {
@@ -64,6 +72,7 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     moss: { ruined: "#4b584c", restored: "#4f7a3c", amount: 1 },
     fireflies: "#D9F28A",
     dust: "#c8d2e6",
+    carved: { tint: { restored: "#BDB6A7", ruined: "#6A6F78" }, moss: 0.8 },
   },
   // The Sorting Works: cold grey daylight through the skylights and cold vapour in ruin; warm amber
   // haze and lamplight restored.
@@ -76,6 +85,7 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     fog: { ruined: "#23272d", restored: "#2c2925" },
     moon: { ruined: "#AAB2BC", restored: "#cfc0a8", strengthRuined: 1.3, strengthRestored: 0.6 },
     moss: { ruined: "#2c2b29", restored: "#3a2a1e", amount: 0.55 },
+    carved: { tint: { restored: "#A89F93", ruined: "#5F6268" } },
     // Warm motes drifting up from the machines (never sparks in the face: background only).
     fireflies: "#F0B060",
     dust: "#b9bec6",
@@ -99,6 +109,7 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     // candles, so the stone reads as sandstone, not one orange-brown.
     moon: { ruined: "#8e95a4", restored: "#e2dccd", strengthRuined: 1.5, strengthRestored: 0.55 },
     moss: { ruined: "#45474c", restored: "#8c7a5c", amount: 0.45 },
+    carved: { tint: { restored: "#D2C2A2", ruined: "#7A7B80" } },
     fireflies: null,
     dust: "#d8ccb0",
     // The cathedral kit's grey trim-sheet stone, warmed toward sandstone when restored (multiplied in
