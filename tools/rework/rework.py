@@ -181,13 +181,32 @@ def cut_wedge(obj, start: float, end: float):
     bpy.context.view_layer.update()
 
 
+def drop_larger(obj, size: float):
+    """Removes faces wider than `size`: a backing board baked into a small prop ("drop_larger": metres)."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    big = [
+        f
+        for f in bm.faces
+        if max(max(v.co[i] for v in f.verts) - min(v.co[i] for v in f.verts) for i in range(3)) > size
+    ]
+    bmesh.ops.delete(bm, geom=big, context="FACES")
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+    bpy.context.view_layer.update()
+    log(f"dropped {len(big)} faces wider than {size}")
+
+
 def join_all():
     meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
     if not meshes:
         raise SystemExit("no meshes imported")
     for o in meshes:
+        # Animation we don't keep: keyframes put an object's transform back, and decimating refuses shape keys.
+        o.animation_data_clear()
         if o.data.shape_keys:
-            o.shape_key_clear()  # animation we don't keep; decimating refuses them
+            o.shape_key_clear()
     bpy.ops.object.select_all(action="DESELECT")
     for o in meshes:
         o.select_set(True)
@@ -210,6 +229,7 @@ def join_all():
 
 def stand(obj, height: float):
     """Scale to its height, centred on x/y, standing on z = 0."""
+    bpy.context.view_layer.update()
     corners = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
     lo = Vector((min(c.x for c in corners), min(c.y for c in corners), min(c.z for c in corners)))
     hi = Vector((max(c.x for c in corners), max(c.y for c in corners), max(c.z for c in corners)))
@@ -387,6 +407,8 @@ def main():
     high = join_all()
     if spec.get("wedge"):
         cut_wedge(high, *spec["wedge"])
+    if spec.get("drop_larger"):
+        drop_larger(high, spec["drop_larger"])
     # Any further turn a model needs to stand upright and face the front (degrees about x, y, z).
     if spec.get("rotate"):
         high.rotation_euler = [math.radians(a) for a in spec["rotate"]]
