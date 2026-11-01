@@ -20,7 +20,7 @@ export const ruin = uniform(1);
 export const WAVE_WIDTH = 2.5; // metres over which the front blends old into new
 
 // Ruin at a point in the world, for shaders.
-function ruinAt(point: typeof positionWorld) {
+export function ruinAt(point: typeof positionWorld) {
   const reached = float(1).sub(smoothstep(waveRadius.sub(WAVE_WIDTH), waveRadius, distance(point, waveOrigin)));
   return mix(ruinFrom, ruinTo, reached);
 }

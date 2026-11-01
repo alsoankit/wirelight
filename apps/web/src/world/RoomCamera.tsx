@@ -5,6 +5,7 @@ import { useMemo, useRef } from "react";
 import { type PerspectiveCamera as Camera, Vector3 } from "three";
 import { useSession } from "../engine/store";
 import { useReducedMotion } from "../progress/motion";
+import { captureMode, pictureMode } from "./prerender/RoomPicture";
 
 // The fixed three-quarter view (0006, art-direction.md): a narrow lens, no orbit,
 // and a gentle parallax that follows the pointer. With reduced motion (UI-23) the camera holds still:
@@ -38,6 +39,12 @@ export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0 }: 
   useFrame(({ pointer }, delta) => {
     const camera = ref.current;
     if (!camera) return;
+    // Picture rooms (prototype): the camera never moves, so the live things stay on the picture.
+    if (captureMode || pictureMode) {
+      camera.position.copy(home);
+      camera.lookAt(lookAt);
+      return;
+    }
     // With the console slid up over the bottom of the screen, the view eases down and a little out,
     // so the room sits in the part still showing (it doesn't vanish under the console).
     const { consoleOpen, voiceGiven, roomId } = useSession.getState();

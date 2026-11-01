@@ -3,6 +3,7 @@ import { voice } from "@wirelight/content";
 import { type RoomDef, roomById } from "@wirelight/rooms";
 import { type ReactNode, Suspense, useMemo, useRef } from "react";
 import type { Object3D } from "three";
+import { Vector3 } from "three";
 import { useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { useQuality } from "../../render/quality";
@@ -16,6 +17,7 @@ import type { KeeperCue } from "../observatory/Messages";
 import { Moonbeams } from "../observatory/Moonbeams";
 import { RoomLights } from "../observatory/RoomLights";
 import { RoomPost } from "../post/RoomPost";
+import { captureMode, hasPicture, pictureMode, RoomPicture } from "../prerender/RoomPicture";
 import { RoomCamera, VIEW_DIRECTION } from "../RoomCamera";
 import { RuinDial } from "../RuinDial";
 import { LOOKS, useRegion } from "../region";
@@ -76,6 +78,9 @@ type Props = {
   children?: ReactNode;
 };
 
+/** Where RoomCamera stands, for the picture (target and distance as below). */
+const PICTURE_HOME = new Vector3(0, 1.1, -0.6).addScaledVector(VIEW_DIRECTION, 19);
+
 export function MachineScene({ device, layout, barred, glows, arriving = false, children }: Props) {
   const watch = useRef<Object3D>(null);
   const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
@@ -100,6 +105,8 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
   // Restoration spreads from the doorway (the door and its corridor are what rooms fix first).
   const origin: Vec3 = first ? [doorGeometry(first).doorway[0], 1, doorGeometry(first).doorway[2]] : [0, 1, 0];
 
+  const pictureId = `r${region}-${device === "observatory" ? "observatory" : layout.doorSlots.length > 2 ? "hall" : "house"}-d${doors.length}`;
+  const picture = pictureMode && hasPicture(pictureId);
   const baked = useMemo(() => lampsBaked(layout.placements, layout.extras, layout.kitPieces, region), [layout, region]);
 
   return (
@@ -107,61 +114,87 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
       <RoomCamera target={[0, 1.1, -0.6]} distance={19} settleFrom={arriving ? 9 : 0} />
       <color attach="background" args={[look.background]} />
       <RuinDial level={ruinLevel} origin={origin} />
-      <RoomLights glows={layout.glows ?? glows} region={region} baked={baked} />
-      <Suspense fallback={null}>
-        <StaticRoom region={region} placements={layout.placements} extras={layout.extras} toCamera={VIEW_DIRECTION} />
-      </Suspense>
-      <Suspense fallback={null}>
-        <KitRoom pieces={layout.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
-      </Suspense>
-      {layout.statues?.map((s) => (
-        <Statue key={`${s.slug}${s.position.join()}`} {...look.carved} {...s} />
-      ))}
-      {layout.gears && <Gears gears={layout.gears} region={region} />}
-      {quality.moonbeams && layout.steam && <Steam vents={layout.steam} />}
-      {quality.moonbeams && layout.beams && (
-        <Moonbeams
-          beams={layout.beams.list}
-          direction={layout.beams.direction}
-          colour={layout.beams.colour}
-          ruined={layout.beams.ruined}
-          restored={layout.beams.restored}
-          pools={layout.beams.pools}
-        />
+      <RoomLights glows={layout.glows ?? glows} region={region} baked={baked || picture} />
+      {picture && (
+        <Suspense fallback={null}>
+          <RoomPicture id={pictureId} home={PICTURE_HOME} />
+        </Suspense>
       )}
-      {region === 4 && <Haze haze={quality.moonbeams} glass={layout.stainedGlass} />}
-      {quality.fireflies && look.fireflies && <Fireflies bounds={layout.air} colour={look.fireflies} />}
-      {quality.dust && <Dust bounds={layout.air} colour={look.dust} />}
-      <Keeper
-        position={layout.keeper}
-        rest={[origin[0], 1.4, origin[2]]}
-        watch={watch}
-        cue={cue}
-        region={region}
-        asleep={asleep}
-      />
-      {/* Ask the keeper why (CORE-25). */}
-      <Html center position={[layout.keeper[0], 2.2, layout.keeper[2]]} zIndexRange={[10, 0]}>
-        <button
-          type="button"
-          className="world-chip"
-          data-tab={TAB.keeper}
-          onClick={() => openPanel({ kind: "keeper", device })}
-        >
-          {region === 4 ? voice.keeper.navigator : voice.keeper.name}
-        </button>
-      </Html>
-      {doors.map((info, i) => {
-        const slot = layout.doorSlots[i];
-        return slot ? (
-          <Doorway key={info.iface} info={info} index={i} slot={slot} keeper={layout.keeper} watch={watch} cue={cue} />
-        ) : null;
-      })}
-      {/* Doors with no cable (the home router's spare ports): the doorway and its plate, nothing beyond. */}
-      {empty.map((iface, i) => {
-        const slot = layout.doorSlots[doors.length + i];
-        return slot ? <EmptyDoor key={iface} device={device} iface={iface} slot={slot} /> : null;
-      })}
+      {!picture && (
+        <>
+          <Suspense fallback={null}>
+            <StaticRoom
+              region={region}
+              placements={layout.placements}
+              extras={layout.extras}
+              toCamera={VIEW_DIRECTION}
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <KitRoom pieces={layout.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
+          </Suspense>
+          {layout.statues?.map((s) => (
+            <Statue key={`${s.slug}${s.position.join()}`} {...look.carved} {...s} />
+          ))}
+          {layout.gears && <Gears gears={layout.gears} region={region} />}
+          {quality.moonbeams && layout.steam && <Steam vents={layout.steam} />}
+          {quality.moonbeams && layout.beams && (
+            <Moonbeams
+              beams={layout.beams.list}
+              direction={layout.beams.direction}
+              colour={layout.beams.colour}
+              ruined={layout.beams.ruined}
+              restored={layout.beams.restored}
+              pools={layout.beams.pools}
+            />
+          )}
+          {region === 4 && <Haze haze={quality.moonbeams} glass={layout.stainedGlass} />}
+        </>
+      )}
+      {!captureMode && quality.fireflies && look.fireflies && <Fireflies bounds={layout.air} colour={look.fireflies} />}
+      {!captureMode && quality.dust && <Dust bounds={layout.air} colour={look.dust} />}
+      {!captureMode && (
+        <>
+          <Keeper
+            position={layout.keeper}
+            rest={[origin[0], 1.4, origin[2]]}
+            watch={watch}
+            cue={cue}
+            region={region}
+            asleep={asleep}
+          />
+          {/* Ask the keeper why (CORE-25). */}
+          <Html center position={[layout.keeper[0], 2.2, layout.keeper[2]]} zIndexRange={[10, 0]}>
+            <button
+              type="button"
+              className="world-chip"
+              data-tab={TAB.keeper}
+              onClick={() => openPanel({ kind: "keeper", device })}
+            >
+              {region === 4 ? voice.keeper.navigator : voice.keeper.name}
+            </button>
+          </Html>
+          {doors.map((info, i) => {
+            const slot = layout.doorSlots[i];
+            return slot ? (
+              <Doorway
+                key={info.iface}
+                info={info}
+                index={i}
+                slot={slot}
+                keeper={layout.keeper}
+                watch={watch}
+                cue={cue}
+              />
+            ) : null;
+          })}
+          {/* Doors with no cable (the home router's spare ports): the doorway and its plate, nothing beyond. */}
+          {empty.map((iface, i) => {
+            const slot = layout.doorSlots[doors.length + i];
+            return slot ? <EmptyDoor key={iface} device={device} iface={iface} slot={slot} /> : null;
+          })}
+        </>
+      )}
       <BossPiece
         device={device}
         region={region}
@@ -169,9 +202,9 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
         doors={doors.length}
         hall={layout.doorSlots.length > 2}
       />
-      {children}
+      {!picture && children}
       {/* The finishing pass: bloom, tone mapping, the region's grade, vignette (world/post). */}
-      <RoomPost />
+      {!picture && <RoomPost />}
     </>
   );
 }

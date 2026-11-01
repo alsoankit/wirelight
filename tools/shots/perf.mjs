@@ -20,13 +20,15 @@ const launch = () =>
 const MIN_TRIS = Number(process.env.MIN_TRIS ?? 20000);
 const REPEAT = Number(process.env.REPEAT ?? 1);
 const SCALE = Number(process.env.SCALE ?? 1);
+// EXTRA: more of the address, e.g. EXTRA="&pre=1".
+const EXTRA = process.env.EXTRA ?? "";
 
 const quantile = (values, q) => [...values].sort((a, b) => a - b)[Math.floor(values.length * q)] ?? 0;
 
 async function measure(room, ruin) {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: SCALE });
-  await page.goto(`${base}?room=${room}&onboarded=1&ruin=${ruin}&perf=1&tier=high`);
+  await page.goto(`${base}?room=${room}&onboarded=1&ruin=${ruin}&perf=1&tier=high${EXTRA}`);
   // The room is in when its triangle count has stopped climbing (models load after the shell).
   let last = 0;
   let steady = 0;
