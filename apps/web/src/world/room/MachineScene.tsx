@@ -25,6 +25,7 @@ import { Steam } from "../regions/Steam";
 import { BossPiece } from "./BossPiece";
 import { type DoorInfo, Doorway, EmptyDoor } from "./Doorway";
 import { doorGeometry, type RoomLayout, type Vec3 } from "./layout";
+import { Statue } from "./Statue";
 
 // One machine's room (CORE-06): its layout, its keeper, and a doorway for each of its real doors,
 // read from the room's topology (eth0 takes the first doorway, eth1 the second…). What changes is
@@ -113,6 +114,9 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
       <Suspense fallback={null}>
         <KitRoom pieces={layout.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
       </Suspense>
+      {layout.statues?.map((s) => (
+        <Statue key={`${s.slug}${s.position.join()}`} {...look.carved} {...s} />
+      ))}
       {layout.gears && <Gears gears={layout.gears} region={region} />}
       {quality.moonbeams && layout.steam && <Steam vents={layout.steam} />}
       {quality.moonbeams && layout.beams && (

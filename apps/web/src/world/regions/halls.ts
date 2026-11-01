@@ -3,10 +3,13 @@ import { type CorridorDressing, corridorFloor } from "../corridor/frame";
 import { makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import { extras } from "../kit/shapes";
+import { carvedPiece } from "../kits/carvedKit";
 import type { KitPlacement } from "../kits/placement";
 import { MOON_POSITION, MOON_TARGET } from "../moon";
 import type { RuneMark } from "../observatory/Runes";
 import type { Beams, Glow } from "../room/layout";
+import type { StatuePlace } from "../room/standing";
+import { hedge } from "./hedge";
 import { type RootRun, rootRuns } from "./roots";
 
 // Region 1, the Overgrown Halls (world/art-briefs/region-1-overgrown-halls.md): the first, oldest
@@ -22,6 +25,9 @@ import { type RootRun, rootRuns } from "./roots";
 // the desk, the Glass, the keeper) as the game camera sees it.
 
 const QUARTER = Math.PI / 2;
+
+/** A clipped bush, in the hedges' green, not the region's stone. */
+const TOPIARY = { tint: { restored: "#3f6a39", ruined: "#464e47" }, moss: 0, detail: 0.5 };
 
 /** Moonlight through the gaps: cold shafts, strongest in ruin, with a soft pool where each meets the floor. */
 function moonlight(list: Beams["list"]): Beams {
@@ -258,7 +264,7 @@ function observatoryGrowth(secondDoor: boolean): KitPlacement[] {
     nature("Grass_Wispy_Short", [1.25, 0, -3.65], 1.2),
     nature("Clover_1", [-0.95, 0, -3.72], 2.0, 0.8),
     // The collapsed corner: a mossy boulder of fallen masonry, a big plant and tall grass coming in.
-    nature("Rock_Medium_3", [3.55, -0.12, -3.35], 2.6, 0.42),
+    carvedPiece("rock-moss-b", [3.5, -0.12, -3.3], { turn: 2.6, scale: 0.8 }),
     nature("Plant_1_Big", [3.65, 0, -2.75], 0.4, 0.9),
     nature("Grass_Wispy_Tall", [2.55, 0, -3.75], 1.7),
     nature("Grass_Common_Short", [3.35, 0, -2.35], 0.2),
@@ -282,12 +288,21 @@ function observatoryGrowth(secondDoor: boolean): KitPlacement[] {
     nature("Pebble_Square_3", [3.25, 0, -2.75], 1.9),
     nature("Pebble_Round_1", [-2.6, 0, -0.05], 0.8),
   ];
+  // A fallen block by the rubble at the front of the left wall.
+  out.push(carvedPiece("rock-moss-a", [-3.45, -0.08, 3.05], { turn: 1.1, scale: 0.62 }));
   if (!secondDoor) {
     // Under the Knight's cloak.
     out.push(nature("Grass_Wispy_Short", [-3.6, 0, 1.75], 0.4, 0.8));
   }
   return out;
 }
+
+// The Knight's tower stands by the outer gate (0088): the gate beyond its collapsed corner, a rune
+// stone of the wire-weavers beyond the broken left wall. Both far outside, behind nothing.
+const OBSERVATORY_VIEW: StatuePlace[] = [
+  { slug: "stone-gate", position: [5.6, 0, -5.7], turn: -0.6, scale: 0.72 },
+  { slug: "rune-monolith", position: [-6.3, 0, 2.2], turn: 0.8, scale: 0.9 },
+];
 
 // Where the moon gets in: the barred window, the gap above the crumbled left wall, and the collapsed
 // top of the back wall's right end. Only the window's light pools on the floor (the wide gap's pool
@@ -302,6 +317,7 @@ type HallsRoom = {
   placements: Placement[];
   extras: Extra[];
   kitPieces: KitPlacement[];
+  statues?: StatuePlace[];
   beams: Beams;
   runes?: RuneMark[];
   glows?: Glow[];
@@ -317,6 +333,7 @@ export function hallsObservatory(secondDoor: boolean): HallsRoom {
       placements: hallsObservatoryPieces(secondDoor),
       extras: [...OBSERVATORY_FLOOR, ...extras({ Root: observatoryRoots(secondDoor) })],
       kitPieces: observatoryGrowth(secondDoor),
+      statues: OBSERVATORY_VIEW,
       beams: OBSERVATORY_MOON,
     };
     OBSERVATORIES.set(secondDoor, room);
@@ -328,7 +345,9 @@ export function hallsObservatory(secondDoor: boolean): HallsRoom {
 // Another computer's room (lantern; quill's is sealed)
 // ---------------------------------------------------------------------------------------------------
 //
-// A smaller ruin of the same weavers, one arch in the back wall where the corridor comes in.
+// A walled garden court of the same weavers (0088), one arch in the back wall where the corridor
+// comes in: clipped hedges gone shaggy, a topiary in the far corner, a lion's head on the wall where a
+// fountain ran, and the next court's ruined arch beyond the fallen corner.
 
 export const HALLS_HOUSE_PIECES: Placement[] = [
   // Back wall: the arch the corridor comes through, plain walls either side.
@@ -419,9 +438,8 @@ const HOUSE_GROWTH: KitPlacement[] = [
   nature("Grass_Wispy_Tall", [1.7, 0, -3.65], 0.6, 0.85),
   nature("Clover_1", [-0.95, 0, -3.7], 1.1, 0.7),
   // The broken back corner: a big leafy plant and tall grass pushing in.
-  nature("Plant_1_Big", [3.6, 0, -3.15], 2.0, 0.85),
-  nature("Grass_Wispy_Tall", [3.2, 0, -2.55], 0.9, 0.8),
-  nature("Rock_Medium_2", [3.55, -0.1, -2.15], 0.7, 0.3),
+  nature("Grass_Wispy_Tall", [2.75, 0, -2.75], 0.9, 0.8),
+  carvedPiece("rock-moss-c", [3.6, -0.06, -2.2], { turn: 0.7, scale: 0.5 }),
   // The open window's light on the floor.
   nature("Clover_2", [-1.75, 0, -0.85], 2.2, 0.5),
   nature("Grass_Wispy_Short", [-2.15, 0, -0.35], 0.8, 0.7),
@@ -448,10 +466,26 @@ const HOUSE_RUNES: RuneMark[] = [
   { wall: "left", along: -1.6, y: 1.1, size: 0.15 },
 ];
 
+// The court's hedges along the walls' feet, clear of the arch, the runes' light and the boards.
+function houseHedges(): BufferGeometry[] {
+  return [
+    hedge([1.5, 0, -3.5], [3.1, 0, -3.5], 0.95, 0.62, 3),
+    hedge([-3.5, 0, -2.95], [-3.5, 0, -1.95], 0.85, 0.6, 7),
+  ];
+}
+
+const HOUSE_VIEW: StatuePlace[] = [
+  { slug: "topiary", position: [3.5, 0, -3.45], scale: 0.85, ...TOPIARY },
+  { slug: "lion-head", position: [-3.74, 0.85, -0.1], turn: QUARTER, scale: 1.7 },
+  { slug: "fantasy-arch", position: [6.6, 0, -7.2], turn: 0.5, scale: 1.5 },
+  { slug: "wall-bosigran", position: [-5.2, 0, 1.6], turn: QUARTER, scale: 1.15 },
+];
+
 const HOUSE: HallsRoom = {
   placements: HALLS_HOUSE_PIECES,
-  extras: [...HOUSE_FLOOR, ...extras({ Root: houseRoots() })],
+  extras: [...HOUSE_FLOOR, ...extras({ Root: houseRoots(), Hedge: houseHedges() })],
   kitPieces: HOUSE_GROWTH,
+  statues: HOUSE_VIEW,
   beams: HOUSE_MOON,
   runes: HOUSE_RUNES,
   glows: [
@@ -490,9 +524,9 @@ export function hallsHall(): { placements: Placement[]; extras: Extra[]; kitPiec
 }
 
 // ---------------------------------------------------------------------------------------------------
-// A corridor (0081): a low root tunnel (region-1 brief). The back wall in mossy stone with a hole the
-// moon comes through, roots crawling along its foot, growth in the damp; the rune-line down the
-// middle stays clear. Room coordinates: the back wall on z = −4, the tunnel along x from −5 to 5.
+// A corridor (0081): a garden walk along the old wall (region-1 brief, 0088). The wall in mossy stone
+// with a hole the moon comes through, roots crawling along its foot, hedges gone shaggy, growth in
+// the damp; the rune-line down the middle stays clear. Room coordinates: the back wall on z = −4, the tunnel along x from −5 to 5.
 
 /** Where the corridor wall's hole is (the cycle's fourth piece, laid from the left end). */
 function holeAt(half: number): number {
@@ -633,7 +667,13 @@ export function hallsCorridor(half = 5): CorridorDressing {
       { piece: "Bricks", position: [half - 1.6, 0, -0.9], rotationY: 0.7, scale: 0.8 },
       { piece: "Brick", position: [-half + 1.9, 0, -0.8], rotationY: 2.2 },
     ],
-    extras: [...corridorFloor(1, "Floor", 5101, half), ...extras({ Root: corridorRoots(half) })],
+    extras: [
+      ...corridorFloor(1, "Floor", 5101, half),
+      ...extras({
+        Root: corridorRoots(half),
+        Hedge: [hedge([-half + 1.6, 0, -3.55], [-half + 3.3, 0, -3.55], 0.8, 0.55, 11)],
+      }),
+    ],
     kitPieces: growth,
     runes,
     // Each rune's warm light, a little out from the wall.

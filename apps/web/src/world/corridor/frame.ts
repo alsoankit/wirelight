@@ -5,6 +5,7 @@ import type { KitPlacement } from "../kits/placement";
 import type { RuneMark } from "../observatory/Runes";
 import type { RegionId } from "../region";
 import type { Beams, Gear, Glow } from "../room/layout";
+import type { StatuePlace } from "../room/standing";
 
 // A corridor's frame (0081), in room coordinates so each region dresses it with the same helpers as its
 // rooms: the back wall's face on z = −4 like a room's, the tunnel running along x from one door's arch
@@ -42,6 +43,8 @@ export type CorridorDressing = {
   stainedGlass?: BufferGeometry;
   /** Carved runes on the back wall (Region 1): the visible source of its glows. */
   runes?: RuneMark[];
+  /** Live models of the corridor's own (0100): statues and backdrops, shadow casters in the bake. */
+  statues?: StatuePlace[];
 };
 
 /** The region's floor, laid as a path between the back wall and the cutaway's edge. */

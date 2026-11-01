@@ -8,11 +8,10 @@ import { addTo, ball, box, gearGeometry, ring, rod, type V3 } from "../kit/shape
 import type { RegionId } from "../region";
 
 // What makes one house's room its own (playtest, Region 4 #24: vesper, lumen, wren and halo looked
-// identical): a name plaque by its door, a rug in its own colour, and one of a few sets of things
+// identical): a name plaque by its door and one of a few sets of things
 // its owner left behind, chosen from its name so the same house always looks the same. Made in
 // code, in the region's own wood; muted colours only (cyan, amber and violet mean something).
 
-const RUGS = ["#6a3a33", "#3e5848", "#4a4462", "#73653a", "#3c5262", "#6b4a5a", "#5a5a40"];
 const WOOD: Record<RegionId, string> = { 1: "Wood", 2: "Walnut", 3: "Timber", 4: "DarkWood" };
 
 /** A small, stable number from a name. */
@@ -429,7 +428,6 @@ function cathedralByTheDoor(bag: Bag, kind: number) {
 
 export function HouseTraits({ device, region }: { device: string; region: RegionId }) {
   const h = hash(device);
-  const rug = RUGS[h % RUGS.length] as string;
   const parts = useMemo(() => {
     const bag: Bag = {};
     if (region === 2) {
@@ -450,24 +448,8 @@ export function HouseTraits({ device, region }: { device: string; region: Region
       return geometry ? [{ name, geometry }] : [];
     });
   }, [h, region]);
-  // The rug, turned a little differently in each house. Not in the Sorting Works: its rooms are
-  // machinery, told apart by what machines were left behind (owner, 2026-10-25; 0083). Not in the
-  // Lantern Town either: nobody lives in its houses now (0052; 0084), nor the Cathedral's chapels (0086).
-  const turn = (((h >>> 8) % 7) - 3) * 0.06;
   return (
     <>
-      {region === 1 && (
-        <>
-          <mesh position={[0.4, 0.06, 1.3]} rotation={[-Math.PI / 2, 0, turn]}>
-            <planeGeometry args={[2.2, 1.4]} />
-            <meshStandardMaterial color={rug} roughness={1} />
-          </mesh>
-          <mesh position={[0.4, 0.062, 1.3]} rotation={[-Math.PI / 2, 0, turn]}>
-            <ringGeometry args={[0.5, 0.56, 24]} />
-            <meshStandardMaterial color="#b9a888" roughness={1} transparent opacity={0.35} />
-          </mesh>
-        </>
-      )}
       {parts.map((p) => (
         <mesh key={p.name} geometry={p.geometry} material={regionMaterial(p.name, region)} />
       ))}

@@ -72,7 +72,7 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     moss: { ruined: "#4b584c", restored: "#4f7a3c", amount: 1 },
     fireflies: "#D9F28A",
     dust: "#c8d2e6",
-    carved: { tint: { restored: "#BDB6A7", ruined: "#6A6F78" }, moss: 0.8 },
+    carved: { tint: { restored: "#A89272", ruined: "#636973" }, moss: 0.8 },
   },
   // The Sorting Works: cold grey daylight through the skylights and cold vapour in ruin; warm amber
   // haze and lamplight restored.

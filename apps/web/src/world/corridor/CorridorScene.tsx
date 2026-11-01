@@ -28,6 +28,7 @@ import { Haze } from "../regions/Haze";
 import { Steam } from "../regions/Steam";
 import type { Vec3 } from "../room/layout";
 import { SecretDoor } from "../room/SecretDoor";
+import { Statue } from "../room/Statue";
 import { corridorDressing } from "./dressing";
 import { CORRIDOR, corridorHalf, endArches } from "./frame";
 
@@ -219,6 +220,9 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
       <Suspense fallback={null}>
         <KitRoom pieces={dressing.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
       </Suspense>
+      {dressing.statues?.map((s) => (
+        <Statue key={`${s.slug}${s.position.join()}`} {...look.carved} {...s} />
+      ))}
       {dressing.gears && <Gears gears={dressing.gears} region={region} />}
       {quality.moonbeams && dressing.steam && <Steam vents={dressing.steam} />}
       {dressing.runes && <Runes marks={dressing.runes} />}

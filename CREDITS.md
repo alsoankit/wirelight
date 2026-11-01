@@ -15,6 +15,12 @@
 - **Stone Angel** — by [GregorPanda](https://sketchfab.com/3d-models/stone-angel-387f363fcf864e9f81b2ed95b8eb6b5a), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Decimated, rebaked and recoloured: a mossy statue in the Observatory (Region 1).
 - **Praying Monk Sculpture** — by [visionsbymicael](https://sketchfab.com/3d-models/praying-monk-sculpture-7c77c2f2db624225a7b30b1507869e77), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Decimated, rebaked and recoloured: a statue in the Observatory (Region 3).
 - **Owl 'Zun' wine vessel** — [Cleveland Museum of Art](https://sketchfab.com/clevelandart), CC0, and **Gothic Statue** — [Poly Haven](https://polyhaven.com/a/gothic_statue), CC0: statues in the Observatory (Regions 2 and 4).
+- **Temple Ruins Asset Pack** — by [Bl4ckGh0st](https://sketchfab.com/3d-models/temple-ruins-asset-pack-d1e25cdbe51e467a87baf94ead0afa63), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look). Broken walls, arches, stairs and pillars in the outer gardens.
+- **Topiary bush, Bell shape, Sceaux Park** — by [Luis 3D](https://sketchfab.com/3d-models/topiary-bush-bell-shape-sceaux-park-ac98e638a0994e9e96884d7189af56eb), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
+- **Wall at Bosigran Western Courtyard Houses 1** — by [MelanieFrankell](https://sketchfab.com/3d-models/wall-at-bosigran-western-courtyard-houses-1-21a9224909ca41dd93c356b6b87ac795), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
+- **Steps** — by [Virtua Con](https://sketchfab.com/3d-models/2ab420ae72c243f98772a8f58cca0c39), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
+- **Rock Moss Set 01** and **Lion Head** — [Poly Haven](https://polyhaven.com/a/rock_moss_set_01), CC0. Reworked (carved look).
+- **3TD Fantasy Ruins Pack** — by [3TD](https://opengameart.org/content/3td-fantasy-ruins-pack), CC0. Backdrops, reworked.
 
 ## Sound effects and ambience
 - **Interface Sounds**, **UI Audio**, **Impact Sounds** and **RPG Audio** — by [Kenney](https://kenney.nl/assets?q=audio) (www.kenney.nl), CC0 1.0. Licence files and source pages in `assets-src/licenses/kenney-*`. Clicks, switches, latches, the key jingle, doors, footsteps, creaks and the far bell, softened and levelled by `tools/audio/make-sfx.sh`.

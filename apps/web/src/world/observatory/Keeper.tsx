@@ -19,6 +19,7 @@ import { carvedMaterial } from "../kit/carved";
 import { regionMaterial } from "../kit/regionMaterials";
 import type { RegionId } from "../region";
 import { useModel } from "../room/Statue";
+import { KEEPER_TURN } from "../room/standing";
 import { ruinHere } from "../ruin";
 import type { KeeperCue } from "./Messages";
 
@@ -240,8 +241,6 @@ function Beam() {
 
 /** The mourner's height in the game (the model stands 1.7 m): a little taller than a person. */
 const MOURNER_SCALE = 1.1;
-/** The mourner model faces this way about the vertical (its front turned to the keeper's +z). */
-const MOURNER_TURN = 0;
 
 type Fit = { eye: [number, number, number]; lantern: [number, number, number] };
 
@@ -249,13 +248,15 @@ type Fit = { eye: [number, number, number]; lantern: [number, number, number] };
  * Where the model's face and hands are: the front-most point at face height (the eye glows just
  * inside it) and at hand height (the lantern hangs just before it). Found in the mesh, not guessed.
  */
+const UP = new Vector3(0, 1, 0);
+
 function fitOf(geometry: BufferGeometry, matrix: Matrix4, scale: number): Fit {
   // The positions are quantised: read them through the attribute and the node's transform.
   const attribute = geometry.getAttribute("position");
   const v = new Vector3();
   const points: [number, number][] = [];
   for (let i = 0; i < attribute.count; i++) {
-    v.fromBufferAttribute(attribute, i).applyMatrix4(matrix);
+    v.fromBufferAttribute(attribute, i).applyMatrix4(matrix).applyAxisAngle(UP, KEEPER_TURN);
     points.push([v.y, v.z]);
   }
   let top = 0;
@@ -280,7 +281,7 @@ function Mourner({ region, onFit }: { region: RegionId; onFit: (fit: Fit) => voi
   );
   useEffect(() => onFit(fitOf(geometry, matrix, MOURNER_SCALE)), [geometry, matrix, onFit]);
   return (
-    <group scale={MOURNER_SCALE} rotation={[0, MOURNER_TURN, 0]}>
+    <group scale={MOURNER_SCALE} rotation={[0, KEEPER_TURN, 0]}>
       <mesh geometry={geometry} material={material} matrix={matrix} matrixAutoUpdate={false} castShadow />
     </group>
   );
@@ -319,14 +320,16 @@ export function Keeper({ position, rest, watch, cue, region = 1, asleep = false 
     const root = beamRef.current?.parent;
     if (!f || !l || !root) return;
 
-    // It turns slowly toward the message it watches (a little, never all the way round).
+    // It faces its door, and turns slowly toward the message it watches (a little, never all the way round).
     const target = watch.current;
     if (target?.visible) target.getWorldPosition(look);
     else look.copy(restPoint);
     aim.lerp(look, 1 - Math.exp(-delta * 2));
-    // Its front (+z, turned half round) faces −z in the room; yaw from there toward the aim.
-    const yaw = Math.atan2(aim.x - at.x, -(aim.z - at.z));
-    f.rotation.y = Math.PI - Math.max(-0.45, Math.min(0.45, yaw));
+    // Its front (+z, turned half round) faces −z in the room; yaw from there.
+    const doorYaw = Math.atan2(restPoint.x - at.x, -(restPoint.z - at.z));
+    const off = Math.atan2(aim.x - at.x, -(aim.z - at.z)) - doorYaw;
+    const turned = Math.atan2(Math.sin(off), Math.cos(off));
+    f.rotation.y = Math.PI - (doorYaw + Math.max(-0.45, Math.min(0.45, turned)));
 
     // A faint breath; it bows a little as a message arrives, the eye brightening.
     const sinceArrival = now - c.arrived;

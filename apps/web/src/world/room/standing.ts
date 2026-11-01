@@ -97,7 +97,7 @@ export const DRESSING_AT: Record<number, StatuePlace> = {
 };
 
 /** A live model in a room, as `Statue` takes it. */
-export type StatuePlace = CarvedOptions & {
+export type StatuePlace = Partial<CarvedOptions> & {
   slug: string;
   position: [number, number, number];
   turn?: number;
@@ -106,6 +106,8 @@ export type StatuePlace = CarvedOptions & {
 
 /** The keeper's model, as Keeper.tsx draws it. */
 const KEEPER = "keeper-mourner";
+/** The mourner scan's front is this far round from +z (measured on the model: hood 60°, chest 45°). */
+export const KEEPER_TURN = 0.96;
 const KEEPER_SCALE = 1.1;
 
 /** The live models standing in a room of this kind: what the bake takes as shadow casters. */
@@ -127,6 +129,6 @@ export function standing(
       turn: dressing.turn ?? 0,
       scale: dressing.scale ?? 1,
     });
-  if (keeper) out.push({ slug: KEEPER, position: keeper, turn: 0, scale: KEEPER_SCALE });
+  if (keeper) out.push({ slug: KEEPER, position: keeper, turn: Math.PI + KEEPER_TURN, scale: KEEPER_SCALE });
   return out;
 }

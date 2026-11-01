@@ -201,7 +201,7 @@
     "slug": "stone-gate",
     "zip": "mypicks/ancient-stone-gate-ruin-moss-covered.zip",
     "role": "ruin",
-    "tris": 24000,
+    "tris": 6000,
     "height": 4.0,
     "licence": "CC BY 4.0",
     "credit": "Ancient Stone Gate Ruin - Moss Covered by s8819296 (AI-generated)"
@@ -210,7 +210,7 @@
     "slug": "rune-monolith",
     "zip": "mypicks/floating-rune-monolith-ancient-stone.zip",
     "role": "prop",
-    "tris": 10000,
+    "tris": 5000,
     "height": 2.4,
     "licence": "CC BY 4.0",
     "credit": "Floating Rune Monolith - Ancient Stone by s8819296 (AI-generated)"
@@ -893,7 +893,7 @@
     "slug": "wall-bosigran",
     "zip": "9-extras/wall-at-bosigran-western-courtyard-houses-1.zip",
     "role": "ruin",
-    "tris": 20000,
+    "tris": 7000,
     "height": 1.5,
     "licence": "CC BY 4.0",
     "credit": "Wall at Bosigran Western Courtyard Houses 1 by MelanieFrankell"

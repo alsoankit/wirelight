@@ -36,6 +36,7 @@ type Swatch = {
   glow?: number; // lamps and glass: emissive strength when restored (out in ruin)
   ember?: number; // how much of the glow stays in ruin (default 0.15)
   aged?: boolean; // stone: weathering, grime and creeping moss
+  leafy?: boolean; // clipped hedges: dark gaps and lit leaf-tips, painted in the shader
   verdigris?: boolean; // old brass: green-grey patina in patches
   patchy?: string; // moss and ivy: broken into patches, the stone (this swatch) showing between them
   coursed?: [number, number]; // stone laid in courses on walls: [course height, block length] in metres
@@ -53,6 +54,8 @@ const REGION_1: Record<string, Swatch> = {
   Highlights: { ruined: "#6b7078", restored: "#ae9473", roughness: 0.95, aged: true },
   Black: { ruined: "#16181d", restored: "#221a14", roughness: 1 },
   // Moss on the walls comes in patches, never whole flat-green bricks (playtest).
+  // Clipped hedges in the garden courts (regions/hedge.ts): dry grey-green in ruin, deep green restored.
+  Hedge: { ruined: "#464e47", restored: "#3f6a39", roughness: 1, leafy: true },
   Leaf_Texture: { ruined: "#4a524b", restored: "#4f7a40", roughness: 1, patchy: "Highlights" },
   Texture_Leaves: { ruined: "#3f4a42", restored: "#3E6B3A", roughness: 1 },
   Green: { ruined: "#4d564d", restored: "#5f8f4c", roughness: 1, patchy: "Highlights" },
@@ -212,6 +215,12 @@ function nodeMaterial(swatch: Swatch, region: RegionId, baked = false, lightmaps
     const clump = smoothstep(-0.05, 0.3, mx_noise_float(positionWorld.mul(2.3).add(5.7)));
     const mottle = mx_noise_float(positionWorld.mul(9.0)).mul(0.22).add(0.86);
     tint = mix(stoneTint, tint.mul(mottle), clump);
+  }
+  if (swatch.leafy) {
+    // Clipped leaves: dark gaps where the hedge is deep, a scatter of paler tips on top of them.
+    const gaps = smoothstep(-0.35, 0.25, mx_noise_float(positionWorld.mul(17)));
+    const tips = smoothstep(0.32, 0.62, mx_noise_float(positionWorld.mul(38).add(3.1)));
+    tint = tint.mul(mix(float(0.42), float(1.05), gaps)).mul(tips.mul(0.5).add(1));
   }
   if (swatch.verdigris) {
     // Centuries of damp: patina gathers in patches across old brass.
