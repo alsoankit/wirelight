@@ -30,7 +30,9 @@ for (const { id, room, walk } of ROOMS) {
     await page.waitForTimeout(600);
     const png = `${OUT}${id}-${state}.png`;
     await page.screenshot({ path: png });
-    execFileSync("magick", [png, "-quality", "86", `${OUT}${id}-${state}.webp`]);
+    // Ruin stays cold and quiet, but every shape must read: a gentle lift, never fog.
+    const clearer = state === "ruin" ? ["-level", "6%,58%,1.05", "-modulate", "100,112"] : [];
+    execFileSync("magick", [png, ...clearer, "-quality", "86", `${OUT}${id}-${state}.webp`]);
     execFileSync("rm", [png]);
     console.log(id, state);
   }

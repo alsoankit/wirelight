@@ -48,6 +48,8 @@ export function RoomPicture({ id, home }: { id: string; home: Vector3 }) {
     m.vertexNode = vec4(positionGeometry.xy, float(0.99), float(1));
     m.colorNode = mix(texture(restored as never).rgb, texture(ruined as never).rgb, ruinAt(vec3(floor) as never));
     m.toneMapped = false;
+    // The picture holds its own atmosphere: the room's fog would lie over it like smoke.
+    m.fog = false;
     return m;
   }, [ruined, restored, camera, home]);
   return <mesh geometry={SCREEN} material={material} frustumCulled={false} renderOrder={-1000} />;
