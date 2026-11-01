@@ -11,11 +11,11 @@ import { MachineScene } from "../room/MachineScene";
 import { Statue } from "../room/Statue";
 import { DRESSING_AT, GUARDIAN_AT, type GuardianPlace } from "../room/standing";
 import { WallArt, type WallArtMark } from "../room/WallArt";
+import { WarTable } from "../room/WarTable";
 import { KnightCorner } from "./KnightCorner";
 import { KnightLetter } from "./KnightLetter";
 import { LETTER, observatoryLayout } from "./layout";
 import { RUNE_GLOWS, Runes } from "./Runes";
-import { ScryingGlass } from "./ScryingGlass";
 import { ObservatoryTools } from "./Tools";
 
 // The Observatory, the player's own machine on every floor (CORE-07): the Knight's old base, with the
@@ -88,18 +88,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
       {DRESSING_AT[region] && <Statue {...(DRESSING_AT[region] as Parameters<typeof Statue>[0])} />}
       {region === 4 && <Runes set="chapel" />}
       <KnightLetter position={LETTER} />
-      <ScryingGlass position={[2.4, 0, 1.6]} region={region} />
-      {/* The Glass stands here too (CORE-31): its label opens it, like G. */}
-      <Html center position={[2.4, 1.75, 1.6]} zIndexRange={[10, 0]}>
-        <button
-          type="button"
-          className="world-chip"
-          data-guide="glass"
-          onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "g" }))}
-        >
-          {voice.glass.title}
-        </button>
-      </Html>
+      <WarTable position={[2.4, 0, 1.6]} region={region} />
       <ObservatoryTools />
       <Board device="observatory" kind="ledger" at={[-1.2, 0, -2.9]} turn={0.15} />
       <Desk device="observatory" at={[0.6, 0, 1.2]} />

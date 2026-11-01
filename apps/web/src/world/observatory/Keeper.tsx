@@ -241,6 +241,8 @@ function Beam() {
 
 /** The mourner's height in the game (the model stands 1.7 m): a little taller than a person. */
 const MOURNER_SCALE = 1.1;
+/** The robot's paint: pale and worn, greyed in ruin. */
+const ROBOT = { restored: "#D8CDB8", ruined: "#8A93A3" };
 
 type Fit = { eye: [number, number, number]; lantern: [number, number, number] };
 
@@ -274,9 +276,9 @@ function fitOf(geometry: BufferGeometry, matrix: Matrix4, scale: number): Fit {
 
 /** The keeper's body: the hooded mourner (decision 0092), in its region's cloth. */
 function Mourner({ region, onFit }: { region: RegionId; onFit: (fit: Fit) => void }) {
-  const { geometry, source, matrix } = useModel("keeper-mourner");
+  const { geometry, source, matrix } = useModel("robot");
   const material = useMemo(
-    () => carvedMaterial(source, { tint: CLOTH[region], detail: 0.25, roughness: 1 }),
+    () => carvedMaterial(source, { tint: ROBOT, detail: 0.75, roughness: 0.7 }),
     [source, region],
   );
   useEffect(() => onFit(fitOf(geometry, matrix, MOURNER_SCALE)), [geometry, matrix, onFit]);

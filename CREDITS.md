@@ -21,6 +21,7 @@
 - **Steps** — by [Virtua Con](https://sketchfab.com/3d-models/2ab420ae72c243f98772a8f58cca0c39), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
 - **Rock Moss Set 01** and **Lion Head** — [Poly Haven](https://polyhaven.com/a/rock_moss_set_01), CC0. Reworked (carved look).
 - **3TD Fantasy Ruins Pack** — by [3TD](https://opengameart.org/content/3td-fantasy-ruins-pack), CC0. Backdrops, reworked.
+- **Ancient Maintenance Bot** — by [Lagst](https://sketchfab.com/3d-models/5d36e6133d7444f385ac4ec1c257c207), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
 
 ## Sound effects and ambience
 - **Interface Sounds**, **UI Audio**, **Impact Sounds** and **RPG Audio** — by [Kenney](https://kenney.nl/assets?q=audio) (www.kenney.nl), CC0 1.0. Licence files and source pages in `assets-src/licenses/kenney-*`. Clicks, switches, latches, the key jingle, doors, footsteps, creaks and the far bell, softened and levelled by `tools/audio/make-sfx.sh`.

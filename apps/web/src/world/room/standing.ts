@@ -105,9 +105,9 @@ export type StatuePlace = Partial<CarvedOptions> & {
 };
 
 /** The keeper's model, as Keeper.tsx draws it. */
-const KEEPER = "keeper-mourner";
-/** The mourner scan's front is this far round from +z (measured on the model: hood 60°, chest 45°). */
-export const KEEPER_TURN = 0.96;
+const KEEPER = "robot";
+/** The robot model's front is this far round from +z (measured on the model). */
+export const KEEPER_TURN = 0;
 const KEEPER_SCALE = 1.1;
 
 /** The live models standing in a room of this kind: what the bake takes as shadow casters. */

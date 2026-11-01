@@ -954,5 +954,14 @@
     "height": 1.2,
     "licence": "CC BY 4.0",
     "credit": "Fallen Column - Apollonia by Moshe Caine"
+  },
+  {
+    "slug": "robot",
+    "zip": "9-extras/ancient-maintenance-bot.zip",
+    "role": "character",
+    "tris": 7000,
+    "height": 1.3,
+    "licence": "CC BY 4.0",
+    "credit": "Ancient Maintenance Bot by Lagst"
   }
 ]
