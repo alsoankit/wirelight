@@ -52,9 +52,9 @@ export function keeperSays(d: Decision, reason?: DropReason, name?: (mac: string
 
 export const voice = {
   keeper: {
-    name: "Robot",
+    name: "Keeper",
     /** In the Cathedral (Region 4) the keeper is the navigator, at its lectern (region-4 brief). */
-    navigator: "Robot",
+    navigator: "Navigator",
     title: "The keeper",
     about: "Ask it about something it handled. It tells you exactly what it did, and why.",
     idle: "Nothing has arrived yet.",

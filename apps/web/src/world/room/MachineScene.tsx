@@ -158,13 +158,12 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
           <Keeper
             position={layout.keeper}
             rest={[origin[0], 1.4, origin[2]]}
-            watch={watch}
             cue={cue}
             region={region}
             asleep={asleep}
           />
           {/* Ask the keeper why (CORE-25). */}
-          <Html center position={[layout.keeper[0], 2.2, layout.keeper[2]]} zIndexRange={[10, 0]}>
+          <Html center position={[layout.keeper[0], 1.95, layout.keeper[2]]} zIndexRange={[10, 0]}>
             <button
               type="button"
               className="world-chip"

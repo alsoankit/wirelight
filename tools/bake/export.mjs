@@ -290,7 +290,7 @@ for (const entry of layouts()) {
   // applied by assembleKit).
   const kitParts = assembleKit(kitScenes, kitPieces, kitUrl, (p) => KITS[p.kit]?.scaleToRuins ?? 1, VIEW_DIRECTION);
   // The live models standing in the room (room/standing.ts): uncut, as they stand.
-  const standers = [...standing(entry.kind, region, layout.keeper), ...(layout.statues ?? [])].map((s) =>
+  const standers = [...standing(entry.kind, region), ...(layout.statues ?? [])].map((s) =>
     carvedPiece(s.slug, s.position, { turn: s.turn, scale: s.scale }),
   );
   for (const p of standers) {

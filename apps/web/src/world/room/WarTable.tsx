@@ -6,7 +6,8 @@ import type { RegionId } from "../region";
 // a few markers left where someone stopped working. Decoration only: it never changes, so it reads as
 // furniture, not as a broken screen. The live map is the one in the corner of the screen.
 
-const WOOD: Record<RegionId, string> = { 1: "Wood", 2: "Walnut", 3: "Timber", 4: "DarkWood" };
+/** Each region's wood, for its furniture. */
+export const WOOD: Record<RegionId, string> = { 1: "Wood", 2: "Walnut", 3: "Timber", 4: "DarkWood" };
 const TOP = new BoxGeometry(1.9, 0.08, 1.25);
 const LEG = new BoxGeometry(0.12, 0.76, 0.12);
 const FRAME = new BoxGeometry(1.6, 0.06, 0.95);

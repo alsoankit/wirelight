@@ -1,223 +1,82 @@
 import { useFrame } from "@react-three/fiber";
-import { type RefObject, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { type RefObject, useMemo, useRef } from "react";
 import {
   AdditiveBlending,
-  BufferGeometry,
+  BoxGeometry,
+  CylinderGeometry,
   DoubleSide,
   type Group,
-  LatheGeometry,
-  type Matrix4,
-  type Object3D,
-  Quaternion,
-  Vector2,
+  PlaneGeometry,
+  type PointLight,
+  SphereGeometry,
   Vector3,
 } from "three";
-import { color, float, frontFacing, mix, mx_noise_float, positionLocal, smoothstep, uniform, vec3 } from "three/tsl";
-import { MeshBasicNodeMaterial, MeshStandardNodeMaterial } from "three/webgpu";
-import { noise3 } from "../kit/bake";
-import { carvedMaterial } from "../kit/carved";
+import { color, float, floor, fract, mix, positionLocal, sin, smoothstep, step, uniform, uv } from "three/tsl";
+import { MeshBasicNodeMaterial } from "three/webgpu";
 import { regionMaterial } from "../kit/regionMaterials";
 import type { RegionId } from "../region";
-import { useModel } from "../room/Statue";
-import { KEEPER_TURN } from "../room/standing";
-import { ruinHere } from "../ruin";
+import { WOOD } from "../room/WarTable";
 import type { KeeperCue } from "./Messages";
 
-// The keeper (world/lore.md, CORE-24, 0051, 0052, proposed 0054): a mysterious figure, not a robot
-// and not a doll. One loose robe of dark, weathered cloth that rises over its head into a hood; the
-// face is an opening into darkness with one faint eye. Its lantern hangs before it from where its
-// sleeves meet, so from behind it is softly lit from the front. It turns slowly toward each message,
-// bows a little as one arrives, and sends a beam of lantern-light from its eye to the door it chose.
-// Built in code; its front is +z here, and it is turned to face the doorway.
+// The keeper (0107): the machine in the middle of every room, the thing that really handles each
+// message. A heavy old cabinet with a keyboard and an amber screen. It stands still: its screen
+// brightens as a message arrives and dims when it is asleep (0042), and a thread of warm light runs
+// from the screen to the door it chose. Amber, never cyan: cyan belongs to messages (0090).
+// Built in code; its front is +z here, turned toward the player, who only ever sees the room from there.
 
 type Props = {
   position: [number, number, number];
   region?: RegionId;
-  /** Its desk holds messages it won't pass on (0042): it sleeps, head bowed, eye nearly out. */
+  /** Its desk holds messages it won't pass on (0042): the screen is nearly out. */
   asleep?: boolean;
-  rest: [number, number, number]; // where it looks when nothing is moving (the doorway)
-  watch: RefObject<Object3D | null>;
-  cue: RefObject<KeeperCue>; // when to bow (a message arrived) and when to point (an answer left)
+  rest: [number, number, number]; // the doorway, where a decision's beam ends
+  cue: RefObject<KeeperCue>; // when to brighten (a message arrived) and when to point (an answer left)
 };
 
-const BOW_SECONDS = 1.0;
+const ARRIVAL_SECONDS = 1.0;
 const BEAM_SECONDS = 1.1;
-const EYE: [number, number, number] = [0, 1.69, 0.12]; // in the face opening
-const LANTERN_RING: [number, number, number] = [0, 1.0, 0.36];
+/** Its screen faces the fixed camera. */
+const FACING = Math.PI / 4;
+const SCREEN_AT: [number, number, number] = [0, 1.12, 0.222];
 
-// One keeper per room: one beam level and one eye level.
+// One keeper per room: one beam level and one screen level.
 const beamLevel = uniform(0);
-const eyeLevel = uniform(1);
+const screenLevel = uniform(1);
 
-// Dark, weathered cloth on the ruin dial, with a faint weave of light and shade; its lower part stirs
-// in the wind.
-// Its inside (seen through the face opening) is near-black, so the face is only darkness: one
-// double-sided mesh instead of a second lining mesh.
-// In the Cathedral the keeper is the navigator (region-4 brief): a pale stone-and-brass robe, never a
-// black cloak (a dark hooded figure there read as a reaper: "never horror").
-const CLOTH: Record<RegionId, { ruined: string; restored: string }> = {
-  1: { ruined: "#474c58", restored: "#5a4b3f" },
-  2: { ruined: "#4a4c50", restored: "#5b4a3c" },
-  3: { ruined: "#474c58", restored: "#5a4b3f" },
-  4: { ruined: "#8a8a8c", restored: "#cdbb98" },
-};
+const PLINTH = new BoxGeometry(1, 0.1, 0.72);
+const BODY = new BoxGeometry(0.9, 0.62, 0.62);
+const PANEL = new BoxGeometry(0.7, 0.4, 0.02);
+const SLAT = new BoxGeometry(0.6, 0.02, 0.012);
+const SHELF = new BoxGeometry(0.9, 0.06, 0.42);
+const KEYS = new BoxGeometry(0.62, 0.02, 0.2);
+const HEAD = new BoxGeometry(0.86, 0.62, 0.5);
+const BEZEL = new BoxGeometry(0.72, 0.5, 0.04);
+const SCREEN = new PlaneGeometry(0.62, 0.4);
+const LAMP = new SphereGeometry(0.018, 10, 8);
+const CONDUIT = new CylinderGeometry(0.025, 0.025, 1.3, 8);
+const MAST = new CylinderGeometry(0.012, 0.012, 0.3, 6);
+const SLATS = [0.3, 0.38, 0.46, 0.54];
+const LAMPS = [-0.1, 0, 0.1];
+const CONDUITS = [-0.32, 0.32];
 
-function clothMaterial(region: RegionId) {
-  const m = new MeshStandardNodeMaterial({ roughness: 1, side: DoubleSide });
-  const base = mix(color(CLOTH[region].restored), color(CLOTH[region].ruined), ruinHere);
-  const weave = base.mul(
-    mx_noise_float(positionLocal.mul(vec3(9, 2.5, 9)))
-      .mul(0.08)
-      .add(0.96),
-  );
-  m.colorNode = mix(color("#050506"), weave, float(frontFacing));
+/** The screen: lines of text in amber on dark glass, as bright as `screenLevel`. */
+function screenMaterial() {
+  const m = new MeshBasicNodeMaterial({ toneMapped: false });
+  const rows = uv().y.mul(9);
+  const row = fract(rows);
+  const length = fract(sin(floor(rows).mul(12.9)).mul(437.5))
+    .mul(0.5)
+    .add(0.35);
+  const text = step(0.35, row)
+    .mul(float(1).sub(step(0.7, row)))
+    .mul(step(0.07, uv().x))
+    .mul(float(1).sub(step(length, uv().x)));
+  m.colorNode = mix(color("#2a1606"), color("#FFC27A"), text).mul(screenLevel);
   return m;
 }
 
-// The robe and its hood, one surface: a lathe turned into a figure. Broad shoulders, loose folds to
-// a ragged hem; above the shoulders the cloth rises over the head and leans back to a soft peak.
-const ROBE: [number, number][] = [
-  [0.41, 0.0],
-  [0.37, 0.12],
-  [0.32, 0.45],
-  [0.285, 0.85],
-  [0.275, 1.05],
-  [0.29, 1.24],
-  [0.305, 1.35],
-  [0.26, 1.45],
-  [0.185, 1.52],
-  [0.2, 1.6],
-  [0.205, 1.7],
-  [0.185, 1.79],
-  [0.13, 1.87],
-  [0.06, 1.94],
-  [0.0, 1.97],
-];
-
-function smooth(a: number, b: number, x: number): number {
-  const t = Math.min(Math.max((x - a) / (b - a), 0), 1);
-  return t * t * (3 - 2 * t);
-}
-
-// The face: the part of the hood that is open, at the front.
-function inFace(angle: number, y: number): boolean {
-  return Math.abs(angle) < 0.62 && y > 1.56 && y < 1.83;
-}
-
-function buildRobe(): BufferGeometry {
-  const lathe = new LatheGeometry(
-    ROBE.map(([r, y]) => new Vector2(r, y)),
-    48,
-  );
-  const p = lathe.getAttribute("position");
-  const angles = new Float32Array(p.count);
-  for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i);
-    let y = p.getY(i);
-    let z = p.getZ(i);
-    const a = Math.atan2(x, z); // 0 = front
-    angles[i] = a;
-    const r = Math.hypot(x, z);
-    const loose = 1 - smooth(0.95, 1.4, y);
-    const fold = (Math.sin(a * 7 + y * 1.4) * 0.045 + Math.sin(a * 3 + 1.3) * 0.025) * loose;
-    // Broad shoulders, narrowing again at the neck and hood.
-    const sx = 1.0 + 0.26 * smooth(0.95, 1.42, y) * (1 - smooth(1.44, 1.56, y));
-    const sz = 0.84 + 0.14 * smooth(1.5, 1.62, y);
-    if (y < 0.001) y = 0.02 + Math.max(0, noise3(Math.cos(a) * 2.2, 0, Math.sin(a) * 2.2)) * 0.09;
-    const nx = Math.sin(a) * r * (1 + fold) * sx;
-    z = Math.cos(a) * r * (1 + fold) * sz;
-    // The hood leans back toward a soft peak, and its brim comes forward a little over the face.
-    z += -smooth(1.78, 1.97, y) * 0.16 + smooth(1.58, 1.72, y) * (1 - smooth(1.74, 1.86, y)) * 0.03;
-    p.setXYZ(i, nx, y, z);
-  }
-  lathe.computeVertexNormals();
-  // Cut the face open: drop the triangles whose middle falls in it.
-  const index = lathe.getIndex();
-  const kept: number[] = [];
-  if (index) {
-    for (let t = 0; t < index.count; t += 3) {
-      const ids = [index.getX(t), index.getX(t + 1), index.getX(t + 2)];
-      const y = ids.reduce((s, id) => s + p.getY(id), 0) / 3;
-      const cx = ids.reduce((s, id) => s + p.getX(id), 0) / 3;
-      const cz = ids.reduce((s, id) => s + p.getZ(id), 0) / 3;
-      if (!inFace(Math.atan2(cx, cz), y)) kept.push(ids[0] as number, ids[1] as number, ids[2] as number);
-    }
-  }
-  const robe = new BufferGeometry();
-  robe.setAttribute("position", p);
-  robe.setAttribute("normal", lathe.getAttribute("normal"));
-  robe.setIndex(kept);
-  return robe;
-}
-
-// A sleeve: an open, widening cylinder from the shoulder to its loose end (the hands stay hidden).
-function Sleeve({ from, to, material }: { from: Vector3; to: Vector3; material: MeshStandardNodeMaterial }) {
-  const { position, quaternion, length } = useMemo(() => {
-    const dir = to.clone().sub(from);
-    return {
-      position: from.clone().add(to).multiplyScalar(0.5),
-      quaternion: new Quaternion().setFromUnitVectors(new Vector3(0, -1, 0), dir.clone().normalize()),
-      length: dir.length(),
-    };
-  }, [from, to]);
-  return (
-    <mesh position={position} quaternion={quaternion} material={material}>
-      <cylinderGeometry args={[0.13, 0.085, length, 16, 1, true]} />
-    </mesh>
-  );
-}
-
-// The lantern, hanging by its ring. Its flame is soft: a warm glow, not a bright ball.
-function Lantern() {
-  const bars = 6;
-  return (
-    <group position={[0, -0.6 * 0.75, 0]} scale={0.75}>
-      <mesh position={[0, 0.03, 0]} material={regionMaterial("AgedBrass")}>
-        <cylinderGeometry args={[0.18, 0.16, 0.06, 24]} />
-      </mesh>
-      <mesh position={[0, 0.22, 0]}>
-        <cylinderGeometry args={[0.15, 0.15, 0.32, 24, 1, true]} />
-        <meshStandardMaterial
-          color="#d9cfb8"
-          emissive="#ffcf8a"
-          emissiveIntensity={0.35}
-          transparent
-          opacity={0.32}
-          roughness={0.6}
-          depthWrite={false}
-        />
-      </mesh>
-      {Array.from({ length: bars }, (_, i) => {
-        const a = (i / bars) * Math.PI * 2 + Math.PI / bars;
-        return (
-          <mesh
-            // biome-ignore lint/suspicious/noArrayIndexKey: fixed bars
-            key={i}
-            position={[Math.cos(a) * 0.155, 0.22, Math.sin(a) * 0.155]}
-            material={regionMaterial("AgedBrass")}
-          >
-            <boxGeometry args={[0.025, 0.34, 0.025]} />
-          </mesh>
-        );
-      })}
-      <mesh position={[0, 0.2, 0]}>
-        <sphereGeometry args={[0.035, 12, 8]} />
-        <meshBasicMaterial color={[0.95, 0.7, 0.4]} toneMapped={false} />
-      </mesh>
-      <pointLight position={[0, 0.2, 0]} color="#FFD9A0" intensity={1.0} distance={2.6} decay={2} />
-      <mesh position={[0, 0.46, 0]} material={regionMaterial("AgedBrass")}>
-        <coneGeometry args={[0.2, 0.16, 24]} />
-      </mesh>
-      <mesh position={[0, 0.6, 0]} material={regionMaterial("AgedBrass")}>
-        <torusGeometry args={[0.06, 0.014, 8, 20]} />
-      </mesh>
-    </group>
-  );
-}
-
-// The beam of its decision (CORE-24): a thin thread of warm lantern-light from its eye toward the door
-// it chose, brightest at the eye, fading along its length and away over about a second. Never cyan,
-// never a torch's cone (playtest: it read as a flashlight sweeping the room).
+// The beam of its decision (CORE-24): a thin thread of warm light from its screen toward the door it
+// chose, brightest at the screen, fading along its length and away over about a second.
 function Beam() {
   const material = useMemo(() => {
     const m = new MeshBasicNodeMaterial({
@@ -227,7 +86,7 @@ function Beam() {
       toneMapped: false,
       side: DoubleSide,
     });
-    // positionLocal.y: +0.5 at the eye, −0.5 at the door.
+    // positionLocal.y: +0.5 at the screen, −0.5 at the door.
     const along = smoothstep(-0.5, 0.35, positionLocal.y);
     m.colorNode = color("#FFD9A0").mul(along.mul(beamLevel).mul(0.16));
     return m;
@@ -239,155 +98,72 @@ function Beam() {
   );
 }
 
-/** The mourner's height in the game (the model stands 1.7 m): a little taller than a person. */
-const ROBOT_SCALE = 1.1;
-/** The robot's paint: pale and worn, greyed in ruin. */
-const ROBOT = { restored: "#D8CDB8", ruined: "#8A93A3" };
-
-type Fit = { eye: [number, number, number]; lantern: [number, number, number] };
-
-/**
- * Where the model's face and hands are: the front-most point at face height (the eye glows just
- * inside it) and at hand height (the lantern hangs just before it). Found in the mesh, not guessed.
- */
-const UP = new Vector3(0, 1, 0);
-
-function fitOf(geometry: BufferGeometry, matrix: Matrix4, scale: number): Fit {
-  // The positions are quantised: read them through the attribute and the node's transform.
-  const attribute = geometry.getAttribute("position");
-  const v = new Vector3();
-  const points: [number, number][] = [];
-  for (let i = 0; i < attribute.count; i++) {
-    v.fromBufferAttribute(attribute, i).applyMatrix4(matrix).applyAxisAngle(UP, KEEPER_TURN);
-    points.push([v.y, v.z]);
-  }
-  let top = 0;
-  for (const [y] of points) top = Math.max(top, y);
-  const frontAt = (lo: number, hi: number) => {
-    let z = -1;
-    for (const [y, pz] of points) if (y > top * lo && y < top * hi) z = Math.max(z, pz);
-    return z;
-  };
-  return {
-    eye: [0, top * 0.875 * scale, (frontAt(0.84, 0.9) - 0.04) * scale],
-    lantern: [0, top * 0.6 * scale, (frontAt(0.55, 0.65) + 0.12) * scale],
-  };
-}
-
-/** The body: the maintenance robot (0104), the same worn paint in every region. */
-function RobotBody({ onFit }: { onFit: (fit: Fit) => void }) {
-  const { geometry, source, matrix } = useModel("robot");
-  const material = useMemo(() => carvedMaterial(source, { tint: ROBOT, detail: 0.75, roughness: 0.7 }), [source]);
-  useEffect(() => onFit(fitOf(geometry, matrix, ROBOT_SCALE)), [geometry, matrix, onFit]);
-  return (
-    <group scale={ROBOT_SCALE} rotation={[0, KEEPER_TURN, 0]}>
-      <mesh geometry={geometry} material={material} matrix={matrix} matrixAutoUpdate={false} castShadow />
-    </group>
-  );
-}
-
-export function Keeper({ position, rest, watch, cue, region = 1, asleep = false }: Props) {
-  // Until the mourner has loaded, the code-made robe stands in; then the eye and lantern move to it.
-  const [fit, setFit] = useState<Fit>({ eye: EYE, lantern: LANTERN_RING });
-  const eyeAtFit = useRef(fit.eye);
-  eyeAtFit.current = fit.eye;
-  const robe = useMemo(buildRobe, []);
-  const cloth = useMemo(() => clothMaterial(region), [region]);
-  const eye = useMemo(() => {
-    const m = new MeshBasicNodeMaterial({ toneMapped: false });
-    // Faint: an ember in the dark of the hood, not a lamp.
-    m.colorNode = color("#FFD9A6").mul(float(0.9).mul(eyeLevel));
-    return m;
-  }, []);
-  const figure = useRef<Group>(null);
-  const lantern = useRef<Group>(null);
+export function Keeper({ position, rest, cue, region = 1, asleep = false }: Props) {
+  const wood = regionMaterial(WOOD[region], region);
+  const iron = regionMaterial("Iron", region);
+  const brass = regionMaterial("AgedBrass", region);
+  const screen = useMemo(screenMaterial, []);
+  const machine = useRef<Group>(null);
+  const glow = useRef<PointLight>(null);
   const beamRef = useRef<Group>(null);
 
-  const restPoint = useMemo(() => new Vector3(...rest), [rest]);
-  const look = useMemo(() => new Vector3(), []);
-  const aim = useMemo(() => new Vector3(...rest), [rest]);
-  const eyeAt = useMemo(() => new Vector3(), []);
   const door = useMemo(() => new Vector3(...rest), [rest]);
+  const screenAt = useMemo(() => new Vector3(), []);
   const DOWN = useMemo(() => new Vector3(0, -1, 0), []);
-  const at = useMemo(() => new Vector3(...position), [position]);
 
-  useFrame(({ clock }, delta) => {
+  useFrame(({ clock }) => {
     const now = clock.elapsedTime;
     const c = cue.current;
-    const f = figure.current;
-    const l = lantern.current;
-    const root = beamRef.current?.parent;
-    if (!f || !l || !root) return;
-
-    // It faces its door, and turns slowly toward the message it watches (a little, never all the way round).
-    const target = watch.current;
-    if (target?.visible) target.getWorldPosition(look);
-    else look.copy(restPoint);
-    aim.lerp(look, 1 - Math.exp(-delta * 2));
-    // Its front (+z, turned half round) faces −z in the room; yaw from there.
-    const doorYaw = Math.atan2(restPoint.x - at.x, -(restPoint.z - at.z));
-    const off = Math.atan2(aim.x - at.x, -(aim.z - at.z)) - doorYaw;
-    const turned = Math.atan2(Math.sin(off), Math.cos(off));
-    f.rotation.y = Math.PI - (doorYaw + Math.max(-0.45, Math.min(0.45, turned)));
-
-    // A faint breath; it bows a little as a message arrives, the eye brightening.
-    const sinceArrival = now - c.arrived;
-    const bowing = sinceArrival >= 0 && sinceArrival < BOW_SECONDS;
-    const bow = bowing ? Math.sin((Math.PI * sinceArrival) / BOW_SECONDS) : 0;
-    f.rotation.x = bow * 0.07 + (asleep ? 0.16 : 0);
-    f.position.y = Math.sin(now * (asleep ? 0.4 : 0.7)) * (asleep ? 0.012 : 0.005);
-    eyeLevel.value = asleep ? 0.12 : 1 + bow * 0.5;
-
-    // The lantern sways a little on its chain.
-    l.rotation.z = Math.sin(now * 0.8) * 0.04;
-    l.rotation.x = Math.sin(now * 0.55 + 1) * 0.03 + bow * 0.1;
-
-    // An answer left: the beam from the eye toward the doorway.
-    const sinceDeparture = now - c.departed;
+    const m = machine.current;
     const beam = beamRef.current;
-    if (beam) {
-      const on = sinceDeparture >= 0 && sinceDeparture < BEAM_SECONDS;
-      beam.visible = on;
-      if (on) {
-        const x = sinceDeparture / BEAM_SECONDS;
-        beamLevel.value = Math.min(x / 0.12, 1) * (1 - Math.max(0, (x - 0.12) / 0.88)) ** 1.5;
-        f.localToWorld(eyeAt.set(...eyeAtFit.current));
-        const from = root.worldToLocal(eyeAt.clone());
-        const to = root.worldToLocal(door.clone());
-        const dir = to.clone().sub(from);
-        beam.position.copy(from).add(to).multiplyScalar(0.5);
-        beam.quaternion.setFromUnitVectors(DOWN, dir.clone().normalize());
-        beam.scale.set(1, dir.length(), 1);
-      }
+    const root = beam?.parent;
+    if (!m || !beam || !root) return;
+
+    const sinceArrival = now - c.arrived;
+    const arriving = sinceArrival >= 0 && sinceArrival < ARRIVAL_SECONDS;
+    const pulse = arriving ? Math.sin((Math.PI * sinceArrival) / ARRIVAL_SECONDS) : 0;
+    screenLevel.value = asleep ? 0.12 : 1 + pulse * 0.5;
+    if (glow.current) glow.current.intensity = screenLevel.value;
+
+    // An answer left: the beam from the screen toward the doorway.
+    const sinceDeparture = now - c.departed;
+    const on = sinceDeparture >= 0 && sinceDeparture < BEAM_SECONDS;
+    beam.visible = on;
+    if (on) {
+      const x = sinceDeparture / BEAM_SECONDS;
+      beamLevel.value = Math.min(x / 0.12, 1) * (1 - Math.max(0, (x - 0.12) / 0.88)) ** 1.5;
+      m.localToWorld(screenAt.set(...SCREEN_AT));
+      const from = root.worldToLocal(screenAt.clone());
+      const to = root.worldToLocal(door.clone());
+      const dir = to.clone().sub(from);
+      beam.position.copy(from).add(to).multiplyScalar(0.5);
+      beam.quaternion.setFromUnitVectors(DOWN, dir.clone().normalize());
+      beam.scale.set(1, dir.length(), 1);
     }
   });
 
   return (
     <group position={position}>
-      {/* turned half round so its front (+z) faces the doorway (−z in the room) */}
-      <group ref={figure} rotation={[0, Math.PI, 0]}>
-        <Suspense
-          fallback={
-            <>
-              <mesh geometry={robe} material={cloth} />
-              {/* loose sleeves meeting in front, the lantern hanging from where they meet */}
-              <Sleeve from={new Vector3(-0.3, 1.38, 0)} to={new Vector3(-0.08, 1.12, 0.3)} material={cloth} />
-              <Sleeve from={new Vector3(0.3, 1.38, 0)} to={new Vector3(0.08, 1.12, 0.3)} material={cloth} />
-            </>
-          }
-        >
-          <RobotBody onFit={setFit} />
-        </Suspense>
-        <mesh position={fit.eye}>
-          <sphereGeometry args={[0.022, 12, 8]} />
-          <primitive object={eye} attach="material" />
-        </mesh>
-        <mesh position={[fit.lantern[0], fit.lantern[1] + 0.07, fit.lantern[2]]} material={regionMaterial("Iron")}>
-          <cylinderGeometry args={[0.008, 0.008, 0.12, 6]} />
-        </mesh>
-        <group ref={lantern} position={fit.lantern}>
-          <Lantern />
-        </group>
+      <group ref={machine} rotation={[0, FACING, 0]}>
+        <mesh geometry={PLINTH} material={iron} position={[0, 0.05, 0]} />
+        <mesh geometry={BODY} material={wood} position={[0, 0.41, 0]} />
+        <mesh geometry={PANEL} material={iron} position={[0, 0.42, 0.315]} />
+        {SLATS.map((y) => (
+          <mesh key={y} geometry={SLAT} material={brass} position={[0, y, 0.33]} />
+        ))}
+        <mesh geometry={SHELF} material={wood} position={[0, 0.76, 0.12]} rotation={[0.2, 0, 0]} />
+        <mesh geometry={KEYS} material={iron} position={[0, 0.795, 0.2]} rotation={[0.2, 0, 0]} />
+        <mesh geometry={HEAD} material={wood} position={[0, 1.1, -0.06]} />
+        <mesh geometry={BEZEL} material={iron} position={[0, 1.12, 0.2]} />
+        <mesh geometry={SCREEN} material={screen} position={SCREEN_AT} />
+        {LAMPS.map((x) => (
+          <mesh key={x} geometry={LAMP} material={screen} position={[x, 0.83, 0.195]} />
+        ))}
+        {CONDUITS.map((x) => (
+          <mesh key={x} geometry={CONDUIT} material={brass} position={[x, 0.75, -0.36]} />
+        ))}
+        <mesh geometry={MAST} material={brass} position={[0.3, 1.56, -0.1]} />
+        <pointLight ref={glow} position={[0, 1.1, 0.55]} color="#FFD9A0" distance={2.6} decay={2} />
       </group>
       <group ref={beamRef} visible={false}>
         <Beam />
