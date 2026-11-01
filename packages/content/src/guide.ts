@@ -50,7 +50,7 @@ export const guide: GuideTopic[] = [
         { target: "door", label: "A door. A cable runs from here to another room." },
         { target: "plate", label: "The door's plate" },
         { target: "keeper", label: "The keeper, who handles every message" },
-        { target: "glass", label: "The Scrying Glass" },
+        { target: "glass", label: "The planning table" },
       ],
     },
     body: [
@@ -69,14 +69,14 @@ export const guide: GuideTopic[] = [
         { target: "door", label: "Doors: archways in the back and left walls" },
         { target: "plate", label: "A plate beside every door" },
         { target: "keeper", label: "The keeper, in the middle of the room" },
-        { target: "glass", label: "The Scrying Glass (your room only)" },
+        { target: "glass", label: "The planning table (your room only)" },
         { target: "workbench", label: "The Knight's workbench (some rooms)" },
       ],
     },
     body: [
       "You see each room from above, with the front wall cut away so the whole room fits on screen. Every room of the same kind is laid out the same way, so you only have to learn it once.",
       "Doors are archways in the back and left walls, and each one has a plate beside it. The keeper, a hooded figure with a lantern, stands in the middle of the room.",
-      "Your own machine is the Observatory, the Knight's old base. It has a few extra things: the Scrying Glass, a stone basin in the floor, and in some rooms the Knight's workbench and his messenger.",
+      "Your own machine is the Observatory, the Knight's old base. It has a few extra things: a planning table, and in some rooms the Knight's workbench and his messenger.",
     ],
   },
   {
@@ -89,7 +89,6 @@ export const guide: GuideTopic[] = [
       marks: [
         { target: "plate", label: "Click a plate to read it" },
         { target: "keeper", label: "Click the keeper to ask what it did" },
-        { target: "glass", label: "Click the Glass to open it" },
       ],
     },
     body: [
@@ -136,7 +135,7 @@ export const guide: GuideTopic[] = [
   },
   {
     id: "glass",
-    title: "The Scrying Glass",
+    title: "The Map",
     blurb: "A live map of the floor, and of the whole palace",
     visual: {
       kind: "glass",
@@ -148,9 +147,9 @@ export const guide: GuideTopic[] = [
       ],
     },
     body: [
-      "The Glass shows the whole floor from above: every room, every corridor, and every message moving through it. Press [[G]] to open it from anywhere, or click the small map in the corner.",
+      "The Map shows the whole floor from above: every room, every corridor, and every message moving through it. Press [[G]] to open it from anywhere, or click the small map in the corner.",
       "The palace tab shows the whole palace: the floors you've restored glowing, the next one in mist, and fog over everything further on.",
-      "You can watch anything through the Glass, but you can't change anything through it. To do something, go to the room where it belongs.",
+      "You can watch anything on the Map, but you can't change anything from it. To do something, go to the room where it belongs.",
     ],
   },
   {
@@ -173,7 +172,7 @@ export const guide: GuideTopic[] = [
         { target: "pause", label: "Pause and play" },
         { target: "speed", label: "Run time slower or faster" },
         { target: "reset", label: "Put the room back the way it started" },
-        { target: "glass", label: "The Scrying Glass: click it to open the map" },
+        { target: "glass", label: "The Map: click it to open it" },
       ],
     },
     body: [
@@ -218,7 +217,7 @@ export const guide: GuideTopic[] = [
     blurb: "Watching a message's trip again",
     body: [
       "Click the ✕ a lost message left behind to replay its journey. After you restore a room, you can replay the winning journey too.",
-      "A replay plays in the Glass. It follows the message from room to room, slowed down, and shows what each keeper decided as it happens.",
+      "A replay plays on the Map. It follows the message from room to room, slowed down, and shows what each keeper decided as it happens.",
       "Replays are made from what really happened, so they always match it.",
     ],
   },
@@ -229,7 +228,7 @@ export const guide: GuideTopic[] = [
     body: [
       "When a room works again, an answer comes back to you carrying the room's key. The key goes on your keyring.",
       "Then the debrief: what happened, the new words you met (each with a plain meaning), and a kind line about each thing you tried along the way.",
-      "In the first regions you can also see how the room's builders made it. After a floor's last room, its Guardian remembers the whole floor working. Both play in the Glass, and the Codex keeps them to watch again.",
+      "In the first regions you can also see how the room's builders made it. After a floor's last room, its Guardian remembers the whole floor working. Both play on the Map, and the Codex keeps them to watch again.",
     ],
   },
   {
@@ -259,9 +258,9 @@ export const guide: GuideTopic[] = [
     blurb: "Every shortcut in one place",
     body: [
       "[[M]] open or close the menu",
-      "[[G]] open or close the Scrying Glass",
+      "[[G]] open or close the Map",
       "[[`]] open or close the console, once you have it",
-      "[[Esc]] step back: close a panel or the Glass",
+      "[[Esc]] step back: close a panel or the Map",
       "[[1]]–[[9]] go through a door",
       "[[Enter]] go on to the next spoken line",
     ],
@@ -374,7 +373,7 @@ export const guide: GuideTopic[] = [
     },
     from: "f2.lights-out",
     body: [
-      "The Guardian's second gift is the voice: the console, every machine's command line. Press [[`]] (the key above Tab) to open or close it. Commands run on the machine whose room you're in. The Glass has no console.",
+      "The Guardian's second gift is the voice: the console, every machine's command line. Press [[`]] (the key above Tab) to open or close it. Commands run on the machine whose room you're in. The Map has no console.",
       "[[Tab]] finishes a command or name you've started. [[↑]] and [[↓]] bring back earlier commands. [[Ctrl]]+[[C]] stops a command that keeps on running. Type help to list what you can use, and man and a command's name to read about it.",
       "When you click to do something, the console shows the real command that click ran, marked with ↳.",
       "Commands that start with lab are Wirelight's own tools, and show in violet. Everything else works the same on a real Linux machine. When a command fails, a dim line under the error says what it means.",

@@ -21,7 +21,8 @@ for (const { id, room, walk } of ROOMS) {
     ["lit", 0],
   ]) {
     await page.goto(`${base}?room=${room}&onboarded=1&ruin=${ruin}&capture=1&tier=high`);
-    await page.waitForTimeout(7000);
+    // Long enough for painted art and statues, which load on their own after the room.
+    await page.waitForTimeout(14000);
     if (walk) {
       await page.evaluate((to) => window.__wirelight.useSession.getState().goTo(to), walk);
       await page.waitForTimeout(6000);

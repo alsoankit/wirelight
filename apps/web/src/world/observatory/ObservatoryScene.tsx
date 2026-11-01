@@ -19,7 +19,7 @@ import { RUNE_GLOWS, Runes } from "./Runes";
 import { ObservatoryTools } from "./Tools";
 
 // The Observatory, the player's own machine on every floor (CORE-07): the Knight's old base, with the
-// Scrying Glass, his unfinished letter and the runes. An old fantasy ruin explored with modern tools
+// planning table, his unfinished letter and the runes. An old fantasy ruin explored with modern tools
 // (0051): only the Glass is modern here. A left world (0052). Its doors and everything that changes
 // come from the room (MachineScene); this adds what only the Observatory has.
 

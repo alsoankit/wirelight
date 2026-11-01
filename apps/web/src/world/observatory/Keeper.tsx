@@ -240,7 +240,7 @@ function Beam() {
 }
 
 /** The mourner's height in the game (the model stands 1.7 m): a little taller than a person. */
-const MOURNER_SCALE = 1.1;
+const ROBOT_SCALE = 1.1;
 /** The robot's paint: pale and worn, greyed in ruin. */
 const ROBOT = { restored: "#D8CDB8", ruined: "#8A93A3" };
 
@@ -274,16 +274,13 @@ function fitOf(geometry: BufferGeometry, matrix: Matrix4, scale: number): Fit {
   };
 }
 
-/** The keeper's body: the hooded mourner (decision 0092), in its region's cloth. */
-function Mourner({ region, onFit }: { region: RegionId; onFit: (fit: Fit) => void }) {
+/** The body: the maintenance robot (0104), the same worn paint in every region. */
+function RobotBody({ onFit }: { onFit: (fit: Fit) => void }) {
   const { geometry, source, matrix } = useModel("robot");
-  const material = useMemo(
-    () => carvedMaterial(source, { tint: ROBOT, detail: 0.75, roughness: 0.7 }),
-    [source, region],
-  );
-  useEffect(() => onFit(fitOf(geometry, matrix, MOURNER_SCALE)), [geometry, matrix, onFit]);
+  const material = useMemo(() => carvedMaterial(source, { tint: ROBOT, detail: 0.75, roughness: 0.7 }), [source]);
+  useEffect(() => onFit(fitOf(geometry, matrix, ROBOT_SCALE)), [geometry, matrix, onFit]);
   return (
-    <group scale={MOURNER_SCALE} rotation={[0, KEEPER_TURN, 0]}>
+    <group scale={ROBOT_SCALE} rotation={[0, KEEPER_TURN, 0]}>
       <mesh geometry={geometry} material={material} matrix={matrix} matrixAutoUpdate={false} castShadow />
     </group>
   );
@@ -379,7 +376,7 @@ export function Keeper({ position, rest, watch, cue, region = 1, asleep = false 
             </>
           }
         >
-          <Mourner region={region} onFit={setFit} />
+          <RobotBody onFit={setFit} />
         </Suspense>
         <mesh position={fit.eye}>
           <sphereGeometry args={[0.022, 12, 8]} />
@@ -388,17 +385,6 @@ export function Keeper({ position, rest, watch, cue, region = 1, asleep = false 
         <mesh position={[fit.lantern[0], fit.lantern[1] + 0.07, fit.lantern[2]]} material={regionMaterial("Iron")}>
           <cylinderGeometry args={[0.008, 0.008, 0.12, 6]} />
         </mesh>
-        {region === 4 && (
-          <>
-            {/* The navigator's brass: a band at the hem and a clasp at the collar. */}
-            <mesh position={[0, 0.08, 0]} rotation={[Math.PI / 2, 0, 0]} material={regionMaterial("Brass", 4)}>
-              <torusGeometry args={[0.39, 0.018, 6, 40]} />
-            </mesh>
-            <mesh position={[0, 1.43, 0.2]} material={regionMaterial("Brass", 4)}>
-              <sphereGeometry args={[0.045, 12, 8]} />
-            </mesh>
-          </>
-        )}
         <group ref={lantern} position={fit.lantern}>
           <Lantern />
         </group>

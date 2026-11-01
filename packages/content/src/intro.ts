@@ -87,8 +87,8 @@ export const tour = {
       target: "plate",
     },
     {
-      title: "The Scrying Glass",
-      body: "This is the Scrying Glass, a live map of the whole floor. Open it any time with [[G]] or a click.",
+      title: "The Map",
+      body: "This is the Map, a live view of the whole floor. Open it any time with [[G]] or a click.",
       target: "glass",
     },
     {

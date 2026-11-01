@@ -52,9 +52,9 @@ export function keeperSays(d: Decision, reason?: DropReason, name?: (mac: string
 
 export const voice = {
   keeper: {
-    name: "Keeper",
+    name: "Robot",
     /** In the Cathedral (Region 4) the keeper is the navigator, at its lectern (region-4 brief). */
-    navigator: "Navigator",
+    navigator: "Robot",
     title: "The keeper",
     about: "Ask it about something it handled. It tells you exactly what it did, and why.",
     idle: "Nothing has arrived yet.",
@@ -293,10 +293,10 @@ export const voice = {
     next: "Next",
     done: "Close",
   },
-  /** The Scrying Glass (CORE-31..33, 0064): the live map of the floor, and the world map. */
+  /** The Map, once the Scrying Glass (CORE-31..33, 0064, 0105): the live map of the floor, and the world map. */
   glass: {
-    title: "The Scrying Glass",
-    open: "Open the Scrying Glass (G)",
+    title: "The Map",
+    open: "Open the Map (G)",
     floorMap: "A live map of this floor: every machine, every cable and the messages on them.",
     thisFloor: "This floor",
     world: "The palace",
