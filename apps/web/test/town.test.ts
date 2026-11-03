@@ -14,23 +14,23 @@ describe("the town square's readable things", () => {
   it("the register lists each house at its own address, not the player's house", () => {
     const rows = register(room("f5.where-not-who"));
     expect(rows.map((h) => [h.id, h.address])).toEqual([
-      ["lantern", "10.0.1.7"],
-      ["quill", "10.0.1.12"],
-      ["anvil", "10.0.1.10"],
+      ["kitchen", "10.0.1.7"],
+      ["library", "10.0.1.12"],
+      ["forge", "10.0.1.10"],
     ]);
   });
 
-  it("keeps a house's own address while it uses another (7.B: bell .18, moth .14)", () => {
+  it("keeps a house's own address while it uses another (7.B: chapel .18, cellar .14)", () => {
     const r = room("f7.boss-census");
     const byId = Object.fromEntries(register(r).map((h) => [h.id, h.address]));
-    expect(byId.bell).toBe("10.0.1.18");
-    expect(byId.moth).toBe("10.0.1.14");
+    expect(byId.chapel).toBe("10.0.1.18");
+    expect(byId.cellar).toBe("10.0.1.14");
     expect(byId.registry).toBe("10.0.1.2");
     expect(
       census(r)
         .map((h) => h.id)
         .sort(),
-    ).toEqual(["anvil", "bell", "lantern", "moth", "quill"]);
+    ).toEqual(["cellar", "chapel", "forge", "kitchen", "library"]);
   });
 
   it("the street sign reads the square's street, even when the player's house is on another", () => {
@@ -38,7 +38,7 @@ describe("the town square's readable things", () => {
     expect(squareStreet(room("f7.secret-binary"))).toBe("10.0.1.0/24");
     expect(streetOf("10.0.1.200", 25)).toBe("10.0.1.128/25");
     expect(streetStart("10.0.1.0/24")).toBe("10.0.1.");
-    expect(houseNumber(room("f7.boss-census"), "lantern")).toBe("7");
+    expect(houseNumber(room("f7.boss-census"), "kitchen")).toBe("7");
   });
 });
 

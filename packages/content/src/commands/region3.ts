@@ -44,7 +44,7 @@ export const REGION_3_COMMANDS: Record<string, CommandMemory> = {
       ],
       dimmed: "`ttl=64` and `56(84) bytes`: you can ignore these for now.",
     },
-    action: { say: "Now ask lantern yourself. It fails, for now.", type: "ping -c 3 10.0.1.7" },
+    action: { say: "Now ask kitchen yourself. It fails, for now.", type: "ping -c 3 10.0.1.7" },
   },
   "CMD-05": {
     id: "CMD-05",
@@ -102,7 +102,7 @@ export const REGION_3_COMMANDS: Record<string, CommandMemory> = {
       { line: "ip neigh del <address> dev <door>", meaning: "cross a line out" },
       { line: "ip neigh flush dev <door>", meaning: "clear the whole ledger for a door" },
     ],
-    // The room's real output (6.2, after lantern's door was asked for and written down).
+    // The room's real output (6.2, after kitchen's door was asked for and written down).
     output: {
       text: "10.0.1.7 dev eth0 lladdr 02:00:00:00:00:17 REACHABLE ",
       marks: [

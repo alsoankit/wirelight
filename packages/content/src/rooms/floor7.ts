@@ -4,13 +4,13 @@ import type { FloorText, RoomText } from "./types";
 /** floors/floor-7.md, word for word. The Lantern Town's last floor. */
 
 export const sameStreet: RoomText = {
-  title: "Same Street?",
+  title: "Moved House",
   mission: "You've moved house again. Now nobody on the square can hear you.",
-  access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
+  access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
-    // Lantern's house is locked, so its address is read on the register in the square.
-    { text: "Compare your plate with lantern's address on the square's register." },
+    // Kitchen's house is locked, so its address is read on the register in the square.
+    { text: "Compare your plate with kitchen's address on the square's register." },
     { text: "The street sign on the square says which street this is." },
     {
       text: "An address is a street and a house number; the `/24` says the street is the first three numbers. Only same-street houses talk directly.",
@@ -18,7 +18,7 @@ export const sameStreet: RoomText = {
     },
     { text: "Move your house onto the square's street with a free house number." },
     {
-      text: "Remove `10.0.2.5/24` and add `10.0.1.5/24` (the slot, or `ip addr del` then `ip addr add`), then ping lantern.",
+      text: "Remove `10.0.2.5/24` and add `10.0.1.5/24` (the slot, or `ip addr del` then `ip addr add`), then ping kitchen.",
     },
   ],
   detectors: {
@@ -27,11 +27,11 @@ export const sameStreet: RoomText = {
       tried: "You moved onto the right street, but with a different `/` from everyone else's.",
     },
     "take-lanterns-house": {
-      note: "That's lantern's house. Two houses, one address doesn't work.",
-      tried: "You took lantern's address for your own house.",
+      note: "That's kitchen's house. Two houses, one address doesn't work.",
+      tried: "You took kitchen's address for your own house.",
     },
     "ping-the-lane": {
-      note: "That's your own street, the lane. Who lives on lantern's?",
+      note: "That's your own street, the lane. Who lives on kitchen's?",
       tried: "You pinged houses on the lane, your old street, instead of the square's.",
     },
   },
@@ -39,7 +39,7 @@ export const sameStreet: RoomText = {
     // The spec's third new words, "network part / host part", are named here and folded into the prefix
     // length's meaning: a room teaches at most two terms (ROOM-07).
     happened:
-      "Your address was on street `10.0.2`, and lantern's on `10.0.1`. A machine talks directly only to its own street, its subnet. The `/24`, the prefix length, says the first three numbers are the street (the network part) and the last is the house (the host part). Moving onto the square's street put you next door to lantern again.",
+      "Your address was on street `10.0.2`, and kitchen's on `10.0.1`. A machine talks directly only to its own street, its subnet. The `/24`, the prefix length, says the first three numbers are the street (the network part) and the last is the house (the host part). Moving onto the square's street put you next door to kitchen again.",
     terms: [
       { id: "subnet", term: "subnet", meaning: "a street: all the addresses that share the same network part" },
       {
@@ -78,17 +78,17 @@ export const askForAnAddress: RoomText = {
   title: "Ask for an Address",
   mission: "Every house on the square is taken, and you don't know which numbers are free. The town keeps a registry.",
   access: {
-    lantern: HOUSE_LOCKED,
-    quill: HOUSE_LOCKED,
-    anvil: HOUSE_LOCKED,
-    bell: HOUSE_LOCKED,
+    kitchen: HOUSE_LOCKED,
+    library: HOUSE_LOCKED,
+    forge: HOUSE_LOCKED,
+    chapel: HOUSE_LOCKED,
   },
   notes: ["Don't guess numbers. Ask the registry."],
   hints: [
     { text: "Don't guess. Someone keeps track of free addresses." },
     { text: "The registry hands them out, if you ask." },
     { text: "DHCP: call out, get an offer, accept it, get a lease.", codex: "registry" },
-    { text: "Ask the registry for an address with the command that does it, then ping lantern." },
+    { text: "Ask the registry for an address with the command that does it, then ping kitchen." },
     { text: "`dhclient -v eth0`, then `ping -c 3 10.0.1.7`." },
   ],
   detectors: {
@@ -129,8 +129,8 @@ export const askForAnAddress: RoomText = {
 export const census: RoomText = {
   title: "The Census",
   mission: "The town is taking a census, the first in years. Every house on the square must answer.",
-  access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED, registry: HOUSE_LOCKED },
-  notes: ["Census: lantern .7 · quill .12 · anvil .10 · bell .18 · moth .14"],
+  access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED, registry: HOUSE_LOCKED },
+  notes: ["Census: kitchen .7 · library .12 · forge .10 · chapel .18 · cellar .14"],
   hints: [
     { text: "Ping each house on the census. Note who's silent." },
     { text: "Compare the subnet colour (the street colour) on every plate, and on the census board." },
@@ -142,7 +142,7 @@ export const census: RoomText = {
       text: "Get yourself an address from DHCP, bring the machine on the wrong subnet onto the square's subnet, and make sure nobody's using an address that isn't theirs.",
     },
     {
-      text: "In bell's room: `ip addr del 10.0.1.100/24 dev eth0`, then `ip addr add 10.0.1.18/24 dev eth0`. In moth's room: `ip addr del 10.0.2.14/24 dev eth0`, then `ip addr add 10.0.1.14/24 dev eth0`. In your house: `dhclient -v eth0`. Then ping all five.",
+      text: "In chapel's room: `ip addr del 10.0.1.100/24 dev eth0`, then `ip addr add 10.0.1.18/24 dev eth0`. In cellar's room: `ip addr del 10.0.2.14/24 dev eth0`, then `ip addr add 10.0.1.14/24 dev eth0`. In your house: `dhclient -v eth0`. Then ping all five.",
     },
   ],
   detectors: {
@@ -169,7 +169,7 @@ export const census: RoomText = {
   },
   debrief: {
     happened:
-      "Moth was on the wrong subnet, bell was using an address that belonged to the DHCP server's pool, and you had no address at all. You moved moth onto the square's subnet, gave bell its own address, and asked DHCP for yours. Every house answered the census.",
+      "Cellar was on the wrong subnet, chapel was using an address that belonged to the DHCP server's pool, and you had no address at all. You moved cellar onto the square's subnet, gave chapel its own address, and asked DHCP for yours. Every house answered the census.",
     terms: [],
   },
   voice: [
@@ -199,7 +199,7 @@ export const floor7: FloorText = {
       title: "Ride-along",
       text: "Same street: straight there.",
       shown:
-        "the camera rides the observatory's DHCP DISCOVER, a call from nobody to everyone, across the square to the registry; rides the OFFER back; then a ping to lantern: the street part of its address glows amber and matches; it goes straight there",
+        "the camera rides the observatory's DHCP DISCOVER, a call from nobody to everyone, across the square to the registry; rides the OFFER back; then a ping to kitchen: the street part of its address glows amber and matches; it goes straight there",
     },
     {
       id: "F7-FM-04",

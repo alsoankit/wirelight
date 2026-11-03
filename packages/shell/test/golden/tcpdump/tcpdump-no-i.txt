@@ -1,4 +1,4 @@
-# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: during capture, observatory: ping -c 1 10.0.0.7 | runs on: lantern
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: during capture, observatory: ping -c 1 10.0.0.7 | runs on: kitchen
 $ tcpdump -n -c 2 icmp
 tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
 listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes

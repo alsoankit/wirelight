@@ -29,8 +29,8 @@ export const region2Arrival: { id: string; speaker: string; text: string }[] = [
 // ── Floor 3 · The Switch ───────────────────────────────────────────────────────────────────
 
 const manyDoors: RoomText = {
-  title: "Many Doors",
-  mission: "Your messenger is writing to anvil, but the hall's keeper has forgotten how to sort. Show it.",
+  title: "Sort It by Hand",
+  mission: "Your messenger is writing to forge, but the hall's keeper has forgotten how to sort. Show it.",
   notes: [],
   hints: [
     { text: "A frame is waiting at the desk. Read it." },
@@ -41,7 +41,7 @@ const manyDoors: RoomText = {
     },
     { text: "If the board knows the to, send it out that door. If not, send it out every other door." },
     {
-      text: "First frame: Remember, then Send out every other door. Anvil's answer: Remember, then Send out eth0. Next frame: Send out eth3. The keeper will take over.",
+      text: "First frame: Remember, then Send out every other door. Forge's answer: Remember, then Send out eth0. Next frame: Send out eth3. The keeper will take over.",
     },
   ],
   detectors: {
@@ -50,7 +50,7 @@ const manyDoors: RoomText = {
       tried: "You sent a frame back out of the door it came in by.",
     },
     "guess-a-door": {
-      note: "You didn't know where anvil was yet. What can the keeper do when it doesn't know?",
+      note: "You didn't know where forge was yet. What can the keeper do when it doesn't know?",
       tried: "You picked one door for a name the board didn't know yet.",
     },
     "flood-everything": {
@@ -117,10 +117,10 @@ const manyDoors: RoomText = {
 };
 
 const keepersMemory: RoomText = {
-  title: "The Keeper's Memory",
+  title: "What the Hall Remembers",
   mission:
     "Something behind the hall's third door keeps a key. Nobody remembers its MAC address, and the hall's board can't be read.",
-  access: { compass: SEALED, beacon: SEALED, gate: SEALED },
+  access: { pantry: SEALED, attic: SEALED, gate: SEALED },
   notes: ["The one behind the third door has the key."],
   hints: [
     { text: "The board can't be read. Can the hall tell you what's in its MAC table?" },
@@ -179,10 +179,10 @@ const keepersMemory: RoomText = {
 };
 
 const findEveryone: RoomText = {
-  title: "Find Everyone",
+  title: "Fill In the Cards",
   mission:
     "You left three letters before you shut down, one for each door of the hall. You only wrote down the doors, not the names.",
-  access: { ember: SEALED, thistle: SEALED, bell: SEALED },
+  access: { bakery: SEALED, larder: SEALED, chapel: SEALED },
   notes: [],
   hints: [
     { text: "Three letters, three doors, three names you don't know yet." },
@@ -217,17 +217,17 @@ const findEveryone: RoomText = {
 const busyHall: RoomText = {
   title: "The Busy Hall",
   mission: "Your last letter to this hall never got an answer. Something here is still waiting for it.",
-  access: { compass: SEALED, beacon: SEALED, wren: SEALED },
+  access: { pantry: SEALED, attic: SEALED, laundry: SEALED },
   notes: [],
   hints: [
     { text: "One of the hall's doors is dark." },
     { text: "Its switch is broken. Use the hall's terminal." },
     { text: "A machine behind a dark door can't hear a broadcast, or answer one.", codex: "everyone-address" },
     {
-      text: "Switch the door on in the hall, make wren send something, read its MAC address from the hall's MAC table, then fix the card.",
+      text: "Switch the door on in the hall, make laundry send something, read its MAC address from the hall's MAC table, then fix the card.",
     },
     {
-      text: "In the hall: `ip link set eth2 up`. Broadcast. `bridge fdb show` shows `02:00:00:00:00:13 dev eth2`. Set the card to it; wren answers with the key.",
+      text: "In the hall: `ip link set eth2 up`. Broadcast. `bridge fdb show` shows `02:00:00:00:00:13 dev eth2`. Set the card to it; laundry answers with the key.",
     },
   ],
   detectors: {
@@ -249,12 +249,12 @@ const busyHall: RoomText = {
     },
     "broadcast-before-link": {
       note: "Everyone answered… except whoever's behind the dark door.",
-      tried: "You sent a broadcast while wren's door was still switched off.",
+      tried: "You sent a broadcast while laundry's door was still switched off.",
     },
   },
   debrief: {
     happened:
-      "Wren was behind a door that was switched off, so nothing reached it and it never spoke. Once the door was on, a broadcast made it answer, the hall learned its name from the source, and your letter could finally be delivered.",
+      "Laundry was behind a door that was switched off, so nothing reached it and it never spoke. Once the door was on, a broadcast made it answer, the hall learned its name from the source, and your letter could finally be delivered.",
     terms: [],
   },
   voice: [
@@ -304,36 +304,36 @@ const floor3: FloorText = {
 // ── Floor 4 · Memory and Loops ─────────────────────────────────────────────────────────────
 
 const pinnedMemory: RoomText = {
-  title: "The Pinned Memory",
-  mission: "Lantern moved to a new door in the hall last night. Since then, nothing reaches it.",
+  title: "Moved Out",
+  mission: "Kitchen moved to a new door in the hall last night. Since then, nothing reaches it.",
   access: { alcove: "Nobody lives at the far end of this corridor any more. Its cable lies loose on the floor." },
   notes: [],
   hints: [
-    { text: "Follow a frame for lantern. Which door does it leave the hall by?" },
-    { text: "Ask the hall what it remembers about lantern." },
+    { text: "Follow a frame for kitchen. Which door does it leave the hall by?" },
+    { text: "Ask the hall what it remembers about kitchen." },
     { text: "Most memories fade when a machine goes quiet. A pinned one never does.", codex: "pinned-memory" },
     { text: "Remove the wrong line, then let the hall learn again." },
     {
-      text: "In the hall: `bridge fdb del 02:00:00:00:00:07 dev eth1 master`. The next frame floods, lantern answers from eth3, and the key arrives.",
+      text: "In the hall: `bridge fdb del 02:00:00:00:00:07 dev eth1 master`. The next frame floods, kitchen answers from eth3, and the key arrives.",
     },
   ],
   detectors: {
     "replug-old-cable": {
-      note: "That corridor leads nowhere now. Lantern isn't behind that door anymore.",
+      note: "That corridor leads nowhere now. Kitchen isn't behind that door anymore.",
       tried: "You plugged in the old cable, but nobody lives at its far end now.",
     },
     "wait-for-fade": {
-      note: "Quill's line faded. Lantern's didn't. What's different about it?",
-      tried: "You waited for lantern's line to fade, but a pinned line never does.",
+      note: "Library's line faded. Kitchen's didn't. What's different about it?",
+      tried: "You waited for kitchen's line to fade, but a pinned line never does.",
     },
     "delete-wrong-line": {
-      note: "That one was right. Which line sends lantern's frames to the wrong door?",
-      tried: "You removed quill's line, which was right.",
+      note: "That one was right. Which line sends kitchen's frames to the wrong door?",
+      tried: "You removed library's line, which was right.",
     },
   },
   debrief: {
     happened:
-      "A switch forgets a machine after five minutes of silence, so its memory follows machines when they move. That's ageing. But lantern's line had been pinned by hand, a static entry, so it never faded and kept pointing at the old door. You removed it, the hall flooded once, and learned the right door.",
+      "A switch forgets a machine after five minutes of silence, so its memory follows machines when they move. That's ageing. But kitchen's line had been pinned by hand, a static entry, so it never faded and kept pointing at the old door. You removed it, the hall flooded once, and learned the right door.",
     terms: [
       { id: "ageing", term: "ageing", meaning: "a switch forgetting machines that have gone quiet" },
       {
@@ -359,7 +359,7 @@ const pinnedMemory: RoomText = {
     },
     { q: "How long does it remember?", a: "Five minutes of silence. Then the line goes." },
     {
-      q: "Why does lantern's line never fade?",
+      q: "Why does kitchen's line never fade?",
       a: "Somebody pinned it. A pinned line never goes. That's the point of pinning it, and the trouble too.",
     },
   ],
@@ -372,9 +372,9 @@ const pinnedMemory: RoomText = {
 };
 
 const whoHasTheKey: RoomText = {
-  title: "Who Has the Key?",
+  title: "Ask Everyone",
   mission: "Somewhere in these two halls, one machine keeps the key. You don't know which, or where.",
-  access: { compass: SEALED, beacon: SEALED, anvil: SEALED, bell: SEALED, ember: SEALED },
+  access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED, bakery: SEALED },
   notes: [],
   hints: [
     { text: "You don't know where it is. Who could you ask all at once?" },
@@ -385,7 +385,7 @@ const whoHasTheKey: RoomText = {
     },
     { text: "Broadcast, read who says they keep the key, then write to them by name." },
     {
-      text: "Broadcast; anvil answers `I'm here — anvil (I keep the key)` from `02:00:00:00:00:0a`. Send it a frame by name.",
+      text: "Broadcast; forge answers `I'm here — forge (I keep the key)` from `02:00:00:00:00:0a`. Send it a frame by name.",
     },
   ],
   detectors: {
@@ -423,27 +423,27 @@ const whoHasTheKey: RoomText = {
 };
 
 const spareCable: RoomText = {
-  title: "The Spare Cable",
+  title: "One Cable Too Many",
   mission:
-    "Someone left a spare cable between the two halls, in case the first one ever broke. Plug it in, then get a message to anvil.",
-  access: { compass: SEALED, beacon: SEALED, anvil: SEALED, bell: SEALED },
+    "Someone left a spare cable between the two halls, in case the first one ever broke. Plug it in, then get a message to forge.",
+  access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED },
   notes: ["Left a spare cable between the halls, just in case. Two cables are safer than one. Surely."],
   hints: [
     { text: "Plug in the spare, then watch one broadcast. Where does it go after it crosses to the other hall?" },
-    { text: "Read a hall's MAC table, then read it again a few seconds later. Where is anvil now?" },
+    { text: "Read a hall's MAC table, then read it again a few seconds later. Where is forge now?" },
     {
       text: "Two halls joined by two cables make a circle: each hall floods every broadcast on to the other, round and round.",
       codex: "loop",
     },
-    { text: "Take one of the two cables away, let the halls settle, then write to anvil." },
+    { text: "Take one of the two cables away, let the halls settle, then write to forge." },
     {
-      text: 'Unplug the spare again (hall-b\'s eth4). Wait a few seconds, then send anvil a frame: `lab send-frame --to 02:00:00:00:00:0a --msg "hello"`. It answers with the key.',
+      text: 'Unplug the spare again (hall-b\'s eth4). Wait a few seconds, then send forge a frame: `lab send-frame --to 02:00:00:00:00:0a --msg "hello"`. It answers with the key.',
     },
   ],
   detectors: {
     "message-in-the-storm": {
       note: "In all those copies, a message can get lost or sent the wrong way. Let the halls settle first.",
-      tried: "You wrote to anvil while the copies were still circling.",
+      tried: "You wrote to forge while the copies were still circling.",
     },
     "loop-again": {
       note: "That brings the circle back, and the copies with it.",
@@ -452,7 +452,7 @@ const spareCable: RoomText = {
   },
   debrief: {
     happened:
-      "With the spare plugged in, the two halls were joined twice: a switching loop. Every broadcast crossed one cable and came back over the other, again and again, and the copies piled up: a broadcast storm. The boards kept moving names between doors, because copies came in by every door. You took one cable away, the copies drained, and anvil's answer got through.",
+      "With the spare plugged in, the two halls were joined twice: a switching loop. Every broadcast crossed one cable and came back over the other, again and again, and the copies piled up: a broadcast storm. The boards kept moving names between doors, because copies came in by every door. You took one cable away, the copies drained, and forge's answer got through.",
     terms: [
       {
         id: "switching-loop",
@@ -491,7 +491,7 @@ const spareCable: RoomText = {
 const storm: RoomText = {
   title: "The Storm",
   mission: "The great hall is drowning in its own messages. Somewhere inside, the key is still waiting.",
-  access: { compass: SEALED, beacon: SEALED, anvil: SEALED, bell: SEALED, wren: SEALED },
+  access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED, laundry: SEALED },
   notes: [],
   hints: [
     { text: "Watch one broadcast. Where does it go after it crosses to the other hall?" },
@@ -500,37 +500,37 @@ const storm: RoomText = {
       text: "Two switches joined twice make a loop: each floods every broadcast back to the other, forever.",
       codex: "loop",
     },
-    { text: "Break the loop by taking one of the two spans away, then check what hall-b remembers about wren." },
+    { text: "Break the loop by taking one of the two spans away, then check what hall-b remembers about laundry." },
     {
-      text: "Unplug `span-2` (or `ip link set eth4 down` in hall-b). Then in hall-b, `bridge fdb del 02:00:00:00:00:13 dev eth2 master`. Write to wren; it answers with the key.",
+      text: "Unplug `span-2` (or `ip link set eth4 down` in hall-b). Then in hall-b, `bridge fdb del 02:00:00:00:00:13 dev eth2 master`. Write to laundry; it answers with the key.",
     },
   ],
   detectors: {
     "replug-old-cable": {
-      // Inherited from 4.1 (floor-4.md); its words there are about lantern, so here they're about the span.
+      // Inherited from 4.1 (floor-4.md); its words there are about kitchen, so here they're about the span.
       note: "That cable was the trouble. Plug it back in and the copies start circling again.",
       tried: "You plugged a span back in after taking it away, and the loop came back.",
     },
     "delete-wrong-line": {
-      note: "That one was right. Which line sends wren's frames to the wrong door?",
-      tried: "You removed a line in hall-b that wasn't wren's.",
+      note: "That one was right. Which line sends laundry's frames to the wrong door?",
+      tried: "You removed a line in hall-b that wasn't laundry's.",
     },
     "only-hall-a": {
       note: "Hall-a doesn't know everyone. One of its doors leads somewhere else.",
-      tried: "You searched hall-a's memory, but wren lives behind hall-b.",
+      tried: "You searched hall-a's memory, but laundry lives behind hall-b.",
     },
     "more-cables": {
       note: "More paths, more copies. What happens when a broadcast can go round and round?",
       tried: "You plugged in a cable while the storm was running.",
     },
     "only-the-loop": {
-      note: "The storm is over. Is the hall's memory of wren right?",
-      tried: "You stopped the storm, but hall-b's pinned line still sent wren's frames to the wrong door.",
+      note: "The storm is over. Is the hall's memory of laundry right?",
+      tried: "You stopped the storm, but hall-b's pinned line still sent laundry's frames to the wrong door.",
     },
   },
   debrief: {
     happened:
-      "Two spans between the same two halls made a switching loop. Every broadcast was flooded across one span and back across the other, again and again: the broadcast storm that drowned the Works. Removing one span stopped it. Then a pinned memory still pointed wren to the wrong door, and you cleared it.",
+      "Two spans between the same two halls made a switching loop. Every broadcast was flooded across one span and back across the other, again and again: the broadcast storm that drowned the Works. Removing one span stopped it. Then a pinned memory still pointed laundry to the wrong door, and you cleared it.",
     terms: [],
   },
   voice: [

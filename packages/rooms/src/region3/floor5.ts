@@ -3,7 +3,7 @@ import { keyFor, lanternNewDoorReply, messengerMessage } from "@wirelight/conten
 import { messengerPingAnswered, printed, ran, ranBefore } from "../predicates";
 import { type Access, defineRoom, type Misconception, type SolutionStep } from "../types";
 import { answeredBy, crossedBothWays, hasAddr, pingRanFor, pingsTo, ranAfterAnswer } from "./predicates";
-import { ANVIL, BELL, IP, LANTERN, QUILL, town } from "./topology";
+import { CHAPEL, FORGE, IP, KITCHEN, LIBRARY, town } from "./topology";
 
 const typed = (device: string, line: string, waitMs?: number): SolutionStep => ({
   device,
@@ -44,7 +44,7 @@ const pingForever: Misconception = { id: "ping-forever", detect: pingRanFor("obs
 // ── 5.1 · Where, Not Who ───────────────────────────────────────────────────────────────────
 
 const whereId = "f5.where-not-who";
-const cardAnswered = messengerPingAnswered("observatory", IP.lantern);
+const cardAnswered = messengerPingAnswered("observatory", IP.kitchen);
 export const whereNotWho = defineRoom({
   id: whereId,
   region: 3,
@@ -55,15 +55,15 @@ export const whereNotWho = defineRoom({
   content: whereId,
   seed: 51,
   topology: town({
-    houses: ["lantern", "quill", "anvil"],
-    messenger: { to: IP.lantern, msg: messengerMessage, intervalMs: 3000 },
-    // An old-style frame written to lantern's new door gets an answer, without the key.
+    houses: ["kitchen", "library", "forge"],
+    messenger: { to: IP.kitchen, msg: messengerMessage, intervalMs: 3000 },
+    // An old-style frame written to kitchen's new door gets an answer, without the key.
     lanternLab: { mode: "responder", reply: lanternNewDoorReply },
   }),
-  // The card still holds lantern's old door name.
+  // The card still holds kitchen's old door name.
   faults: [{ kind: "card", device: "observatory", to: "02:00:00:00:00:07" }],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil"]),
+  access: access(["kitchen", "library", "forge"]),
   controls: { console: "typing", card: "works", catching: true },
   tools: {},
   glow: "symptoms",
@@ -79,16 +79,16 @@ export const whereNotWho = defineRoom({
     { id: "own-address", detect: ran("observatory", /^lab card --to 10\.0\.1\.5$/) },
   ],
   detectorTests: [
-    { misconception: "chase-the-new-name", steps: [click("observatory", `lab card --to ${LANTERN}`)] },
+    { misconception: "chase-the-new-name", steps: [click("observatory", `lab card --to ${KITCHEN}`)] },
     { misconception: "own-address", steps: [click("observatory", `lab card --to ${IP.observatory}`)] },
   ],
-  solution: [click("observatory", `lab card --to ${IP.lantern}`)],
+  solution: [click("observatory", `lab card --to ${IP.kitchen}`)],
 });
 
 // ── 5.2 · A Place to Live ──────────────────────────────────────────────────────────────────
 
 const placeId = "f5.place-to-live";
-const lanternAnswered = answeredBy("observatory", IP.lantern, LANTERN);
+const lanternAnswered = answeredBy("observatory", IP.kitchen, KITCHEN);
 export const placeToLive = defineRoom({
   id: placeId,
   region: 3,
@@ -98,10 +98,10 @@ export const placeToLive = defineRoom({
   pathTag: "tool",
   content: placeId,
   seed: 52,
-  topology: town({ houses: ["lantern", "quill", "anvil"] }),
+  topology: town({ houses: ["kitchen", "library", "forge"] }),
   faults: [noAddress],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil"]),
+  access: access(["kitchen", "library", "forge"]),
   controls: { console: "typing", catching: true, addressSlots: { "observatory:eth0": "works" } },
   tools: { unlock: ["ip addr", "ping"] },
   glow: "symptoms",
@@ -147,10 +147,10 @@ export const placeToLive = defineRoom({
 
 const rollId = "f5.roll-call";
 const ROLL = [
-  { ip: IP.lantern, door: LANTERN },
-  { ip: IP.anvil, door: ANVIL },
-  { ip: IP.quill, door: QUILL },
-  { ip: IP.bell, door: BELL },
+  { ip: IP.kitchen, door: KITCHEN },
+  { ip: IP.forge, door: FORGE },
+  { ip: IP.library, door: LIBRARY },
+  { ip: IP.chapel, door: CHAPEL },
 ];
 export const rollCall = defineRoom({
   id: rollId,
@@ -161,10 +161,10 @@ export const rollCall = defineRoom({
   pathTag: "building-block",
   content: rollId,
   seed: 53,
-  topology: town({ houses: ["lantern", "quill", "anvil", "bell", "ember"] }),
-  faults: [noAddress, { kind: "iface-down", device: "ember", iface: "eth0" }],
+  topology: town({ houses: ["kitchen", "library", "forge", "chapel", "bakery"] }),
+  faults: [noAddress, { kind: "iface-down", device: "bakery", iface: "eth0" }],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil", "bell", "ember"]),
+  access: access(["kitchen", "library", "forge", "chapel", "bakery"]),
   controls: { console: "typing", catching: true, addressSlots: { "observatory:eth0": "broken" } },
   tools: {},
   glow: "symptoms",
@@ -175,7 +175,7 @@ export const rollCall = defineRoom({
   uses: ["ip-address", "ping", "echo-request-reply"],
   cards: [],
   commandMemory: "CMD-05",
-  misconceptions: [{ id: "empty-house", detect: pingsTo("observatory", IP.ember, 5) }],
+  misconceptions: [{ id: "empty-house", detect: pingsTo("observatory", IP.bakery, 5) }],
   detectorTests: [
     {
       misconception: "empty-house",
@@ -192,7 +192,7 @@ export const rollCall = defineRoom({
 // ── 5.B · The Quiet Street ─────────────────────────────────────────────────────────────────
 
 const quietId = "f5.boss-quiet-street";
-const quietAnswered = messengerPingAnswered("observatory", IP.lantern);
+const quietAnswered = messengerPingAnswered("observatory", IP.kitchen);
 export const quietStreet = defineRoom({
   id: quietId,
   region: 3,
@@ -203,8 +203,8 @@ export const quietStreet = defineRoom({
   content: quietId,
   seed: 59,
   topology: town({
-    houses: ["lantern", "quill", "anvil"],
-    messenger: { to: IP.lantern, msg: messengerMessage, intervalMs: 3000 },
+    houses: ["kitchen", "library", "forge"],
+    messenger: { to: IP.kitchen, msg: messengerMessage, intervalMs: 3000 },
   }),
   faults: [
     noAddress,
@@ -212,7 +212,7 @@ export const quietStreet = defineRoom({
     { kind: "card", device: "observatory", to: "10.0.1.70" },
   ],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil"]),
+  access: access(["kitchen", "library", "forge"]),
   controls: {
     console: "typing",
     card: "works",
@@ -245,7 +245,7 @@ export const quietStreet = defineRoom({
       id: "wrong-door-name",
       detect: (f) => printed("observatory", "Cannot find device")(f) || printed("square", "Cannot find device")(f),
     },
-    { id: "ping-only-quill", detect: ranAfterAnswer("observatory", IP.quill, /^ip addr (add|del) /) },
+    { id: "ping-only-library", detect: ranAfterAnswer("observatory", IP.library, /^ip addr (add|del) /) },
   ],
   detectorTests: [
     { misconception: "wrong-house", steps: [typed("observatory", "ip addr add 10.0.1.7/24 dev eth0")] },
@@ -256,7 +256,7 @@ export const quietStreet = defineRoom({
     },
     { misconception: "wrong-door-name", steps: [typed("square", "ip link set eth9 up")] },
     {
-      misconception: "ping-only-quill",
+      misconception: "ping-only-library",
       steps: [
         typed("observatory", ADD_OWN),
         typed("observatory", "ping -c 1 10.0.1.12"),
@@ -268,6 +268,6 @@ export const quietStreet = defineRoom({
   solution: [
     typed("observatory", ADD_OWN),
     typed("square", "ip link set eth1 up"),
-    click("observatory", `lab card --to ${IP.lantern}`),
+    click("observatory", `lab card --to ${IP.kitchen}`),
   ],
 });

@@ -1,5 +1,5 @@
-# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: observatory: ip addr del 10.0.0.5/24 dev eth0 | runs on: observatory
+# lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off | setup: observatory: ip addr del 10.0.0.5/24 dev eth0 | runs on: observatory
 $ ip addr show dev eth0
 2: eth0@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
-    link/ether 02:00:00:00:00:05 brd ff:ff:ff:ff:ff:ff link-netns lantern
+    link/ether 02:00:00:00:00:05 brd ff:ff:ff:ff:ff:ff link-netns kitchen
 [exit 0]

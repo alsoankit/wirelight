@@ -19,9 +19,9 @@ const topology: Topology = {
       kind: "host",
       interfaces: [{ name: "eth0", mac: "02:00:00:00:00:05" }],
     },
-    { id: "lantern", hostname: "lantern", kind: "host", interfaces: [{ name: "eth0", mac: "02:00:00:00:00:07" }] },
+    { id: "kitchen", hostname: "kitchen", kind: "host", interfaces: [{ name: "eth0", mac: "02:00:00:00:00:07" }] },
   ],
-  links: [{ id: "c1", a: { device: "observatory", iface: "eth0" }, b: { device: "lantern", iface: "eth0" } }],
+  links: [{ id: "c1", a: { device: "observatory", iface: "eth0" }, b: { device: "kitchen", iface: "eth0" } }],
 };
 
 /** veth artifacts → physical NIC (docs/sim-deviations.md). */
@@ -32,12 +32,12 @@ function normalize(line: string): string {
     .replace(/qdisc noqueue state (UP|DOWN)/, "qdisc fq_codel state $1");
 }
 
-function scenario(obs: string, lantern: string): SimBackend {
+function scenario(obs: string, kitchen: string): SimBackend {
   const b = new SimBackend(testContent);
   b.options = () => ({ tools: new Set(["ip link"]), subtitles: false });
   b.loadSync(topology, obs === "never" ? [{ kind: "iface-down", device: "observatory", iface: "eth0" }] : [], 1);
   if (obs === "down") b.world.setAdmin("observatory", "eth0", false);
-  if (lantern === "down") b.world.setAdmin("lantern", "eth0", false);
+  if (kitchen === "down") b.world.setAdmin("kitchen", "eth0", false);
   return b;
 }
 
@@ -46,9 +46,9 @@ describe("golden: ip", () => {
     it(file.replace(/\.txt$/, ""), () => {
       const lines = readFileSync(join(dir, file), "utf8").trimEnd().split("\n");
       const [setup = "", cmd = "", ...rest] = lines;
-      const [, obs = "", lantern = ""] = /# obs=(\w+) lantern=(\w+)/.exec(setup) ?? [];
+      const [, obs = "", kitchen = ""] = /# obs=(\w+) kitchen=(\w+)/.exec(setup) ?? [];
       const exit = Number(/\[exit (\d+)\]/.exec(rest.pop() ?? "")?.[1]);
-      const b = scenario(obs, lantern);
+      const b = scenario(obs, kitchen);
       const h = b.exec("observatory", cmd.replace(/^\$ /, ""), "typed");
       const ours = b
         .trace()

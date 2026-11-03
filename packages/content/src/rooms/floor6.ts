@@ -4,18 +4,18 @@ import type { FloorText, RoomText } from "./types";
 /** floors/floor-6.md, word for word. */
 
 export const insideTheEnvelope: RoomText = {
-  title: "Inside the Envelope",
-  mission: "Lantern has been sending the same sealed letter since the day you met. Your Scanner can open it now.",
-  access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
-  notes: ["Found this in the post office. Try it on lantern's messages."],
+  title: "Open It Up",
+  mission: "Kitchen has been sending the same sealed letter since the day you met. Your Scanner can open it now.",
+  access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
+  notes: ["Found this in the post office. Try it on kitchen's messages."],
   hints: [
     // The Scanner is the button at the bottom left (it replaced the jar), not an object on the table.
     { text: "A new tool is online: the Scanner, at the bottom left. Open it." },
-    { text: "Catch one of lantern's sealed letters with the Scanner." },
+    { text: "Catch one of kitchen's sealed letters with the Scanner." },
     { text: "A frame can carry another envelope inside it: a packet.", codex: "packet" },
     { text: "Open a catch, then open what's inside the frame, then what's inside that." },
     {
-      text: "Catch a lantern announcement on the Scanner and open it to the message layer. The key is in the message.",
+      text: "Catch a kitchen announcement on the Scanner and open it to the message layer. The key is in the message.",
     },
   ],
   detectors: {
@@ -64,12 +64,12 @@ export const insideTheEnvelope: RoomText = {
 
 export const whoHasThisAddress: RoomText = {
   title: "Who Has This Address?",
-  mission: "Your house has forgotten how to address its envelopes. A ping for lantern is stuck on your desk.",
-  access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
+  mission: "Your house has forgotten how to address its envelopes. A ping for kitchen is stuck on your desk.",
+  access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
     { text: "The packet on your desk needs a frame around it." },
-    { text: "A frame needs a MAC address. Do you know lantern's?" },
+    { text: "A frame needs a MAC address. Do you know kitchen's?" },
     {
       text: "When a house doesn't know a neighbour's door, it asks everyone: 'Who has this address?'",
       codex: "arp-question",
@@ -78,7 +78,7 @@ export const whoHasThisAddress: RoomText = {
       text: "Look it up; if it's missing, send a broadcast asking for it; then wrap the packet in a frame to the MAC address you got back and send it.",
     },
     {
-      text: "Ask everyone (a broadcast) for `10.0.1.7`; lantern answers `02:00:00:00:00:17`. Wrap to that and send. Do it once more, and the keeper takes over.",
+      text: "Ask everyone (a broadcast) for `10.0.1.7`; kitchen answers `02:00:00:00:00:17`. Wrap to that and send. Do it once more, and the keeper takes over.",
     },
   ],
   detectors: {
@@ -87,8 +87,8 @@ export const whoHasThisAddress: RoomText = {
       tried: "You tried to wrap a frame to an IP address, but a frame needs a MAC address.",
     },
     "wrap-to-everyone": {
-      note: "A broadcast reaches lantern… and every other machine too. Is there a way to learn lantern's own MAC address?",
-      tried: "You wrapped the packet in a broadcast frame instead of a frame to lantern's MAC address.",
+      note: "A broadcast reaches kitchen… and every other machine too. Is there a way to learn kitchen's own MAC address?",
+      tried: "You wrapped the packet in a broadcast frame instead of a frame to kitchen's MAC address.",
     },
     "ask-again": {
       note: "It's already written down. Look first.",
@@ -132,17 +132,17 @@ export const whoHasThisAddress: RoomText = {
 };
 
 export const twoOfMe: RoomText = {
-  title: "Two of Me",
-  mission: "Sometimes lantern answers you. Sometimes a stranger answers in its place.",
-  access: { anvil: HOUSE_LOCKED },
-  notes: ["Register: lantern 10.0.1.7 · quill 10.0.1.12 · anvil 10.0.1.10."],
+  title: "Two Answers",
+  mission: "Sometimes kitchen answers you. Sometimes a stranger answers in its place.",
+  access: { forge: HOUSE_LOCKED },
+  notes: ["Register: kitchen 10.0.1.7 · library 10.0.1.12 · forge 10.0.1.10."],
   hints: [
     { text: "Look at who each answer is *from*." },
     { text: "Your Scanner shows the MAC address on every reply. So does your neighbour ledger (the ARP table)." },
     { text: "Two houses can't share one address: the street can't tell them apart.", codex: "two-answers" },
-    { text: "Find which MAC address isn't lantern's, find its machine, and give it its own IP address." },
+    { text: "Find which MAC address isn't kitchen's, find its machine, and give it its own IP address." },
     {
-      text: "Some replies come from `02:00:00:00:00:17` (lantern), some from `…:0c` (quill). In quill's room: `ip addr del 10.0.1.7/24 dev eth0`, then `ip addr add 10.0.1.12/24 dev eth0`.",
+      text: "Some replies come from `02:00:00:00:00:17` (kitchen), some from `…:0c` (library). In library's room: `ip addr del 10.0.1.7/24 dev eth0`, then `ip addr add 10.0.1.12/24 dev eth0`.",
     },
   ],
   detectors: {
@@ -151,17 +151,17 @@ export const twoOfMe: RoomText = {
       tried: "You cleared your ARP table more than once, but it kept learning from two doors.",
     },
     "change-my-address": {
-      note: "Your address was fine. Someone else is answering as lantern.",
+      note: "Your address was fine. Someone else is answering as kitchen.",
       tried: "You changed your own address, but yours wasn't the problem.",
     },
-    "delete-lantern": {
-      note: "Lantern was the right one. Who else claims `.7`?",
-      tried: "You took lantern's address away, but lantern was the rightful owner.",
+    "delete-kitchen": {
+      note: "Kitchen was the right one. Who else claims `.7`?",
+      tried: "You took kitchen's address away, but kitchen was the rightful owner.",
     },
   },
   debrief: {
     happened:
-      "Quill had been given lantern's IP address. Both answered the ARP question 'who has 10.0.1.7?'. Your ARP table kept whichever answered first, and switched whenever the other one spoke up, so your pings went to one door, then the other. Giving quill its own address fixed it.",
+      "Library had been given kitchen's IP address. Both answered the ARP question 'who has 10.0.1.7?'. Your ARP table kept whichever answered first, and switched whenever the other one spoke up, so your pings went to one door, then the other. Giving library its own address fixed it.",
     terms: [
       {
         id: "duplicate-address",
@@ -171,17 +171,17 @@ export const twoOfMe: RoomText = {
     ],
   },
   guardian: [
-    { q: "Who is answering for lantern?", a: "Ask the Scanner. Every answer carries the door it came from." },
+    { q: "Who is answering for kitchen?", a: "Ask the Scanner. Every answer carries the door it came from." },
     { q: "Can two houses share an address?", a: "Two houses, one number? Nobody would know where to deliver." },
   ],
 };
 
 export const mixedUpLetters: RoomText = {
-  title: "The Mixed-Up Letters",
+  title: "Wrong Deliveries",
   mission:
-    "The post office has been delivering packets to the wrong houses for years. Two houses need to hear from you: lantern, and anvil.",
-  access: { quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
-  notes: ["Register: lantern 10.0.1.7 · anvil 10.0.1.10 · quill 10.0.1.12 · bell 10.0.1.18."],
+    "The post office has been delivering packets to the wrong houses for years. Two houses need to hear from you: kitchen, and forge.",
+  access: { library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
+  notes: ["Register: kitchen 10.0.1.7 · forge 10.0.1.10 · library 10.0.1.12 · chapel 10.0.1.18."],
   hints: [
     { text: "Two houses, two different problems." },
     { text: "Read your ARP table. Read the MAC address on every reply." },
@@ -191,7 +191,7 @@ export const mixedUpLetters: RoomText = {
     },
     { text: "Cross out the wrong pinned line; give the imposter its own address." },
     {
-      text: "In your house: `ip neigh del 10.0.1.7 dev eth0`. In bell's room: `ip addr del 10.0.1.10/24 dev eth0`, then `ip addr add 10.0.1.18/24 dev eth0`. Then ping lantern and anvil.",
+      text: "In your house: `ip neigh del 10.0.1.7 dev eth0`. In chapel's room: `ip addr del 10.0.1.10/24 dev eth0`, then `ip addr add 10.0.1.18/24 dev eth0`. Then ping kitchen and forge.",
     },
   ],
   detectors: {
@@ -203,18 +203,18 @@ export const mixedUpLetters: RoomText = {
       note: "Your address was fine. Someone else is answering in another house's place.",
       tried: "You changed your own address, but yours wasn't the problem.",
     },
-    "delete-lantern": {
-      note: "Lantern was the right one. Who else is answering for someone else?",
-      tried: "You took lantern's address away, but lantern was the rightful owner.",
+    "delete-kitchen": {
+      note: "Kitchen was the right one. Who else is answering for someone else?",
+      tried: "You took kitchen's address away, but kitchen was the rightful owner.",
     },
     "permanent-again": {
       note: "Most lines go stale and get checked. This one says PERMANENT.",
-      tried: "You waited for lantern's line to go stale, but a pinned line never does.",
+      tried: "You waited for kitchen's line to go stale, but a pinned line never does.",
     },
   },
   debrief: {
     happened:
-      "Your ARP table had a pinned entry for lantern's old door, so your packets went to a door that no longer exists. And bell was claiming anvil's IP address. You removed the pinned entry and gave bell its own address.",
+      "Your ARP table had a pinned entry for kitchen's old door, so your packets went to a door that no longer exists. And chapel was claiming forge's IP address. You removed the pinned entry and gave chapel its own address.",
     terms: [],
   },
   voice: [
@@ -244,7 +244,7 @@ export const floor6: FloorText = {
       title: "Ride-along",
       text: "The frame for the road. The packet for the house.",
       shown:
-        "the camera starts inside the observatory's keeper: a packet to 10.0.1.7; the ledger is searched; a question flies out; the answer is written; the packet is folded into a frame (the camera watches the frame close around it); out through the door, through the square; at lantern's door the frame is opened and dropped; the packet goes in",
+        "the camera starts inside the observatory's keeper: a packet to 10.0.1.7; the ledger is searched; a question flies out; the answer is written; the packet is folded into a frame (the camera watches the frame close around it); out through the door, through the square; at kitchen's door the frame is opened and dropped; the packet goes in",
     },
     {
       id: "F6-FM-04",

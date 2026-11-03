@@ -69,7 +69,7 @@ await card(p, "02:00:00:00:00:11", 1);
 await card(p, "02:00:00:00:00:12", 2);
 await check("3.3");
 
-// 3.B: the hall's eth2 by voice, everyone speaks, wren's name on the card.
+// 3.B: the hall's eth2 by voice, everyone speaks, laundry's name on the card.
 await open(p, base, "f3.boss-busy-hall");
 await walk("hall");
 await type(p, "ip link set eth2 up");
@@ -85,14 +85,14 @@ await walk("hall");
 await type(p, "bridge fdb del 02:00:00:00:00:07 dev eth1 master");
 await check("4.1");
 
-// 4.2: everyone speaks, then anvil by name.
+// 4.2: everyone speaks, then forge by name.
 await open(p, base, "f4.who-has-the-key");
 await bench(p, "ff:ff:ff:ff:ff:ff");
 await p.waitForTimeout(3000);
 await bench(p, "02:00:00:00:00:0a");
 await check("4.2");
 
-// 4.3: plug in the spare, watch the storm, unplug it again, then write to anvil.
+// 4.3: plug in the spare, watch the storm, unplug it again, then write to forge.
 await open(p, base, "f4.spare-cable");
 await walk("hall-a");
 await walk("hall-b");
@@ -107,7 +107,7 @@ await walk("observatory");
 await bench(p, "02:00:00:00:00:0a");
 await check("4.3");
 
-// 4.B: break the loop in hall-b, remove the wrong memory, write to wren.
+// 4.B: break the loop in hall-b, remove the wrong memory, write to laundry.
 await open(p, base, "f4.boss-storm");
 await walk("hall-a");
 await walk("hall-b");

@@ -53,9 +53,9 @@ export const memoryText = {
   ride: {
     /** Each leg's title, by floor and leg (ride.ts `rideScripts`). */
     legs: {
-      1: { won: "Lantern's message" },
+      1: { won: "Kitchen's message" },
       2: {
-        named: "A frame for lantern's door",
+        named: "A frame for kitchen's door",
         everyone: "A frame for everyone",
         other: "A frame for someone else",
       },

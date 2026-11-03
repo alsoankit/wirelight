@@ -1,4 +1,4 @@
-# square-norouter: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-option=3 (no router option), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off | setup: none | runs on: observatory
+# square-norouter: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-option=3 (no router option), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off | setup: none | runs on: observatory
 $ dhclient -v eth0
 Internet Systems Consortium DHCP Client 4.4.3-P1
 Copyright 2004-2022 Internet Systems Consortium.

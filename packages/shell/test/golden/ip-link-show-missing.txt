@@ -1,4 +1,4 @@
-# obs=up lantern=up
+# obs=up kitchen=up
 $ ip link show eth9
 Device "eth9" does not exist.
 [exit 1]

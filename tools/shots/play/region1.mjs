@@ -12,8 +12,8 @@ await p.click(".send");
 await check("P");
 
 await open(p, base, "f1.two-rooms");
-await p.click("text=→ lantern");
-await arrived(p, "lantern");
+await p.click("text=→ kitchen");
+await arrived(p, "kitchen");
 await tidy(p);
 await p.click("button.plate");
 await check("1.1");
@@ -23,15 +23,15 @@ await p.click("text=Cable end");
 await check("1.2");
 
 await open(p, base, "f1.both-ends");
-await p.click("text=→ lantern");
-await arrived(p, "lantern");
+await p.click("text=→ kitchen");
+await arrived(p, "kitchen");
 await plateSwitch(p);
 await check("1.3");
 
 await open(p, base, "f1.boss-dark-corridor");
 await plateSwitch(p);
-await p.click("text=→ lantern");
-await arrived(p, "lantern");
+await p.click("text=→ kitchen");
+await arrived(p, "kitchen");
 await tidy(p);
 await p.click("text=Cable end");
 await p.waitForTimeout(600);

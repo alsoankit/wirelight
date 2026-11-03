@@ -3,16 +3,16 @@ import type { FloorText, RoomText } from "./types";
 /** floors/floor-2.md, word for word. */
 
 export const firstLight: RoomText = {
-  title: "First Light",
-  mission: "The big button is gone. Lantern is still waiting to hear from you.",
+  title: "Write Your Own",
+  mission: "The big button is gone. Kitchen is still waiting to hear from you.",
   notes: [],
   hints: [
     { text: "The table is waiting for something in its first slot." },
     { text: "Every door's name is written on its plate." },
     { text: "A frame needs the name of the door it's going to: its MAC address.", codex: "mac-address" },
-    { text: "Read lantern's plate, write that name in the To slot, add any message, then seal and send." },
+    { text: "Read kitchen's plate, write that name in the To slot, add any message, then seal and send." },
     {
-      text: "Put `02:00:00:00:00:07` (lantern's name, from its plate) in To, any word in Message, then Seal and send. Lantern answers with the key.",
+      text: "Put `02:00:00:00:00:07` (kitchen's name, from its plate) in To, any word in Message, then Seal and send. Kitchen answers with the key.",
     },
   ],
   detectors: {
@@ -27,7 +27,7 @@ export const firstLight: RoomText = {
   },
   debrief: {
     happened:
-      "Your message travelled in a frame, an envelope addressed with the name of lantern's door. That name is its MAC address. Lantern saw its own name on the frame and answered.",
+      "Your message travelled in a frame, an envelope addressed with the name of kitchen's door. That name is its MAC address. Kitchen saw its own name on the frame and answered.",
     terms: [
       {
         id: "frame",
@@ -70,18 +70,18 @@ export const firstLight: RoomText = {
 };
 
 export const wrongName: RoomText = {
-  title: "Wrong Name",
-  mission: "Someone in your room keeps sending messages to lantern. Lantern never answers.",
+  title: "Wrong Address",
+  mission: "Someone in your room keeps sending messages to kitchen. Kitchen never answers.",
   notes: [],
   hints: [
-    { text: "Look at lantern's door. Something is piling up there." },
+    { text: "Look at kitchen's door. Something is piling up there." },
     { text: "You can catch one of those messages and look inside." },
     { text: "A door takes in only frames that carry its own name as the to.", codex: "ignored-mark" },
     {
-      text: "Catch one of the messenger's frames, compare its to with lantern's plate, then fix the messenger's card.",
+      text: "Catch one of the messenger's frames, compare its to with kitchen's plate, then fix the messenger's card.",
     },
     {
-      text: "The card says `02:00:00:00:00:08`; lantern's door is `02:00:00:00:00:07`. Click the card and change it (`lab card --to 02:00:00:00:00:07`). Lantern's next answer carries the key.",
+      text: "The card says `02:00:00:00:00:08`; kitchen's door is `02:00:00:00:00:07`. Click the card and change it (`lab card --to 02:00:00:00:00:07`). Kitchen's next answer carries the key.",
     },
   ],
   detectors: {
@@ -96,7 +96,7 @@ export const wrongName: RoomText = {
   },
   debrief: {
     happened:
-      "The messenger was writing a name no door has. Every frame reached lantern's door, but lantern only takes frames with its own name as the to, so it ignored them. With the right name on the card, lantern answered.",
+      "The messenger was writing a name no door has. Every frame reached kitchen's door, but kitchen only takes frames with its own name as the to, so it ignored them. With the right name on the card, kitchen answered.",
     terms: [
       {
         id: "destination-address",
@@ -123,12 +123,12 @@ export const wrongName: RoomText = {
   ],
   guardian: [
     {
-      q: "What are those marks at lantern's door?",
-      a: "Messages that got there and went no further. Lantern decided they weren't meant for it.",
+      q: "What are those marks at kitchen's door?",
+      a: "Messages that got there and went no further. Kitchen decided they weren't meant for it.",
     },
-    { q: "Is lantern ignoring us?", a: "A door only takes what has its own name on it." },
+    { q: "Is kitchen ignoring us?", a: "A door only takes what has its own name on it." },
     {
-      q: "Why does lantern talk to everyone?",
+      q: "Why does kitchen talk to everyone?",
       a: "That one is written to everyone. All doors listen to that name.",
       after: "caught-announcement",
     },
@@ -145,17 +145,17 @@ export const whoAreYou: RoomText = {
   title: "Who Are You?",
   mission:
     "A second door in your room has opened, and someone is behind it. The room beyond is sealed, and you don't know their name.",
-  access: { quill: "Sealed. You can't go in, but anything you send can." },
+  access: { library: "Sealed. You can't go in, but anything you send can." },
   notes: ["Found a room I couldn't get into. Didn't know its name. So I called out to everyone."],
   hints: [
-    { text: "You can't read quill's plate. Can quill tell you its name?" },
+    { text: "You can't read library's plate. Can library tell you its name?" },
     { text: "Remember the address that means everyone?", codex: "everyone-address" },
     { text: "Send a frame to everyone, then look at who the answer is from.", codex: "source-address" },
     {
       text: "Send to `ff:ff:ff:ff:ff:ff` out of eth1, catch or open the answer, read its from, then send to that name.",
     },
     {
-      text: "Send to `ff:ff:ff:ff:ff:ff` on eth1. Quill answers `I'm here — quill` from `02:00:00:00:00:0c`. Send a frame to `02:00:00:00:00:0c`, and quill answers with the key.",
+      text: "Send to `ff:ff:ff:ff:ff:ff` on eth1. Library answers `I'm here — library` from `02:00:00:00:00:0c`. Send a frame to `02:00:00:00:00:0c`, and library answers with the key.",
     },
   ],
   detectors: {
@@ -164,17 +164,17 @@ export const whoAreYou: RoomText = {
       tried: "You guessed names that no door has.",
     },
     "wrong-door": {
-      note: "Lantern answered. But the sealed room is behind your other door.",
-      tried: "You sent out of eth0, toward lantern, but quill is behind eth1.",
+      note: "Kitchen answered. But the sealed room is behind your other door.",
+      tried: "You sent out of eth0, toward kitchen, but library is behind eth1.",
     },
     "stopped-at-hello": {
-      note: "Quill answered you. Who was that answer from?",
-      tried: "Quill told you who it was, and you waited a while before speaking to it by name.",
+      note: "Library answered you. Who was that answer from?",
+      tried: "Library told you who it was, and you waited a while before speaking to it by name.",
     },
   },
   debrief: {
     happened:
-      "You didn't know quill's MAC address, so you called to everyone with the broadcast address. Quill answered, and every answer carries the MAC address of the door that sent it: its source. Then you could write to quill directly.",
+      "You didn't know library's MAC address, so you called to everyone with the broadcast address. Library answered, and every answer carries the MAC address of the door that sent it: its source. Then you could write to library directly.",
     terms: [
       { id: "broadcast", term: "broadcast", meaning: "a frame for everyone, sent to ff:ff:ff:ff:ff:ff" },
       { id: "source-address", term: "source address", meaning: "the from on a frame: who sent it" },
@@ -190,7 +190,7 @@ export const whoAreYou: RoomText = {
       a: "The MAC address of the door that sent it. Every answer carries the address of whoever answered.",
     },
     {
-      q: "Why won't quill give me the key?",
+      q: "Why won't library give me the key?",
       a: "It told you its name. Try writing to it by name.",
       after: "broadcast-sent",
     },
@@ -204,7 +204,7 @@ export const whoAreYou: RoomText = {
 };
 
 export const lightsOut: RoomText = {
-  title: "Lights Out",
+  title: "A Broken Switch",
   mission: "Your door has gone dark, and its switch is broken. You'll need the terminal.",
   notes: [],
   hints: [
@@ -213,7 +213,7 @@ export const lightsOut: RoomText = {
     { text: "`ip link` lists every door and whether it's switched on.", codex: "console" },
     { text: "Look for your door's state in the list, then tell the machine to switch that door on." },
     {
-      text: "Type `ip link` to see `eth0 … state DOWN`, then `ip link set eth0 up`. Both lights come on and lantern's next message carries the key.",
+      text: "Type `ip link` to see `eth0 … state DOWN`, then `ip link set eth0 up`. Both lights come on and kitchen's next message carries the key.",
     },
   ],
   detectors: {
@@ -279,20 +279,20 @@ export const lightsOut: RoomText = {
 };
 
 export const silentLine: RoomText = {
-  title: "The Silent Line",
+  title: "Nobody Answers",
   mission: "Deep in the old halls, someone has been calling for years and never been answered. Answer them.",
-  access: { moth: "Sealed. You can't go in, but anything you send can." },
+  access: { cellar: "Sealed. You can't go in, but anything you send can." },
   notes: [],
   hints: [
-    { text: "Three things stand between you and moth. Start with your doors." },
+    { text: "Three things stand between you and cellar. Start with your doors." },
     { text: "One of your doors is off, and its switch is broken. Use the terminal." },
     {
-      text: "Once the door works, you need moth's name: from a broadcast, or from the from on something moth sends.",
+      text: "Once the door works, you need cellar's name: from a broadcast, or from the from on something cellar sends.",
       codex: "source-address",
     },
-    { text: "Switch eth1 on from the terminal, learn moth's name, then put it on the messenger's card." },
+    { text: "Switch eth1 on from the terminal, learn cellar's name, then put it on the messenger's card." },
     {
-      text: "`ip link set eth1 up`; catch one of moth's frames (or broadcast on eth1) and read its from: `02:00:00:00:00:0e`; set the messenger's card to it. Moth answers with the key.",
+      text: "`ip link set eth1 up`; catch one of cellar's frames (or broadcast on eth1) and read its from: `02:00:00:00:00:0e`; set the messenger's card to it. Cellar answers with the key.",
     },
   ],
   detectors: {
@@ -305,8 +305,8 @@ export const silentLine: RoomText = {
       tried: "You guessed names that no door has.",
     },
     "wrong-door": {
-      note: "Lantern answered. But moth is behind your other door.",
-      tried: "You called out of eth0, toward lantern, but moth is behind eth1.",
+      note: "Kitchen answered. But cellar is behind your other door.",
+      tried: "You called out of eth0, toward kitchen, but cellar is behind eth1.",
     },
     "card-to-self": {
       note: "Now the messenger is writing to you. Who should it be writing to?",
@@ -317,13 +317,13 @@ export const silentLine: RoomText = {
       tried: "You switched a working door off and on again.",
     },
     "fix-moths-calls": {
-      note: "Moth is calling a name nobody has. You can't fix moth from here, but you can answer it yourself.",
-      tried: "You sent to the name moth calls, but no door has it.",
+      note: "Cellar is calling a name nobody has. You can't fix cellar from here, but you can answer it yourself.",
+      tried: "You sent to the name cellar calls, but no door has it.",
     },
   },
   debrief: {
     happened:
-      "Three things kept moth unheard: your door was off, the messenger had no name to send to, and you didn't know moth's name. You switched the door on with a terminal command, learned moth's name from what it sent, and gave the messenger the right card. A link, a frame, two names: that's everything the old halls were built on.",
+      "Three things kept cellar unheard: your door was off, the messenger had no name to send to, and you didn't know cellar's name. You switched the door on with a terminal command, learned cellar's name from what it sent, and gave the messenger the right card. A link, a frame, two names: that's everything the old halls were built on.",
     terms: [],
   },
   voice: [
@@ -353,7 +353,7 @@ export const floor2: FloorText = {
       title: "Ride-along",
       text: "A door reads the to. Its own name, or everyone's: it takes it. Anything else: it lets it fall.",
       shown:
-        "a frame sealed at the workbench rides through eth0 to lantern's door, which reads the to and lets it in; a broadcast reaches two doors and both take it in; a third frame, for someone else, stops at a door and fades",
+        "a frame sealed at the workbench rides through eth0 to kitchen's door, which reads the to and lets it in; a broadcast reaches two doors and both take it in; a third frame, for someone else, stops at a door and fades",
     },
     {
       id: "F2-FM-04",
@@ -371,6 +371,6 @@ export const floor2: FloorText = {
   farewell: {
     id: "F2-BYE-01",
     speaker: "You",
-    text: "This floor is working again. Moth finally got its answer. On to the gears.",
+    text: "This floor is working again. Cellar finally got its answer. On to the gears.",
   },
 };

@@ -5,7 +5,7 @@ import { startEngine } from "../../engine/connect";
 // Lights Out, types the solution as real commands, lets network time pass, and prints what came back.
 // Not part of the game.
 
-const LANTERN = "02:00:00:00:00:07";
+const KITCHEN = "02:00:00:00:00:07";
 
 export function EngineCheck() {
   const [lines, setLines] = useState<string[]>([]);
@@ -16,7 +16,7 @@ export function EngineCheck() {
       const started = performance.now();
       const load = await engine.loadRoom("f2.lights-out");
       say(`loaded ${load.status.roomId}: won ${load.status.won}, health ${JSON.stringify(load.status.health)}`);
-      for (const line of ["ip link set eth0 up", `lab send-frame --to ${LANTERN}`]) {
+      for (const line of ["ip link set eth0 up", `lab send-frame --to ${KITCHEN}`]) {
         const r = await engine.exec("observatory", line, "typed");
         say(`$ ${line}  → exit ${r.exitCode}, ${r.events.length} events`);
         for (const e of r.events) if (e.kind === "proc.output") say(`  ${e.text}`);

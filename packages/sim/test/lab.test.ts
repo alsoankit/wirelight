@@ -9,9 +9,9 @@ const topo = (lab = { mode: "responder" as const, answersBroadcast: true }): Top
       kind: "host",
       interfaces: [{ name: "eth0", mac: "02:00:00:00:00:05" }],
     },
-    { id: "lantern", hostname: "lantern", kind: "host", interfaces: [{ name: "eth0", mac: "02:00:00:00:00:07" }], lab },
+    { id: "kitchen", hostname: "kitchen", kind: "host", interfaces: [{ name: "eth0", mac: "02:00:00:00:00:07" }], lab },
   ],
-  links: [{ id: "c1", a: { device: "observatory", iface: "eth0" }, b: { device: "lantern", iface: "eth0" } }],
+  links: [{ id: "c1", a: { device: "observatory", iface: "eth0" }, b: { device: "kitchen", iface: "eth0" } }],
 });
 
 const kinds = (tr: readonly SimEvent[]) => tr.map((e) => `${e.kind}${"device" in e ? `@${e.device}` : ""}`);
@@ -25,17 +25,17 @@ describe("lab protocol over one cable", () => {
     run(sim);
     const delivered = sim.trace.filter((e) => e.kind === "app.deliver");
     expect(delivered.map((e) => [e.device, e.text])).toEqual([
-      ["lantern", "hello"],
-      ["observatory", "hello from lantern"],
+      ["kitchen", "hello"],
+      ["observatory", "hello from kitchen"],
     ]);
     expect(kinds(sim.trace)).toEqual([
       "frame.tx@observatory",
       "link.enter",
       "link.exit",
-      "frame.rx@lantern",
-      "fwd.decision@lantern",
-      "app.deliver@lantern",
-      "frame.tx@lantern",
+      "frame.rx@kitchen",
+      "fwd.decision@kitchen",
+      "app.deliver@kitchen",
+      "frame.tx@kitchen",
       "link.enter",
       "link.exit",
       "frame.rx@observatory",
@@ -60,7 +60,7 @@ describe("lab protocol over one cable", () => {
     const sim = new Simulator(topo());
     sim.sendLabFrame("observatory", { to: "02:00:00:00:00:17", msg: "hello" });
     run(sim);
-    expect(sim.trace.at(-1)).toMatchObject({ kind: "frame.drop", device: "lantern", reason: "not-for-me" });
+    expect(sim.trace.at(-1)).toMatchObject({ kind: "frame.drop", device: "kitchen", reason: "not-for-me" });
     expect(sim.trace.some((e) => e.kind === "app.deliver")).toBe(false);
   });
 
@@ -69,14 +69,14 @@ describe("lab protocol over one cable", () => {
     sim.sendLabFrame("observatory", { to: "ff:ff:ff:ff:ff:ff", msg: "anyone?" });
     run(sim);
     const back = sim.trace.filter((e) => e.kind === "app.deliver" && e.device === "observatory");
-    expect(back).toMatchObject([{ text: "I'm here — lantern", from: "02:00:00:00:00:07" }]);
+    expect(back).toMatchObject([{ text: "I'm here — kitchen", from: "02:00:00:00:00:07" }]);
   });
 
   it("listeners never reply", () => {
     const sim = new Simulator(topo({ mode: "listener" } as never));
     sim.sendLabFrame("observatory", { to: "02:00:00:00:00:07", msg: "hello" });
     run(sim);
-    expect(sim.trace.filter((e) => e.kind === "app.deliver").map((e) => e.device)).toEqual(["lantern"]);
+    expect(sim.trace.filter((e) => e.kind === "app.deliver").map((e) => e.device)).toEqual(["kitchen"]);
   });
 
   it("utf-8 survives the trip", () => {
@@ -93,13 +93,13 @@ describe("links", () => {
     sim.sendLabFrame("observatory", { to: "02:00:00:00:00:07", msg: "hello" });
     expect(sim.trace).toMatchObject([{ kind: "frame.drop", device: "observatory", reason: "link-down" }]);
     expect(sim.oper("observatory", "eth0")).toEqual({ adminUp: false, carrier: false, up: false });
-    expect(sim.oper("lantern", "eth0")).toEqual({ adminUp: true, carrier: false, up: false });
+    expect(sim.oper("kitchen", "eth0")).toEqual({ adminUp: true, carrier: false, up: false });
   });
 
   it("bringing the door up restores the link", () => {
     const sim = new Simulator(topo(), [{ kind: "iface-down", device: "observatory", iface: "eth0" }]);
     sim.setAdmin("observatory", "eth0", true);
-    expect(sim.oper("lantern", "eth0").up).toBe(true);
+    expect(sim.oper("kitchen", "eth0").up).toBe(true);
     expect(sim.trace.at(-1)).toMatchObject({ kind: "table.change", table: "link", before: false, after: true });
   });
 
@@ -123,7 +123,7 @@ describe("links", () => {
 
   it("rejects branching cables", () => {
     const t = topo();
-    t.links.push({ id: "c2", a: { device: "observatory", iface: "eth0" }, b: { device: "lantern", iface: "eth0" } });
+    t.links.push({ id: "c2", a: { device: "observatory", iface: "eth0" }, b: { device: "kitchen", iface: "eth0" } });
     expect(() => new Simulator(t)).toThrow(/cables never branch/);
   });
 });
@@ -182,7 +182,7 @@ describe("determinism and snapshots", () => {
 describe("lab text", () => {
   it("decodes text, and never throws on bytes that aren't text (they become U+FFFD)", async () => {
     const { decodeLab, encodeLab } = await import("../src");
-    expect(decodeLab(encodeLab("hello — key: amber-bell ✓"))).toBe("hello — key: amber-bell ✓");
+    expect(decodeLab(encodeLab("hello — key: amber-chapel ✓"))).toBe("hello — key: amber-chapel ✓");
     const junk = Uint8Array.from([0x01, 0xff, 0xf8, 0xc0, 0x80, 0xe2, 0x28, 0xa1, 0xf4, 0x90, 0x80, 0x80, 0x41]);
     expect(() => decodeLab(junk)).not.toThrow();
     expect(decodeLab(junk)).toMatch(/�/);

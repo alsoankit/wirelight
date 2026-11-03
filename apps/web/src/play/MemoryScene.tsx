@@ -97,7 +97,7 @@ export function Envelope({ look, at, opacity = 1 }: { look: Look; at: Pt; opacit
   );
 }
 
-/** Words drawn on the map, with a dark halo so they stay readable over lines. */
+/** Words drawn on the map, with a dark loft so they stay readable over lines. */
 export function MapText({
   at,
   children,

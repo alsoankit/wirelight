@@ -55,97 +55,97 @@ export const scenes: Record<string, Scene> = {
   // -- The Prologue and Floor 1: the thread. --
   "P-BLD-01": {
     beats: [
-      { at: 0, show: ["observatory", "lantern"] },
-      { at: 0, dim: ["observatory", "lantern"] },
+      { at: 0, show: ["observatory", "kitchen"] },
+      { at: 0, dim: ["observatory", "kitchen"] },
       { at: 600, lay: ["wire"], ms: 3200, weavers: true },
-      { at: 4000, glow: ["observatory", "lantern"] },
-      { at: 4600, send: [["observatory", "lantern"]], look: "dot", fate: "in", repeat: 3200 },
+      { at: 4000, glow: ["observatory", "kitchen"] },
+      { at: 4600, send: [["observatory", "kitchen"]], look: "dot", fate: "in", repeat: 3200 },
     ],
   },
   "F1-BLD-01": {
     beats: [
       { at: 400, mark: "observatory", glyph: "plate", label: "name" },
-      { at: 1800, mark: "lantern", glyph: "plate", label: "name" },
+      { at: 1800, mark: "kitchen", glyph: "plate", label: "name" },
     ],
   },
   "F1-BLD-02": {
     beats: [
       { at: 0, lay: ["wire"], ms: 0 },
       { at: 0, mark: "observatory", glyph: "light", off: true },
-      { at: 0, mark: "lantern", glyph: "light", off: true },
+      { at: 0, mark: "kitchen", glyph: "light", off: true },
       { at: 300, lay: ["wire"], ms: 1800 },
       { at: 2300, mark: "observatory", glyph: "light", label: "light" },
-      { at: 2300, mark: "lantern", glyph: "light" },
-      { at: 3000, send: [["lantern", "observatory"]], look: "dot", fate: "in", repeat: 3000 },
+      { at: 2300, mark: "kitchen", glyph: "light" },
+      { at: 3000, send: [["kitchen", "observatory"]], look: "dot", fate: "in", repeat: 3000 },
     ],
   },
   "F1-BLD-03": {
     beats: [
       { at: 400, mark: "observatory", glyph: "switch", label: "switch" },
-      { at: 1400, mark: "lantern", glyph: "switch", off: true, label: "resting" },
-      { at: 2400, send: [["observatory", "lantern"]], look: "dot", fate: "fell", repeat: 3400 },
+      { at: 1400, mark: "kitchen", glyph: "switch", off: true, label: "resting" },
+      { at: 2400, send: [["observatory", "kitchen"]], look: "dot", fate: "fell", repeat: 3400 },
     ],
   },
   "F1-FM-01": {
     hide: ["wire"],
     beats: [
       { at: 300, show: ["observatory"] },
-      { at: 1200, show: ["lantern"] },
+      { at: 1200, show: ["kitchen"] },
       { at: 2000, call: "observatory", repeat: 3600 },
-      { at: 3800, call: "lantern", repeat: 3600 },
-      { at: 2400, tag: "observatory|lantern", label: "nothing" },
+      { at: 3800, call: "kitchen", repeat: 3600 },
+      { at: 2400, tag: "observatory|kitchen", label: "nothing" },
     ],
   },
   "F1-FM-02": {
     beats: [
       { at: 300, lay: ["wire"], ms: 2600, weavers: true },
       { at: 3100, mark: "observatory", glyph: "plate", label: "name" },
-      { at: 3100, mark: "lantern", glyph: "plate" },
+      { at: 3100, mark: "kitchen", glyph: "plate" },
       { at: 4200, mark: "observatory", glyph: "light", label: "light" },
-      { at: 4200, mark: "lantern", glyph: "light" },
-      { at: 5300, mark: "lantern", glyph: "switch", label: "switch" },
+      { at: 4200, mark: "kitchen", glyph: "light" },
+      { at: 5300, mark: "kitchen", glyph: "switch", label: "switch" },
       { at: 5300, mark: "observatory", glyph: "switch" },
-      { at: 6400, send: [["lantern", "observatory"]], look: "dot", fate: "in", repeat: 3200 },
+      { at: 6400, send: [["kitchen", "observatory"]], look: "dot", fate: "in", repeat: 3200 },
     ],
   },
   "F1-FM-04": {
-    beats: [{ at: 400, send: [["observatory", "lantern"]], look: "dot", fate: "in", repeat: 3600, tag: "forWhom" }],
+    beats: [{ at: 400, send: [["observatory", "kitchen"]], look: "dot", fate: "in", repeat: 3600, tag: "forWhom" }],
   },
 
   // -- Floor 2: names on the wire. --
   "F2-BLD-01": {
     beats: [
       { at: 300, tag: "observatory", label: "message" },
-      { at: 1600, mark: "lantern", glyph: "plate" },
+      { at: 1600, mark: "kitchen", glyph: "plate" },
       {
         at: 1600,
-        send: [["observatory", "lantern"]],
+        send: [["observatory", "kitchen"]],
         look: "frame",
         fate: "in",
         repeat: 3600,
-        tag: ["to", { door: door("lantern") }],
+        tag: ["to", { door: door("kitchen") }],
       },
     ],
   },
   "F2-BLD-02": {
     beats: [
-      { at: 0, mark: "lantern", glyph: "plate" },
+      { at: 0, mark: "kitchen", glyph: "plate" },
       {
         at: 500,
-        send: [["observatory", "lantern"]],
+        send: [["observatory", "kitchen"]],
         look: "frame",
         fate: "in",
         repeat: 6400,
-        tag: ["to", { door: door("lantern") }],
+        tag: ["to", { door: door("kitchen") }],
       },
-      { at: 3700, send: [["observatory", "lantern"]], look: "frame", fate: "fell", repeat: 6400, tag: "someoneElse" },
+      { at: 3700, send: [["observatory", "kitchen"]], look: "frame", fate: "fell", repeat: 6400, tag: "someoneElse" },
     ],
   },
   "F2-BLD-03": {
     beats: [
       {
         at: 400,
-        send: [["observatory", "lantern"]],
+        send: [["observatory", "kitchen"]],
         look: "frame",
         fate: "in",
         tag: ["from", { door: door("observatory") }],
@@ -153,8 +153,8 @@ export const scenes: Record<string, Scene> = {
       {
         at: 3000,
         send: [
-          ["observatory", "lantern"],
-          ["observatory", "quill"],
+          ["observatory", "kitchen"],
+          ["observatory", "library"],
         ],
         look: "broadcast",
         fate: "in",
@@ -171,37 +171,37 @@ export const scenes: Record<string, Scene> = {
   },
   "F2-FM-01": {
     beats: [
-      { at: 0, show: ["observatory", "lantern"] },
-      { at: 1400, show: ["moth"] },
+      { at: 0, show: ["observatory", "kitchen"] },
+      { at: 1400, show: ["cellar"] },
       { at: 1400, lay: ["root"], ms: 1400 },
       {
         at: 3200,
-        send: [["observatory", "lantern"]],
+        send: [["observatory", "kitchen"]],
         look: "dot",
         fate: "in",
         repeat: 4200,
-        tag: ["meantFor", { who: "moth" }],
+        tag: ["meantFor", { who: "cellar" }],
       },
     ],
   },
   "F2-FM-02": {
     beats: [
-      { at: 300, mark: "lantern", glyph: "plate", label: "name" },
-      { at: 300, mark: "moth", glyph: "plate" },
+      { at: 300, mark: "kitchen", glyph: "plate", label: "name" },
+      { at: 300, mark: "cellar", glyph: "plate" },
       { at: 300, mark: "observatory", iface: "eth0", glyph: "plate" },
       { at: 300, mark: "observatory", iface: "eth1", glyph: "plate" },
       {
         at: 1500,
-        send: [["observatory", "lantern"]],
+        send: [["observatory", "kitchen"]],
         look: "frame",
         fate: "in",
-        tag: ["to", { door: door("lantern") }],
+        tag: ["to", { door: door("kitchen") }],
       },
       {
         at: 4300,
         send: [
-          ["observatory", "lantern"],
-          ["observatory", "moth"],
+          ["observatory", "kitchen"],
+          ["observatory", "cellar"],
         ],
         look: "broadcast",
         fate: "in",
@@ -218,19 +218,19 @@ export const scenes: Record<string, Scene> = {
     beats: [
       { at: 300, mark: "hall", glyph: "ledger", label: "ledger" },
       { at: 600, ledger: "hall", line: "observatory → eth0" },
-      { at: 900, ledger: "hall", line: "quill → eth2" },
-      { at: 1200, ledger: "hall", line: "anvil → eth3" },
-      { at: 1800, send: [["observatory", "hall", "quill"]], look: "frame", fate: "in", repeat: 6000, tag: "known" },
-      { at: 4800, send: [["observatory", "hall", "anvil"]], look: "frame", fate: "in", repeat: 6000 },
+      { at: 900, ledger: "hall", line: "library → eth2" },
+      { at: 1200, ledger: "hall", line: "forge → eth3" },
+      { at: 1800, send: [["observatory", "hall", "library"]], look: "frame", fate: "in", repeat: 6000, tag: "known" },
+      { at: 4800, send: [["observatory", "hall", "forge"]], look: "frame", fate: "in", repeat: 6000 },
     ],
   },
   "F3-BLD-02": {
     beats: [
       { at: 200, mark: "hall", glyph: "ledger", label: "ledger" },
-      { at: 600, send: [["compass", "hall"]], look: "frame", fate: "in" },
-      { at: 1700, ledger: "hall", line: "compass → eth1" },
-      { at: 2400, send: [["beacon", "hall"]], look: "frame", fate: "in" },
-      { at: 3500, ledger: "hall", line: "beacon → eth2" },
+      { at: 600, send: [["pantry", "hall"]], look: "frame", fate: "in" },
+      { at: 1700, ledger: "hall", line: "pantry → eth1" },
+      { at: 2400, send: [["attic", "hall"]], look: "frame", fate: "in" },
+      { at: 3500, ledger: "hall", line: "attic → eth2" },
       { at: 4200, send: [["gate", "hall"]], look: "frame", fate: "in" },
       { at: 5300, ledger: "hall", line: "gate → eth3" },
       { at: 6000, send: [["observatory", "hall"]], look: "frame", fate: "in" },
@@ -241,37 +241,37 @@ export const scenes: Record<string, Scene> = {
     beats: [
       { at: 200, mark: "hall", glyph: "ledger", label: "ledger" },
       { at: 0, show: ["observatory", "hall"] },
-      { at: 600, show: ["ember"] },
+      { at: 600, show: ["bakery"] },
       { at: 600, lay: ["hall-eth1"], ms: 900 },
-      { at: 1600, send: [["ember", "hall", "observatory"]], look: "broadcast", fate: "in", hop: 900 },
-      { at: 2500, ledger: "hall", line: "ember → eth1" },
-      { at: 3800, show: ["thistle"] },
+      { at: 1600, send: [["bakery", "hall", "observatory"]], look: "broadcast", fate: "in", hop: 900 },
+      { at: 2500, ledger: "hall", line: "bakery → eth1" },
+      { at: 3800, show: ["larder"] },
       { at: 3800, lay: ["hall-eth2"], ms: 900 },
       {
         at: 4800,
         send: [
-          ["thistle", "hall", "observatory"],
-          ["thistle", "hall", "ember"],
+          ["larder", "hall", "observatory"],
+          ["larder", "hall", "bakery"],
         ],
         look: "broadcast",
         fate: "in",
         hop: 900,
       },
-      { at: 5700, ledger: "hall", line: "thistle → eth2" },
-      { at: 7000, show: ["bell"] },
+      { at: 5700, ledger: "hall", line: "larder → eth2" },
+      { at: 7000, show: ["chapel"] },
       { at: 7000, lay: ["hall-eth3"], ms: 900 },
       {
         at: 8000,
         send: [
-          ["bell", "hall", "observatory"],
-          ["bell", "hall", "ember"],
-          ["bell", "hall", "thistle"],
+          ["chapel", "hall", "observatory"],
+          ["chapel", "hall", "bakery"],
+          ["chapel", "hall", "larder"],
         ],
         look: "broadcast",
         fate: "in",
         hop: 900,
       },
-      { at: 8900, ledger: "hall", line: "bell → eth3" },
+      { at: 8900, ledger: "hall", line: "chapel → eth3" },
     ],
   },
   "F3-FM-01": {
@@ -280,9 +280,9 @@ export const scenes: Record<string, Scene> = {
       {
         at: 400,
         send: [
-          ["observatory", "hall", "compass"],
-          ["observatory", "hall", "wren"],
-          ["observatory", "hall", "beacon"],
+          ["observatory", "hall", "pantry"],
+          ["observatory", "hall", "laundry"],
+          ["observatory", "hall", "attic"],
         ],
         look: "frame",
         fate: "in",
@@ -292,9 +292,9 @@ export const scenes: Record<string, Scene> = {
       {
         at: 1600,
         send: [
-          ["beacon", "hall", "observatory"],
-          ["beacon", "hall", "compass"],
-          ["beacon", "hall", "wren"],
+          ["attic", "hall", "observatory"],
+          ["attic", "hall", "pantry"],
+          ["attic", "hall", "laundry"],
         ],
         look: "frame",
         fate: "in",
@@ -304,9 +304,9 @@ export const scenes: Record<string, Scene> = {
       {
         at: 2800,
         send: [
-          ["compass", "hall", "observatory"],
-          ["compass", "hall", "wren"],
-          ["compass", "hall", "beacon"],
+          ["pantry", "hall", "observatory"],
+          ["pantry", "hall", "laundry"],
+          ["pantry", "hall", "attic"],
         ],
         look: "frame",
         fate: "in",
@@ -318,15 +318,15 @@ export const scenes: Record<string, Scene> = {
   "F3-FM-02": {
     beats: [
       { at: 300, mark: "hall", glyph: "ledger", label: "ledger" },
-      { at: 500, ledger: "hall", line: "beacon → eth3" },
-      { at: 1000, send: [["observatory", "hall", "beacon"]], look: "frame", fate: "in", hop: 1300, tag: "known" },
+      { at: 500, ledger: "hall", line: "attic → eth3" },
+      { at: 1000, send: [["observatory", "hall", "attic"]], look: "frame", fate: "in", hop: 1300, tag: "known" },
       { at: 2300, ledger: "hall", line: "observatory → eth0" },
       {
         at: 4800,
         send: [
-          ["observatory", "hall", "compass"],
-          ["observatory", "hall", "wren"],
-          ["observatory", "hall", "beacon"],
+          ["observatory", "hall", "pantry"],
+          ["observatory", "hall", "laundry"],
+          ["observatory", "hall", "attic"],
         ],
         look: "frame",
         fate: "fell",
@@ -342,8 +342,8 @@ export const scenes: Record<string, Scene> = {
     beats: [
       { at: 0, mark: "hall", glyph: "ledger", label: "ledger" },
       { at: 0, ledger: "hall", line: "alcove → eth1", fadeAt: 1600 },
-      { at: 0, ledger: "hall", line: "quill → eth2", fadeAt: 3200 },
-      { at: 0, ledger: "hall", line: "lantern → eth3", brass: true },
+      { at: 0, ledger: "hall", line: "library → eth2", fadeAt: 3200 },
+      { at: 0, ledger: "hall", line: "kitchen → eth3", brass: true },
       { at: 3800, tag: "hall", label: "brass", below: true },
     ],
   },
@@ -354,11 +354,11 @@ export const scenes: Record<string, Scene> = {
       {
         at: 2600,
         send: [
-          ["observatory", "hall-a", "compass"],
-          ["observatory", "hall-a", "beacon"],
-          ["observatory", "hall-a", "hall-b", "anvil"],
-          ["observatory", "hall-a", "hall-b", "bell"],
-          ["observatory", "hall-a", "hall-b", "ember"],
+          ["observatory", "hall-a", "pantry"],
+          ["observatory", "hall-a", "attic"],
+          ["observatory", "hall-a", "hall-b", "forge"],
+          ["observatory", "hall-a", "hall-b", "chapel"],
+          ["observatory", "hall-a", "hall-b", "bakery"],
         ],
         look: "broadcast",
         fate: "in",
@@ -378,9 +378,9 @@ export const scenes: Record<string, Scene> = {
   "F4-FM-01": {
     beats: [
       { at: 0, mark: "hall-a", glyph: "ledger" },
-      { at: 0, ledger: "hall-a", line: "compass → eth1", fadeAt: 1400 },
-      { at: 0, ledger: "hall-a", line: "beacon → eth2", fadeAt: 1400 },
-      { at: 1600, show: ["hall-b", "anvil", "bell", "wren"] },
+      { at: 0, ledger: "hall-a", line: "pantry → eth1", fadeAt: 1400 },
+      { at: 0, ledger: "hall-a", line: "attic → eth2", fadeAt: 1400 },
+      { at: 1600, show: ["hall-b", "forge", "chapel", "laundry"] },
       { at: 1600, lay: ["span"], ms: 1400 },
       { at: 3600, lay: ["span-2"], ms: 1800, drawn: true },
       { at: 5000, tag: "hall-a|hall-b", label: "secondSpan", lift: 62 },
@@ -406,9 +406,9 @@ export const scenes: Record<string, Scene> = {
       {
         at: 2100,
         send: [
-          ["hall-b", "anvil"],
-          ["hall-b", "bell"],
-          ["hall-b", "wren"],
+          ["hall-b", "forge"],
+          ["hall-b", "chapel"],
+          ["hall-b", "laundry"],
         ],
         look: "broadcast",
         fate: "in",
@@ -418,8 +418,8 @@ export const scenes: Record<string, Scene> = {
       {
         at: 2100,
         send: [
-          ["hall-a", "compass"],
-          ["hall-a", "beacon"],
+          ["hall-a", "pantry"],
+          ["hall-a", "attic"],
           ["hall-a", "observatory"],
         ],
         look: "broadcast",
@@ -435,12 +435,12 @@ export const scenes: Record<string, Scene> = {
   // -- Floor 5: addresses. --
   "F5-FM-01": {
     beats: [
-      { at: 0, mark: "lantern", glyph: "plate", text: "02:00:00:00:00:07" },
-      { at: 1600, mark: "lantern", glyph: "plate", text: "02:00:00:00:00:17" },
-      { at: 1600, tag: "lantern", label: "replaced", below: true },
+      { at: 0, mark: "kitchen", glyph: "plate", text: "02:00:00:00:00:07" },
+      { at: 1600, mark: "kitchen", glyph: "plate", text: "02:00:00:00:00:17" },
+      { at: 1600, tag: "kitchen", label: "replaced", below: true },
       {
         at: 2800,
-        send: [["observatory", "square", "lantern"]],
+        send: [["observatory", "square", "kitchen"]],
         look: "frame",
         fate: "fell",
         repeat: 4200,
@@ -451,16 +451,16 @@ export const scenes: Record<string, Scene> = {
   "F5-FM-02": {
     beats: [
       { at: 300, mark: "observatory", glyph: "address", label: "address" },
-      { at: 900, mark: "lantern", glyph: "address" },
-      { at: 1300, mark: "quill", glyph: "address" },
-      { at: 1700, mark: "anvil", glyph: "address" },
+      { at: 900, mark: "kitchen", glyph: "address" },
+      { at: 1300, mark: "library", glyph: "address" },
+      { at: 1700, mark: "forge", glyph: "address" },
       {
         at: 2600,
-        send: [["observatory", "square", "lantern"]],
+        send: [["observatory", "square", "kitchen"]],
         look: "packet",
         fate: "in",
         repeat: 4000,
-        tag: ["houseLetter", { ip: "@addr:lantern" }],
+        tag: ["houseLetter", { ip: "@addr:kitchen" }],
       },
     ],
   },
@@ -470,7 +470,7 @@ export const scenes: Record<string, Scene> = {
   "F6-FM-01": {
     beats: [
       { at: 300, mark: "observatory", glyph: "address" },
-      { at: 300, mark: "lantern", glyph: "address" },
+      { at: 300, mark: "kitchen", glyph: "address" },
       {
         at: 900,
         send: [["observatory", "square"]],
@@ -478,7 +478,7 @@ export const scenes: Record<string, Scene> = {
         fate: "fell",
         hop: 1400,
         repeat: 4000,
-        tag: ["houseLetter", { ip: "@addr:lantern" }],
+        tag: ["houseLetter", { ip: "@addr:kitchen" }],
       },
       { at: 2300, tag: "observatory|square", label: "understood" },
     ],
@@ -489,26 +489,26 @@ export const scenes: Record<string, Scene> = {
       {
         at: 600,
         send: [
-          ["observatory", "square", "lantern"],
-          ["observatory", "square", "quill"],
-          ["observatory", "square", "anvil"],
-          ["observatory", "square", "bell"],
+          ["observatory", "square", "kitchen"],
+          ["observatory", "square", "library"],
+          ["observatory", "square", "forge"],
+          ["observatory", "square", "chapel"],
         ],
         look: "question",
         fate: "in",
-        tag: ["question", { ip: "@addr:lantern" }],
+        tag: ["question", { ip: "@addr:kitchen" }],
       },
       {
         at: 3000,
-        send: [["lantern", "square", "observatory"]],
+        send: [["kitchen", "square", "observatory"]],
         look: "answer",
         fate: "in",
-        tag: ["answer", { ip: "@addr:lantern", mac: "@mac:lantern:eth0" }],
+        tag: ["answer", { ip: "@addr:kitchen", mac: "@mac:kitchen:eth0" }],
       },
       { at: 5300, ledger: "observatory", line: "10.0.1.7 → …:17" },
       {
         at: 6000,
-        send: [["observatory", "square", "lantern"]],
+        send: [["observatory", "square", "kitchen"]],
         look: "framed",
         fate: "in",
         repeat: 3600,
@@ -521,21 +521,21 @@ export const scenes: Record<string, Scene> = {
   // -- Floor 7: neighbourhoods. --
   "F7-FM-01": {
     beats: [
-      { at: 0, show: ["observatory", "square", "lantern"] },
-      { at: 600, show: ["quill"] },
-      { at: 1100, show: ["anvil"] },
-      { at: 1600, show: ["bell"] },
-      { at: 2100, show: ["moth"] },
+      { at: 0, show: ["observatory", "square", "kitchen"] },
+      { at: 600, show: ["library"] },
+      { at: 1100, show: ["forge"] },
+      { at: 1600, show: ["chapel"] },
+      { at: 2100, show: ["cellar"] },
       { at: 2600, show: ["registry"] },
       {
         at: 3000,
         send: [
-          ["quill", "square", "observatory"],
-          ["quill", "square", "lantern"],
-          ["quill", "square", "anvil"],
-          ["quill", "square", "bell"],
-          ["quill", "square", "moth"],
-          ["quill", "square", "registry"],
+          ["library", "square", "observatory"],
+          ["library", "square", "kitchen"],
+          ["library", "square", "forge"],
+          ["library", "square", "chapel"],
+          ["library", "square", "cellar"],
+          ["library", "square", "registry"],
         ],
         look: "question",
         fate: "in",
@@ -544,12 +544,12 @@ export const scenes: Record<string, Scene> = {
       {
         at: 4200,
         send: [
-          ["moth", "square", "observatory"],
-          ["moth", "square", "lantern"],
-          ["moth", "square", "anvil"],
-          ["moth", "square", "bell"],
-          ["moth", "square", "quill"],
-          ["moth", "square", "registry"],
+          ["cellar", "square", "observatory"],
+          ["cellar", "square", "kitchen"],
+          ["cellar", "square", "forge"],
+          ["cellar", "square", "chapel"],
+          ["cellar", "square", "library"],
+          ["cellar", "square", "registry"],
         ],
         look: "question",
         fate: "in",
@@ -562,11 +562,11 @@ export const scenes: Record<string, Scene> = {
     beats: [
       { at: 300, mark: "observatory", glyph: "sign", label: "sign", text: "10.0.1.0/24" },
       { at: 1000, mark: "observatory", glyph: "address" },
-      { at: 1200, mark: "lantern", glyph: "address" },
-      { at: 1400, mark: "quill", glyph: "address" },
-      { at: 1600, mark: "anvil", glyph: "address" },
-      { at: 1800, mark: "bell", glyph: "address" },
-      { at: 2000, mark: "moth", glyph: "address" },
+      { at: 1200, mark: "kitchen", glyph: "address" },
+      { at: 1400, mark: "library", glyph: "address" },
+      { at: 1600, mark: "forge", glyph: "address" },
+      { at: 1800, mark: "chapel", glyph: "address" },
+      { at: 2000, mark: "cellar", glyph: "address" },
       { at: 3000, mark: "registry", glyph: "registry", label: "registry" },
       { at: 3000, glow: ["registry"] },
     ],
@@ -577,12 +577,12 @@ export const scenes: Record<string, Scene> = {
   // -- Floor 8: crossings. --
   "F8-FM-01": {
     beats: [
-      { at: 0, show: ["observatory", "nave", "vesper", "cloister", "lumen", "tower"] },
-      { at: 0, lay: ["nave-observatory", "cloister-vesper", "tower-lumen"], ms: 0 },
+      { at: 0, show: ["observatory", "nave", "gallery", "cloister", "belfry", "tower"] },
+      { at: 0, lay: ["nave-observatory", "cloister-gallery", "tower-belfry"], ms: 0 },
       { at: 600, tag: "nave", label: "island" },
       { at: 1200, send: [["observatory", "nave"]], look: "framed", fate: "fell", hop: 1300, repeat: 3600 },
-      { at: 1800, send: [["vesper", "cloister"]], look: "framed", fate: "fell", hop: 1300, repeat: 3600 },
-      { at: 2400, send: [["lumen", "tower"]], look: "framed", fate: "fell", hop: 1300, repeat: 3600 },
+      { at: 1800, send: [["gallery", "cloister"]], look: "framed", fate: "fell", hop: 1300, repeat: 3600 },
+      { at: 2400, send: [["belfry", "tower"]], look: "framed", fate: "fell", hop: 1300, repeat: 3600 },
     ],
   },
   "F8-FM-02": {
@@ -595,7 +595,7 @@ export const scenes: Record<string, Scene> = {
       { at: 3800, tag: "observatory", label: "giveIt" },
       {
         at: 4600,
-        send: [["observatory", "nave", "crossing", "cloister", "vesper"]],
+        send: [["observatory", "nave", "crossing", "cloister", "gallery"]],
         look: "framed",
         fate: "in",
         hop: 1000,
@@ -638,7 +638,7 @@ export const scenes: Record<string, Scene> = {
     beats: [
       {
         at: 400,
-        send: [["observatory", "nave", "crossing", "cloister", "arch", "tower", "spire", "window", "halo"]],
+        send: [["observatory", "nave", "crossing", "cloister", "arch", "tower", "spire", "window", "loft"]],
         look: "framed",
         fate: "in",
         hop: 900,

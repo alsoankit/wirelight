@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 // The map a memory and a ride-along are drawn on (0066): the floor as it was, in the memory's sepia
 // grade, laid out compactly so the picture fills its panel (a long road of crossings folds back on
 // itself in two rows), two cables between the same machines drawn as two curves, every label with a
-// dark halo so it stays readable where lines cross it. Pictures draw on top through `children`.
+// dark loft so it stays readable where lines cross it. Pictures draw on top through `children`.
 
 export type MapNode = { id: string; x: number; y: number; kind: "you" | "switch" | "router" | "house" };
 export type MapLink = { id: string; a: string; ai: string; b: string; bi: string; bend: number };

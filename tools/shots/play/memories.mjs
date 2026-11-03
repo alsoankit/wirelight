@@ -13,8 +13,8 @@ const shot = (n) => p.screenshot({ path: `${out}/${n}.png` });
 // 1. A real debrief: win 1.B, then "The Gardener remembers".
 await open(p, base, "f1.boss-dark-corridor");
 await plateSwitch(p);
-await p.click("text=→ lantern");
-await arrived(p, "lantern");
+await p.click("text=→ kitchen");
+await arrived(p, "kitchen");
 await tidy(p);
 await p.click("text=Cable end");
 await p.waitForTimeout(600);

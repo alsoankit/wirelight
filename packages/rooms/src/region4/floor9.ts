@@ -28,9 +28,9 @@ const VARS = {
   archTower: IP.arch1,
   spireTower: IP.spire0,
   spireWindow: IP.spire1,
-  lumen: IP.lumen,
-  wren: IP.wren,
-  halo: IP.halo,
+  belfry: IP.belfry,
+  laundry: IP.laundry,
+  loft: IP.loft,
   tower: STREET.tower,
   window: STREET.window,
   nowhere: "10.0.4.9",
@@ -130,7 +130,7 @@ export const twoEnvelopes = defineRoom({
 // ── 9.2 · Show the Way ─────────────────────────────────────────────────────────────────────
 
 const showId = "f9.show-the-way";
-const showTopo = cathedral({ tower: true, wren: true });
+const showTopo = cathedral({ tower: true, laundry: true });
 export const showTheWay = defineRoom({
   id: showId,
   region: 4,
@@ -142,28 +142,32 @@ export const showTheWay = defineRoom({
   vars: VARS,
   seed: 92,
   topology: showTopo,
-  faults: [{ kind: "route-remove", device: "wren", dst: "default" }],
+  faults: [{ kind: "route-remove", device: "laundry", dst: "default" }],
   playerDevice: "observatory",
   access: openRooms(showTopo),
   controls: controls(showTopo),
   tools: {},
   glow: "symptoms",
-  winCondition: (f) => pingAnswered("wren", IP.observatory)(f) && tracedHops("wren", 3)(f),
+  winCondition: (f) => pingAnswered("laundry", IP.observatory)(f) && tracedHops("laundry", 3)(f),
   key: { word: keyFor(showId), via: "mark" },
   healthChecks: [
-    { id: "wren-gateway", object: { kind: "board", device: "wren" }, check: hasRoute("wren", "default", IP.arch1) },
+    {
+      id: "laundry-gateway",
+      object: { kind: "board", device: "laundry" },
+      check: hasRoute("laundry", "default", IP.arch1),
+    },
   ],
   teaches: [],
   uses: ["routing-table", "default-gateway", "return-path", "hop"],
   cards: [],
   misconceptions: [
-    { id: "gateway-far", detect: ran("wren", /^ip route (?:add|replace) default via (?!10\.0\.3\.)\S+$/) },
+    { id: "gateway-far", detect: ran("laundry", /^ip route (?:add|replace) default via (?!10\.0\.3\.)\S+$/) },
   ],
-  detectorTests: [{ misconception: "gateway-far", steps: [typed("wren", "ip route add default via 10.0.2.1")] }],
+  detectorTests: [{ misconception: "gateway-far", steps: [typed("laundry", "ip route add default via 10.0.2.1")] }],
   solution: [
-    typed("wren", "ip route add default via 10.0.3.1"),
-    click("wren", "lab slate trace --next", 100),
-    typed("wren", "ping -c 1 10.0.1.5"),
+    typed("laundry", "ip route add default via 10.0.3.1"),
+    click("laundry", "lab slate trace --next", 100),
+    typed("laundry", "ping -c 1 10.0.1.5"),
   ],
 });
 
@@ -233,7 +237,7 @@ export const roundAndRound = defineRoom({
   controls: controls(windowTopo),
   tools: {},
   glow: "symptoms",
-  winCondition: pingAnswered("observatory", IP.halo),
+  winCondition: pingAnswered("observatory", IP.loft),
   key: { word: keyFor(roundId), via: "mark" },
   healthChecks: [{ id: "arch-knows-window", object: { kind: "board", device: "arch" }, check: archToWindow }],
   teaches: ["routing-loop"],
@@ -275,14 +279,14 @@ export const theCrossing = defineRoom({
     { kind: "route-remove", device: "arch", dst: STREET.window },
     { kind: "sysctl", device: "spire", key: FORWARD, value: "0" },
     // A door nobody has.
-    { kind: "route-set", device: "halo", route: { dst: "default", via: "10.0.4.9" } },
+    { kind: "route-set", device: "loft", route: { dst: "default", via: "10.0.4.9" } },
   ],
   playerDevice: "observatory",
   access: openRooms(windowTopo),
   controls: controls(windowTopo),
   tools: {},
   glow: "none",
-  winCondition: pingAnswered("observatory", IP.halo),
+  winCondition: pingAnswered("observatory", IP.loft),
   key: { word: keyFor(crossingId), via: "mark" },
   healthChecks: [
     {
@@ -292,7 +296,7 @@ export const theCrossing = defineRoom({
     },
     { id: "arch-knows-window", object: { kind: "board", device: "arch" }, check: archToWindow },
     { id: "spire-forwards", object: { kind: "keeper", device: "spire" }, check: sysctlIs("spire", FORWARD, "1") },
-    { id: "halo-way-back", object: { kind: "board", device: "halo" }, check: hasRoute("halo", "default", IP.spire1) },
+    { id: "loft-way-back", object: { kind: "board", device: "loft" }, check: hasRoute("loft", "default", IP.spire1) },
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
   teaches: [],
@@ -314,7 +318,7 @@ export const theCrossing = defineRoom({
     { id: "via-far-door", detect: ran("crossing", /^ip route (?:add|replace) \S+ via 10\.0\.[34]\.\d+$/) },
     // Spire's board is right; it isn't allowed to forward.
     { id: "routes-again", detect: ran("spire", ROUTE_CHANGE) },
-    { id: "gateway-far", detect: ran("halo", /^ip route (?:add|replace) default via (?!10\.0\.4\.)\S+$/) },
+    { id: "gateway-far", detect: ran("loft", /^ip route (?:add|replace) default via (?!10\.0\.4\.)\S+$/) },
     ttlZero,
     raiseTheTtl,
     { id: "step-by-step", detect: failedChangesWithoutLooking(3) },
@@ -323,7 +327,7 @@ export const theCrossing = defineRoom({
     { misconception: "fix-my-house", steps: [typed("observatory", "ip route add 10.0.4.0/24 via 10.0.1.1")] },
     { misconception: "via-far-door", steps: [typed("crossing", "ip route add 10.0.4.0/24 via 10.0.3.2")] },
     { misconception: "routes-again", steps: [typed("spire", "ip route add 10.0.1.0/24 via 10.0.3.1")] },
-    { misconception: "gateway-far", steps: [typed("halo", "ip route replace default via 10.0.3.1")] },
+    { misconception: "gateway-far", steps: [typed("loft", "ip route replace default via 10.0.3.1")] },
     { misconception: "ttl-zero", steps: [typed("observatory", "ping -c 1 -t 0 10.0.4.7")] },
     { misconception: "raise-the-ttl", steps: [typed("observatory", "ping -c 1 -t 255 10.0.4.7")] },
     {
@@ -331,7 +335,7 @@ export const theCrossing = defineRoom({
       steps: [
         typed("crossing", "ip route add 10.0.4.0/24 via 10.0.4.1"),
         typed("arch", "ip route add 10.0.4.0/24 via 10.0.4.1"),
-        typed("halo", "ip route add default via 10.0.4.1"),
+        typed("loft", "ip route add default via 10.0.4.1"),
       ],
     },
   ],
@@ -340,8 +344,8 @@ export const theCrossing = defineRoom({
     typed("crossing", "ip route add 10.0.4.0/24 via 10.0.2.2"),
     typed("arch", "ip route add 10.0.4.0/24 via 10.0.3.2"),
     typed("spire", `sysctl -w ${FORWARD}=1`),
-    typed("halo", "ip route del default"),
-    typed("halo", "ip route add default via 10.0.4.1"),
+    typed("loft", "ip route del default"),
+    typed("loft", "ip route add default via 10.0.4.1"),
     typed("observatory", "ping -c 3 10.0.4.7"),
   ],
   // A default line on crossing via arch instead of the two street lines (floor-9.md 9.B note).
@@ -350,7 +354,7 @@ export const theCrossing = defineRoom({
       typed("crossing", "ip route add default via 10.0.2.2"),
       typed("arch", "ip route add 10.0.4.0/24 via 10.0.3.2"),
       typed("spire", `sysctl -w ${FORWARD}=1`),
-      typed("halo", "ip route replace default via 10.0.4.1"),
+      typed("loft", "ip route replace default via 10.0.4.1"),
       typed("observatory", "ping -c 3 10.0.4.7"),
     ],
   ],

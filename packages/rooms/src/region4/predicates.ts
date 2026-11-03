@@ -110,7 +110,7 @@ export function failedChangesWithoutLooking(n: number): Predicate {
 }
 
 /**
- * The player heard `text` at `where` (e.g. a request arriving at lumen, by Capture), then made at
+ * The player heard `text` at `where` (e.g. a request arriving at belfry, by Capture), then made at
  * least `n` route changes on `near` machines (8.B *one-direction*).
  */
 export function changedNearAfterHearing(where: DeviceId, text: string, near: DeviceId[], n: number): Predicate {

@@ -10,19 +10,19 @@ const link = (a: string, ai: string, b: string, bi: string) => ({
   b: { device: b, iface: bi },
 });
 
-// observatory — hall — {lantern, quill}; lantern — quill too (a branch beside).
+// observatory — hall — {kitchen, library}; kitchen — library too (a branch beside).
 const t = {
   devices: [
     dev("observatory", ["eth0"]),
     dev("hall", ["eth0", "eth1", "eth2"]),
-    dev("lantern", ["eth0", "eth1"]),
-    dev("quill", ["eth0", "eth1"]),
+    dev("kitchen", ["eth0", "eth1"]),
+    dev("library", ["eth0", "eth1"]),
   ],
   links: [
     link("observatory", "eth0", "hall", "eth0"),
-    link("hall", "eth1", "lantern", "eth0"),
-    link("hall", "eth2", "quill", "eth0"),
-    link("lantern", "eth1", "quill", "eth1"),
+    link("hall", "eth1", "kitchen", "eth0"),
+    link("hall", "eth2", "library", "eth0"),
+    link("kitchen", "eth1", "library", "eth1"),
   ],
 } as unknown as Topology;
 
@@ -34,7 +34,7 @@ describe("doorSides", () => {
       eth1: "back",
       eth2: "back",
     });
-    expect(Object.fromEntries(doorSides(t, "observatory", "lantern"))).toEqual({ eth0: "front", eth1: "left" });
+    expect(Object.fromEntries(doorSides(t, "observatory", "kitchen"))).toEqual({ eth0: "front", eth1: "left" });
   });
   it("makes a corridor's two ends face each other", () => {
     const opposite = { back: "front", front: "back", left: "left" } as const;

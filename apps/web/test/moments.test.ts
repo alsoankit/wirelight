@@ -68,7 +68,7 @@ describe("moments read from the interface", () => {
   it("knows your own plate, a plate's switch, walking, and time sped up then back", () => {
     const r = room("f1.both-ends");
     const out = new Set<string>();
-    const view = { here: "lantern", speed: 4, voiceGiven: false, detectors: ["replugging"] };
+    const view = { here: "kitchen", speed: 4, voiceGiven: false, detectors: ["replugging"] };
     readView({ ...view, panel: { kind: "plate", device: "observatory", iface: "eth0" } }, r, new Set(), out);
     expect([...out].sort()).toEqual(["own-plate", "replugging", "speed-fast", "switch-seen", "walked"]);
     readView({ ...view, speed: 1, panel: null }, r, out, out);
@@ -124,7 +124,7 @@ describe("the gentle way back (HELP-12)", () => {
   it("offers the room a fired detector comes from, else the floor's first room", () => {
     const boss1 = room("f1.boss-dark-corridor");
     expect(matchingRoom(boss1, ["replugging"])?.id).toBe("f1.both-ends");
-    expect(matchingRoom(boss1, ["replugging", "blaming-lantern"])?.id).toBe("f1.loose-cable");
+    expect(matchingRoom(boss1, ["replugging", "blaming-kitchen"])?.id).toBe("f1.loose-cable");
     expect(matchingRoom(boss1, [])?.id).toBe("f1.two-rooms");
     expect(matchingRoom(room("f2.boss-silent-line"), ["card-to-self"])?.id).toBe("f2.wrong-name");
   });
@@ -143,7 +143,7 @@ describe("journal pages (CORE-45): where each lies and when it shows", () => {
     const at = (floor: number) => floorTexts[floor]?.journal.where ?? "";
     const player = "observatory";
     expect(journalShows(at(1), { won: false, here: player, player })).toBe(false);
-    expect(journalShows(at(1), { won: false, here: "lantern", player })).toBe(true);
+    expect(journalShows(at(1), { won: false, here: "kitchen", player })).toBe(true);
     expect(journalShows(at(2), { won: false, here: player, player })).toBe(false);
     expect(journalShows(at(2), { won: true, here: player, player })).toBe(true);
     expect(journalShows(at(5), { won: false, here: player, player })).toBe(true);

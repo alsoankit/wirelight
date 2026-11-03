@@ -1,4 +1,4 @@
-# obs=up lantern=up
+# obs=up kitchen=up
 $ ip frobnicate
 Object "frobnicate" is unknown, try "ip help".
 [exit 1]

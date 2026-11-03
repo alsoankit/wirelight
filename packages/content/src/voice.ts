@@ -220,6 +220,8 @@ export const voice = {
     message: "Message",
     close: "Close",
   },
+  /** Role tags (0113): a machine's role joins its name once the room that teaches it is cleared. */
+  roles: { label: "{name} · {role}", switch: "switch", router: "router", dhcp: "DHCP server" },
   /** Command reminders beside the terminal (0109). */
   reminders: {
     title: "Commands to remember",

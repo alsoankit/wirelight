@@ -56,26 +56,26 @@ echo; echo "== ping 10.0.0.9 -c 4: when the 'Destination Host Unreachable' lines
 fresh lan
 ex observatory bash -c 'stdbuf -oL ping -c 4 10.0.0.9 | while IFS= read -r l; do printf "%s %s\n" "$(date +%s.%N)" "$l"; done' | deltas
 
-echo; echo "== ping default interval and IP IDs (ping -c 5 10.0.0.7, captured on lantern)"
+echo; echo "== ping default interval and IP IDs (ping -c 5 10.0.0.7, captured on kitchen)"
 fresh lan
-tdump lantern 7 -i eth0 -v icmp
+tdump kitchen 7 -i eth0 -v icmp
 ex observatory ping -c 5 10.0.0.7 >/dev/null; wait
 deltas < "$TMPD/cap"
 
 echo; echo "== ping -i 0.2 -c 5 IP IDs (to see whether the ID is a counter)"
 fresh lan
-tdump lantern 4 -i eth0 -v 'icmp[icmptype] = icmp-echo'
+tdump kitchen 4 -i eth0 -v 'icmp[icmptype] = icmp-echo'
 ex observatory ping -i 0.2 -c 5 10.0.0.7 >/dev/null; wait
 deltas < "$TMPD/cap"
 
 echo; echo "== Neighbour after a successful ping, seen from both sides, with timestamps of ARP traffic"
 fresh lan
-tdump lantern 9 -i eth0 arp
+tdump kitchen 9 -i eth0 arp
 ex observatory ping -c 1 10.0.0.7 >/dev/null
 s0=$(date +%s.%N)
 for target in 0.2 4.8 5.6 7.0; do
   while [ "$(echo "$(date +%s.%N) - $s0 < $target" | bc)" = 1 ]; do sleep 0.05; done
-  printf '  +%ss  observatory: %s | lantern: %s\n' "$target" "$(ex observatory ip neigh | tr -s ' ')" "$(ex lantern ip neigh | tr -s ' ')"
+  printf '  +%ss  observatory: %s | kitchen: %s\n' "$target" "$(ex observatory ip neigh | tr -s ' ')" "$(ex kitchen ip neigh | tr -s ' ')"
 done
 wait; echo "-- ARP on the wire:"; deltas < "$TMPD/cap"
 
@@ -91,7 +91,7 @@ done
 echo; echo "== Neighbour state timeline with base_reachable_time_ms=1000 and default delay_first_probe_time=5"
 fresh lan
 ex observatory sysctl -qw net.ipv4.neigh.eth0.base_reachable_time_ms=1000
-tdump lantern 15 -i eth0 arp
+tdump kitchen 15 -i eth0 arp
 s0=$(date +%s.%N); ex observatory ping -c 1 -W 1 10.0.0.7 >/dev/null
 prev=""; for _ in $(seq 250); do
   st=$(ex observatory ip neigh show 10.0.0.7 | awk '{print $NF}')
@@ -113,13 +113,13 @@ fresh routed on; on right 'ip addr flush dev eth0'
 tdump left 7 -i eth0 icmp
 ex left ping -c 1 -W 6 10.0.2.20 >/dev/null; wait; deltas < "$TMPD/cap"
 
-echo; echo "== Neighbour probe that goes unanswered: DELAY -> PROBE -> FAILED (lantern loses its address)"
+echo; echo "== Neighbour probe that goes unanswered: DELAY -> PROBE -> FAILED (kitchen loses its address)"
 fresh lan
 ex observatory sysctl -qw net.ipv4.neigh.eth0.base_reachable_time_ms=1000 net.ipv4.neigh.eth0.delay_first_probe_time=0
 ex observatory ping -c 1 10.0.0.7 >/dev/null; sleep 3
 ex observatory sysctl -qw net.ipv4.neigh.eth0.base_reachable_time_ms=30000 net.ipv4.neigh.eth0.delay_first_probe_time=5
 echo "  before: $(ex observatory ip neigh | tr -s ' ')"
-ex lantern ip addr flush dev eth0
+ex kitchen ip addr flush dev eth0
 tdump observatory 11 -i eth0 arp
 s0=$(date +%s.%N); ex observatory ping -c 1 -W 1 10.0.0.7 >/dev/null
 prev=""; for _ in $(seq 200); do

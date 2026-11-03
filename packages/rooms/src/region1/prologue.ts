@@ -7,7 +7,7 @@ import { halls } from "./topology";
 const id = "p.first-message";
 const key = keyFor(id);
 const reply = lanternReply(key);
-const send = { device: "observatory", line: 'lab send-frame --to lantern --msg "hello"', source: "click" as const };
+const send = { device: "observatory", line: 'lab send-frame --to kitchen --msg "hello"', source: "click" as const };
 
 export const firstMessage = defineRoom({
   id,
@@ -21,7 +21,7 @@ export const firstMessage = defineRoom({
   topology: halls({ lanternReply: reply }),
   faults: [],
   playerDevice: "observatory",
-  access: { observatory: { state: "enterable" }, lantern: { state: "locked-for-now" } },
+  access: { observatory: { state: "enterable" }, kitchen: { state: "locked-for-now" } },
   controls: { console: "hidden", sendButton: send, glassOnSend: true },
   tools: { unlock: ["lab send-frame"] },
   glow: "causes",

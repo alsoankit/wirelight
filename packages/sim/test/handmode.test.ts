@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { type Fault, keyOf, type SimEvent, Simulator, type Topology } from "./handmode-helpers";
 
-/** 3.1: observatory — hall (a switch: eth0..eth3) — lantern, quill, anvil. The messenger writes to anvil. */
+/** 3.1: observatory — hall (a switch: eth0..eth3) — kitchen, library, forge. The messenger writes to forge. */
 function hall(): Topology {
   const host = (id: string, mac: string, lab?: boolean) => ({
     id,
@@ -30,15 +30,15 @@ function hall(): Topology {
         ],
         bridges: [{ name: "br0", ports: ["eth0", "eth1", "eth2", "eth3"] }],
       },
-      host("lantern", "02:00:00:00:00:07"),
-      host("quill", "02:00:00:00:00:0c"),
-      host("anvil", "02:00:00:00:00:0a", true),
+      host("kitchen", "02:00:00:00:00:07"),
+      host("library", "02:00:00:00:00:0c"),
+      host("forge", "02:00:00:00:00:0a", true),
     ],
     links: [
       { id: "wire", a: { device: "observatory", iface: "eth0" }, b: { device: "hall", iface: "eth0" } },
-      { id: "l1", a: { device: "hall", iface: "eth1" }, b: { device: "lantern", iface: "eth0" } },
-      { id: "l2", a: { device: "hall", iface: "eth2" }, b: { device: "quill", iface: "eth0" } },
-      { id: "l3", a: { device: "hall", iface: "eth3" }, b: { device: "anvil", iface: "eth0" } },
+      { id: "l1", a: { device: "hall", iface: "eth1" }, b: { device: "kitchen", iface: "eth0" } },
+      { id: "l2", a: { device: "hall", iface: "eth2" }, b: { device: "library", iface: "eth0" } },
+      { id: "l3", a: { device: "hall", iface: "eth3" }, b: { device: "forge", iface: "eth0" } },
     ],
   };
 }
@@ -71,11 +71,11 @@ describe("3.1 · the switch, by hand", () => {
   it("plays the room's solution: learn, flood, learn, send back, send on; then the keeper takes over", () => {
     const sim = new Simulator(hall(), ASLEEP);
     sim.advance(2000);
-    // Frame 1: from the observatory (in at eth0), to anvil, unknown → every other door.
+    // Frame 1: from the observatory (in at eth0), to forge, unknown → every other door.
     expect(sim.keeperLearn("hall", "02:00:00:00:00:05", "eth0")).toEqual({ ok: true });
     expect(sim.keeperSend("hall", "flood")).toEqual({ ok: true });
     sim.advance(2100);
-    // Anvil's answer waits at the desk (in at eth3), to the observatory, known → eth0.
+    // Forge's answer waits at the desk (in at eth3), to the observatory, known → eth0.
     expect(sim.device("hall")?.keeper.desk).toHaveLength(1);
     sim.keeperLearn("hall", "02:00:00:00:00:0a", "eth3");
     sim.keeperSend("hall", "eth0");
@@ -83,18 +83,18 @@ describe("3.1 · the switch, by hand", () => {
     expect(
       sim.trace.some((e) => e.kind === "app.deliver" && e.device === "observatory" && e.text === "key: brass-owl"),
     ).toBe(true);
-    // The messenger's next frame (at 7.5 s): to anvil, now known → eth3.
+    // The messenger's next frame (at 7.5 s): to forge, now known → eth3.
     sim.advance(7600);
     sim.keeperSend("hall", "eth3");
     sim.advance(7650);
-    // Lantern and quill saw only the one flooded copy.
+    // Kitchen and library saw only the one flooded copy.
     const at = (d: string) => sim.trace.filter((e) => e.kind === "frame.rx" && e.device === d).length;
-    expect([at("lantern"), at("quill"), at("anvil")]).toEqual([1, 1, 2]);
+    expect([at("kitchen"), at("library"), at("forge")]).toEqual([1, 1, 2]);
     // The keeper remembers and sorts every frame from then on.
     expect(sim.wakeKeeper("hall")).toBe(true);
     sim.advance(14_000);
     expect(sim.device("hall")?.keeper.desk).toHaveLength(0);
-    expect(at("anvil")).toBe(3);
+    expect(at("forge")).toBe(3);
   });
 
   it("is the same job: by hand, the same frames cross the same doors as with the keeper awake (SIM-06)", () => {
@@ -108,7 +108,7 @@ describe("3.1 · the switch, by hand", () => {
     hand.advance(7600);
     hand.keeperSend("hall", "eth3");
     hand.advance(7650);
-    hand.keeperSend("hall", "eth0"); // anvil's second answer
+    hand.keeperSend("hall", "eth0"); // forge's second answer
     hand.advance(7700);
 
     const auto = new Simulator(hall());
@@ -132,7 +132,7 @@ describe("3.1 · the switch, by hand", () => {
   });
 });
 
-/** 6.1 / 8.5: observatory 10.0.1.5 — lantern 10.0.1.7 on one street; a router to another. */
+/** 6.1 / 8.5: observatory 10.0.1.5 — kitchen 10.0.1.7 on one street; a router to another. */
 function street(): Topology {
   return {
     devices: [
@@ -158,8 +158,8 @@ function street(): Topology {
         ],
       },
       {
-        id: "vesper",
-        hostname: "vesper",
+        id: "gallery",
+        hostname: "gallery",
         kind: "host",
         interfaces: [{ name: "eth0", mac: "02:00:00:00:00:27" }],
         addrs: [{ dev: "eth0", cidr: "10.0.2.7/24" }],
@@ -168,7 +168,7 @@ function street(): Topology {
     ],
     links: [
       { id: "s1", a: { device: "observatory", iface: "eth0" }, b: { device: "crossing", iface: "eth0" } },
-      { id: "s2", a: { device: "crossing", iface: "eth1" }, b: { device: "vesper", iface: "eth0" } },
+      { id: "s2", a: { device: "crossing", iface: "eth1" }, b: { device: "gallery", iface: "eth0" } },
     ],
   };
 }
@@ -213,7 +213,7 @@ describe("8.5 · forwarding by hand (the router's navigator)", () => {
     sim.advance(30);
     expect(sim.keeperForward("crossing", "02:00:00:00:00:27")).toEqual({ ok: true });
     sim.advance(40);
-    // Vesper's reply waits too; the ledger already knows the observatory (from its ARP request).
+    // Gallery's reply waits too; the ledger already knows the observatory (from its ARP request).
     expect(sim.device("crossing")?.keeper.desk).toHaveLength(1);
     sim.keeperForward("crossing", "02:00:00:00:00:15");
     sim.advance(60);

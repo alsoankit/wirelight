@@ -50,7 +50,7 @@ for (const ip of ["10.0.1.7", "10.0.1.10", "10.0.1.12", "10.0.1.18"]) {
 }
 await check("5.3");
 
-// 5.B: an address, the square's door to lantern, the card.
+// 5.B: an address, the square's door to kitchen, the card.
 await open(p, base, "f5.boss-quiet-street");
 await type(p, "ip addr add 10.0.1.5/24 dev eth0");
 await walk("square");
@@ -59,7 +59,7 @@ await walk("observatory");
 await card(p, "10.0.1.7");
 await check("5.B");
 
-// 6.1: the Slate catches lantern's announcement and opens it to the message.
+// 6.1: the Slate catches kitchen's announcement and opens it to the message.
 await open(p, base, "f6.inside-the-envelope");
 await slate();
 await p.fill(".addr-form input", "10.0.1.7");
@@ -89,20 +89,20 @@ for (let i = 0; i < 2; i++) {
 }
 await check("6.2");
 
-// 6.3: quill gives lantern's address back and takes its own; the ledger catches up.
+// 6.3: library gives kitchen's address back and takes its own; the ledger catches up.
 await open(p, base, "f6.two-of-me");
 await walk("square");
-await walk("quill");
+await walk("library");
 await type(p, "ip addr del 10.0.1.7/24 dev eth0");
 await type(p, "ip addr add 10.0.1.12/24 dev eth0");
 await fast();
 await check("6.3");
 
-// 6.B: the pinned line, and bell's borrowed address.
+// 6.B: the pinned line, and chapel's borrowed address.
 await open(p, base, "f6.boss-mixed-up-letters");
 await type(p, "ip neigh del 10.0.1.7 dev eth0");
 await walk("square");
-await walk("bell");
+await walk("chapel");
 await type(p, "ip addr del 10.0.1.10/24 dev eth0");
 await type(p, "ip addr add 10.0.1.18/24 dev eth0");
 await walk("square");
@@ -127,14 +127,14 @@ await type(p, "dhclient -v eth0");
 await type(p, "ping -c 3 10.0.1.7");
 await check("7.2");
 
-// 7.B: bell and moth to their own houses, then ask the registry, then the census.
+// 7.B: chapel and cellar to their own houses, then ask the registry, then the census.
 await open(p, base, "f7.boss-census");
 await walk("square");
-await walk("bell");
+await walk("chapel");
 await type(p, "ip addr del 10.0.1.100/24 dev eth0");
 await type(p, "ip addr add 10.0.1.18/24 dev eth0");
 await walk("square");
-await walk("moth");
+await walk("cellar");
 await type(p, "ip addr del 10.0.2.14/24 dev eth0");
 await type(p, "ip addr add 10.0.1.14/24 dev eth0");
 await walk("square");

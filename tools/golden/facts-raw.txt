@@ -70,7 +70,7 @@ mcast_snooping 1
   +6.177s  1791840035.551602360 4 packets transmitted, 0 received, +4 errors, 100% packet loss, time 3096ms
   +6.179s  1791840035.553666387 pipe 3
 
-== ping default interval and IP IDs (ping -c 5 10.0.0.7, captured on lantern)
+== ping default interval and IP IDs (ping -c 5 10.0.0.7, captured on kitchen)
   +0.000s  1791840036.409166 IP (tos 0x0, ttl 64, id 58749, offset 0, flags [DF], proto ICMP (1), length 84)
                 10.0.0.5 > 10.0.0.7: ICMP echo request, id 32556, seq 1, length 64
   +0.000s  1791840036.409182 IP (tos 0x0, ttl 64, id 38685, offset 0, flags [none], proto ICMP (1), length 84)
@@ -105,10 +105,10 @@ mcast_snooping 1
                 10.0.0.5 > 10.0.0.7: ICMP echo request, id 32596, seq 5, length 64
 
 == Neighbour after a successful ping, seen from both sides, with timestamps of ARP traffic
-  +0.2s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | lantern: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 DELAY 
-  +4.8s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | lantern: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 DELAY 
-  +5.6s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | lantern: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 REACHABLE 
-  +7.0s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | lantern: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 REACHABLE 
+  +0.2s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | kitchen: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 DELAY 
+  +4.8s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | kitchen: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 DELAY 
+  +5.6s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | kitchen: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 REACHABLE 
+  +7.0s  observatory: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 REACHABLE  | kitchen: 10.0.0.5 dev eth0 lladdr 02:00:00:00:00:05 REACHABLE 
 -- ARP on the wire:
   +0.000s  1791840047.774139 ARP, Request who-has 10.0.0.7 tell 10.0.0.5, length 28
   +0.000s  1791840047.774172 ARP, Reply 10.0.0.7 is-at 02:00:00:00:00:07, length 28
@@ -147,7 +147,7 @@ mcast_snooping 1
   +0.000s  1791840115.105691 IP 10.0.1.10 > 10.0.2.20: ICMP echo request, id 35579, seq 1, length 64
   +3.060s  1791840118.165616 IP 10.0.1.1 > 10.0.1.10: ICMP host 10.0.2.20 unreachable, length 92
 
-== Neighbour probe that goes unanswered: DELAY -> PROBE -> FAILED (lantern loses its address)
+== Neighbour probe that goes unanswered: DELAY -> PROBE -> FAILED (kitchen loses its address)
   before: 10.0.0.7 dev eth0 lladdr 02:00:00:00:00:07 STALE 
   state at +1.02s: DELAY
   state at +5.26s: PROBE

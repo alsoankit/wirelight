@@ -16,10 +16,10 @@ export const MAC = {
   arch1: "02:00:00:00:00:24",
   spire0: "02:00:00:00:00:25",
   spire1: "02:00:00:00:00:26",
-  vesper: "02:00:00:00:00:27",
-  lumen: "02:00:00:00:00:37",
-  wren: "02:00:00:00:00:39",
-  halo: "02:00:00:00:00:47",
+  gallery: "02:00:00:00:00:27",
+  belfry: "02:00:00:00:00:37",
+  laundry: "02:00:00:00:00:39",
+  loft: "02:00:00:00:00:47",
 } as const;
 
 export const IP = {
@@ -30,10 +30,10 @@ export const IP = {
   arch1: "10.0.3.1",
   spire0: "10.0.3.2",
   spire1: "10.0.4.1",
-  vesper: "10.0.2.7",
-  lumen: "10.0.3.7",
-  wren: "10.0.3.9",
-  halo: "10.0.4.7",
+  gallery: "10.0.2.7",
+  belfry: "10.0.3.7",
+  laundry: "10.0.3.9",
+  loft: "10.0.4.7",
 } as const;
 
 export const STREET = {
@@ -46,11 +46,11 @@ export const STREET = {
 export interface CathedralOptions {
   /** The observatory knows its way off the nave (default via crossing). Not in 8.1. */
   observatoryGateway?: boolean;
-  /** Arch, lumen and the bell tower (from 8.3). */
+  /** Arch, belfry and the bell tower (from 8.3). */
   tower?: boolean;
-  /** Wren on the bell tower (9.2). */
-  wren?: boolean;
-  /** Spire, halo and the high window (from 9.4). */
+  /** Laundry on the bell tower (9.2). */
+  laundry?: boolean;
+  /** Spire, loft and the high window (from 9.4). */
   highWindow?: boolean;
 }
 
@@ -104,30 +104,30 @@ export function cathedral(o: CathedralOptions = {}): Topology {
   const devices: DeviceSpec[] = [
     house("observatory", MAC.observatory, IP.observatory, o.observatoryGateway === false ? null : IP.crossing0),
     router("crossing", [MAC.crossing0, MAC.crossing1], [IP.crossing0, IP.crossing1], crossingRoutes),
-    house("vesper", MAC.vesper, IP.vesper, IP.crossing1),
+    house("gallery", MAC.gallery, IP.gallery, IP.crossing1),
   ];
   // Each street's switch, with a door for every machine on it.
   const nave: string[] = ["observatory", "crossing:eth0"];
-  const cloister: string[] = ["crossing:eth1", "vesper"];
+  const cloister: string[] = ["crossing:eth1", "gallery"];
   const tower: string[] = [];
   const window: string[] = [];
   if (o.tower) {
     devices.push(router("arch", [MAC.arch0, MAC.arch1], [IP.arch0, IP.arch1], archRoutes));
-    devices.push(house("lumen", MAC.lumen, IP.lumen, IP.arch1));
+    devices.push(house("belfry", MAC.belfry, IP.belfry, IP.arch1));
     cloister.push("arch:eth0");
-    tower.push("arch:eth1", "lumen");
+    tower.push("arch:eth1", "belfry");
   }
-  if (o.wren) {
-    devices.push(house("wren", MAC.wren, IP.wren, IP.arch1));
-    tower.push("wren");
+  if (o.laundry) {
+    devices.push(house("laundry", MAC.laundry, IP.laundry, IP.arch1));
+    tower.push("laundry");
   }
   if (o.highWindow) {
     devices.push(
       router("spire", [MAC.spire0, MAC.spire1], [IP.spire0, IP.spire1], [{ dst: "default", via: IP.arch1 }]),
     );
-    devices.push(house("halo", MAC.halo, IP.halo, IP.spire1));
+    devices.push(house("loft", MAC.loft, IP.loft, IP.spire1));
     tower.push("spire:eth0");
-    window.push("spire:eth1", "halo");
+    window.push("spire:eth1", "loft");
   }
 
   const links: LinkSpec[] = [];

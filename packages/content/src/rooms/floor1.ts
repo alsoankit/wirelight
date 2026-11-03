@@ -3,7 +3,7 @@ import type { FloorText, RoomText } from "./types";
 /** floors/floor-1.md, word for word. Placeholders: none. */
 
 export const twoRooms: RoomText = {
-  title: "Two Rooms, One Cable",
+  title: "First Contact",
   mission: "Something keeps arriving at your door. Follow it back and find out where it comes from.",
   notes: [],
   hints: [
@@ -11,7 +11,7 @@ export const twoRooms: RoomText = {
     { text: "Doors lead to corridors, and corridors lead to other rooms." },
     { text: "Every door has a plate that tells you whose door it is.", codex: "door" },
     { text: "Walk the corridor into the other room and read the plate on its door." },
-    { text: "Click your doorway, walk to the far end, enter lantern's room, and click the plate beside its door." },
+    { text: "Click your doorway, walk to the far end, enter kitchen's room, and click the plate beside its door." },
   ],
   detectors: {
     "staying-put": {
@@ -21,7 +21,7 @@ export const twoRooms: RoomText = {
   },
   debrief: {
     happened:
-      "The messages came from lantern, down the cable, through your door. Every machine has at least one door, with a name like eth0. That door is where its cable plugs in.",
+      "The messages came from kitchen, down the cable, through your door. Every machine has at least one door, with a name like eth0. That door is where its cable plugs in.",
     terms: [{ id: "interface", term: "interface", meaning: "a machine's network door, with a name like eth0" }],
   },
   memories: [
@@ -57,7 +57,7 @@ export const twoRooms: RoomText = {
 };
 
 export const looseCable: RoomText = {
-  title: "The Loose Cable",
+  title: "Unplugged",
   mission: "Nothing arrives at your door anymore. The corridor has gone dark and cracked.",
   notes: [],
   hints: [
@@ -66,13 +66,13 @@ export const looseCable: RoomText = {
     { text: "A link only works when its cable is plugged in at both ends.", codex: "link-light" },
     { text: "Find the loose end on the floor by your door and plug it back in." },
     {
-      text: "Click the loose cable end beside your door. It plugs back in (`lab cable plug eth0`), both lights come on, and lantern's next message gets through.",
+      text: "Click the loose cable end beside your door. It plugs back in (`lab cable plug eth0`), both lights come on, and kitchen's next message gets through.",
     },
   ],
   detectors: {
-    "blaming-lantern": {
-      note: "Lantern's light is out too. Is it lantern, or something between you?",
-      tried: "You looked at lantern's door, but the trouble was the cable between you.",
+    "blaming-kitchen": {
+      note: "Kitchen's light is out too. Is it kitchen, or something between you?",
+      tried: "You looked at kitchen's door, but the trouble was the cable between you.",
     },
   },
   debrief: {
@@ -97,7 +97,7 @@ export const looseCable: RoomText = {
       q: "Why is the corridor broken?",
       a: "It isn't carrying anything. Something between the two doors is wrong.",
     },
-    { q: "Is lantern broken?", a: "Lantern's light is dark too. Both ends go dark when the line between them is cut." },
+    { q: "Is kitchen broken?", a: "Kitchen's light is dark too. Both ends go dark when the line between them is cut." },
   ],
   building: {
     id: "F1-BLD-02",
@@ -108,16 +108,16 @@ export const looseCable: RoomText = {
 };
 
 export const bothEnds: RoomText = {
-  title: "Both Ends",
+  title: "Switched Off",
   mission: "The cable is plugged in at both ends, but nothing gets through.",
   notes: [],
   hints: [
     { text: "Both lights are dark, but the cable is plugged in. What else could be off?" },
     { text: "Doors can be switched off. Check both of them." },
     { text: "A link is up only when both doors are switched on and the cable is plugged in.", codex: "door-switch" },
-    { text: "Go to lantern's room and look closely at its door's plate." },
+    { text: "Go to kitchen's room and look closely at its door's plate." },
     {
-      text: "In lantern's room, click the switch on its plate (`ip link set eth0 up`). Both lights come on and the next message arrives.",
+      text: "In kitchen's room, click the switch on its plate (`ip link set eth0 up`). Both lights come on and the next message arrives.",
     },
   ],
   detectors: {
@@ -128,7 +128,7 @@ export const bothEnds: RoomText = {
   },
   debrief: {
     happened:
-      "Lantern's door was switched off. A link is only up when the cable is plugged in and both doors are on. You switched it on, and the messages came back.",
+      "Kitchen's door was switched off. A link is only up when the cable is plugged in and both doors are on. You switched it on, and the messages came back.",
     terms: [
       {
         id: "link-up-down",
@@ -164,22 +164,22 @@ export const bothEnds: RoomText = {
 };
 
 export const darkCorridor: RoomText = {
-  title: "The Dark Corridor",
-  mission: "Lantern hasn't heard from anyone in years, and you can't hear lantern. Bring the line back.",
+  title: "Bring the Line Back",
+  mission: "Kitchen hasn't heard from anyone in years, and you can't hear kitchen. Bring the line back.",
   notes: [],
   hints: [
     { text: "More than one thing is wrong. Check every end and every door." },
     { text: "Two doors, two cable ends. Visit both rooms." },
     { text: "A link needs the cable in at both ends and both doors on.", codex: "cable-end" },
-    { text: "Switch your door on, then go to lantern's room, plug its end in and switch its door on." },
+    { text: "Switch your door on, then go to kitchen's room, plug its end in and switch its door on." },
     {
-      text: "Click the switch on your plate (`ip link set eth0 up`). Then in lantern's room, click its loose cable end (`lab cable plug eth0`) and the switch on its plate (`ip link set eth0 up`). Lantern's next message brings the key.",
+      text: "Click the switch on your plate (`ip link set eth0 up`). Then in kitchen's room, click its loose cable end (`lab cable plug eth0`) and the switch on its plate (`ip link set eth0 up`). Kitchen's next message brings the key.",
     },
   ],
   detectors: {
-    "blaming-lantern": {
-      note: "Lantern's light is out too. Is it lantern, or something between you?",
-      tried: "You looked at lantern's door while the cable was still out.",
+    "blaming-kitchen": {
+      note: "Kitchen's light is out too. Is it kitchen, or something between you?",
+      tried: "You looked at kitchen's door while the cable was still out.",
     },
     replugging: {
       note: "The cable was fine. A link needs both doors switched on, too.",
@@ -192,7 +192,7 @@ export const darkCorridor: RoomText = {
   },
   debrief: {
     happened:
-      "Three things were wrong at once: your door, lantern's door and the cable's far end. A link only works when all of them are right. You checked everything.",
+      "Three things were wrong at once: your door, kitchen's door and the cable's far end. A link only works when all of them are right. You checked everything.",
     terms: [],
   },
   voice: [
@@ -222,7 +222,7 @@ export const floor1: FloorText = {
       title: "Ride-along",
       text: "Plugged in at both ends, both doors on. That's all a link needs.",
       shown:
-        "the camera rides lantern's message from its keeper, out through its door (the light blinks), along the glowing thread, into your door",
+        "the camera rides kitchen's message from its keeper, out through its door (the light blinks), along the glowing thread, into your door",
     },
     {
       id: "F1-FM-04",
@@ -234,6 +234,6 @@ export const floor1: FloorText = {
     page: 1,
     title: "The first hall",
     where: "hidden in the roots of the corridor in 1.2 (glows faintly when you walk the corridor)",
-    text: "Log 3,140. Lantern stopped answering today, the first time in years. The cable from my room to its room looks fine. Checking again tomorrow.",
+    text: "Log 3,140. Kitchen stopped answering today, the first time in years. The cable from my room to its room looks fine. Checking again tomorrow.",
   },
 };

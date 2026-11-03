@@ -16,7 +16,7 @@ import {
   waitedOnLedger,
   wrappedTo,
 } from "./predicates";
-import { ANVIL, IP, LANTERN, LANTERN_OLD, town } from "./topology";
+import { FORGE, IP, KITCHEN, LANTERN_OLD, town } from "./topology";
 
 const typed = (device: string, line: string, waitMs?: number): SolutionStep => ({
   device,
@@ -43,7 +43,7 @@ const SLATE = { catch: true } as const;
 // ── 6.1 · Inside the Envelope ──────────────────────────────────────────────────────────────
 
 const envelopeId = "f6.inside-the-envelope";
-const openedLantern = openedToMessage(LANTERN);
+const openedLantern = openedToMessage(KITCHEN);
 export const insideTheEnvelope = defineRoom({
   id: envelopeId,
   region: 3,
@@ -54,12 +54,12 @@ export const insideTheEnvelope = defineRoom({
   content: envelopeId,
   seed: 61,
   topology: town({
-    houses: ["lantern", "quill", "anvil"],
+    houses: ["kitchen", "library", "forge"],
     lanternAnnounces: { text: lanternLampsRemember(keyFor(envelopeId)) },
   }),
   faults: [],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil"]),
+  access: access(["kitchen", "library", "forge"]),
   controls: { console: "typing", slate: SLATE },
   tools: { unlock: ["lab slate"] },
   glow: "symptoms",
@@ -87,7 +87,7 @@ export const insideTheEnvelope = defineRoom({
     },
   ],
   solution: [
-    click("observatory", `lab slate catch --next --from ${IP.lantern}`, 8000),
+    click("observatory", `lab slate catch --next --from ${IP.kitchen}`, 8000),
     click("observatory", "lab slate open 1 --layer message"),
   ],
 });
@@ -104,20 +104,20 @@ export const whoHasThisAddress = defineRoom({
   pathTag: "tool",
   content: whoHasId,
   seed: 62,
-  topology: town({ houses: ["lantern", "quill", "anvil"] }),
+  topology: town({ houses: ["kitchen", "library", "forge"] }),
   faults: [{ kind: "keeper-asleep", device: "observatory", desk: "host" }],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil"]),
+  access: access(["kitchen", "library", "forge"]),
   controls: { console: "typing", desk: "observatory", ledgers: { observatory: "works" }, slate: SLATE },
   tools: { unlock: ["ip neigh"] },
   glow: "symptoms",
-  winCondition: answeredBy("observatory", IP.lantern, LANTERN),
+  winCondition: answeredBy("observatory", IP.kitchen, KITCHEN),
   key: { word: keyFor(whoHasId), via: "mark" },
   healthChecks: [
     {
-      id: "ledger-has-lantern",
+      id: "ledger-has-kitchen",
       object: { kind: "ledger", device: "observatory" },
-      check: ledgerHas("observatory", IP.lantern, LANTERN),
+      check: ledgerHas("observatory", IP.kitchen, KITCHEN),
     },
     { id: "keeper-awake", object: { kind: "keeper", device: "observatory" }, check: keeperAwake("observatory") },
   ],
@@ -154,15 +154,15 @@ export const whoHasThisAddress = defineRoom({
   solution: [
     typed("observatory", "ping -c 3 10.0.1.7", 500),
     click("observatory", "lab keeper arp-ask 10.0.1.7", 500),
-    click("observatory", `lab keeper wrap ${LANTERN}`, 1100),
-    click("observatory", `lab keeper wrap ${LANTERN}`),
+    click("observatory", `lab keeper wrap ${KITCHEN}`, 1100),
+    click("observatory", `lab keeper wrap ${KITCHEN}`),
     typed("observatory", "ip neigh"),
   ],
-  // After two packets wrapped by hand to lantern's door, the keeper remembers (F6-KEEP-01).
+  // After two packets wrapped by hand to kitchen's door, the keeper remembers (F6-KEEP-01).
   rules: [
     {
       id: "keeper-remembers",
-      when: wrappedTo("observatory", LANTERN, 2),
+      when: wrappedTo("observatory", KITCHEN, 2),
       // biome-ignore lint/suspicious/noThenProperty: the room format names a rule's effect `then` (types.ts).
       then: { kind: "wake-keeper", device: "observatory" },
     },
@@ -172,13 +172,13 @@ export const whoHasThisAddress = defineRoom({
 // ── 6.3 · Two of Me ────────────────────────────────────────────────────────────────────────
 
 const twoId = "f6.two-of-me";
-const quillOwnHouse = all(hasAddr("quill", "10.0.1.12/24"), not(claims("quill", IP.lantern)));
+const quillOwnHouse = all(hasAddr("library", "10.0.1.12/24"), not(claims("library", IP.kitchen)));
 const flushAndHope: Misconception = {
   id: "flush-and-hope",
   detect: ran("observatory", /^ip neigh (flush|del)\b/, 2),
 };
 const changeMyAddress: Misconception = { id: "change-my-address", detect: ran("observatory", /^ip addr (add|del) /) };
-const deleteLantern: Misconception = { id: "delete-lantern", detect: ran("lantern", /^ip addr del 10\.0\.1\.7\b/) };
+const deleteLantern: Misconception = { id: "delete-kitchen", detect: ran("kitchen", /^ip addr del 10\.0\.1\.7\b/) };
 export const twoOfMe = defineRoom({
   id: twoId,
   region: 3,
@@ -188,44 +188,44 @@ export const twoOfMe = defineRoom({
   pathTag: "core",
   content: twoId,
   seed: 63,
-  // The Knight's messenger keeps pinging lantern, so the answers (and who sends them) keep coming.
-  // Lantern and quill each call on the observatory now and then; on real Linux the ledger keeps the
+  // The Knight's messenger keeps pinging kitchen, so the answers (and who sends them) keep coming.
+  // Kitchen and library each call on the observatory now and then; on real Linux the ledger keeps the
   // first answer and switches only when the other house asks the observatory something itself
   // (decision 0061), so these calls are what make the stranger answer "sometimes".
   topology: town({
-    houses: ["lantern", "quill", "anvil"],
-    messenger: { to: IP.lantern, intervalMs: 2000 },
+    houses: ["kitchen", "library", "forge"],
+    messenger: { to: IP.kitchen, intervalMs: 2000 },
     extra: {
-      lantern: { messenger: { to: "10.0.1.5", intervalMs: 9000 } },
-      quill: { messenger: { to: "10.0.1.5", intervalMs: 13_000 } },
+      kitchen: { messenger: { to: "10.0.1.5", intervalMs: 9000 } },
+      library: { messenger: { to: "10.0.1.5", intervalMs: 13_000 } },
     },
   }),
   faults: [
-    { kind: "addr-remove", device: "quill", cidr: "10.0.1.12/24", dev: "eth0" },
-    { kind: "addr-set", device: "quill", cidr: "10.0.1.7/24", dev: "eth0" },
+    { kind: "addr-remove", device: "library", cidr: "10.0.1.12/24", dev: "eth0" },
+    { kind: "addr-set", device: "library", cidr: "10.0.1.7/24", dev: "eth0" },
   ],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil"], ["lantern", "quill"]),
+  access: access(["kitchen", "library", "forge"], ["kitchen", "library"]),
   controls: {
     console: "typing",
     slate: SLATE,
     ledgers: { observatory: "works" },
-    addressSlots: { "quill:eth0": "broken" },
+    addressSlots: { "library:eth0": "broken" },
   },
   tools: {},
   glow: "symptoms",
-  winCondition: all(quillOwnHouse, lastAnswersFrom("observatory", IP.lantern, LANTERN, 3)),
+  winCondition: all(quillOwnHouse, lastAnswersFrom("observatory", IP.kitchen, KITCHEN, 3)),
   key: { word: keyFor(twoId), via: "mark" },
   healthChecks: [
     {
-      id: "one-claims-lantern",
-      object: { kind: "slot", device: "quill", iface: "eth0" },
-      check: not(claims("quill", IP.lantern)),
+      id: "one-claims-kitchen",
+      object: { kind: "slot", device: "library", iface: "eth0" },
+      check: not(claims("library", IP.kitchen)),
     },
     {
-      id: "quill-at-12",
-      object: { kind: "slot", device: "quill", iface: "eth0" },
-      check: hasAddr("quill", "10.0.1.12/24"),
+      id: "library-at-12",
+      object: { kind: "slot", device: "library", iface: "eth0" },
+      check: hasAddr("library", "10.0.1.12/24"),
     },
   ],
   teaches: ["duplicate-address"],
@@ -238,22 +238,22 @@ export const twoOfMe = defineRoom({
       steps: [typed("observatory", "ip neigh flush dev eth0"), typed("observatory", "ip neigh flush dev eth0")],
     },
     { misconception: "change-my-address", steps: [typed("observatory", "ip addr del 10.0.1.5/24 dev eth0")] },
-    { misconception: "delete-lantern", steps: [typed("lantern", "ip addr del 10.0.1.7/24 dev eth0")] },
+    { misconception: "delete-kitchen", steps: [typed("kitchen", "ip addr del 10.0.1.7/24 dev eth0")] },
   ],
   solution: [
-    typed("quill", "ip addr del 10.0.1.7/24 dev eth0"),
-    typed("quill", "ip addr add 10.0.1.12/24 dev eth0", 90_000),
+    typed("library", "ip addr del 10.0.1.7/24 dev eth0"),
+    typed("library", "ip addr add 10.0.1.12/24 dev eth0", 90_000),
   ],
 });
 
 // ── 6.B · The Mixed-Up Letters ─────────────────────────────────────────────────────────────
 
 const mixedId = "f6.boss-mixed-up-letters";
-/** A pinned ledger line for lantern's old door (`ip neigh add 10.0.1.7 lladdr 02:00:00:00:00:07 dev eth0 nud permanent`). */
+/** A pinned ledger line for kitchen's old door (`ip neigh add 10.0.1.7 lladdr 02:00:00:00:00:07 dev eth0 nud permanent`). */
 const pinnedLine = {
   kind: "neigh-permanent",
   device: "observatory",
-  ip: IP.lantern,
+  ip: IP.kitchen,
   mac: LANTERN_OLD,
   dev: "eth0",
 } as const satisfies Fault;
@@ -266,34 +266,34 @@ export const mixedUpLetters = defineRoom({
   pathTag: "boss",
   content: mixedId,
   seed: 69,
-  topology: town({ houses: ["lantern", "quill", "anvil", "bell"] }),
+  topology: town({ houses: ["kitchen", "library", "forge", "chapel"] }),
   faults: [
     pinnedLine,
-    { kind: "addr-remove", device: "bell", cidr: "10.0.1.18/24", dev: "eth0" },
-    { kind: "addr-set", device: "bell", cidr: "10.0.1.10/24", dev: "eth0" },
+    { kind: "addr-remove", device: "chapel", cidr: "10.0.1.18/24", dev: "eth0" },
+    { kind: "addr-set", device: "chapel", cidr: "10.0.1.10/24", dev: "eth0" },
   ],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil", "bell"], ["lantern", "bell"]),
+  access: access(["kitchen", "library", "forge", "chapel"], ["kitchen", "chapel"]),
   controls: {
     console: "typing",
     slate: SLATE,
     ledgers: { observatory: "works" },
-    addressSlots: { "observatory:eth0": "broken", "bell:eth0": "broken" },
+    addressSlots: { "observatory:eth0": "broken", "chapel:eth0": "broken" },
   },
   tools: {},
   glow: "none",
-  winCondition: all(answeredBy("observatory", IP.lantern, LANTERN), answeredBy("observatory", IP.anvil, ANVIL)),
+  winCondition: all(answeredBy("observatory", IP.kitchen, KITCHEN), answeredBy("observatory", IP.forge, FORGE)),
   key: { word: keyFor(mixedId), via: "mark" },
   healthChecks: [
     {
       id: "no-pinned-line",
       object: { kind: "ledger", device: "observatory" },
-      check: not(ledgerHas("observatory", IP.lantern, LANTERN_OLD)),
+      check: not(ledgerHas("observatory", IP.kitchen, LANTERN_OLD)),
     },
     {
-      id: "bell-own-house",
-      object: { kind: "slot", device: "bell", iface: "eth0" },
-      check: all(hasAddr("bell", "10.0.1.18/24"), not(claims("bell", IP.anvil))),
+      id: "chapel-own-house",
+      object: { kind: "slot", device: "chapel", iface: "eth0" },
+      check: all(hasAddr("chapel", "10.0.1.18/24"), not(claims("chapel", IP.forge))),
     },
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
@@ -303,7 +303,7 @@ export const mixedUpLetters = defineRoom({
   misconceptions: [
     flushAndHope,
     changeMyAddress,
-    { id: "delete-lantern", detect: ran("lantern", /^ip addr del 10\.0\.1\.7\b/) },
+    { id: "delete-kitchen", detect: ran("kitchen", /^ip addr del 10\.0\.1\.7\b/) },
     { id: "permanent-again", detect: waitedOnLedger("observatory", 30_000) },
   ],
   detectorTests: [
@@ -312,7 +312,7 @@ export const mixedUpLetters = defineRoom({
       steps: [typed("observatory", "ip neigh flush dev eth0"), typed("observatory", "ip neigh flush dev eth0")],
     },
     { misconception: "change-my-address", steps: [typed("observatory", "ip addr del 10.0.1.5/24 dev eth0")] },
-    { misconception: "delete-lantern", steps: [typed("lantern", "ip addr del 10.0.1.7/24 dev eth0")] },
+    { misconception: "delete-kitchen", steps: [typed("kitchen", "ip addr del 10.0.1.7/24 dev eth0")] },
     {
       misconception: "permanent-again",
       steps: [typed("observatory", "ip neigh", 35_000), typed("observatory", "ip neigh")],
@@ -321,8 +321,8 @@ export const mixedUpLetters = defineRoom({
   solution: [
     typed("observatory", "ip neigh"),
     typed("observatory", "ip neigh del 10.0.1.7 dev eth0"),
-    typed("bell", "ip addr del 10.0.1.10/24 dev eth0"),
-    typed("bell", "ip addr add 10.0.1.18/24 dev eth0"),
+    typed("chapel", "ip addr del 10.0.1.10/24 dev eth0"),
+    typed("chapel", "ip addr add 10.0.1.18/24 dev eth0"),
     typed("observatory", "ping -c 3 10.0.1.7"),
     typed("observatory", "ping -c 3 10.0.1.10"),
   ],

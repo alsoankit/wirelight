@@ -75,7 +75,7 @@ export const guide: GuideTopic[] = [
     },
     body: [
       "You see each room from above, with the front wall cut away so the whole room fits on screen. Every room of the same kind is laid out the same way, so you only have to learn it once.",
-      "Doors are archways in the back and left walls, and each one has a plate beside it. The keeper, a hooded figure with a lantern, stands in the middle of the room.",
+      "Doors are archways in the back and left walls, and each one has a plate beside it. The keeper, a hooded figure with a kitchen, stands in the middle of the room.",
       "Your own machine is the observatory, the room you woke up in. It has a few extra things: a planning table, and in some rooms a workbench and a messenger.",
     ],
   },

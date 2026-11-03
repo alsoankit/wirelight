@@ -18,9 +18,9 @@ describe("a ride-along (0036): each floor's own idea, from a real trace", () => 
     }
   });
 
-  it("Floor 1: lantern's message, from lantern's door into yours", () => {
+  it("Floor 1: kitchen's message, from kitchen's door into yours", () => {
     const [b] = beats(1);
-    expect(b?.headers.frame.from.device).toBe("lantern");
+    expect(b?.headers.frame.from.device).toBe("kitchen");
     expect(b?.headers.frame.to).toMatchObject({ device: "observatory", iface: "eth0" });
     expect(b?.copies[0]?.fate).toBe("in");
   });
@@ -31,10 +31,10 @@ describe("a ride-along (0036): each floor's own idea, from a real trace", () => 
     const everyone = beats(2, 1)[0];
     expect(everyone?.headers.frame.to.everyone).toBe(true);
     expect(everyone?.copies.map((c) => [c.to, c.fate]).sort()).toEqual([
-      ["lantern", "in"],
-      ["moth", "in"],
+      ["cellar", "in"],
+      ["kitchen", "in"],
     ]);
-    expect(beats(2, 2)[0]?.copies[0]).toMatchObject({ to: "lantern", fate: "fell" });
+    expect(beats(2, 2)[0]?.copies[0]).toMatchObject({ to: "kitchen", fate: "fell" });
   });
 
   it("Floor 3: the hall learns the from, sends a known to by one door, floods an unknown one", () => {
@@ -71,7 +71,7 @@ describe("a ride-along (0036): each floor's own idea, from a real trace", () => 
     expect(notes[0]).toBe("question");
     expect(notes).toContain("answer");
     expect(notes).toContain("wrap");
-    expect(all(6).at(-1)?.copies[0]).toMatchObject({ to: "lantern", fate: "in" });
+    expect(all(6).at(-1)?.copies[0]).toMatchObject({ to: "kitchen", fate: "in" });
   });
 
   it("Floor 7: DISCOVER from nobody to everyone, the OFFER back, then straight there on the same street", () => {
@@ -80,13 +80,13 @@ describe("a ride-along (0036): each floor's own idea, from a real trace", () => 
     expect(reg[0]?.headers.packet?.from).toBe("0.0.0.0");
     expect(reg.find((b) => b.note === "offer")?.headers.dhcp).toBe("OFFER");
     expect(beats(7, 1)[0]?.note).toBe("street");
-    expect(beats(7, 1).at(-1)?.copies[0]).toMatchObject({ to: "lantern", fate: "in" });
+    expect(beats(7, 1).at(-1)?.copies[0]).toMatchObject({ to: "kitchen", fate: "in" });
   });
 
-  it("Floor 8: over the crossing to vesper and back (floors/floor-8.md)", () => {
+  it("Floor 8: over the crossing to gallery and back (floors/floor-8.md)", () => {
     const b = all(8);
-    expect(b.find((x) => x.copies.some((c) => c.to === "vesper"))).toBeTruthy();
-    expect(b.some((x) => x.copies.some((c) => c.to === "lumen"))).toBe(false);
+    expect(b.find((x) => x.copies.some((c) => c.to === "gallery"))).toBeTruthy();
+    expect(b.some((x) => x.copies.some((c) => c.to === "belfry"))).toBe(false);
     const crossing = b.find((x) => x.note === "crossing");
     expect(crossing?.headers.packet?.ttl).toBe(63);
     expect(crossing?.ttlWas).toBe(64);

@@ -23,7 +23,19 @@ import {
   stuckOnOneHall,
   waitedWithout,
 } from "./predicates";
-import { ANVIL, announcer, BEACON, BELL, BROADCAST, COMPASS, EMBER, LANTERN, QUILL, WREN, works } from "./topology";
+import {
+  ATTIC,
+  announcer,
+  BAKERY,
+  BROADCAST,
+  CHAPEL,
+  FORGE,
+  KITCHEN,
+  LAUNDRY,
+  LIBRARY,
+  PANTRY,
+  works,
+} from "./topology";
 
 const step = (source: "typed" | "click") => (device: string, line: string, waitMs?: number) =>
   ({ device, line, source, ...(waitMs ? { waitMs } : {}) }) as SolutionStep;
@@ -76,7 +88,7 @@ const machine = (id: string, mac: string, hall: string, door: string, last: numb
 // ── 4.1 · The Pinned Memory ────────────────────────────────────────────────────────────────
 
 const pinnedId = "f4.pinned-memory";
-const lanternKeyReply = helloWithKey("lantern", keyFor(pinnedId));
+const lanternKeyReply = helloWithKey("kitchen", keyFor(pinnedId));
 export const pinnedMemory = defineRoom({
   id: pinnedId,
   region: 2,
@@ -87,24 +99,24 @@ export const pinnedMemory = defineRoom({
   content: pinnedId,
   seed: 41,
   topology: works({
-    observatory: { messenger: { to: LANTERN, msg: messengerMessage, intervalMs: 5000 } },
+    observatory: { messenger: { to: KITCHEN, msg: messengerMessage, intervalMs: 5000 } },
     machines: [
-      // The old corridor: lantern's cable when it lived behind eth1. Its far end lies loose.
+      // The old corridor: kitchen's cable when it lived behind eth1. Its far end lies loose.
       { id: "alcove", mac: "02:00:00:00:00:14", door: "eth1", mute: true },
-      // Quill says something once, then goes quiet: its line fades after 300 s (ageing).
-      { id: "quill", mac: QUILL, door: "eth2", messenger: { to: "02:00:00:00:00:05", intervalMs: 3_600_000 } },
-      // Lantern only answers; it never speaks first.
-      { id: "lantern", mac: LANTERN, door: "eth3", reply: lanternKeyReply },
+      // Library says something once, then goes quiet: its line fades after 300 s (ageing).
+      { id: "library", mac: LIBRARY, door: "eth2", messenger: { to: "02:00:00:00:00:05", intervalMs: 3_600_000 } },
+      // Kitchen only answers; it never speaks first.
+      { id: "kitchen", mac: KITCHEN, door: "eth3", reply: lanternKeyReply },
     ],
   }),
   faults: [
     { kind: "unplug", link: "hall-eth1", end: "alcove" },
     // Pinned by hand: `bridge fdb add 02:00:00:00:00:07 dev eth1 master static sticky`. Sticky, so
     // nothing but deleting it moves it (a plain static entry follows the machine on real Linux).
-    { kind: "fdb-static", device: "hall", mac: LANTERN, port: "eth1", sticky: true },
+    { kind: "fdb-static", device: "hall", mac: KITCHEN, port: "eth1", sticky: true },
   ],
   playerDevice: "observatory",
-  access: { observatory: OPEN, hall: OPEN, quill: OPEN, lantern: OPEN, alcove: SEALED },
+  access: { observatory: OPEN, hall: OPEN, library: OPEN, kitchen: OPEN, alcove: SEALED },
   controls: {
     console: "typing",
     macBoards: { hall: "broken" },
@@ -115,10 +127,10 @@ export const pinnedMemory = defineRoom({
   },
   tools: {},
   glow: "symptoms",
-  winCondition: messengerHeard("observatory", "lantern", lanternKeyReply),
+  winCondition: messengerHeard("observatory", "kitchen", lanternKeyReply),
   key: { word: keyFor(pinnedId), via: "lab-text" },
   healthChecks: [
-    { id: "board-lantern", object: { kind: "board", device: "hall" }, check: boardHas("hall", LANTERN, "eth3") },
+    { id: "board-kitchen", object: { kind: "board", device: "hall" }, check: boardHas("hall", KITCHEN, "eth3") },
   ],
   teaches: ["ageing", "static-entry"],
   uses: ["mac-table", "learning-from-the-source"],
@@ -135,13 +147,13 @@ export const pinnedMemory = defineRoom({
     { misconception: "wait-for-fade", steps: [typed("hall", "bridge fdb show", 700_000)] },
     { misconception: "delete-wrong-line", steps: [typed("hall", "bridge fdb del 02:00:00:00:00:0c dev eth2 master")] },
   ],
-  solution: [typed("hall", "bridge fdb show"), typed("hall", `bridge fdb del ${LANTERN} dev eth1 master`, 8000)],
+  solution: [typed("hall", "bridge fdb show"), typed("hall", `bridge fdb del ${KITCHEN} dev eth1 master`, 8000)],
 });
 
 // ── 4.2 · Who Has the Key? ─────────────────────────────────────────────────────────────────
 
 const whoId = "f4.who-has-the-key";
-const anvilReply = helloWithKey("anvil", keyFor(whoId));
+const anvilReply = helloWithKey("forge", keyFor(whoId));
 export const whoHasTheKey = defineRoom({
   id: whoId,
   region: 2,
@@ -154,19 +166,19 @@ export const whoHasTheKey = defineRoom({
   topology: works({
     halls: HALLS,
     machines: [
-      { id: "compass", mac: COMPASS, hall: "hall-a", door: "eth1" },
-      { id: "beacon", mac: BEACON, hall: "hall-a", door: "eth2" },
-      // Anvil's broadcast answer says it keeps the key.
+      { id: "pantry", mac: PANTRY, hall: "hall-a", door: "eth1" },
+      { id: "attic", mac: ATTIC, hall: "hall-a", door: "eth2" },
+      // Forge's broadcast answer says it keeps the key.
       {
-        id: "anvil",
-        mac: ANVIL,
+        id: "forge",
+        mac: FORGE,
         hall: "hall-b",
         door: "eth1",
-        broadcastReply: keepsTheKey("anvil"),
+        broadcastReply: keepsTheKey("forge"),
         reply: anvilReply,
       },
-      { id: "bell", mac: BELL, hall: "hall-b", door: "eth2" },
-      { id: "ember", mac: EMBER, hall: "hall-b", door: "eth3" },
+      { id: "chapel", mac: CHAPEL, hall: "hall-b", door: "eth2" },
+      { id: "bakery", mac: BAKERY, hall: "hall-b", door: "eth3" },
     ],
     spans: [span],
   }),
@@ -176,7 +188,7 @@ export const whoHasTheKey = defineRoom({
     observatory: OPEN,
     "hall-a": OPEN,
     "hall-b": OPEN,
-    ...sealed("compass", "beacon", "anvil", "bell", "ember"),
+    ...sealed("pantry", "attic", "forge", "chapel", "bakery"),
   },
   controls: {
     console: "typing",
@@ -193,23 +205,23 @@ export const whoHasTheKey = defineRoom({
       // Something crossed the span both ways: each hall learned a name from the other side.
       id: "span-crossed",
       object: { kind: "corridor", link: "span" },
-      check: (f) => boardHas("hall-b", "02:00:00:00:00:05", "eth0")(f) && boardHas("hall-a", ANVIL, "eth3")(f),
+      check: (f) => boardHas("hall-b", "02:00:00:00:00:05", "eth0")(f) && boardHas("hall-a", FORGE, "eth3")(f),
     },
   ],
   teaches: ["broadcast-domain"],
   uses: ["broadcast", "flooding", "source-address", "mac-table"],
   cards: ["span"],
-  misconceptions: [{ id: "only-hall-a", detect: onlyOneHall("hall-a", "hall-b", "observatory", ANVIL) }],
+  misconceptions: [{ id: "only-hall-a", detect: onlyOneHall("hall-a", "hall-b", "observatory", FORGE) }],
   detectorTests: [
-    { misconception: "only-hall-a", steps: [typed("hall-a", "bridge fdb show"), bench(COMPASS, "hello")] },
+    { misconception: "only-hall-a", steps: [typed("hall-a", "bridge fdb show"), bench(PANTRY, "hello")] },
   ],
-  solution: [bench(BROADCAST, "who?"), bench(ANVIL, "hello")],
+  solution: [bench(BROADCAST, "who?"), bench(FORGE, "hello")],
 });
 
 // ── 4.3 · The Spare Cable (decision 0067) ──────────────────────────────────────────────────
 
 const spareId = "f4.spare-cable";
-const anvilSpareReply = helloWithKey("anvil", keyFor(spareId));
+const anvilSpareReply = helloWithKey("forge", keyFor(spareId));
 export const spareCable = defineRoom({
   id: spareId,
   region: 2,
@@ -222,10 +234,10 @@ export const spareCable = defineRoom({
   topology: works({
     halls: HALLS.map((h) => ({ ...h, doors: 5 })),
     machines: [
-      machine("compass", COMPASS, "hall-a", "eth1", 13),
-      machine("beacon", BEACON, "hall-a", "eth2", 11),
-      machine("anvil", ANVIL, "hall-b", "eth1", 10, anvilSpareReply),
-      machine("bell", BELL, "hall-b", "eth2", 18),
+      machine("pantry", PANTRY, "hall-a", "eth1", 13),
+      machine("attic", ATTIC, "hall-a", "eth2", 11),
+      machine("forge", FORGE, "hall-b", "eth1", 10, anvilSpareReply),
+      machine("chapel", CHAPEL, "hall-b", "eth2", 18),
     ],
     // The Knight's spare: plugged in at hall-a, its other end lying by hall-b's eth4.
     spans: [
@@ -239,7 +251,7 @@ export const spareCable = defineRoom({
     observatory: OPEN,
     "hall-a": OPEN,
     "hall-b": OPEN,
-    ...sealed("compass", "beacon", "anvil", "bell"),
+    ...sealed("pantry", "attic", "forge", "chapel"),
   },
   controls: {
     console: "typing",
@@ -265,7 +277,7 @@ export const spareCable = defineRoom({
   detectorTests: [
     {
       misconception: "message-in-the-storm",
-      steps: [click("hall-b", "lab cable plug eth4", 15_000), bench(ANVIL, "hello")],
+      steps: [click("hall-b", "lab cable plug eth4", 15_000), bench(FORGE, "hello")],
     },
     {
       misconception: "loop-again",
@@ -281,18 +293,18 @@ export const spareCable = defineRoom({
     click("hall-b", "lab cable plug eth4", 15_000),
     typed("hall-b", "bridge fdb show", 3000),
     click("hall-b", "lab cable unplug eth4", 10_000),
-    bench(ANVIL, "hello"),
+    bench(FORGE, "hello"),
   ],
   altSolutions: [
     [
       click("hall-b", "lab cable plug eth4", 15_000),
       click("hall-a", "lab cable unplug eth3", 10_000),
-      bench(ANVIL, "hello"),
+      bench(FORGE, "hello"),
     ],
     [
       click("hall-b", "lab cable plug eth4", 15_000),
       typed("hall-a", "ip link set eth4 down", 10_000),
-      bench(ANVIL, "hello"),
+      bench(FORGE, "hello"),
     ],
   ],
 });
@@ -300,7 +312,7 @@ export const spareCable = defineRoom({
 // ── 4.B ★ The Storm ────────────────────────────────────────────────────────────────────────
 
 const stormId = "f4.boss-storm";
-const wrenReply = helloWithKey("wren", keyFor(stormId));
+const wrenReply = helloWithKey("laundry", keyFor(stormId));
 /** A span's door switched off or its cable pulled, at either hall. */
 const BREAKS = /^ip link set eth[034] down$|^lab cable unplug eth[034]$/;
 const MENDS = /^ip link set eth[034] up$|^lab cable plug eth[034]$/;
@@ -327,11 +339,11 @@ export const storm = defineRoom({
   topology: works({
     halls: HALLS.map((h) => ({ ...h, doors: 5 })),
     machines: [
-      machine("compass", COMPASS, "hall-a", "eth1", 13),
-      machine("beacon", BEACON, "hall-a", "eth2", 11),
-      machine("anvil", ANVIL, "hall-b", "eth1", 10),
-      machine("bell", BELL, "hall-b", "eth2", 18),
-      machine("wren", WREN, "hall-b", "eth3", 19, wrenReply),
+      machine("pantry", PANTRY, "hall-a", "eth1", 13),
+      machine("attic", ATTIC, "hall-a", "eth2", 11),
+      machine("forge", FORGE, "hall-b", "eth1", 10),
+      machine("chapel", CHAPEL, "hall-b", "eth2", 18),
+      machine("laundry", LAUNDRY, "hall-b", "eth3", 19, wrenReply),
     ],
     // Joined twice, "in case the first one broke": the loop is the room's first fault.
     spans: [
@@ -339,13 +351,13 @@ export const storm = defineRoom({
       { ...span2, ...STORM_LINK },
     ],
   }),
-  faults: [{ kind: "fdb-static", device: "hall-b", mac: WREN, port: "eth2", sticky: true }],
+  faults: [{ kind: "fdb-static", device: "hall-b", mac: LAUNDRY, port: "eth2", sticky: true }],
   playerDevice: "observatory",
   access: {
     observatory: OPEN,
     "hall-a": OPEN,
     "hall-b": OPEN,
-    ...sealed("compass", "beacon", "anvil", "bell", "wren"),
+    ...sealed("pantry", "attic", "forge", "chapel", "laundry"),
   },
   controls: {
     console: "typing",
@@ -366,7 +378,7 @@ export const storm = defineRoom({
   key: { word: keyFor(stormId), via: "lab-text" },
   healthChecks: [
     { id: "no-loop", object: { kind: "corridor", link: "span-2" }, check: noLoop(SPANS) },
-    { id: "board-wren", object: { kind: "board", device: "hall-b" }, check: boardHas("hall-b", WREN, "eth3") },
+    { id: "board-laundry", object: { kind: "board", device: "hall-b" }, check: boardHas("hall-b", LAUNDRY, "eth3") },
     { id: "calm", object: { kind: "corridor", link: "span" }, check: calm(SPANS, 2000, 20) },
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
@@ -397,7 +409,7 @@ export const storm = defineRoom({
     },
     {
       misconception: "delete-wrong-line",
-      steps: [typed("hall-b", `bridge fdb del ${ANVIL} dev eth1 master`)],
+      steps: [typed("hall-b", `bridge fdb del ${FORGE} dev eth1 master`)],
     },
     {
       misconception: "only-hall-a",
@@ -410,19 +422,19 @@ export const storm = defineRoom({
   ],
   solution: [
     typed("hall-b", "ip link set eth4 down"),
-    typed("hall-b", `bridge fdb del ${WREN} dev eth2 master`),
-    bench(WREN, "hello"),
+    typed("hall-b", `bridge fdb del ${LAUNDRY} dev eth2 master`),
+    bench(LAUNDRY, "hello"),
   ],
   altSolutions: [
     [
       click("hall-a", "lab cable unplug eth4"),
-      typed("hall-b", `bridge fdb del ${WREN} dev eth2 master`),
-      bench(WREN, "hello"),
+      typed("hall-b", `bridge fdb del ${LAUNDRY} dev eth2 master`),
+      bench(LAUNDRY, "hello"),
     ],
     [
       typed("hall-a", "lab cable unplug eth3"),
-      typed("hall-b", `bridge fdb del ${WREN} dev eth2 master`),
-      bench(WREN, "hello"),
+      typed("hall-b", `bridge fdb del ${LAUNDRY} dev eth2 master`),
+      bench(LAUNDRY, "hello"),
     ],
   ],
 });
@@ -430,7 +442,7 @@ export const storm = defineRoom({
 // ── Secret · The Peacekeeper (Region 2's secret room, decisions 0065, 0067) ────────────────
 
 const peaceId = "f4.secret-peacekeeper";
-const wrenPeaceReply = helloWithKey("wren", keyFor(peaceId));
+const wrenPeaceReply = helloWithKey("laundry", keyFor(peaceId));
 const STP_ON = "ip link set br0 type bridge stp_state 1";
 export const peacekeeper = defineRoom({
   id: peaceId,
@@ -446,11 +458,11 @@ export const peacekeeper = defineRoom({
   topology: works({
     halls: HALLS.map((h) => ({ ...h, doors: 5 })),
     machines: [
-      machine("compass", COMPASS, "hall-a", "eth1", 13),
-      machine("beacon", BEACON, "hall-a", "eth2", 11),
-      machine("anvil", ANVIL, "hall-b", "eth1", 10),
-      machine("bell", BELL, "hall-b", "eth2", 18),
-      machine("wren", WREN, "hall-b", "eth3", 19, wrenPeaceReply),
+      machine("pantry", PANTRY, "hall-a", "eth1", 13),
+      machine("attic", ATTIC, "hall-a", "eth2", 11),
+      machine("forge", FORGE, "hall-b", "eth1", 10),
+      machine("chapel", CHAPEL, "hall-b", "eth2", 18),
+      machine("laundry", LAUNDRY, "hall-b", "eth3", 19, wrenPeaceReply),
     ],
     spans: [
       { ...span, ...STORM_LINK },
@@ -463,7 +475,7 @@ export const peacekeeper = defineRoom({
     observatory: OPEN,
     "hall-a": OPEN,
     "hall-b": OPEN,
-    ...sealed("compass", "beacon", "anvil", "bell", "wren"),
+    ...sealed("pantry", "attic", "forge", "chapel", "laundry"),
   },
   controls: {
     console: "typing",
@@ -516,7 +528,7 @@ export const peacekeeper = defineRoom({
     // waits for that note to go stale (20 s), then listens 15 s, learns 15 s, and forwards.
     click("hall-a", "lab cable unplug eth3", 55_000),
     typed("hall-b", "bridge link show", 1000),
-    bench(WREN, "hello"),
+    bench(LAUNDRY, "hello"),
   ],
   altSolutions: [
     [
@@ -525,7 +537,7 @@ export const peacekeeper = defineRoom({
       typed("hall-a", "bridge link show", 1000),
       // hall-b's eth4 is the held door by now: it listens at once, and forwards 30 s later.
       typed("hall-b", "ip link set eth0 down", 40_000),
-      bench(WREN, "hello"),
+      bench(LAUNDRY, "hello"),
     ],
   ],
 });

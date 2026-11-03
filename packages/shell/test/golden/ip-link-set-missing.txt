@@ -1,4 +1,4 @@
-# obs=up lantern=up
+# obs=up kitchen=up
 $ ip link set eth9 up
 Cannot find device "eth9"
 [exit 1]

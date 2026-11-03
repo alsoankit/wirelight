@@ -2,9 +2,9 @@ import type { RoomText } from "./types";
 
 /** floors/prologue.md, word for word. */
 export const firstMessage: RoomText = {
-  title: "The First Message",
+  title: "Wake Up and Say Hello",
   mission: "There's someone at the other end of this cable. Press Send and see what happens.",
-  access: { lantern: "Not yet. Send your message first." },
+  access: { kitchen: "Not yet. Send your message first." },
   notes: [
     "Note to self: there's someone at the other end of that cable. I sent a message and never got an answer. Try again when you wake up.",
   ],
@@ -13,7 +13,7 @@ export const firstMessage: RoomText = {
     { text: "Press Send, then watch the corridor." },
     { text: "A message goes out along the cable. Wait and see if anything comes back.", codex: "message" },
     { text: "Press Send once and keep your eyes on the Map until a light returns." },
-    { text: "Press Send. Your message travels to lantern, lantern answers, and the answer lights the corridor." },
+    { text: "Press Send. Your message travels to kitchen, kitchen answers, and the answer lights the corridor." },
   ],
   detectors: {},
   debrief: {

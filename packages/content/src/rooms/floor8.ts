@@ -2,7 +2,7 @@ import type { FloorText, RoomText } from "./types";
 
 /**
  * floors/floor-8.md, word for word. Placeholders come from the rooms' `vars` (0055): {observatory},
- * {crossingNave}, {crossingCloister}, {archCloister}, {archTower}, {vesper}, {lumen}, {tower},
+ * {crossingNave}, {crossingCloister}, {archCloister}, {archTower}, {gallery}, {belfry}, {tower},
  * {nowhere}; in 8.5 also the door names {crossingNaveDoor}, {vesperDoor}, {observatoryDoor}.
  *
  * Two words are kept out of these rooms on purpose: "TTL" (taught in 9.3; 8.5 says "countdown") and
@@ -10,24 +10,24 @@ import type { FloorText, RoomText } from "./types";
  */
 
 export const otherStreet: RoomText = {
-  title: "The Other Street",
-  mission: "Vesper is on the next subnet. Find out who stands between you.",
+  title: "Next Door Over",
+  mission: "Gallery is on the next subnet. Find out who stands between you.",
   notes: [],
   hints: [
     { text: "Who has a door on both subnets?" },
-    { text: "Walk to the room between you and vesper. Read its plates." },
+    { text: "Walk to the room between you and gallery. Read its plates." },
     {
       text: "A router has a door on each subnet it joins; each door has an address on its own subnet.",
       codex: "router",
     },
-    { text: "Ping crossing's door on your subnet from your house, and its other door from vesper's." },
-    { text: "From the observatory: `ping -c 1 {crossingNave}`. From vesper: `ping -c 1 {crossingCloister}`." },
+    { text: "Ping crossing's door on your subnet from your house, and its other door from gallery's." },
+    { text: "From the observatory: `ping -c 1 {crossingNave}`. From gallery: `ping -c 1 {crossingCloister}`." },
   ],
   detectors: {
     "same-street-trick": {
       note: "Now you can't reach your own subnet. A machine on both subnets joins them so you don't have to move.",
       tried:
-        "You moved your house onto vesper's subnet, but a machine on both subnets joins them so nobody has to move.",
+        "You moved your house onto gallery's subnet, but a machine on both subnets joins them so nobody has to move.",
     },
     "far-door-from-here": {
       note: "That's crossing's door on the other subnet. Which of its doors is on yours?",
@@ -36,7 +36,7 @@ export const otherStreet: RoomText = {
   },
   debrief: {
     happened:
-      "Crossing has a door on your subnet and a door on vesper's. Each subnet can reach the door on its own side. A machine like that, which passes packets between subnets, is a router.",
+      "Crossing has a door on your subnet and a door on gallery's. Each subnet can reach the door on its own side. A machine like that, which passes packets between subnets, is a router.",
     terms: [
       {
         id: "router",
@@ -48,14 +48,14 @@ export const otherStreet: RoomText = {
   guardian: [
     { q: "What is this room?", a: "A machine with one foot on each subnet." },
     { q: "Why two addresses?", a: "One door on each subnet. Each door's address belongs to the subnet it stands on." },
-    { q: "Can I reach vesper now?", a: "Not yet. Your house doesn't know the crossing is here." },
+    { q: "Can I reach gallery now?", a: "Not yet. Your house doesn't know the crossing is here." },
   ],
   fieldGuide: ["Routers and crossings"],
 };
 
 export const acrossTheStreet: RoomText = {
-  title: "Across the Street",
-  mission: "Now get a ping across to vesper.",
+  title: "Get Across",
+  mission: "Now get a ping across to gallery.",
   notes: [],
   hints: [
     { text: "Your routing board only knows your own subnet." },
@@ -64,19 +64,19 @@ export const acrossTheStreet: RoomText = {
       text: "Packets for other subnets go to your default gateway: the router's door on your subnet.",
       codex: "default-gateway",
     },
-    { text: "Add a default line that hands packets to crossing's door on your subnet, then ping vesper." },
+    { text: "Add a default line that hands packets to crossing's door on your subnet, then ping gallery." },
     {
-      text: "On the board choose `{crossingNave}` (or `ip route add default via {crossingNave}`), then `ping -c 3 {vesper}`.",
+      text: "On the board choose `{crossingNave}` (or `ip route add default via {crossingNave}`), then `ping -c 3 {gallery}`.",
     },
   ],
   detectors: {
     "far-gateway": {
-      note: "That door is on vesper's subnet. Your house can only hand packets to a machine on its own subnet.",
+      note: "That door is on gallery's subnet. Your house can only hand packets to a machine on its own subnet.",
       tried: "You pointed your house at crossing's door on the far subnet, and the machine refused it.",
     },
-    "gateway-is-vesper": {
-      note: "That door is on vesper's subnet. Your house can only hand packets to a machine on its own subnet.",
-      tried: "You pointed your house at vesper itself, on a subnet your house can't reach.",
+    "gateway-is-gallery": {
+      note: "That door is on gallery's subnet. Your house can only hand packets to a machine on its own subnet.",
+      tried: "You pointed your house at gallery itself, on a subnet your house can't reach.",
     },
     "route-to-self": {
       note: "That's your own house. Which router is on your subnet?",
@@ -85,7 +85,7 @@ export const acrossTheStreet: RoomText = {
   },
   debrief: {
     happened:
-      "Your house only knew its own subnet. You added a route, a line in its routing table: anything for elsewhere goes to `{crossingNave}`, your default gateway. The router passed your ping to vesper's subnet, and vesper answered the same way back.",
+      "Your house only knew its own subnet. You added a route, a line in its routing table: anything for elsewhere goes to `{crossingNave}`, your default gateway. The router passed your ping to gallery's subnet, and gallery answered the same way back.",
     terms: [
       {
         id: "default-gateway",
@@ -102,15 +102,18 @@ export const acrossTheStreet: RoomText = {
   memories: [],
   guardian: [
     { q: "Why the near door?", a: "You can only hand a packet to a machine on your own subnet." },
-    { q: "Does vesper need this too?", a: "Every answer is a packet too. Vesper has its way back. Not everyone will." },
+    {
+      q: "Does gallery need this too?",
+      a: "Every answer is a packet too. Gallery has its way back. Not everyone will.",
+    },
     { q: "What is default?", a: "Everywhere you have no other word for." },
   ],
   fieldGuide: ["Routing boards", "Command book: ip route"],
 };
 
 export const directions: RoomText = {
-  title: "Directions",
-  mission: "Lumen lives up in the bell tower, on another subnet. Crossing doesn't go there.",
+  title: "No Way There",
+  mission: "Belfry lives up in the bell tower, on another subnet. Crossing doesn't go there.",
   notes: [],
   hints: [
     { text: "Read the error. Who sent it?" },
@@ -120,7 +123,7 @@ export const directions: RoomText = {
       codex: "specific-route",
     },
     { text: "Give crossing a route for the bell tower's subnet, via arch's door on the cloister." },
-    { text: "In crossing's room: `ip route add {tower} via {archCloister}`. Then ping lumen." },
+    { text: "In crossing's room: `ip route add {tower} via {archCloister}`. Then ping belfry." },
   ],
   detectors: {
     "fix-my-house": {
@@ -159,7 +162,7 @@ export const directions: RoomText = {
 
 export const noWayBack: RoomText = {
   title: "No Way Back",
-  mission: "Your pings to vesper vanish. No error, no answer, nothing.",
+  mission: "Your pings to gallery vanish. No error, no answer, nothing.",
   notes: [],
   hints: [
     { text: "No error means nothing turned your packet back. Where did it go?" },
@@ -167,7 +170,7 @@ export const noWayBack: RoomText = {
     { text: "A reply needs its own way back: the far house needs a route too.", codex: "return-path" },
     { text: "Find the door where requests arrive but nothing leaves, and give that house its way back." },
     {
-      text: "Capture in vesper's room: requests arrive, nothing goes out. In vesper: `ip route add default via {crossingCloister}`.",
+      text: "Capture in gallery's room: requests arrive, nothing goes out. In gallery: `ip route add default via {crossingCloister}`.",
     },
   ],
   detectors: {
@@ -176,13 +179,13 @@ export const noWayBack: RoomText = {
       tried: "You changed your own routing table, but your requests were already leaving and getting through crossing.",
     },
     "blame-crossing": {
-      note: "Crossing passes your requests through. Have you listened at vesper's door?",
+      note: "Crossing passes your requests through. Have you listened at gallery's door?",
       tried: "You changed crossing, but it was already passing your requests through.",
     },
   },
   debrief: {
     happened:
-      "Your pings reached vesper, but vesper had no route back to your subnet, so its replies were never sent. Every conversation needs a way there and a way back: the return path. Listening at each door showed you exactly where it stopped.",
+      "Your pings reached gallery, but gallery had no route back to your subnet, so its replies were never sent. Every conversation needs a way there and a way back: the return path. Listening at each door showed you exactly where it stopped.",
     terms: [{ id: "return-path", term: "return path", meaning: "the way the answers come back; it needs routes too" }],
   },
   guardian: [
@@ -196,8 +199,8 @@ export const noWayBack: RoomText = {
 };
 
 export const sleepingKeeper: RoomText = {
-  title: "The Sleeping Keeper",
-  mission: "Crossing's keeper has stopped passing anything along. Your pings for vesper pile up at its desk.",
+  title: "Not Allowed",
+  mission: "Crossing's keeper has stopped passing anything along. Your pings for gallery pile up at its desk.",
   notes: [],
   hints: [
     { text: "Your packets reach the router, crossing, and stop." },
@@ -205,7 +208,7 @@ export const sleepingKeeper: RoomText = {
     { text: "A router only forwards if it's allowed to: that's a setting.", codex: "navigator" },
     { text: "Forward a packet or two by hand, then switch on the setting that lets crossing do it." },
     {
-      text: "Unwrap, read the routing table (eth1), ask who has `{vesper}` (ARP), take one off the countdown, wrap to vesper's MAC address, send. Then in crossing: `sysctl -w net.ipv4.ip_forward=1`.",
+      text: "Unwrap, read the routing table (eth1), ask who has `{gallery}` (ARP), take one off the countdown, wrap to gallery's MAC address, send. Then in crossing: `sysctl -w net.ipv4.ip_forward=1`.",
     },
   ],
   detectors: {
@@ -258,9 +261,9 @@ export const sleepingKeeper: RoomText = {
 };
 
 export const closedCrossing: RoomText = {
-  title: "The Closed Crossing",
+  title: "The Blocked Crossing",
   mission:
-    "The great router between the nave and the bell tower has been blocked for a hundred years. Get a ping from your house to lumen, and back.",
+    "The great router between the nave and the bell tower has been blocked for a hundred years. Get a ping from your house to belfry, and back.",
   notes: [],
   hints: [
     { text: "Four things are wrong, all along one road." },
@@ -270,15 +273,15 @@ export const closedCrossing: RoomText = {
       codex: "routing-board",
     },
     {
-      text: "Your house, the first router, the second router, and lumen: check each one's routing table and whether it may forward.",
+      text: "Your house, the first router, the second router, and belfry: check each one's routing table and whether it may forward.",
     },
     {
-      text: "In your house: `ip route add default via {crossingNave}`. In crossing: `ip route add {tower} via {archCloister}`. In arch: `sysctl -w net.ipv4.ip_forward=1`. In lumen: `ip route del default`, then `ip route add default via {archTower}`.",
+      text: "In your house: `ip route add default via {crossingNave}`. In crossing: `ip route add {tower} via {archCloister}`. In arch: `sysctl -w net.ipv4.ip_forward=1`. In belfry: `ip route del default`, then `ip route add default via {archTower}`.",
     },
   ],
   detectors: {
     "far-gateway": {
-      note: "That door is on vesper's subnet. Your house can only hand packets to a machine on its own subnet.",
+      note: "That door is on gallery's subnet. Your house can only hand packets to a machine on its own subnet.",
       tried: "You pointed your house at a door on the far subnet, and the machine refused it.",
     },
     "fix-my-house": {
@@ -298,13 +301,13 @@ export const closedCrossing: RoomText = {
       tried: "You changed arch's routing table, but it was right. Arch wasn't allowed to forward.",
     },
     "one-direction": {
-      note: "Lumen got it. What does lumen do with its answer?",
-      tried: "Your request already reached lumen, and you kept changing the near side of the road.",
+      note: "Belfry got it. What does belfry do with its answer?",
+      tried: "Your request already reached belfry, and you kept changing the near side of the road.",
     },
   },
   debrief: {
     happened:
-      "Four breaks along one road: your house had no default gateway, crossing had no route to the tower, arch wasn't allowed to forward, and lumen's way back pointed at a door that doesn't exist. You walked the road, step by step, both ways.",
+      "Four breaks along one road: your house had no default gateway, crossing had no route to the tower, arch wasn't allowed to forward, and belfry's way back pointed at a door that doesn't exist. You walked the road, step by step, both ways.",
     terms: [],
   },
   voice: [
@@ -334,7 +337,7 @@ export const floor8: FloorText = {
       title: "Ride-along",
       text: "New frame at every crossing. The letter inside, untouched.",
       shown:
-        "the camera rides a ping from the observatory: the house's board says default, so the frame is addressed to crossing's door; at the desk the frame falls away, the board is read, a new frame closes around the packet, the countdown ticks 64 → 63; out onto the cloister to vesper; and the reply back the same way",
+        "the camera rides a ping from the observatory: the house's board says default, so the frame is addressed to crossing's door; at the desk the frame falls away, the board is read, a new frame closes around the packet, the countdown ticks 64 → 63; out onto the cloister to gallery; and the reply back the same way",
     },
     {
       id: "F8-FM-04",

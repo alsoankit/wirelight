@@ -2,20 +2,20 @@ import type { FloorText, RoomText } from "./types";
 
 /**
  * floors/floor-9.md, word for word. Placeholders come from the rooms' `vars` (0055): {observatory},
- * {crossingNave}, {archCloister}, {archTower}, {spireTower}, {spireWindow}, {lumen}, {wren}, {halo},
+ * {crossingNave}, {archCloister}, {archTower}, {spireTower}, {spireWindow}, {belfry}, {laundry}, {loft},
  * {window}, {nowhere}.
  */
 
 export const twoEnvelopes: RoomText = {
-  title: "Two Envelopes",
-  mission: "Follow one ping from your house to lumen, and see what changes on the way.",
+  title: "Follow One Message",
+  mission: "Follow one ping from your house to belfry, and see what changes on the way.",
   notes: [],
   hints: [
     { text: "Tag a ping before you send it." },
     { text: "The Scanner catches a traced packet on every subnet it crosses." },
     { text: "A packet's journey is made of hops: one frame per subnet.", codex: "hop" },
-    { text: "Trace a ping to lumen, then compare its catches from two different subnets." },
-    { text: "Press Trace, `ping -c 1 {lumen}`, then Compare the nave catch with the cloister catch." },
+    { text: "Trace a ping to belfry, then compare its catches from two different subnets." },
+    { text: "Press Trace, `ping -c 1 {belfry}`, then Compare the nave catch with the cloister catch." },
   ],
   detectors: {
     "compare-same-street": {
@@ -29,7 +29,7 @@ export const twoEnvelopes: RoomText = {
   },
   debrief: {
     happened:
-      "Your ping crossed three subnets: three hops. On each subnet it rode in a new frame, with MAC addresses for that subnet only. The packet inside kept its IP addresses the whole way, from your house to lumen's. Only its countdown and checksum changed.",
+      "Your ping crossed three subnets: three hops. On each subnet it rode in a new frame, with MAC addresses for that subnet only. The packet inside kept its IP addresses the whole way, from your house to belfry's. Only its countdown and checksum changed.",
     terms: [
       {
         id: "hop",
@@ -53,7 +53,7 @@ export const twoEnvelopes: RoomText = {
       a: "A frame knows one subnet. The MAC addresses on it mean nothing on the next.",
     },
     { q: "Why keep the packet?", a: "The packet says who wrote it and where it's going. That never changes." },
-    { q: "How many hops to lumen?", a: "Count the subnets it crossed." },
+    { q: "How many hops to belfry?", a: "Count the subnets it crossed." },
   ],
   fieldGuide: ["Following a packet", "Comparing catches"],
   voice: [
@@ -68,24 +68,24 @@ export const twoEnvelopes: RoomText = {
 export const showTheWay: RoomText = {
   title: "Show the Way",
   mission:
-    "Wren has just moved into the bell tower. It can't reach anyone off its subnet, and nobody can reach it: show it the way, then trace a ping home.",
+    "Laundry has just moved into the bell tower. It can't reach anyone off its subnet, and nobody can reach it: show it the way, then trace a ping home.",
   notes: [],
   hints: [
-    { text: "Read wren's routing table." },
+    { text: "Read laundry's routing table." },
     { text: "What does every machine need to reach other subnets?" },
     { text: "A default gateway: a router's door on its own subnet.", codex: "default-gateway" },
-    { text: "Give wren a default via arch's door on the bell tower, then trace a ping home." },
-    { text: "In wren: `ip route add default via {archTower}`. Trace a ping to `{observatory}`." },
+    { text: "Give laundry a default via arch's door on the bell tower, then trace a ping home." },
+    { text: "In laundry: `ip route add default via {archTower}`. Trace a ping to `{observatory}`." },
   ],
   detectors: {
     "gateway-far": {
-      note: "Wren can only hand letters to someone on the bell tower.",
-      tried: "You pointed wren at a door off its own subnet, and the machine refused it.",
+      note: "Laundry can only hand letters to someone on the bell tower.",
+      tried: "You pointed laundry at a door off its own subnet, and the machine refused it.",
     },
   },
   debrief: {
     happened:
-      "Wren needed a default gateway on its own subnet, arch's door, and the rest of the road was already there. Three hops each way, and every router knew its part.",
+      "Laundry needed a default gateway on its own subnet, arch's door, and the rest of the road was already there. Three hops each way, and every router knew its part.",
     terms: [],
   },
 };
@@ -102,7 +102,7 @@ export const oneStepOnly: RoomText = {
       codex: "ttl",
     },
     { text: "Send one ping that runs out at the first router, and one that runs out at the second." },
-    { text: "`ping -c 1 -t 1 {lumen}`, then `ping -c 1 -t 2 {lumen}`." },
+    { text: "`ping -c 1 -t 1 {belfry}`, then `ping -c 1 -t 2 {belfry}`." },
   ],
   detectors: {
     "ttl-zero": {
@@ -111,7 +111,7 @@ export const oneStepOnly: RoomText = {
     },
     "ttl-too-big": {
       note: "That one made it all the way. Which countdown dies at the first router?",
-      tried: "Your countdown was big enough to reach lumen, so no router wrote back.",
+      tried: "Your countdown was big enough to reach belfry, so no router wrote back.",
     },
   },
   debrief: {
@@ -144,10 +144,10 @@ export const oneStepOnly: RoomText = {
 
 export const roundAndRound: RoomText = {
   title: "Round and Round",
-  mission: "Halo lives at the high window. Every ping for it goes out, and none ever arrives.",
+  mission: "Loft lives at the high window. Every ping for it goes out, and none ever arrives.",
   notes: [],
   hints: [
-    { text: "Trace a ping to halo and look at the strip." },
+    { text: "Trace a ping to loft and look at the strip." },
     { text: "It visits the same two routers over and over." },
     {
       text: "When routers point back at each other, a packet loops until its TTL runs out.",
@@ -168,7 +168,7 @@ export const roundAndRound: RoomText = {
   },
   debrief: {
     happened:
-      "Crossing sent halo's packets to arch; arch had no route for the high window, so its default route sent them back to crossing. Round and round, a routing loop, until the TTL ran out. That's why every packet has a TTL. A route on arch, via spire, broke the circle.",
+      "Crossing sent loft's packets to arch; arch had no route for the high window, so its default route sent them back to crossing. Round and round, a routing loop, until the TTL ran out. That's why every packet has a TTL. A route on arch, via spire, broke the circle.",
     terms: [
       {
         id: "routing-loop",
@@ -187,16 +187,16 @@ export const roundAndRound: RoomText = {
 };
 
 export const theCrossing: RoomText = {
-  title: "The Crossing",
+  title: "Up to the High Window",
   mission: "Light hasn't reached the high window in a hundred years. Send it a ping, and bring one back.",
   notes: [],
   hints: [
     { text: "Find where your ping stops. Then fix that step, and look again." },
     { text: "The TTL, a trace, or listening at a door will each tell you where." },
     { text: "Every step needs a route on, permission to forward, and a way back.", codex: "routing-board" },
-    { text: "Crossing, arch, spire and halo each have one thing wrong." },
+    { text: "Crossing, arch, spire and loft each have one thing wrong." },
     {
-      text: "In crossing: `ip route add {tower} via {archCloister}` and `ip route add {window} via {archCloister}`. In arch: `ip route add {window} via {spireTower}`. In spire: `sysctl -w net.ipv4.ip_forward=1`. In halo: `ip route del default`, then `ip route add default via {spireWindow}`.",
+      text: "In crossing: `ip route add {tower} via {archCloister}` and `ip route add {window} via {archCloister}`. In arch: `ip route add {window} via {spireTower}`. In spire: `sysctl -w net.ipv4.ip_forward=1`. In loft: `ip route del default`, then `ip route add default via {spireWindow}`.",
     },
   ],
   detectors: {
@@ -213,8 +213,8 @@ export const theCrossing: RoomText = {
       tried: "You changed spire's routing table, but it was right. IP forwarding was off.",
     },
     "gateway-far": {
-      note: "Halo can only hand packets to a machine on its own subnet, the high window.",
-      tried: "You pointed halo at a door off its own subnet, and the machine refused it.",
+      note: "Loft can only hand packets to a machine on its own subnet, the high window.",
+      tried: "You pointed loft at a door off its own subnet, and the machine refused it.",
     },
     "ttl-zero": {
       note: "Zero means it dies before it leaves. Start from one.",
@@ -231,7 +231,7 @@ export const theCrossing: RoomText = {
   },
   debrief: {
     happened:
-      "Four breaks across four subnets. Crossing had no route to the tower, arch sent the high window's packets in a routing loop, spire wasn't allowed to forward, and halo's default gateway pointed at nobody. You found each one by asking the road where it stopped. That's the whole of what a network does: hop by hop, there and back.",
+      "Four breaks across four subnets. Crossing had no route to the tower, arch sent the high window's packets in a routing loop, spire wasn't allowed to forward, and loft's default gateway pointed at nobody. You found each one by asking the road where it stopped. That's the whole of what a network does: hop by hop, there and back.",
     terms: [],
   },
   voice: [
@@ -261,7 +261,7 @@ export const floor9: FloorText = {
       title: "Ride-along",
       text: "Each street, a new envelope. The letter, the same. The countdown, one less.",
       shown:
-        "the camera rides one ping from the observatory to halo: at each crossing the frame falls away like a shed skin, a new one closes around the packet, the TTL counter ticks down, the addresses inside never change; four streets, the light rising at each. Then the reply, all the way back",
+        "the camera rides one ping from the observatory to loft: at each crossing the frame falls away like a shed skin, a new one closes around the packet, the TTL counter ticks down, the addresses inside never change; four streets, the light rising at each. Then the reply, all the way back",
     },
     {
       id: "F9-FM-04",

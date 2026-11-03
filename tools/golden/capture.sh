@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Captures real Linux output for the shell's golden tests (SRS NFR-09).
 #
-# Builds the Floor 0 topology (observatory eth0 02:00:00:00:00:05 — lantern eth0 02:00:00:00:00:07)
+# Builds the Floor 0 topology (observatory eth0 02:00:00:00:00:05 — kitchen eth0 02:00:00:00:00:07)
 # as two network namespaces joined by a veth pair, runs each case inside `observatory`, and saves
 # "$ command", the combined output, and the exit code to packages/shell/test/golden/<case>.txt.
 #
@@ -16,7 +16,7 @@ set -uo pipefail
 out="$1"
 mount -t tmpfs none /run && mkdir -p /run/netns
 
-fresh() { # fresh <obs-eth0-state: up|down|never> <lantern-eth0-state: up|down>
+fresh() { # fresh <obs-eth0-state: up|down|never> <kitchen-eth0-state: up|down>
   ip netns del obs 2>/dev/null; ip netns del lan 2>/dev/null
   ip netns add obs; ip netns add lan
   ip -n obs link set lo up; ip -n lan link set lo up
@@ -34,11 +34,11 @@ fresh() { # fresh <obs-eth0-state: up|down|never> <lantern-eth0-state: up|down>
   sleep 0.1
 }
 
-case_() { # case_ <name> <obs-state> <lantern-state> <command...>
+case_() { # case_ <name> <obs-state> <kitchen-state> <command...>
   local name="$1" o="$2" l="$3"; shift 3
   fresh "$o" "$l"
   {
-    echo "# obs=$o lantern=$l"
+    echo "# obs=$o kitchen=$l"
     echo "\$ $*"
     ip netns exec obs "$@" 2>&1
     echo "[exit $?]"

@@ -11,15 +11,15 @@ const topo = (): Topology => ({
       messenger: { to: "02:00:00:00:00:07" },
     },
     {
-      id: "lantern",
-      hostname: "lantern",
+      id: "kitchen",
+      hostname: "kitchen",
       kind: "host",
       interfaces: [{ name: "eth0", mac: "02:00:00:00:00:07" }],
-      lab: { mode: "responder", reply: "key: amber-bell" },
-      announcer: { ip: "10.0.0.7", port: 40000, text: "lantern is here", intervalMs: 10_000 },
+      lab: { mode: "responder", reply: "key: amber-chapel" },
+      announcer: { ip: "10.0.0.7", port: 40000, text: "kitchen is here", intervalMs: 10_000 },
     },
   ],
-  links: [{ id: "wire", a: { device: "observatory", iface: "eth0" }, b: { device: "lantern", iface: "eth0" } }],
+  links: [{ id: "wire", a: { device: "observatory", iface: "eth0" }, b: { device: "kitchen", iface: "eth0" } }],
 });
 
 const sent = (sim: Simulator, origin: string) =>
@@ -39,7 +39,7 @@ describe("the messenger (SIM-08)", () => {
       sim.trace
         .filter((e) => e.kind === "app.deliver" && e.device === "observatory")
         .map((e) => (e.kind === "app.deliver" ? e.text : "")),
-    ).toEqual(["key: amber-bell", "key: amber-bell", "key: amber-bell"]);
+    ).toEqual(["key: amber-chapel", "key: amber-chapel", "key: amber-chapel"]);
   });
 
   it("a card fault sends it to the wrong address; fixing the card fixes it", () => {
@@ -85,7 +85,7 @@ describe("announcements: a real IPv4/UDP packet inside a frame", () => {
     });
     const udp = decodeUDP(ip.payload);
     expect(udp).toMatchObject({ srcPort: 40000, dstPort: 40000, length: 8 + 15 });
-    expect(decodeLab(udp.data)).toBe("lantern is here");
+    expect(decodeLab(udp.data)).toBe("kitchen is here");
     // Verifying a UDP checksum over the pseudo-header and segment gives zero.
     const pseudo = [...(parseIp("10.0.0.7") ?? []), ...(parseIp("255.255.255.255") ?? []), 0, 17, 0, udp.length];
     expect(checksum(new Uint8Array([...pseudo, ...ip.payload]))).toBe(0);

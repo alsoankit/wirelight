@@ -6,10 +6,10 @@ import type { RoomText } from "./types";
  * the storm: a small door in the wall where span-2 used to run.
  */
 export const peacekeeper: RoomText = {
-  title: "The Peacekeeper",
+  title: "Keep the Peace",
   mission:
     "The halls are joined twice again, and the storm is back. Get them to keep the peace, then pull the cable they rely on and let the spare take over.",
-  access: { compass: SEALED, beacon: SEALED, anvil: SEALED, bell: SEALED, wren: SEALED },
+  access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED, laundry: SEALED },
   notes: [
     "Found it in the old plans. The halls can keep the peace themselves: they talk, and hold one door shut so nothing goes round. The switch for it is on each hall's br0, and it's off.",
   ],
@@ -26,7 +26,7 @@ export const peacekeeper: RoomText = {
       text: "Find the span with a door that says blocking. Unplug the other span, speed time up, and watch the held door open.",
     },
     {
-      text: 'In each hall: `ip link set br0 type bridge stp_state 1`. Span-2 goes to blocking. Unplug span (hall-a\'s eth3), speed time up for about 30 seconds until span-2 forwards, then send wren a frame: `lab send-frame --to 02:00:00:00:00:13 --msg "hello"`.',
+      text: 'In each hall: `ip link set br0 type bridge stp_state 1`. Span-2 goes to blocking. Unplug span (hall-a\'s eth3), speed time up for about 30 seconds until span-2 forwards, then send laundry a frame: `lab send-frame --to 02:00:00:00:00:13 --msg "hello"`.',
     },
   ],
   detectors: {
@@ -45,7 +45,7 @@ export const peacekeeper: RoomText = {
   },
   debrief: {
     happened:
-      "Two halls can keep a spare cable safely. With the peacekeeper on (its real name is the spanning tree), the halls send each other a short note every two seconds, agree which hall is in charge, and hold shut any door that would close a circle. Span-2's door went to blocking, and the storm stopped. When you pulled span, the held door noticed at once: it listened for 15 seconds, learned names for 15 more, then opened, and wren's answer came over the spare.",
+      "Two halls can keep a spare cable safely. With the peacekeeper on (its real name is the spanning tree), the halls send each other a short note every two seconds, agree which hall is in charge, and hold shut any door that would close a circle. Span-2's door went to blocking, and the storm stopped. When you pulled span, the held door noticed at once: it listened for 15 seconds, learned names for 15 more, then opened, and laundry's answer came over the spare.",
     terms: [],
   },
   guardian: [

@@ -8,8 +8,8 @@ import { SimBackend } from "../src";
 import { testContent } from "./content";
 
 /**
- * observatory 10.0.1.5 — (hall, a switch) — crossing — arch — lumen 10.0.3.7: three streets, two
- * routers. Lantern on the first street announces itself.
+ * observatory 10.0.1.5 — (hall, a switch) — crossing — arch — belfry 10.0.3.7: three streets, two
+ * routers. Kitchen on the first street announces itself.
  */
 function town(tools: string[]): SimBackend {
   const host = (id: string, mac: string, cidr: string, via: string) => ({
@@ -44,12 +44,12 @@ function town(tools: string[]): SimBackend {
     devices: [
       host("observatory", "02:00:00:00:00:05", "10.0.1.5/24", "10.0.1.1"),
       {
-        ...host("lantern", "02:00:00:00:00:07", "10.0.1.7/24", "10.0.1.1"),
+        ...host("kitchen", "02:00:00:00:00:07", "10.0.1.7/24", "10.0.1.1"),
         announcer: {
           ip: "10.0.1.7",
           dst: "10.0.1.255",
           port: 40000,
-          text: "the lamps remember: amber-bell",
+          text: "the lamps remember: amber-chapel",
           intervalMs: 6000,
         },
       },
@@ -76,14 +76,14 @@ function town(tools: string[]): SimBackend {
         ["10.0.2.2/24", "10.0.3.1/24"],
         [{ dst: "default", via: "10.0.2.1" }],
       ),
-      host("lumen", "02:00:00:00:00:37", "10.0.3.7/24", "10.0.3.1"),
+      host("belfry", "02:00:00:00:00:37", "10.0.3.7/24", "10.0.3.1"),
     ],
     links: [
       { id: "s0", a: { device: "observatory", iface: "eth0" }, b: { device: "hall", iface: "eth0" } },
-      { id: "s1", a: { device: "lantern", iface: "eth0" }, b: { device: "hall", iface: "eth1" } },
+      { id: "s1", a: { device: "kitchen", iface: "eth0" }, b: { device: "hall", iface: "eth1" } },
       { id: "s2", a: { device: "hall", iface: "eth2" }, b: { device: "crossing", iface: "eth0" } },
       { id: "s3", a: { device: "crossing", iface: "eth1" }, b: { device: "arch", iface: "eth0" } },
-      { id: "s4", a: { device: "arch", iface: "eth1" }, b: { device: "lumen", iface: "eth0" } },
+      { id: "s4", a: { device: "arch", iface: "eth1" }, b: { device: "belfry", iface: "eth0" } },
     ],
   };
   const b = new SimBackend(testContent);
@@ -116,7 +116,7 @@ describe("lab slate: catching and opening (6.1)", () => {
     const out = run(b, "observatory", "lab slate open 1 --layer message");
     expect(out).toHaveLength(3);
     expect(out[1]).toContain("10.0.1.255");
-    expect(out[2]).toContain("the lamps remember: amber-bell");
+    expect(out[2]).toContain("the lamps remember: amber-chapel");
     expect(events(b, "slate.open").at(-1)).toMatchObject({ n: 1, layer: "message", reached: true });
   });
 
@@ -143,7 +143,7 @@ describe("lab slate: tracing and comparing (9.1)", () => {
     b.exec("observatory", "ping -c 1 10.0.3.7", "typed");
     b.advance(3000);
     const caught = events(b, "slate.catch");
-    // Three streets: the observatory's, crossing → arch, arch → lumen. The switch's copy isn't a new street.
+    // Three streets: the observatory's, crossing → arch, arch → belfry. The switch's copy isn't a new street.
     expect(caught.map((c) => `${c.device} ${c.iface}`)).toEqual(["observatory eth0", "crossing eth1", "arch eth1"]);
     expect(caught.every((c) => c.traced)).toBe(true);
     run(b, "observatory", "lab slate compare 1 3");

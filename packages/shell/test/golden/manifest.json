@@ -8,7 +8,7 @@
       "file": "addr/ip-a.txt",
       "raw": "raw/addr/ip-a.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip a",
@@ -21,7 +21,7 @@
       "file": "addr/ip-addr.txt",
       "raw": "raw/addr/ip-addr.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr",
@@ -34,7 +34,7 @@
       "file": "addr/ip-addr-add.txt",
       "raw": "raw/addr/ip-addr-add.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add 10.0.0.5/24 dev eth0",
@@ -47,7 +47,7 @@
       "file": "addr/ip-addr-add-bad-addr.txt",
       "raw": "raw/addr/ip-addr-add-bad-addr.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add 10.0.0.300/24 dev eth0",
@@ -60,7 +60,7 @@
       "file": "addr/ip-addr-add-bad-prefix.txt",
       "raw": "raw/addr/ip-addr-add-bad-prefix.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add 10.0.0.5/33 dev eth0",
@@ -73,7 +73,7 @@
       "file": "addr/ip-addr-add-down.txt",
       "raw": "raw/addr/ip-addr-add-down.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip link set eth0 down",
@@ -89,7 +89,7 @@
       "file": "addr/ip-addr-add-exists.txt",
       "raw": "raw/addr/ip-addr-add-exists.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add 10.0.0.5/24 dev eth0",
@@ -102,7 +102,7 @@
       "file": "addr/ip-addr-add-missing-dev.txt",
       "raw": "raw/addr/ip-addr-add-missing-dev.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add 10.0.0.5/24 dev eth9",
@@ -115,7 +115,7 @@
       "file": "addr/ip-addr-add-no-addr.txt",
       "raw": "raw/addr/ip-addr-add-no-addr.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add dev eth0",
@@ -128,7 +128,7 @@
       "file": "addr/ip-addr-add-no-dev.txt",
       "raw": "raw/addr/ip-addr-add-no-dev.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add 10.0.0.5/24",
@@ -141,7 +141,7 @@
       "file": "addr/ip-addr-add-noprefix.txt",
       "raw": "raw/addr/ip-addr-add-noprefix.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add 10.0.0.5 dev eth0",
@@ -154,7 +154,7 @@
       "file": "addr/ip-addr-add-other-net.txt",
       "raw": "raw/addr/ip-addr-add-other-net.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip addr add 10.9.0.5/16 dev eth0"
@@ -169,7 +169,7 @@
       "file": "addr/ip-addr-add-second.txt",
       "raw": "raw/addr/ip-addr-add-second.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr add 10.0.0.6/24 dev eth0",
@@ -182,7 +182,7 @@
       "file": "addr/ip-addr-after-add.txt",
       "raw": "raw/addr/ip-addr-after-add.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip addr add 10.0.0.5/24 dev eth0"
@@ -197,7 +197,7 @@
       "file": "addr/ip-addr-after-add-noprefix.txt",
       "raw": "raw/addr/ip-addr-after-add-noprefix.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip addr add 10.0.0.5 dev eth0"
@@ -212,7 +212,7 @@
       "file": "addr/ip-addr-after-add-second.txt",
       "raw": "raw/addr/ip-addr-after-add-second.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip addr add 10.0.0.6/24 dev eth0"
@@ -227,7 +227,7 @@
       "file": "addr/ip-addr-after-del.txt",
       "raw": "raw/addr/ip-addr-after-del.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip addr del 10.0.0.5/24 dev eth0"
@@ -242,7 +242,7 @@
       "file": "addr/ip-addr-after-flush.txt",
       "raw": "raw/addr/ip-addr-after-flush.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip addr flush dev eth0"
@@ -257,7 +257,7 @@
       "file": "addr/ip-addr-bare.txt",
       "raw": "raw/addr/ip-addr-bare.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr",
@@ -270,7 +270,7 @@
       "file": "addr/ip-addr-del.txt",
       "raw": "raw/addr/ip-addr-del.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr del 10.0.0.5/24 dev eth0",
@@ -283,7 +283,7 @@
       "file": "addr/ip-addr-del-missing.txt",
       "raw": "raw/addr/ip-addr-del-missing.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr del 10.0.0.6/24 dev eth0",
@@ -296,7 +296,7 @@
       "file": "addr/ip-addr-del-missing-dev.txt",
       "raw": "raw/addr/ip-addr-del-missing-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr del 10.0.0.5/24 dev eth9",
@@ -309,7 +309,7 @@
       "file": "addr/ip-addr-del-no-dev.txt",
       "raw": "raw/addr/ip-addr-del-no-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr del 10.0.0.5/24",
@@ -322,7 +322,7 @@
       "file": "addr/ip-addr-del-noprefix.txt",
       "raw": "raw/addr/ip-addr-del-noprefix.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr del 10.0.0.5 dev eth0",
@@ -335,7 +335,7 @@
       "file": "addr/ip-addr-del-wrong-prefix.txt",
       "raw": "raw/addr/ip-addr-del-wrong-prefix.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr del 10.0.0.5/16 dev eth0",
@@ -348,7 +348,7 @@
       "file": "addr/ip-addr-door-down.txt",
       "raw": "raw/addr/ip-addr-door-down.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip link set eth0 down"
@@ -363,7 +363,7 @@
       "file": "addr/ip-addr-flush.txt",
       "raw": "raw/addr/ip-addr-flush.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr flush dev eth0",
@@ -376,7 +376,7 @@
       "file": "addr/ip-addr-flush-empty.txt",
       "raw": "raw/addr/ip-addr-flush-empty.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr flush dev eth0",
@@ -389,7 +389,7 @@
       "file": "addr/ip-addr-flush-missing.txt",
       "raw": "raw/addr/ip-addr-flush-missing.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr flush dev eth9",
@@ -402,7 +402,7 @@
       "file": "addr/ip-addr-flush-no-dev.txt",
       "raw": "raw/addr/ip-addr-flush-no-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr flush",
@@ -415,10 +415,10 @@
       "file": "addr/ip-addr-no-carrier.txt",
       "raw": "raw/addr/ip-addr-no-carrier.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
-        "lantern: ip link set eth0 down"
+        "kitchen: ip link set eth0 down"
       ],
       "command": "ip addr",
       "actualCommand": "ip addr",
@@ -430,7 +430,7 @@
       "file": "addr/ip-addr-show.txt",
       "raw": "raw/addr/ip-addr-show.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr show",
@@ -443,7 +443,7 @@
       "file": "addr/ip-addr-show-dev.txt",
       "raw": "raw/addr/ip-addr-show-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr show dev eth0",
@@ -456,7 +456,7 @@
       "file": "addr/ip-addr-show-eth0.txt",
       "raw": "raw/addr/ip-addr-show-eth0.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr show eth0",
@@ -469,7 +469,7 @@
       "file": "addr/ip-addr-show-lo.txt",
       "raw": "raw/addr/ip-addr-show-lo.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr show dev lo",
@@ -482,7 +482,7 @@
       "file": "addr/ip-addr-show-missing.txt",
       "raw": "raw/addr/ip-addr-show-missing.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr show dev eth9",
@@ -495,7 +495,7 @@
       "file": "addr/ip-addr-unknown-cmd.txt",
       "raw": "raw/addr/ip-addr-unknown-cmd.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr frobnicate",
@@ -998,7 +998,7 @@
       "file": "builtins/hostname.txt",
       "raw": "raw/builtins/hostname.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "hostname",
@@ -1011,8 +1011,8 @@
       "file": "bytes/arp-request-reply.txt",
       "raw": "raw/bytes/arp-request-reply.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -1042,8 +1042,8 @@
       "file": "bytes/arp-unicast-probe.txt",
       "raw": "raw/bytes/arp-unicast-probe.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -1057,10 +1057,10 @@
       "file": "bytes/dhcp-decline.txt",
       "raw": "raw/bytes/dhcp-decline.txt",
       "topology": "square-noping",
-      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
-        "during capture, lantern: ip addr add 10.0.1.149/24 dev eth0",
+        "during capture, kitchen: ip addr add 10.0.1.149/24 dev eth0",
         "during capture, observatory: dhclient eth0"
       ],
       "command": "tcpdump -n -e -xx -c 9 -i eth0",
@@ -1073,7 +1073,7 @@
       "file": "bytes/dhcp-exchange.txt",
       "raw": "raw/bytes/dhcp-exchange.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "during capture, observatory: dhclient eth0"
@@ -1088,7 +1088,7 @@
       "file": "bytes/dhcp-release.txt",
       "raw": "raw/bytes/dhcp-release.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0",
@@ -1104,8 +1104,8 @@
       "file": "bytes/icmp-echo.txt",
       "raw": "raw/bytes/icmp-echo.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 2 10.0.0.7"
       ],
@@ -1119,8 +1119,8 @@
       "file": "bytes/icmp-echo-ttl5.txt",
       "raw": "raw/bytes/icmp-echo-ttl5.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 -t 5 10.0.0.7"
       ],
@@ -1180,10 +1180,10 @@
       "file": "bytes/icmp-redirect.txt",
       "raw": "raw/bytes/icmp-redirect.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "during capture, vesper: ping -c 1 -t 2 10.0.4.7"
+        "during capture, gallery: ping -c 1 -t 2 10.0.4.7"
       ],
       "command": "tcpdump -n -e -xx -c 3 -i eth0 icmp",
       "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -e -xx -c 3 -i eth0 icmp",
@@ -1240,8 +1240,8 @@
       "file": "bytes/udp-port-unreachable.txt",
       "raw": "raw/bytes/udp-port-unreachable.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: echo hello > /dev/udp/10.0.0.7/9"
       ],
@@ -1255,7 +1255,7 @@
       "file": "dhcp/dhclient-after-release.txt",
       "raw": "raw/dhcp/dhclient-after-release.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0",
@@ -1271,7 +1271,7 @@
       "file": "dhcp/dhclient-already-running.txt",
       "raw": "raw/dhcp/dhclient-already-running.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0"
@@ -1286,7 +1286,7 @@
       "file": "dhcp/dhclient-already-running-quiet.txt",
       "raw": "raw/dhcp/dhclient-already-running-quiet.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0"
@@ -1301,7 +1301,7 @@
       "file": "dhcp/dhclient-bad-option.txt",
       "raw": "raw/dhcp/dhclient-bad-option.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -Z",
@@ -1314,7 +1314,7 @@
       "file": "dhcp/dhclient-door-down.txt",
       "raw": "raw/dhcp/dhclient-door-down.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip link set eth0 down"
@@ -1329,7 +1329,7 @@
       "file": "dhcp/dhclient-door-down-addr.txt",
       "raw": "raw/dhcp/dhclient-door-down-addr.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip link set eth0 down",
@@ -1345,10 +1345,10 @@
       "file": "dhcp/dhclient-in-use.txt",
       "raw": "raw/dhcp/dhclient-in-use.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
-        "lantern: ip addr add 10.0.1.149/24 dev eth0"
+        "kitchen: ip addr add 10.0.1.149/24 dev eth0"
       ],
       "command": "dhclient -v eth0",
       "actualCommand": "dhclient -v eth0",
@@ -1360,10 +1360,10 @@
       "file": "dhcp/dhclient-in-use-noping.txt",
       "raw": "raw/dhcp/dhclient-in-use-noping.txt",
       "topology": "square-noping",
-      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
-        "lantern: ip addr add 10.0.1.149/24 dev eth0"
+        "kitchen: ip addr add 10.0.1.149/24 dev eth0"
       ],
       "command": "dhclient -v eth0",
       "actualCommand": "dhclient -v eth0",
@@ -1375,10 +1375,10 @@
       "file": "dhcp/dhclient-in-use-noping-addr.txt",
       "raw": "raw/dhcp/dhclient-in-use-noping-addr.txt",
       "topology": "square-noping",
-      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
-        "lantern: ip addr add 10.0.1.149/24 dev eth0",
+        "kitchen: ip addr add 10.0.1.149/24 dev eth0",
         "observatory: dhclient eth0"
       ],
       "command": "ip addr show dev eth0",
@@ -1391,7 +1391,7 @@
       "file": "dhcp/dhclient-ip-addr.txt",
       "raw": "raw/dhcp/dhclient-ip-addr.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0"
@@ -1406,7 +1406,7 @@
       "file": "dhcp/dhclient-ip-addr-later.txt",
       "raw": "raw/dhcp/dhclient-ip-addr-later.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0",
@@ -1422,7 +1422,7 @@
       "file": "dhcp/dhclient-ip-route.txt",
       "raw": "raw/dhcp/dhclient-ip-route.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0"
@@ -1437,7 +1437,7 @@
       "file": "dhcp/dhclient-missing-dev.txt",
       "raw": "raw/dhcp/dhclient-missing-dev.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -v eth9",
@@ -1450,7 +1450,7 @@
       "file": "dhcp/dhclient-missing-dev-quiet.txt",
       "raw": "raw/dhcp/dhclient-missing-dev-quiet.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient eth9",
@@ -1463,7 +1463,7 @@
       "file": "dhcp/dhclient-no-iface.txt",
       "raw": "raw/dhcp/dhclient-no-iface.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -v",
@@ -1476,7 +1476,7 @@
       "file": "dhcp/dhclient-no-server.txt",
       "raw": "raw/dhcp/dhclient-no-server.txt",
       "topology": "square-none",
-      "topologyDesc": "square-none: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: no DHCP server, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-none: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: no DHCP server, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -v eth0",
@@ -1489,7 +1489,7 @@
       "file": "dhcp/dhclient-no-server-quiet.txt",
       "raw": "raw/dhcp/dhclient-no-server-quiet.txt",
       "topology": "square-none",
-      "topologyDesc": "square-none: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: no DHCP server, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-none: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: no DHCP server, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient eth0",
@@ -1502,7 +1502,7 @@
       "file": "dhcp/dhclient-noping.txt",
       "raw": "raw/dhcp/dhclient-noping.txt",
       "topology": "square-noping",
-      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-noping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --no-ping, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -v eth0",
@@ -1515,7 +1515,7 @@
       "file": "dhcp/dhclient-norouter.txt",
       "raw": "raw/dhcp/dhclient-norouter.txt",
       "topology": "square-norouter",
-      "topologyDesc": "square-norouter: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-option=3 (no router option), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-norouter: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-option=3 (no router option), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -v eth0",
@@ -1528,7 +1528,7 @@
       "file": "dhcp/dhclient-norouter-route.txt",
       "raw": "raw/dhcp/dhclient-norouter-route.txt",
       "topology": "square-norouter",
-      "topologyDesc": "square-norouter: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-option=3 (no router option), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-norouter: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-option=3 (no router option), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0"
@@ -1543,7 +1543,7 @@
       "file": "dhcp/dhclient-ping.txt",
       "raw": "raw/dhcp/dhclient-ping.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0"
@@ -1558,7 +1558,7 @@
       "file": "dhcp/dhclient-quiet.txt",
       "raw": "raw/dhcp/dhclient-quiet.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient eth0",
@@ -1571,7 +1571,7 @@
       "file": "dhcp/dhclient-registry-neigh.txt",
       "raw": "raw/dhcp/dhclient-registry-neigh.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "registry",
       "setup": [
         "observatory: dhclient eth0"
@@ -1586,7 +1586,7 @@
       "file": "dhcp/dhclient-release.txt",
       "raw": "raw/dhcp/dhclient-release.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0"
@@ -1601,7 +1601,7 @@
       "file": "dhcp/dhclient-release-addr.txt",
       "raw": "raw/dhcp/dhclient-release-addr.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0",
@@ -1617,7 +1617,7 @@
       "file": "dhcp/dhclient-release-door-down.txt",
       "raw": "raw/dhcp/dhclient-release-door-down.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0",
@@ -1633,7 +1633,7 @@
       "file": "dhcp/dhclient-release-nothing.txt",
       "raw": "raw/dhcp/dhclient-release-nothing.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -r eth0",
@@ -1646,7 +1646,7 @@
       "file": "dhcp/dhclient-release-nothing-v.txt",
       "raw": "raw/dhcp/dhclient-release-nothing-v.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -r -v eth0",
@@ -1659,7 +1659,7 @@
       "file": "dhcp/dhclient-release-route.txt",
       "raw": "raw/dhcp/dhclient-release-route.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0",
@@ -1675,7 +1675,7 @@
       "file": "dhcp/dhclient-release-twice.txt",
       "raw": "raw/dhcp/dhclient-release-twice.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0",
@@ -1691,7 +1691,7 @@
       "file": "dhcp/dhclient-release-v.txt",
       "raw": "raw/dhcp/dhclient-release-v.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: dhclient eth0"
@@ -1706,7 +1706,7 @@
       "file": "dhcp/dhclient-sequential.txt",
       "raw": "raw/dhcp/dhclient-sequential.txt",
       "topology": "square-seq",
-      "topologyDesc": "square-seq: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-sequential-ip, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-seq: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq --dhcp-sequential-ip, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -v eth0",
@@ -1719,7 +1719,7 @@
       "file": "dhcp/dhclient-v.txt",
       "raw": "raw/dhcp/dhclient-v.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "dhclient -v eth0",
@@ -1732,7 +1732,7 @@
       "file": "help/ip-addr-help.txt",
       "raw": "raw/help/ip-addr-help.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip addr help",
@@ -1745,7 +1745,7 @@
       "file": "help/ip-address-help.txt",
       "raw": "raw/help/ip-address-help.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip address help",
@@ -1758,7 +1758,7 @@
       "file": "help/ip-bare.txt",
       "raw": "raw/help/ip-bare.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip",
@@ -1771,7 +1771,7 @@
       "file": "help/ip-h.txt",
       "raw": "raw/help/ip-h.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip h",
@@ -1784,7 +1784,7 @@
       "file": "help/ip-help.txt",
       "raw": "raw/help/ip-help.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip help",
@@ -1797,7 +1797,7 @@
       "file": "help/ip-link-h.txt",
       "raw": "raw/help/ip-link-h.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip link h",
@@ -1810,7 +1810,7 @@
       "file": "help/ip-link-help.txt",
       "raw": "raw/help/ip-link-help.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip link help",
@@ -1823,7 +1823,7 @@
       "file": "help/ip-neigh-help.txt",
       "raw": "raw/help/ip-neigh-help.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip neigh help",
@@ -1836,7 +1836,7 @@
       "file": "help/ip-route-help.txt",
       "raw": "raw/help/ip-route-help.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip route help",
@@ -1849,7 +1849,7 @@
       "file": "neigh/ip-n.txt",
       "raw": "raw/neigh/ip-n.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
@@ -1864,7 +1864,7 @@
       "file": "neigh/neigh-after-del.txt",
       "raw": "raw/neigh/neigh-after-del.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7",
@@ -1880,7 +1880,7 @@
       "file": "neigh/neigh-after-flush.txt",
       "raw": "raw/neigh/neigh-after-flush.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7",
@@ -1896,7 +1896,7 @@
       "file": "neigh/neigh-after-flush-failed.txt",
       "raw": "raw/neigh/neigh-after-flush-failed.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.9",
@@ -1913,7 +1913,7 @@
       "file": "neigh/neigh-del.txt",
       "raw": "raw/neigh/neigh-del.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
@@ -1928,7 +1928,7 @@
       "file": "neigh/neigh-del-missing.txt",
       "raw": "raw/neigh/neigh-del-missing.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip neigh del 10.0.0.7 dev eth0",
@@ -1941,7 +1941,7 @@
       "file": "neigh/neigh-del-missing-dev.txt",
       "raw": "raw/neigh/neigh-del-missing-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip neigh del 10.0.0.7 dev eth9",
@@ -1954,7 +1954,7 @@
       "file": "neigh/neigh-del-no-dev.txt",
       "raw": "raw/neigh/neigh-del-no-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
@@ -1969,7 +1969,7 @@
       "file": "neigh/neigh-delay.txt",
       "raw": "raw/neigh/neigh-delay.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=1000 net.ipv4.neigh.eth0.delay_first_probe_time=0",
@@ -2120,7 +2120,7 @@
       "file": "neigh/neigh-failed.txt",
       "raw": "raw/neigh/neigh-failed.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.9",
@@ -2136,7 +2136,7 @@
       "file": "neigh/neigh-flush.txt",
       "raw": "raw/neigh/neigh-flush.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
@@ -2151,7 +2151,7 @@
       "file": "neigh/neigh-flush-failed.txt",
       "raw": "raw/neigh/neigh-flush-failed.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.9",
@@ -2167,7 +2167,7 @@
       "file": "neigh/neigh-flush-no-args.txt",
       "raw": "raw/neigh/neigh-flush-no-args.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip neigh flush",
@@ -2180,7 +2180,7 @@
       "file": "neigh/neigh-flush-permanent.txt",
       "raw": "raw/neigh/neigh-flush-permanent.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip neigh add 10.0.0.7 lladdr 02:00:00:00:00:07 dev eth0 nud permanent",
@@ -2196,7 +2196,7 @@
       "file": "neigh/neigh-fresh.txt",
       "raw": "raw/neigh/neigh-fresh.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip neigh",
@@ -2209,7 +2209,7 @@
       "file": "neigh/neigh-incomplete.txt",
       "raw": "raw/neigh/neigh-incomplete.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: timeout 5 ping -c 1 -W 4 10.0.0.9 &",
@@ -2225,8 +2225,8 @@
       "file": "neigh/neigh-learned-from-request.txt",
       "raw": "raw/neigh/neigh-learned-from-request.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
       ],
@@ -2240,8 +2240,8 @@
       "file": "neigh/neigh-learned-later.txt",
       "raw": "raw/neigh/neigh-learned-later.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7",
         "wait 7s"
@@ -2256,7 +2256,7 @@
       "file": "neigh/neigh-permanent.txt",
       "raw": "raw/neigh/neigh-permanent.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip neigh add 10.0.0.7 lladdr 02:00:00:00:00:07 dev eth0 nud permanent"
@@ -2287,14 +2287,14 @@
       "file": "neigh/neigh-probe.txt",
       "raw": "raw/neigh/neigh-probe.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=1000 net.ipv4.neigh.eth0.delay_first_probe_time=0",
         "observatory: ping -c 1 -W 1 10.0.0.7",
         "wait 3s",
         "observatory: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=30000 net.ipv4.neigh.eth0.delay_first_probe_time=5",
-        "lantern: ip addr flush dev eth0",
+        "kitchen: ip addr flush dev eth0",
         "observatory: ping -c 1 -W 1 10.0.0.7",
         "wait 6s"
       ],
@@ -2308,14 +2308,14 @@
       "file": "neigh/neigh-probe-failed.txt",
       "raw": "raw/neigh/neigh-probe-failed.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=1000 net.ipv4.neigh.eth0.delay_first_probe_time=0",
         "observatory: ping -c 1 -W 1 10.0.0.7",
         "wait 3s",
         "observatory: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=30000 net.ipv4.neigh.eth0.delay_first_probe_time=5",
-        "lantern: ip addr flush dev eth0",
+        "kitchen: ip addr flush dev eth0",
         "observatory: ping -c 1 -W 1 10.0.0.7",
         "wait 10s"
       ],
@@ -2329,7 +2329,7 @@
       "file": "neigh/neigh-probe-reachable.txt",
       "raw": "raw/neigh/neigh-probe-reachable.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=1000 net.ipv4.neigh.eth0.delay_first_probe_time=0",
@@ -2349,7 +2349,7 @@
       "file": "neigh/neigh-reachable.txt",
       "raw": "raw/neigh/neigh-reachable.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
@@ -2364,7 +2364,7 @@
       "file": "neigh/neigh-show.txt",
       "raw": "raw/neigh/neigh-show.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
@@ -2379,7 +2379,7 @@
       "file": "neigh/neigh-show-dev.txt",
       "raw": "raw/neigh/neigh-show-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
@@ -2394,7 +2394,7 @@
       "file": "neigh/neigh-show-dev-lo.txt",
       "raw": "raw/neigh/neigh-show-dev-lo.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 1 -W 1 10.0.0.7"
@@ -2409,7 +2409,7 @@
       "file": "neigh/neigh-show-missing-dev.txt",
       "raw": "raw/neigh/neigh-show-missing-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip neigh show dev eth9",
@@ -2422,7 +2422,7 @@
       "file": "neigh/neigh-stale.txt",
       "raw": "raw/neigh/neigh-stale.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: sysctl -w net.ipv4.neigh.eth0.base_reachable_time_ms=1000 net.ipv4.neigh.eth0.delay_first_probe_time=0",
@@ -2439,7 +2439,7 @@
       "file": "neigh/neigh-unknown-cmd.txt",
       "raw": "raw/neigh/neigh-unknown-cmd.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ip neigh frobnicate",
@@ -2452,7 +2452,7 @@
       "file": "ping/ping-W-garbage.txt",
       "raw": "raw/ping/ping-W-garbage.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 -W x 10.0.0.7",
@@ -2465,7 +2465,7 @@
       "file": "ping/ping-W-no-reply.txt",
       "raw": "raw/ping/ping-W-no-reply.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 -W 2 10.0.0.9",
@@ -2478,7 +2478,7 @@
       "file": "ping/ping-W-reply.txt",
       "raw": "raw/ping/ping-W-reply.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 2 -W 2 10.0.0.7",
@@ -2491,7 +2491,7 @@
       "file": "ping/ping-bad-address.txt",
       "raw": "raw/ping/ping-bad-address.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 10.0.0.300",
@@ -2504,7 +2504,7 @@
       "file": "ping/ping-bad-option.txt",
       "raw": "raw/ping/ping-bad-option.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -x 10.0.0.7",
@@ -2517,7 +2517,7 @@
       "file": "ping/ping-c-garbage.txt",
       "raw": "raw/ping/ping-c-garbage.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c x 10.0.0.7",
@@ -2530,7 +2530,7 @@
       "file": "ping/ping-c-no-dest.txt",
       "raw": "raw/ping/ping-c-no-dest.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1",
@@ -2543,7 +2543,7 @@
       "file": "ping/ping-c-zero.txt",
       "raw": "raw/ping/ping-c-zero.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 0 10.0.0.7",
@@ -2556,7 +2556,7 @@
       "file": "ping/ping-c1.txt",
       "raw": "raw/ping/ping-c1.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 10.0.0.7",
@@ -2569,7 +2569,7 @@
       "file": "ping/ping-c4.txt",
       "raw": "raw/ping/ping-c4.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 4 10.0.0.7",
@@ -2582,7 +2582,7 @@
       "file": "ping/ping-door-down.txt",
       "raw": "raw/ping/ping-door-down.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ip link set eth0 down"
@@ -2688,7 +2688,7 @@
       "file": "ping/ping-host-unreachable.txt",
       "raw": "raw/ping/ping-host-unreachable.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 4 10.0.0.9",
@@ -2701,7 +2701,7 @@
       "file": "ping/ping-host-unreachable-c1.txt",
       "raw": "raw/ping/ping-host-unreachable-c1.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 10.0.0.9",
@@ -2714,7 +2714,7 @@
       "file": "ping/ping-host-unreachable-interrupted.txt",
       "raw": "raw/ping/ping-host-unreachable-interrupted.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping 10.0.0.9",
@@ -2742,7 +2742,7 @@
       "file": "ping/ping-i.txt",
       "raw": "raw/ping/ping-i.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 3 -i 0.5 10.0.0.7",
@@ -2755,7 +2755,7 @@
       "file": "ping/ping-i-garbage.txt",
       "raw": "raw/ping/ping-i-garbage.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 -i x 10.0.0.7",
@@ -2768,7 +2768,7 @@
       "file": "ping/ping-interrupted.txt",
       "raw": "raw/ping/ping-interrupted.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping 10.0.0.7",
@@ -2781,7 +2781,7 @@
       "file": "ping/ping-loop.txt",
       "raw": "raw/ping/ping-loop.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 3 10.0.4.7",
@@ -2794,7 +2794,7 @@
       "file": "ping/ping-loop-fixed.txt",
       "raw": "raw/ping/ping-loop-fixed.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
       "device": "observatory",
       "setup": [
         "arch: ip route add 10.0.4.0/24 via 10.0.3.2"
@@ -2809,7 +2809,7 @@
       "file": "ping/ping-loop-ttl-1.txt",
       "raw": "raw/ping/ping-loop-ttl-1.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 -t 1 10.0.4.7",
@@ -2822,7 +2822,7 @@
       "file": "ping/ping-loop-ttl-2.txt",
       "raw": "raw/ping/ping-loop-ttl-2.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 -t 2 10.0.4.7",
@@ -2835,7 +2835,7 @@
       "file": "ping/ping-loopback.txt",
       "raw": "raw/ping/ping-loopback.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 2 127.0.0.1",
@@ -2848,7 +2848,7 @@
       "file": "ping/ping-n.txt",
       "raw": "raw/ping/ping-n.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -n -c 2 10.0.0.7",
@@ -2887,7 +2887,7 @@
       "file": "ping/ping-network-unreachable.txt",
       "raw": "raw/ping/ping-network-unreachable.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 192.168.1.1",
@@ -2900,7 +2900,7 @@
       "file": "ping/ping-no-address.txt",
       "raw": "raw/ping/ping-no-address.txt",
       "topology": "lan-bare",
-      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
+      "topologyDesc": "lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 10.0.0.7",
@@ -2926,7 +2926,7 @@
       "file": "ping/ping-no-dest.txt",
       "raw": "raw/ping/ping-no-dest.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping",
@@ -2954,10 +2954,10 @@
       "file": "ping/ping-peer-down.txt",
       "raw": "raw/ping/ping-peer-down.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
-        "lantern: ip link set eth0 down"
+        "kitchen: ip link set eth0 down"
       ],
       "command": "ping -c 2 -W 1 10.0.0.7",
       "actualCommand": "ping -c 2 -W 1 10.0.0.7",
@@ -2969,10 +2969,10 @@
       "file": "ping/ping-peer-no-address.txt",
       "raw": "raw/ping/ping-peer-no-address.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
-        "lantern: ip addr flush dev eth0"
+        "kitchen: ip addr flush dev eth0"
       ],
       "command": "ping -c 2 10.0.0.7",
       "actualCommand": "ping -c 2 10.0.0.7",
@@ -3016,8 +3016,8 @@
       "file": "ping/ping-redirect.txt",
       "raw": "raw/ping/ping-redirect.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [],
       "command": "ping -c 3 10.0.3.2",
       "actualCommand": "ping -c 3 10.0.3.2",
@@ -3029,10 +3029,10 @@
       "file": "ping/ping-redirect-after.txt",
       "raw": "raw/ping/ping-redirect-after.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 2 10.0.3.2"
+        "gallery: ping -c 2 10.0.3.2"
       ],
       "command": "ping -c 2 10.0.3.2",
       "actualCommand": "ping -c 2 10.0.3.2",
@@ -3044,8 +3044,8 @@
       "file": "ping/ping-redirect-loop.txt",
       "raw": "raw/ping/ping-redirect-loop.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [],
       "command": "ping -c 3 -W 1 10.0.4.7",
       "actualCommand": "ping -c 3 -W 1 10.0.4.7",
@@ -3057,8 +3057,8 @@
       "file": "ping/ping-redirect-loop-fast.txt",
       "raw": "raw/ping/ping-redirect-loop-fast.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [],
       "command": "ping -c 30 -i 0.2 -W 1 10.0.4.7",
       "actualCommand": "ping -c 30 -i 0.2 -W 1 10.0.4.7",
@@ -3070,8 +3070,8 @@
       "file": "ping/ping-redirect-loop-ttl-2.txt",
       "raw": "raw/ping/ping-redirect-loop-ttl-2.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [],
       "command": "ping -c 1 -t 2 10.0.4.7",
       "actualCommand": "ping -c 1 -t 2 10.0.4.7",
@@ -3083,8 +3083,8 @@
       "file": "ping/ping-redirect-not-sent.txt",
       "raw": "raw/ping/ping-redirect-not-sent.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
         "crossing: sysctl -w net.ipv4.conf.all.send_redirects=0 net.ipv4.conf.eth1.send_redirects=0"
       ],
@@ -3098,10 +3098,10 @@
       "file": "ping/ping-redirect-refused.txt",
       "raw": "raw/ping/ping-redirect-refused.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: sysctl -w net.ipv4.conf.all.accept_redirects=0 net.ipv4.conf.eth0.accept_redirects=0"
+        "gallery: sysctl -w net.ipv4.conf.all.accept_redirects=0 net.ipv4.conf.eth0.accept_redirects=0"
       ],
       "command": "ping -c 3 10.0.3.2",
       "actualCommand": "ping -c 3 10.0.3.2",
@@ -3178,7 +3178,7 @@
       "file": "ping/ping-self.txt",
       "raw": "raw/ping/ping-self.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 2 10.0.0.5",
@@ -3191,7 +3191,7 @@
       "file": "ping/ping-t.txt",
       "raw": "raw/ping/ping-t.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 2 -t 5 10.0.0.7",
@@ -3204,7 +3204,7 @@
       "file": "ping/ping-t-too-big.txt",
       "raw": "raw/ping/ping-t-too-big.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [],
       "command": "ping -c 1 -t 300 10.0.0.7",
@@ -3746,11 +3746,11 @@
       "file": "route/route-after-flush-cache.txt",
       "raw": "raw/route/route-after-flush-cache.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 3 10.0.3.2",
-        "vesper: ip route flush cache"
+        "gallery: ping -c 3 10.0.3.2",
+        "gallery: ip route flush cache"
       ],
       "command": "ip route show cache",
       "actualCommand": "ip route show cache",
@@ -3778,13 +3778,13 @@
       "file": "route/route-cache-door-down.txt",
       "raw": "raw/route/route-cache-door-down.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 3 10.0.3.2",
-        "vesper: ip link set eth0 down",
-        "vesper: ip link set eth0 up",
-        "vesper: ip route add default via 10.0.2.1"
+        "gallery: ping -c 3 10.0.3.2",
+        "gallery: ip link set eth0 down",
+        "gallery: ip link set eth0 up",
+        "gallery: ip route add default via 10.0.2.1"
       ],
       "command": "ip route show cache",
       "actualCommand": "ip route show cache",
@@ -3917,10 +3917,10 @@
       "file": "route/route-flush-cache.txt",
       "raw": "raw/route/route-flush-cache.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 3 10.0.3.2"
+        "gallery: ping -c 3 10.0.3.2"
       ],
       "command": "ip route flush cache",
       "actualCommand": "ip route flush cache",
@@ -3945,7 +3945,7 @@
       "file": "route/route-get-loop.txt",
       "raw": "raw/route/route-get-loop.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
       "device": "observatory",
       "setup": [
         "observatory: ping -c 2 10.0.4.7"
@@ -3986,10 +3986,10 @@
       "file": "route/route-get-not-redirected.txt",
       "raw": "raw/route/route-get-not-redirected.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 1 10.0.3.2"
+        "gallery: ping -c 1 10.0.3.2"
       ],
       "command": "ip route get 10.0.3.2",
       "actualCommand": "ip route get 10.0.3.2",
@@ -4027,10 +4027,10 @@
       "file": "route/route-get-redirected.txt",
       "raw": "raw/route/route-get-redirected.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 2 10.0.3.2"
+        "gallery: ping -c 2 10.0.3.2"
       ],
       "command": "ip route get 10.0.3.2",
       "actualCommand": "ip route get 10.0.3.2",
@@ -4159,10 +4159,10 @@
       "file": "route/route-show-cache.txt",
       "raw": "raw/route/route-show-cache.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 3 10.0.3.2"
+        "gallery: ping -c 3 10.0.3.2"
       ],
       "command": "ip route show cache",
       "actualCommand": "ip route show cache",
@@ -4174,8 +4174,8 @@
       "file": "route/route-show-cache-empty.txt",
       "raw": "raw/route/route-show-cache-empty.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [],
       "command": "ip route show cache",
       "actualCommand": "ip route show cache",
@@ -4187,11 +4187,11 @@
       "file": "route/route-show-cache-shared.txt",
       "raw": "raw/route/route-show-cache-shared.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 3 10.0.3.2",
-        "vesper: ip route add 10.9.0.0/16 via 10.0.2.1"
+        "gallery: ping -c 3 10.0.3.2",
+        "gallery: ip route add 10.9.0.0/16 via 10.0.2.1"
       ],
       "command": "ip route show cache",
       "actualCommand": "ip route show cache",
@@ -4203,10 +4203,10 @@
       "file": "route/route-show-cache-unused.txt",
       "raw": "raw/route/route-show-cache-unused.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "vesper: ping -c 2 10.0.3.2"
+        "gallery: ping -c 2 10.0.3.2"
       ],
       "command": "ip route show cache",
       "actualCommand": "ip route show cache",
@@ -4257,7 +4257,7 @@
       "file": "route/sysctl-forward-accept-redirects.txt",
       "raw": "raw/route/sysctl-forward-accept-redirects.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
       "device": "crossing",
       "setup": [],
       "command": "sysctl net.ipv4.conf.all.accept_redirects",
@@ -5941,8 +5941,8 @@
       "file": "tcpdump/tcpdump-all.txt",
       "raw": "raw/tcpdump/tcpdump-all.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -5956,8 +5956,8 @@
       "file": "tcpdump/tcpdump-arp.txt",
       "raw": "raw/tcpdump/tcpdump-arp.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -5971,8 +5971,8 @@
       "file": "tcpdump/tcpdump-arp-e.txt",
       "raw": "raw/tcpdump/tcpdump-arp-e.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -5986,8 +5986,8 @@
       "file": "tcpdump/tcpdump-arp-probe.txt",
       "raw": "raw/tcpdump/tcpdump-arp-probe.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -6001,8 +6001,8 @@
       "file": "tcpdump/tcpdump-bad-filter.txt",
       "raw": "raw/tcpdump/tcpdump-bad-filter.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [],
       "command": "tcpdump -i eth0 frobnicate",
       "actualCommand": "timeout -s INT 3 stdbuf -oL tcpdump -Z root -i eth0 frobnicate",
@@ -6014,8 +6014,8 @@
       "file": "tcpdump/tcpdump-bad-filter-host.txt",
       "raw": "raw/tcpdump/tcpdump-bad-filter-host.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [],
       "command": "tcpdump -i eth0 host",
       "actualCommand": "timeout -s INT 3 stdbuf -oL tcpdump -Z root -i eth0 host",
@@ -6027,8 +6027,8 @@
       "file": "tcpdump/tcpdump-bad-option.txt",
       "raw": "raw/tcpdump/tcpdump-bad-option.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [],
       "command": "tcpdump -k",
       "actualCommand": "timeout -s INT 3 stdbuf -oL tcpdump -Z root -k",
@@ -6040,8 +6040,8 @@
       "file": "tcpdump/tcpdump-c.txt",
       "raw": "raw/tcpdump/tcpdump-c.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 2 10.0.0.7"
       ],
@@ -6055,8 +6055,8 @@
       "file": "tcpdump/tcpdump-c-garbage.txt",
       "raw": "raw/tcpdump/tcpdump-c-garbage.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [],
       "command": "tcpdump -c x -i eth0",
       "actualCommand": "timeout -s INT 3 stdbuf -oL tcpdump -Z root -c x -i eth0",
@@ -6068,7 +6068,7 @@
       "file": "tcpdump/tcpdump-dhcp.txt",
       "raw": "raw/tcpdump/tcpdump-dhcp.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "during capture, observatory: dhclient eth0"
@@ -6083,8 +6083,8 @@
       "file": "tcpdump/tcpdump-dhcp-e.txt",
       "raw": "raw/tcpdump/tcpdump-dhcp-e.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: dhclient eth0"
       ],
@@ -6098,7 +6098,7 @@
       "file": "tcpdump/tcpdump-dhcp-names.txt",
       "raw": "raw/tcpdump/tcpdump-dhcp-names.txt",
       "topology": "square-ping",
-      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
+      "topologyDesc": "square-ping: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: dnsmasq (pings before offering), dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off",
       "device": "observatory",
       "setup": [
         "during capture, observatory: dhclient eth0"
@@ -6113,10 +6113,10 @@
       "file": "tcpdump/tcpdump-door-down.txt",
       "raw": "raw/tcpdump/tcpdump-door-down.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
-        "lantern: ip link set eth0 down"
+        "kitchen: ip link set eth0 down"
       ],
       "command": "tcpdump -n -i eth0",
       "actualCommand": "timeout -s INT 3 stdbuf -oL tcpdump -Z root -n -i eth0",
@@ -6145,8 +6145,8 @@
       "file": "tcpdump/tcpdump-e.txt",
       "raw": "raw/tcpdump/tcpdump-e.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -6160,8 +6160,8 @@
       "file": "tcpdump/tcpdump-flags-together.txt",
       "raw": "raw/tcpdump/tcpdump-flags-together.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -6220,8 +6220,8 @@
       "file": "tcpdump/tcpdump-host.txt",
       "raw": "raw/tcpdump/tcpdump-host.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -6235,8 +6235,8 @@
       "file": "tcpdump/tcpdump-host-nobody.txt",
       "raw": "raw/tcpdump/tcpdump-host-nobody.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 -W 1 10.0.0.9"
       ],
@@ -6266,8 +6266,8 @@
       "file": "tcpdump/tcpdump-icmp.txt",
       "raw": "raw/tcpdump/tcpdump-icmp.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 2 10.0.0.7"
       ],
@@ -6281,7 +6281,7 @@
       "file": "tcpdump/tcpdump-loop.txt",
       "raw": "raw/tcpdump/tcpdump-loop.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
       "device": "observatory",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.4.7"
@@ -6296,8 +6296,8 @@
       "file": "tcpdump/tcpdump-missing-dev.txt",
       "raw": "raw/tcpdump/tcpdump-missing-dev.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [],
       "command": "tcpdump -i eth9",
       "actualCommand": "timeout -s INT 3 stdbuf -oL tcpdump -Z root -i eth9",
@@ -6324,8 +6324,8 @@
       "file": "tcpdump/tcpdump-no-i.txt",
       "raw": "raw/tcpdump/tcpdump-no-i.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -6339,8 +6339,8 @@
       "file": "tcpdump/tcpdump-no-n.txt",
       "raw": "raw/tcpdump/tcpdump-no-n.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
       ],
@@ -6354,8 +6354,8 @@
       "file": "tcpdump/tcpdump-nothing.txt",
       "raw": "raw/tcpdump/tcpdump-nothing.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [],
       "command": "tcpdump -n -i eth0 icmp",
       "actualCommand": "timeout -s INT 2 stdbuf -oL tcpdump -Z root -n -i eth0 icmp",
@@ -6367,8 +6367,8 @@
       "file": "tcpdump/tcpdump-port-unreachable.txt",
       "raw": "raw/tcpdump/tcpdump-port-unreachable.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: echo hello > /dev/udp/10.0.0.7/9"
       ],
@@ -6382,10 +6382,10 @@
       "file": "tcpdump/tcpdump-redirect.txt",
       "raw": "raw/tcpdump/tcpdump-redirect.txt",
       "topology": "cathedral",
-      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, vesper eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> halo eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; vesper default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; halo default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
-      "device": "vesper",
+      "topologyDesc": "cathedral: observatory eth0 02:00:00:00:01:05 10.0.1.5/24 <-> crossing eth0 02:00:00:00:01:01 10.0.1.1/24; cloister switch br0 (vlan_default_pvid 0) over eth1 02:00:00:00:02:a1, eth2 02:00:00:00:02:a2, eth3 02:00:00:00:02:a3 cabled to crossing eth1 02:00:00:00:02:01 10.0.2.1/24, arch eth0 02:00:00:00:02:02 10.0.2.2/24, gallery eth0 02:00:00:00:02:07 10.0.2.7/24; arch eth1 02:00:00:00:03:01 10.0.3.1/24 <-> spire eth0 02:00:00:00:03:02 10.0.3.2/24; spire eth1 02:00:00:00:04:01 10.0.4.1/24 <-> loft eth0 02:00:00:00:04:07 10.0.4.7/24; observatory default via 10.0.1.1; gallery default via 10.0.2.1; crossing 10.0.3.0/24 and 10.0.4.0/24 via 10.0.2.2; arch default via 10.0.2.1; spire default via 10.0.3.1; loft default via 10.0.4.1; ip_forward=1 on crossing, arch, spire; all up; IPv6 off",
+      "device": "gallery",
       "setup": [
-        "during capture, vesper: ping -c 1 10.0.3.2"
+        "during capture, gallery: ping -c 1 10.0.3.2"
       ],
       "command": "tcpdump -n -c 3 -i eth0 icmp",
       "actualCommand": "timeout -s INT 6 stdbuf -oL tcpdump -Z root -n -c 3 -i eth0 icmp",
@@ -6397,7 +6397,7 @@
       "file": "tcpdump/tcpdump-sender.txt",
       "raw": "raw/tcpdump/tcpdump-sender.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
       "device": "observatory",
       "setup": [
         "during capture, observatory: ping -c 1 10.0.0.7"
@@ -6533,8 +6533,8 @@
       "file": "tcpdump/tcpdump-udp.txt",
       "raw": "raw/tcpdump/tcpdump-udp.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: echo hello > /dev/udp/10.0.0.7/9"
       ],
@@ -6548,8 +6548,8 @@
       "file": "tcpdump/tcpdump-udp-e.txt",
       "raw": "raw/tcpdump/tcpdump-udp-e.txt",
       "topology": "lan",
-      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
-      "device": "lantern",
+      "topologyDesc": "lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off",
+      "device": "kitchen",
       "setup": [
         "during capture, observatory: echo hello > /dev/udp/10.0.0.7/9"
       ],

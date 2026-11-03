@@ -45,7 +45,7 @@ export function lastAnswersFrom(device: string, ip: string, door: string, n: num
   };
 }
 
-/** An answer from `firstIp` reached `device`, and later `then` ran there (e.g. quill answered; the player re-added an address). */
+/** An answer from `firstIp` reached `device`, and later `then` ran there (e.g. library answered; the player re-added an address). */
 export function ranAfterAnswer(device: string, firstIp: string, then: RegExp): Predicate {
   return (f) => {
     const first = echoReplies(f, device).find((r) => r.ip === firstIp);

@@ -66,15 +66,15 @@ export const SCENARIOS: Scenario[] = [
     steps: [{ device: "observatory", ping: { dst: "10.0.4.7", count: 1 }, settleMs: 6500 }],
   },
   {
-    name: "cathedral: crossing redirects vesper to arch, then vesper goes direct",
+    name: "cathedral: crossing redirects gallery to arch, then gallery goes direct",
     topology: cathedral(),
     // Neighbours primed, and no settling into the routers' 5 s probes: see the loop case below.
     steps: [
       { device: "crossing", ping: { dst: "10.0.2.2", count: 1 }, settleMs: 0 },
-      { device: "vesper", ping: { dst: "10.0.2.2", count: 1 }, settleMs: 0 },
-      { device: "vesper", ping: { dst: "10.0.2.1", count: 1 }, settleMs: 0 },
-      { device: "vesper", ping: { dst: "10.0.3.2", count: 3 }, settleMs: 300 },
-      { device: "vesper", run: "ip route get 10.0.3.2", settleMs: 300 },
+      { device: "gallery", ping: { dst: "10.0.2.2", count: 1 }, settleMs: 0 },
+      { device: "gallery", ping: { dst: "10.0.2.1", count: 1 }, settleMs: 0 },
+      { device: "gallery", ping: { dst: "10.0.3.2", count: 3 }, settleMs: 300 },
+      { device: "gallery", run: "ip route get 10.0.3.2", settleMs: 300 },
     ],
   },
   {
@@ -84,9 +84,9 @@ export const SCENARIOS: Scenario[] = [
     // redirects set off race each other within microseconds, in an order the simulator needn't copy.
     steps: [
       { device: "crossing", ping: { dst: "10.0.2.2", count: 1 }, settleMs: 0 },
-      { device: "vesper", ping: { dst: "10.0.2.2", count: 1 }, settleMs: 0 },
-      { device: "vesper", ping: { dst: "10.0.2.1", count: 1 }, settleMs: 0 },
-      { device: "vesper", ping: { dst: "10.0.4.7", count: 3, waitS: 1 }, settleMs: 300 },
+      { device: "gallery", ping: { dst: "10.0.2.2", count: 1 }, settleMs: 0 },
+      { device: "gallery", ping: { dst: "10.0.2.1", count: 1 }, settleMs: 0 },
+      { device: "gallery", ping: { dst: "10.0.4.7", count: 3, waitS: 1 }, settleMs: 300 },
     ],
   },
   {
@@ -135,14 +135,14 @@ export const SCENARIOS: Scenario[] = [
     name: "square: the registry's first pick answers its ping, so it offers the next address",
     topology: square(),
     needs: ["dhclient"],
-    faults: [{ kind: "addr-set", device: "lantern", cidr: "10.0.1.149/24", dev: "eth0" }],
+    faults: [{ kind: "addr-set", device: "kitchen", cidr: "10.0.1.149/24", dev: "eth0" }],
     steps: [{ device: "observatory", run: "dhclient -v eth0", settleMs: 6500 }],
   },
   {
     name: "square: no conflict check at the registry; the client's ARP check declines a taken address",
     topology: square({ pingCheck: false }),
     needs: ["dhclient"],
-    faults: [{ kind: "addr-set", device: "lantern", cidr: "10.0.1.149/24", dev: "eth0" }],
+    faults: [{ kind: "addr-set", device: "kitchen", cidr: "10.0.1.149/24", dev: "eth0" }],
     steps: [{ device: "observatory", run: "dhclient -v eth0", settleMs: 9000 }],
   },
   {
@@ -178,7 +178,7 @@ export const SCENARIOS: Scenario[] = [
   },
 ];
 
-/** Floor 7's square, small: observatory (no address), the registry (dnsmasq) and lantern on a switch. */
+/** Floor 7's square, small: observatory (no address), the registry (dnsmasq) and kitchen on a switch. */
 function square(server: Partial<DhcpServerSpec> = {}): Topology {
   const host = (id: string, mac: string, cidr?: string) => ({
     id,
@@ -205,12 +205,12 @@ function square(server: Partial<DhcpServerSpec> = {}): Topology {
         ...host("registry", "02:00:00:00:00:02", "10.0.1.2/24"),
         dhcpServer: { range: ["10.0.1.100", "10.0.1.150"], leaseSecs: 3600, ...server },
       },
-      host("lantern", "02:00:00:00:00:07", "10.0.1.7/24"),
+      host("kitchen", "02:00:00:00:00:07", "10.0.1.7/24"),
     ],
     links: [
       { id: "l1", a: { device: "hall", iface: "eth1" }, b: { device: "observatory", iface: "eth0" } },
       { id: "l2", a: { device: "hall", iface: "eth2" }, b: { device: "registry", iface: "eth0" } },
-      { id: "l3", a: { device: "hall", iface: "eth3" }, b: { device: "lantern", iface: "eth0" } },
+      { id: "l3", a: { device: "hall", iface: "eth3" }, b: { device: "kitchen", iface: "eth0" } },
     ],
   };
 }

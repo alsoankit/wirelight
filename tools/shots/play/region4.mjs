@@ -47,7 +47,7 @@ const slate = async () => {
 // 8.1: two pings across one street each.
 await open(p, base, "f8.other-street");
 await type(p, "ping -c 1 10.0.1.1");
-await walk("nave", "crossing", "cloister", "vesper");
+await walk("nave", "crossing", "cloister", "gallery");
 await type(p, "ping -c 1 10.0.2.1");
 await check("8.1");
 
@@ -69,13 +69,13 @@ await walk("nave", "observatory");
 await type(p, "ping -c 3 10.0.3.7");
 await check("8.3");
 
-// 8.4: listen in vesper's room with the Slate's Capture, then give vesper a way back.
+// 8.4: listen in gallery's room with the Slate's Capture, then give gallery a way back.
 await open(p, base, "f8.no-way-back");
 await p.click(".console-bar");
 await p.click(".console-term");
 await p.keyboard.type("ping -c 4 10.0.2.7");
 await p.keyboard.press("Enter");
-await walk("nave", "crossing", "cloister", "vesper");
+await walk("nave", "crossing", "cloister", "gallery");
 await slate();
 await p.click(".panel button:has-text('Start')");
 await p.waitForTimeout(4000);
@@ -125,7 +125,7 @@ await walk("nave", "crossing");
 await type(p, "ip route add 10.0.3.0/24 via 10.0.2.2");
 await walk("cloister", "arch");
 await type(p, "sysctl -w net.ipv4.ip_forward=1");
-await walk("tower", "lumen");
+await walk("tower", "belfry");
 await type(p, "ip route del default");
 await type(p, "ip route add default via 10.0.3.1");
 await walk("tower", "arch", "cloister", "crossing", "nave", "observatory");
@@ -149,9 +149,9 @@ await p.screenshot({
 });
 await check("9.1");
 
-// 9.2: wren gets a way off its street, then traces its own ping home.
+// 9.2: laundry gets a way off its street, then traces its own ping home.
 await open(p, base, "f9.show-the-way");
-await walk("nave", "crossing", "cloister", "arch", "tower", "wren");
+await walk("nave", "crossing", "cloister", "arch", "tower", "laundry");
 await type(p, "ip route add default via 10.0.3.1");
 await slate();
 await p.click(".panel button:has-text('Trace')");
@@ -182,7 +182,7 @@ await walk("cloister", "arch");
 await type(p, "ip route add 10.0.4.0/24 via 10.0.3.2");
 await walk("tower", "spire");
 await type(p, "sysctl -w net.ipv4.ip_forward=1");
-await walk("window", "halo");
+await walk("window", "loft");
 await type(p, "ip route del default");
 await type(p, "ip route add default via 10.0.4.1");
 await walk("window", "spire", "tower", "arch", "cloister", "crossing", "nave", "observatory");

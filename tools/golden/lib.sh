@@ -93,19 +93,19 @@ wait_up() { # wait_up <ns> <if>...: veth carrier settles asynchronously; wait fo
 # ── Topologies ───────────────────────────────────────────────────────────────────────────────
 # TOPO_DESC is the first half of each golden's comment line: enough to rebuild it in the simulator.
 
-topo_lan() { # lan: observatory — lantern on one cable. $1 = addr (default) | bare (no IPv4 addresses)
-  ns_add observatory; ns_add lantern
-  cable observatory eth0 02:00:00:00:00:05 lantern eth0 02:00:00:00:00:07
-  ip -n observatory link set eth0 up; ip -n lantern link set eth0 up
+topo_lan() { # lan: observatory — kitchen on one cable. $1 = addr (default) | bare (no IPv4 addresses)
+  ns_add observatory; ns_add kitchen
+  cable observatory eth0 02:00:00:00:00:05 kitchen eth0 02:00:00:00:00:07
+  ip -n observatory link set eth0 up; ip -n kitchen link set eth0 up
   if [ "${1:-addr}" = addr ]; then
-    ip -n observatory addr add 10.0.0.5/24 dev eth0; ip -n lantern addr add 10.0.0.7/24 dev eth0
+    ip -n observatory addr add 10.0.0.5/24 dev eth0; ip -n kitchen addr add 10.0.0.7/24 dev eth0
     TOPO=lan
-    TOPO_DESC="lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> lantern eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off"
+    TOPO_DESC="lan: observatory eth0 02:00:00:00:00:05 10.0.0.5/24 <-> kitchen eth0 02:00:00:00:00:07 10.0.0.7/24; both doors up; IPv6 off"
   else
     TOPO=lan-bare
-    TOPO_DESC="lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off"
+    TOPO_DESC="lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off"
   fi
-  wait_up observatory eth0; wait_up lantern eth0
+  wait_up observatory eth0; wait_up kitchen eth0
 }
 
 topo_switch() { # switch: hall's br0 over eth1..eth3, each cabled to host a, b, c (eth0). $1 = bare | ip

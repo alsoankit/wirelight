@@ -13,7 +13,20 @@ import {
   readBoardTwiceIdle,
   sortedByHand,
 } from "./predicates";
-import { ANVIL, BEACON, BELL, BROADCAST, COMPASS, EMBER, GATE, LANTERN, QUILL, THISTLE, WREN, works } from "./topology";
+import {
+  ATTIC,
+  BAKERY,
+  BROADCAST,
+  CHAPEL,
+  FORGE,
+  GATE,
+  KITCHEN,
+  LARDER,
+  LAUNDRY,
+  LIBRARY,
+  PANTRY,
+  works,
+} from "./topology";
 
 const step = (source: "typed" | "click") => (device: string, line: string, waitMs?: number) =>
   ({ device, line, source, ...(waitMs ? { waitMs } : {}) }) as SolutionStep;
@@ -29,10 +42,10 @@ const readBoard = typed("hall", "bridge fdb show");
 const SEALED = { state: "off-limits" } as const;
 const OPEN = { state: "enterable" } as const;
 const sealed = (...ids: string[]) => Object.fromEntries(ids.map((id) => [id, SEALED]));
-/** Compass and beacon write to each other now and then (3.2, 3.B). */
+/** Pantry and attic write to each other now and then (3.2, 3.B). */
 const chatter = [
-  { id: "compass", mac: COMPASS, door: "eth1", messenger: { to: BEACON, intervalMs: 7000 } },
-  { id: "beacon", mac: BEACON, door: "eth2", messenger: { to: COMPASS, intervalMs: 9000 } },
+  { id: "pantry", mac: PANTRY, door: "eth1", messenger: { to: ATTIC, intervalMs: 7000 } },
+  { id: "attic", mac: ATTIC, door: "eth2", messenger: { to: PANTRY, intervalMs: 9000 } },
 ];
 
 // Detectors more than one room uses.
@@ -49,7 +62,7 @@ const wrongConsoleTest = { misconception: "wrong-console", steps: [typed("observ
 // ── 3.1 · Many Doors ───────────────────────────────────────────────────────────────────────
 
 const manyDoorsId = "f3.many-doors";
-const anvilReply = helloWithKey("anvil", keyFor(manyDoorsId));
+const anvilReply = helloWithKey("forge", keyFor(manyDoorsId));
 /** Three frames sorted right by hand, at least one sent out every other door: the keeper remembers. */
 const sortedEnough: Predicate = sortedByHand("hall", 3);
 export const manyDoors = defineRoom({
@@ -62,16 +75,16 @@ export const manyDoors = defineRoom({
   content: manyDoorsId,
   seed: 31,
   topology: works({
-    observatory: { messenger: { to: ANVIL, msg: messengerMessage, intervalMs: 6000 } },
+    observatory: { messenger: { to: FORGE, msg: messengerMessage, intervalMs: 6000 } },
     machines: [
-      { id: "lantern", mac: LANTERN, door: "eth1" },
-      { id: "quill", mac: QUILL, door: "eth2" },
-      { id: "anvil", mac: ANVIL, door: "eth3", reply: anvilReply },
+      { id: "kitchen", mac: KITCHEN, door: "eth1" },
+      { id: "library", mac: LIBRARY, door: "eth2" },
+      { id: "forge", mac: FORGE, door: "eth3", reply: anvilReply },
     ],
   }),
   faults: [{ kind: "keeper-asleep", device: "hall", desk: "switch" }],
   playerDevice: "observatory",
-  access: { observatory: OPEN, hall: OPEN, lantern: OPEN, quill: OPEN, anvil: OPEN },
+  access: { observatory: OPEN, hall: OPEN, kitchen: OPEN, library: OPEN, forge: OPEN },
   controls: {
     console: "typing",
     desk: "hall",
@@ -90,7 +103,7 @@ export const manyDoors = defineRoom({
     {
       id: "board-knows",
       object: { kind: "board", device: "hall" },
-      check: (f) => boardHas("hall", "02:00:00:00:00:05")(f) && boardHas("hall", ANVIL)(f),
+      check: (f) => boardHas("hall", "02:00:00:00:00:05")(f) && boardHas("hall", FORGE)(f),
     },
     { id: "keeper-awake", object: { kind: "keeper", device: "hall" }, check: keeperAwake("hall") },
   ],
@@ -117,7 +130,7 @@ export const manyDoors = defineRoom({
       steps: [
         desk("learn 02:00:00:00:00:05 eth0", 100),
         desk("send flood", 500),
-        desk(`learn ${ANVIL} eth3`, 100),
+        desk(`learn ${FORGE} eth3`, 100),
         desk("send eth0", 2500),
         desk("send flood"),
       ],
@@ -128,7 +141,7 @@ export const manyDoors = defineRoom({
   solution: [
     desk("learn 02:00:00:00:00:05 eth0", 100),
     desk("send flood", 500),
-    desk(`learn ${ANVIL} eth3`, 100),
+    desk(`learn ${FORGE} eth3`, 100),
     desk("send eth0", 2500),
     desk("send eth3"),
   ],
@@ -157,7 +170,7 @@ export const keepersMemory = defineRoom({
   }),
   faults: [],
   playerDevice: "observatory",
-  access: { observatory: OPEN, hall: OPEN, ...sealed("compass", "beacon", "gate") },
+  access: { observatory: OPEN, hall: OPEN, ...sealed("pantry", "attic", "gate") },
   controls: { console: "typing", macBoards: { hall: "broken" }, workbench: "works", card: "works", catching: true },
   tools: {},
   glow: "symptoms",
@@ -183,9 +196,9 @@ const findKey = keyFor(findId);
 const third = Math.ceil(findKey.length / 3);
 const parts = [findKey.slice(0, third), findKey.slice(third, 2 * third), findKey.slice(2 * third)];
 const letters = [
-  { id: "ember", mac: EMBER, door: "eth1" },
-  { id: "thistle", mac: THISTLE, door: "eth2" },
-  { id: "bell", mac: BELL, door: "eth3" },
+  { id: "bakery", mac: BAKERY, door: "eth1" },
+  { id: "larder", mac: LARDER, door: "eth2" },
+  { id: "chapel", mac: CHAPEL, door: "eth3" },
 ].map((m, i) => ({ ...m, reply: helloWithKeyPart(m.id, i + 1, 3, parts[i] as string) }));
 const letterAnswered = (i: number) => {
   const m = letters[i] as (typeof letters)[number];
@@ -216,7 +229,7 @@ export const findEveryone = defineRoom({
   // The Knight wrote only the doors: every card is blank.
   faults: [1, 2, 3].map((n) => ({ kind: "card", device: "observatory", to: "", messenger: n }) as const),
   playerDevice: "observatory",
-  access: { observatory: OPEN, hall: OPEN, ...sealed("ember", "thistle", "bell") },
+  access: { observatory: OPEN, hall: OPEN, ...sealed("bakery", "larder", "chapel") },
   controls: { console: "typing", macBoards: { hall: "broken" }, workbench: "works", card: "works", catching: true },
   tools: {},
   glow: "symptoms",
@@ -232,21 +245,21 @@ export const findEveryone = defineRoom({
   cards: [],
   misconceptions: [{ id: "swapped-doors", detect: swappedDoors }],
   detectorTests: [
-    { misconception: "swapped-doors", steps: [click("observatory", `lab card --messenger 1 --to ${THISTLE}`)] },
+    { misconception: "swapped-doors", steps: [click("observatory", `lab card --messenger 1 --to ${LARDER}`)] },
   ],
   solution: [
     bench(BROADCAST, "who?"),
     readBoard,
-    click("observatory", `lab card --messenger 1 --to ${EMBER}`),
-    click("observatory", `lab card --messenger 2 --to ${THISTLE}`),
-    click("observatory", `lab card --messenger 3 --to ${BELL}`),
+    click("observatory", `lab card --messenger 1 --to ${BAKERY}`),
+    click("observatory", `lab card --messenger 2 --to ${LARDER}`),
+    click("observatory", `lab card --messenger 3 --to ${CHAPEL}`),
   ],
 });
 
 // ── 3.B · The Busy Hall ────────────────────────────────────────────────────────────────────
 
 const busyId = "f3.boss-busy-hall";
-const wrenReply = helloWithKey("wren", keyFor(busyId));
+const wrenReply = helloWithKey("laundry", keyFor(busyId));
 export const busyHall = defineRoom({
   id: busyId,
   region: 2,
@@ -257,10 +270,10 @@ export const busyHall = defineRoom({
   content: busyId,
   seed: 39,
   topology: works({
-    observatory: { messenger: { to: WREN, msg: messengerMessage } },
+    observatory: { messenger: { to: LAUNDRY, msg: messengerMessage } },
     machines: [
       { ...(chatter[0] as (typeof chatter)[number]) },
-      { id: "wren", mac: WREN, door: "eth2", reply: wrenReply },
+      { id: "laundry", mac: LAUNDRY, door: "eth2", reply: wrenReply },
       { ...(chatter[1] as (typeof chatter)[number]), door: "eth3" },
     ],
   }),
@@ -269,7 +282,7 @@ export const busyHall = defineRoom({
     { kind: "card", device: "observatory", to: "02:00:00:00:00:66" },
   ],
   playerDevice: "observatory",
-  access: { observatory: OPEN, hall: OPEN, ...sealed("compass", "beacon", "wren") },
+  access: { observatory: OPEN, hall: OPEN, ...sealed("pantry", "attic", "laundry") },
   controls: {
     console: "typing",
     plateSwitches: { "hall:eth2": "broken" },
@@ -280,15 +293,15 @@ export const busyHall = defineRoom({
   },
   tools: {},
   glow: "none",
-  winCondition: messengerHeard("observatory", "wren", wrenReply),
+  winCondition: messengerHeard("observatory", "laundry", wrenReply),
   key: { word: keyFor(busyId), via: "lab-text" },
   healthChecks: [
     { id: "eth2-up", object: { kind: "door", device: "hall", iface: "eth2" }, check: linkUp("hall", "eth2") },
-    { id: "board-wren", object: { kind: "board", device: "hall" }, check: boardHas("hall", WREN, "eth2") },
+    { id: "board-laundry", object: { kind: "board", device: "hall" }, check: boardHas("hall", LAUNDRY, "eth2") },
     {
       id: "card-answered",
       object: { kind: "card", device: "observatory" },
-      check: messengerHeard("observatory", "wren", wrenReply),
+      check: messengerHeard("observatory", "laundry", wrenReply),
     },
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
@@ -322,6 +335,6 @@ export const busyHall = defineRoom({
     typed("hall", "ip link set eth2 up"),
     bench(BROADCAST, "who?"),
     readBoard,
-    click("observatory", `lab card --to ${WREN}`),
+    click("observatory", `lab card --to ${LAUNDRY}`),
   ],
 });

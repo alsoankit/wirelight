@@ -24,8 +24,8 @@ const readPlate = (device: string) => click(device, "ip link show eth0");
 const PLATE = /^ip link show eth0$/;
 const PLUG = /^lab cable plug eth0$/;
 const UNPLUG = /^lab cable unplug eth0$/;
-const BOTH_ROOMS = { observatory: { state: "enterable" }, lantern: { state: "enterable" } } as const;
-const keyMessage = (room: string) => helloWithKey("lantern", keyFor(room));
+const BOTH_ROOMS = { observatory: { state: "enterable" }, kitchen: { state: "enterable" } } as const;
+const keyMessage = (room: string) => helloWithKey("kitchen", keyFor(room));
 
 const wireLit = { id: "wire-lit", object: { kind: "corridor", link: "wire" }, check: corridorLit("wire") } as const;
 const doorUp = (device: string) => ({
@@ -37,13 +37,13 @@ const doorUp = (device: string) => ({
 /** Plate switches and cable ends all work on this floor: nothing is worn out before the gift of the voice. */
 const working = (switches: boolean, ends: boolean): Controls => ({
   console: "hidden",
-  ...(switches ? { plateSwitches: { "observatory:eth0": "works", "lantern:eth0": "works" } } : {}),
-  ...(ends ? { cableEnds: { "observatory:eth0": "works", "lantern:eth0": "works" } } : {}),
+  ...(switches ? { plateSwitches: { "observatory:eth0": "works", "kitchen:eth0": "works" } } : {}),
+  ...(ends ? { cableEnds: { "observatory:eth0": "works", "kitchen:eth0": "works" } } : {}),
 });
 
-const blamingLantern: Misconception = { id: "blaming-lantern", detect: ranBefore("lantern", PLATE, PLUG) };
+const blamingLantern: Misconception = { id: "blaming-kitchen", detect: ranBefore("kitchen", PLATE, PLUG) };
 const replugging: Misconception = { id: "replugging", detect: ranThen(UNPLUG, PLUG) };
-const blamingLanternTest = { misconception: "blaming-lantern", steps: [readPlate("lantern")] };
+const blamingLanternTest = { misconception: "blaming-kitchen", steps: [readPlate("kitchen")] };
 const repluggingTest = {
   misconception: "replugging",
   steps: [click("observatory", "lab cable unplug eth0"), click("observatory", "lab cable plug eth0")],
@@ -52,7 +52,7 @@ const repluggingTest = {
 // ── 1.1 · Two Rooms, One Cable ─────────────────────────────────────────────────────────────
 
 const twoRoomsId = "f1.two-rooms";
-const readLantern = ran("lantern", PLATE);
+const readLantern = ran("kitchen", PLATE);
 export const twoRooms = defineRoom({
   id: twoRoomsId,
   region: 1,
@@ -69,11 +69,11 @@ export const twoRooms = defineRoom({
   controls: working(false, false),
   tools: { unlock: ["ip link"] },
   glow: "causes",
-  // The lock opens when you know whose room it is: lantern's plate has been read.
+  // The lock opens when you know whose room it is: kitchen's plate has been read.
   winCondition: readLantern,
   key: { word: keyFor(twoRoomsId), via: "lock" },
   healthChecks: [
-    { id: "lantern-plate", object: { kind: "door", device: "lantern", iface: "eth0" }, check: readLantern },
+    { id: "kitchen-plate", object: { kind: "door", device: "kitchen", iface: "eth0" }, check: readLantern },
   ],
   teaches: ["interface"],
   uses: [],
@@ -85,7 +85,7 @@ export const twoRooms = defineRoom({
       steps: [readPlate("observatory"), readPlate("observatory"), readPlate("observatory")],
     },
   ],
-  solution: [readPlate("lantern")],
+  solution: [readPlate("kitchen")],
 });
 
 // ── 1.2 · The Loose Cable ──────────────────────────────────────────────────────────────────
@@ -131,7 +131,7 @@ export const bothEnds = defineRoom({
   content: bothId,
   seed: 13,
   topology: halls({ lanternMessage: keyMessage(bothId) }),
-  faults: [{ kind: "iface-down", device: "lantern", iface: "eth0" }],
+  faults: [{ kind: "iface-down", device: "kitchen", iface: "eth0" }],
   playerDevice: "observatory",
   access: BOTH_ROOMS,
   controls: working(true, true),
@@ -139,13 +139,13 @@ export const bothEnds = defineRoom({
   glow: "symptoms",
   winCondition: labDelivered("observatory", keyMessage(bothId)),
   key: { word: keyFor(bothId), via: "lab-text" },
-  healthChecks: [doorUp("lantern"), wireLit],
+  healthChecks: [doorUp("kitchen"), wireLit],
   teaches: ["link-up-down"],
   uses: ["interface", "link", "link-light"],
   cards: ["door-switch"],
   misconceptions: [replugging],
   detectorTests: [repluggingTest],
-  solution: [click("lantern", "ip link set eth0 up")],
+  solution: [click("kitchen", "ip link set eth0 up")],
 });
 
 // ── 1.B · The Dark Corridor ────────────────────────────────────────────────────────────────
@@ -153,8 +153,8 @@ export const bothEnds = defineRoom({
 const bossId = "f1.boss-dark-corridor";
 const FIXES = [
   { device: "observatory", line: /^ip link set eth0 up$/ },
-  { device: "lantern", line: PLUG },
-  { device: "lantern", line: /^ip link set eth0 up$/ },
+  { device: "kitchen", line: PLUG },
+  { device: "kitchen", line: /^ip link set eth0 up$/ },
 ];
 export const darkCorridor = defineRoom({
   id: bossId,
@@ -167,9 +167,9 @@ export const darkCorridor = defineRoom({
   seed: 19,
   topology: halls({ lanternMessage: keyMessage(bossId) }),
   faults: [
-    { kind: "unplug", link: "wire", end: "lantern" },
+    { kind: "unplug", link: "wire", end: "kitchen" },
     { kind: "iface-down", device: "observatory", iface: "eth0" },
-    { kind: "iface-down", device: "lantern", iface: "eth0" },
+    { kind: "iface-down", device: "kitchen", iface: "eth0" },
   ],
   playerDevice: "observatory",
   access: BOTH_ROOMS,
@@ -181,7 +181,7 @@ export const darkCorridor = defineRoom({
   healthChecks: [
     { id: "cable-in", object: { kind: "corridor", link: "wire" }, check: ({ world }) => !!world.links()[0]?.plugged },
     doorUp("observatory"),
-    doorUp("lantern"),
+    doorUp("kitchen"),
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
   teaches: [],
@@ -198,7 +198,7 @@ export const darkCorridor = defineRoom({
   ],
   solution: [
     click("observatory", "ip link set eth0 up"),
-    click("lantern", "lab cable plug eth0"),
-    click("lantern", "ip link set eth0 up"),
+    click("kitchen", "lab cable plug eth0"),
+    click("kitchen", "ip link set eth0 up"),
   ],
 });

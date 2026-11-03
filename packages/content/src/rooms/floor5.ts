@@ -25,28 +25,28 @@ export const REGION_3_ARRIVAL = [
 ];
 
 export const whereNotWho: RoomText = {
-  title: "Where, Not Who",
-  mission: "Lantern got a new door last winter. Your messenger still writes to its old one.",
-  access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
+  title: "A New Door",
+  mission: "Kitchen got a new door last winter. Your messenger still writes to its old one.",
+  access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
-    { text: "Lantern isn't gone. Its door is new." },
-    // Lantern's house is locked in 5.1, so its own plate can't be read: the register is the place to look.
+    { text: "Kitchen isn't gone. Its door is new." },
+    // Kitchen's house is locked in 5.1, so its own plate can't be read: the register is the place to look.
     { text: "Read the register on the square's wall: it lists every house's address." },
     {
       text: "A door has a name; a house has an address. The address stays when the door changes.",
       codex: "ip-address",
     },
-    { text: "Give the messenger lantern's house address instead of its MAC address." },
+    { text: "Give the messenger kitchen's house address instead of its MAC address." },
     {
-      // The spec says "The messenger's ping reaches lantern"; the word arrives in 5.2, so it waits until then.
-      text: "Set the card to `10.0.1.7`. The messenger's letter reaches lantern, and its reply carries the key.",
+      // The spec says "The messenger's ping reaches kitchen"; the word arrives in 5.2, so it waits until then.
+      text: "Set the card to `10.0.1.7`. The messenger's letter reaches kitchen, and its reply carries the key.",
     },
   ],
   detectors: {
     "chase-the-new-name": {
       note: "It answered. What stays the same when a door changes?",
-      tried: "You wrote lantern's new MAC address on the card. It answered, but the next new door would lose it again.",
+      tried: "You wrote kitchen's new MAC address on the card. It answered, but the next new door would lose it again.",
     },
     "own-address": {
       note: "That's your own house.",
@@ -55,7 +55,7 @@ export const whereNotWho: RoomText = {
   },
   debrief: {
     happened:
-      "Lantern's door changed, so its MAC address changed, and the messenger's frames went nowhere. Its house address didn't: that's its IP address. Writing to the IP address instead of the MAC address found lantern, whichever door it has.",
+      "Kitchen's door changed, so its MAC address changed, and the messenger's frames went nowhere. Its house address didn't: that's its IP address. Writing to the IP address instead of the MAC address found kitchen, whichever door it has.",
     terms: [{ id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" }],
   },
   guardian: [
@@ -76,15 +76,15 @@ export const whereNotWho: RoomText = {
 };
 
 export const placeToLive: RoomText = {
-  title: "A Place to Live",
-  mission: "You've moved into the Lantern Town, but your house has no address yet. Then see if lantern is home.",
-  access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
+  title: "No Address",
+  mission: "You've moved into the Lantern Town, but your house has no address yet. Then see if kitchen is home.",
+  access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: ["Our house: 10.0.1.5/24."],
   hints: [
     { text: "Your plate is missing something." },
     { text: "Look at the note on the table in your room." },
     { text: "A house needs its own address before it can send or receive.", codex: "ip-address" },
-    { text: "Write the address from the note in your plate's address slot, then ping lantern." },
+    { text: "Write the address from the note in your plate's address slot, then ping kitchen." },
     {
       text: "Click the address slot and write `10.0.1.5/24` (`ip addr add 10.0.1.5/24 dev eth0`), then `ping -c 3 10.0.1.7`.",
     },
@@ -98,7 +98,7 @@ export const placeToLive: RoomText = {
     },
     "wrong-house": {
       note: "That answer came from your own house. Whose address did you write?",
-      tried: "You gave your house lantern's address, so your pings answered themselves.",
+      tried: "You gave your house kitchen's address, so your pings answered themselves.",
     },
     "no-prefix": {
       note: "Copy the whole address from the note, the `/24` too.",
@@ -111,7 +111,7 @@ export const placeToLive: RoomText = {
   },
   debrief: {
     happened:
-      "Your door had no address, so you couldn't send anything to a house, or hear back. With an address of your own, you pinged lantern: an echo request out, an echo reply back.",
+      "Your door had no address, so you couldn't send anything to a house, or hear back. With an address of your own, you pinged kitchen: an echo request out, an echo reply back.",
     terms: [
       { id: "ping", term: "ping", meaning: "asking a house 'are you there?'" },
       {
@@ -140,11 +140,11 @@ export const rollCall: RoomText = {
   title: "Roll Call",
   mission: "A roll on the wall lists five houses. Each one's lamp lights only when it answers.",
   access: {
-    lantern: HOUSE_LOCKED,
-    quill: HOUSE_LOCKED,
-    anvil: HOUSE_LOCKED,
-    bell: HOUSE_LOCKED,
-    ember: HOUSE_LOCKED,
+    kitchen: HOUSE_LOCKED,
+    library: HOUSE_LOCKED,
+    forge: HOUSE_LOCKED,
+    chapel: HOUSE_LOCKED,
+    bakery: HOUSE_LOCKED,
   },
   notes: ["Roll: 10.0.1.7, 10.0.1.10, 10.0.1.12, 10.0.1.16, 10.0.1.18."],
   hints: [
@@ -159,7 +159,7 @@ export const rollCall: RoomText = {
   detectors: {
     "empty-house": {
       note: "Nobody's home at that one. Was every house on the roll going to answer?",
-      tried: "You kept pinging ember's house, but its door is dark.",
+      tried: "You kept pinging bakery's house, but its door is dark.",
     },
   },
   debrief: {
@@ -172,8 +172,8 @@ export const rollCall: RoomText = {
 
 export const quietStreet: RoomText = {
   title: "The Quiet Street",
-  mission: "No house on this street has answered anyone in years. Lantern, at least, should.",
-  access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
+  mission: "No house on this street has answered anyone in years. Kitchen, at least, should.",
+  access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
     { text: "Three things are wrong: one in your house, one in the square, one on the card." },
@@ -182,15 +182,15 @@ export const quietStreet: RoomText = {
       text: "A house needs an address; a door needs to be on; a letter needs the right address.",
       codex: "ip-address",
     },
-    { text: "Give yourself an address, switch the square's door to lantern on, fix the card." },
+    { text: "Give yourself an address, switch the square's door to kitchen on, fix the card." },
     {
-      text: "In your house: `ip addr add 10.0.1.5/24 dev eth0`. In the square: `ip link set eth1 up`. Then set the card to `10.0.1.7` (`lab card --to 10.0.1.7`). Lantern's reply carries the key.",
+      text: "In your house: `ip addr add 10.0.1.5/24 dev eth0`. In the square: `ip link set eth1 up`. Then set the card to `10.0.1.7` (`lab card --to 10.0.1.7`). Kitchen's reply carries the key.",
     },
   ],
   detectors: {
     "wrong-house": {
       note: "That answer came from your own house. Whose address did you write?",
-      tried: "You gave your house lantern's address.",
+      tried: "You gave your house kitchen's address.",
     },
     "no-prefix": {
       note: "Copy the whole address, the `/24` too.",
@@ -204,14 +204,14 @@ export const quietStreet: RoomText = {
       note: "Doors have names. Which name does it have? Ask the machine for its doors.",
       tried: "You named a door that machine doesn't have.",
     },
-    "ping-only-quill": {
-      note: "Quill hears you. So your address is fine. What's between you and lantern?",
-      tried: "Quill answered, and you changed your own address again, but yours was already fine.",
+    "ping-only-library": {
+      note: "Library hears you. So your address is fine. What's between you and kitchen?",
+      tried: "Library answered, and you changed your own address again, but yours was already fine.",
     },
   },
   debrief: {
     happened:
-      "Your house had no address, the square's door to lantern was off, and the messenger had a wrong house number. Each one alone would keep the street quiet.",
+      "Your house had no address, the square's door to kitchen was off, and the messenger had a wrong house number. Each one alone would keep the street quiet.",
     terms: [],
   },
   voice: [
@@ -241,7 +241,7 @@ export const floor5: FloorText = {
       title: "Ride-along",
       text: "A question, an answer. 'Are you there?' 'I'm here.'",
       shown:
-        "the camera rides a ping from the observatory: the address written on it glows, 10.0.1.7; it crosses the square and arrives at lantern's house; an echo comes back",
+        "the camera rides a ping from the observatory: the address written on it glows, 10.0.1.7; it crosses the square and arrives at kitchen's house; an echo comes back",
     },
     {
       id: "F5-FM-04",

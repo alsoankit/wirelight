@@ -2,7 +2,7 @@
 import { helloWithKey, keyFor, messengerMessage, mothCall } from "@wirelight/content";
 import { corridorLit, labDelivered, linkUp, messengerAnswered, printed, quietAfter, ran, sentTo } from "../predicates";
 import { defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
-import { BROADCAST, halls, LANTERN, MOTH, OBSERVATORY, QUILL } from "./topology";
+import { BROADCAST, CELLAR, halls, KITCHEN, LIBRARY, OBSERVATORY } from "./topology";
 
 const typed = (device: string, line: string, waitMs?: number): SolutionStep => ({
   device,
@@ -21,7 +21,7 @@ const bench = (to: string, msg: string, dev?: string, waitMs?: number) =>
   click("observatory", `lab send-frame${dev ? ` --dev ${dev}` : ""} --to ${to} --msg "${msg}"`, waitMs);
 
 const wireLit = { id: "wire-lit", object: { kind: "corridor", link: "wire" }, check: corridorLit("wire") } as const;
-const LANTERN_ROOM = { observatory: { state: "enterable" }, lantern: { state: "enterable" } } as const;
+const LANTERN_ROOM = { observatory: { state: "enterable" }, kitchen: { state: "enterable" } } as const;
 
 // Detectors shared by several rooms.
 const linkBlame: Misconception = { id: "link-blame", detect: ran(null, /^ip link set \S+ down$|^lab cable unplug/) };
@@ -53,7 +53,7 @@ function clicksAfterGift(control: string, n: number): Predicate {
 // ── 2.1 · First Light ──────────────────────────────────────────────────────────────────────
 
 const firstLightId = "f2.first-light";
-const firstLightReply = helloWithKey("lantern", keyFor(firstLightId));
+const firstLightReply = helloWithKey("kitchen", keyFor(firstLightId));
 export const firstLight = defineRoom({
   id: firstLightId,
   region: 1,
@@ -70,8 +70,8 @@ export const firstLight = defineRoom({
   controls: {
     console: "hidden",
     workbench: "works",
-    plateSwitches: { "observatory:eth0": "works", "lantern:eth0": "works" },
-    cableEnds: { "observatory:eth0": "works", "lantern:eth0": "works" },
+    plateSwitches: { "observatory:eth0": "works", "kitchen:eth0": "works" },
+    cableEnds: { "observatory:eth0": "works", "kitchen:eth0": "works" },
   },
   tools: { unlock: ["workbench"] },
   glow: "symptoms",
@@ -93,13 +93,13 @@ export const firstLight = defineRoom({
       steps: [click("observatory", 'lab send-frame --msg "hi"'), click("observatory", 'lab send-frame --msg "hi"')],
     },
   ],
-  solution: [bench(LANTERN, "hello")],
+  solution: [bench(KITCHEN, "hello")],
 });
 
 // ── 2.2 · Wrong Name ───────────────────────────────────────────────────────────────────────
 
 const wrongNameId = "f2.wrong-name";
-const wrongNameReply = helloWithKey("lantern", keyFor(wrongNameId));
+const wrongNameReply = helloWithKey("kitchen", keyFor(wrongNameId));
 export const wrongName = defineRoom({
   id: wrongNameId,
   region: 1,
@@ -112,7 +112,7 @@ export const wrongName = defineRoom({
   topology: halls({
     lanternReply: wrongNameReply,
     announcements: true,
-    messenger: { to: LANTERN, msg: messengerMessage },
+    messenger: { to: KITCHEN, msg: messengerMessage },
   }),
   faults: [{ kind: "card", device: "observatory", to: "02:00:00:00:00:08" }],
   playerDevice: "observatory",
@@ -122,18 +122,18 @@ export const wrongName = defineRoom({
     workbench: "works",
     card: "works",
     catching: true,
-    plateSwitches: { "observatory:eth0": "works", "lantern:eth0": "works" },
-    cableEnds: { "observatory:eth0": "works", "lantern:eth0": "works" },
+    plateSwitches: { "observatory:eth0": "works", "kitchen:eth0": "works" },
+    cableEnds: { "observatory:eth0": "works", "kitchen:eth0": "works" },
   },
   tools: { unlock: ["lab card"] },
   glow: "symptoms",
-  winCondition: messengerAnswered("observatory", "lantern", wrongNameReply),
+  winCondition: messengerAnswered("observatory", "kitchen", wrongNameReply),
   key: { word: keyFor(wrongNameId), via: "lab-text" },
   healthChecks: [
     {
       id: "card-answered",
       object: { kind: "card", device: "observatory" },
-      check: messengerAnswered("observatory", "lantern", wrongNameReply),
+      check: messengerAnswered("observatory", "kitchen", wrongNameReply),
     },
   ],
   teaches: ["destination-address"],
@@ -147,13 +147,13 @@ export const wrongName = defineRoom({
     },
     { misconception: "card-to-self", steps: [click("observatory", `lab card --to ${OBSERVATORY}`)] },
   ],
-  solution: [click("observatory", `lab card --to ${LANTERN}`)],
+  solution: [click("observatory", `lab card --to ${KITCHEN}`)],
 });
 
 // ── 2.3 · Who Are You? ─────────────────────────────────────────────────────────────────────
 
 const whoId = "f2.who-are-you";
-const quillReply = helloWithKey("quill", keyFor(whoId));
+const quillReply = helloWithKey("library", keyFor(whoId));
 export const whoAreYou = defineRoom({
   id: whoId,
   region: 1,
@@ -165,11 +165,11 @@ export const whoAreYou = defineRoom({
   seed: 23,
   topology: halls({
     announcements: true,
-    second: { id: "quill", mac: QUILL, link: "vine", reply: quillReply },
+    second: { id: "library", mac: LIBRARY, link: "vine", reply: quillReply },
   }),
   faults: [],
   playerDevice: "observatory",
-  access: { ...LANTERN_ROOM, quill: { state: "off-limits" } },
+  access: { ...LANTERN_ROOM, library: { state: "off-limits" } },
   controls: { console: "hidden", workbench: "works", catching: true },
   tools: {},
   glow: "symptoms",
@@ -182,7 +182,7 @@ export const whoAreYou = defineRoom({
   misconceptions: [
     guessing,
     wrongDoor,
-    { id: "stopped-at-hello", detect: quietAfter("observatory", "I'm here — quill", "eth1", 60_000) },
+    { id: "stopped-at-hello", detect: quietAfter("observatory", "I'm here — library", "eth1", 60_000) },
   ],
   detectorTests: [
     {
@@ -192,13 +192,13 @@ export const whoAreYou = defineRoom({
     { misconception: "wrong-door", steps: [bench(BROADCAST, "who are you?", "eth0")] },
     { misconception: "stopped-at-hello", steps: [bench(BROADCAST, "who are you?", "eth1", 65_000)] },
   ],
-  solution: [bench(BROADCAST, "who are you?", "eth1"), bench(QUILL, "hello", "eth1")],
+  solution: [bench(BROADCAST, "who are you?", "eth1"), bench(LIBRARY, "hello", "eth1")],
 });
 
 // ── 2.4 · Lights Out ───────────────────────────────────────────────────────────────────────
 
 const lightsId = "f2.lights-out";
-const lightsMessage = helloWithKey("lantern", keyFor(lightsId));
+const lightsMessage = helloWithKey("kitchen", keyFor(lightsId));
 export const lightsOut = defineRoom({
   id: lightsId,
   region: 1,
@@ -216,7 +216,7 @@ export const lightsOut = defineRoom({
     console: "typing",
     workbench: "works",
     catching: true,
-    plateSwitches: { "observatory:eth0": "broken", "lantern:eth0": "works" },
+    plateSwitches: { "observatory:eth0": "broken", "kitchen:eth0": "works" },
   },
   tools: {},
   glow: "symptoms",
@@ -258,7 +258,7 @@ export const lightsOut = defineRoom({
 // ── 2.B ★ The Silent Line ──────────────────────────────────────────────────────────────────
 
 const bossId = "f2.boss-silent-line";
-const mothReply = helloWithKey("moth", keyFor(bossId));
+const mothReply = helloWithKey("cellar", keyFor(bossId));
 export const silentLine = defineRoom({
   id: bossId,
   region: 1,
@@ -272,8 +272,8 @@ export const silentLine = defineRoom({
     announcements: true,
     messenger: { to: "", dev: "eth1", msg: messengerMessage },
     second: {
-      id: "moth",
-      mac: MOTH,
+      id: "cellar",
+      mac: CELLAR,
       link: "root",
       reply: mothReply,
       calls: { to: "02:00:00:00:00:66", msg: mothCall, intervalMs: 5000 },
@@ -281,7 +281,7 @@ export const silentLine = defineRoom({
   }),
   faults: [{ kind: "iface-down", device: "observatory", iface: "eth1" }],
   playerDevice: "observatory",
-  access: { ...LANTERN_ROOM, moth: { state: "off-limits" } },
+  access: { ...LANTERN_ROOM, cellar: { state: "off-limits" } },
   controls: {
     console: "typing",
     workbench: "works",
@@ -291,7 +291,7 @@ export const silentLine = defineRoom({
   },
   tools: {},
   glow: "none",
-  winCondition: messengerAnswered("observatory", "moth", mothReply),
+  winCondition: messengerAnswered("observatory", "cellar", mothReply),
   key: { word: keyFor(bossId), via: "lab-text" },
   healthChecks: [
     {
@@ -302,7 +302,7 @@ export const silentLine = defineRoom({
     {
       id: "card-answered",
       object: { kind: "card", device: "observatory" },
-      check: messengerAnswered("observatory", "moth", mothReply),
+      check: messengerAnswered("observatory", "cellar", mothReply),
     },
     { id: "root-lit", object: { kind: "corridor", link: "root" }, check: corridorLit("root") },
   ],
@@ -339,17 +339,17 @@ export const silentLine = defineRoom({
   solution: [
     typed("observatory", "ip link set eth1 up"),
     bench(BROADCAST, "who?", "eth1"),
-    click("observatory", `lab card --to ${MOTH}`),
+    click("observatory", `lab card --to ${CELLAR}`),
   ],
-  // Moth's own calls arrive as ignored marks once eth1 is up; catching one shows moth's name.
-  altSolutions: [[typed("observatory", "ip link set eth1 up"), click("observatory", `lab card --to ${MOTH}`)]],
+  // Cellar's own calls arrive as ignored marks once eth1 is up; catching one shows cellar's name.
+  altSolutions: [[typed("observatory", "ip link set eth1 up"), click("observatory", `lab card --to ${CELLAR}`)]],
 });
 
 // ── Secret · Why 48 bits? (Region 1's secret room, decision 0065) ──────────────────────────
 
-const RELIC = "00:1b:21:3a:4f:9c";
+const VAULT = "00:1b:21:3a:4f:9c";
 const secretId = "f2.secret-48-bits";
-const relicReply = helloWithKey("relic", keyFor(secretId));
+const relicReply = helloWithKey("vault", keyFor(secretId));
 export const why48Bits = defineRoom({
   id: secretId,
   region: 1,
@@ -359,10 +359,10 @@ export const why48Bits = defineRoom({
   pathTag: "all",
   content: secretId,
   seed: 250,
-  topology: halls({ second: { id: "relic", mac: RELIC, link: "seam", reply: relicReply } }),
+  topology: halls({ second: { id: "vault", mac: VAULT, link: "seam", reply: relicReply } }),
   faults: [],
   playerDevice: "observatory",
-  access: { ...LANTERN_ROOM, relic: { state: "off-limits" } },
+  access: { ...LANTERN_ROOM, vault: { state: "off-limits" } },
   controls: { console: "typing", workbench: "works", catching: true },
   tools: {},
   glow: "none",
@@ -374,5 +374,5 @@ export const why48Bits = defineRoom({
   cards: ["makers-mark"],
   misconceptions: [{ id: "guessed-02", detect: ran("observatory", /^lab send-frame\b.*--dev eth1\b.*--to 02:/) }],
   detectorTests: [{ misconception: "guessed-02", steps: [bench("02:00:00:00:00:0d", "hi", "eth1")] }],
-  solution: [bench(BROADCAST, "who?", "eth1"), bench(RELIC, "hello", "eth1")],
+  solution: [bench(BROADCAST, "who?", "eth1"), bench(VAULT, "hello", "eth1")],
 });

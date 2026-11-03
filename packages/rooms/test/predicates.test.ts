@@ -26,7 +26,7 @@ describe("corridor state (FR-COR-02)", () => {
 
   it("a door switched off breaks it", () => {
     const b = loadRoom(room, rooms);
-    b.world.setAdmin("lantern", "eth0", false);
+    b.world.setAdmin("kitchen", "eth0", false);
     expect(corridorState(facts(b.trace(), b.state()), "wire", b.now())).toBe("broken");
   });
 

@@ -71,7 +71,7 @@ export const REGION_2_COMMANDS: Record<string, CommandMemory> = {
       { line: "bridge fdb del <name> dev <door> master", meaning: "forget one line" },
       { line: "bridge fdb add <name> dev <door> master static", meaning: "pin one by hand (rarely a good idea)" },
     ],
-    // The hall in 4.1 once the pinned line is gone and lantern has answered: asked with `bridge fdb show`.
+    // The hall in 4.1 once the pinned line is gone and kitchen has answered: asked with `bridge fdb show`.
     output: {
       text: [
         "02:00:00:00:00:05 dev eth0 master br0 ",
@@ -84,7 +84,7 @@ export const REGION_2_COMMANDS: Record<string, CommandMemory> = {
         ...bridgeLines,
       ].join("\n"),
       marks: [
-        { match: "02:00:00:00:00:07 dev eth3", meaning: "lantern, learned again behind its new door" },
+        { match: "02:00:00:00:00:07 dev eth3", meaning: "kitchen, learned again behind its new door" },
         { match: "dev eth1", meaning: "nothing pointing at the old door any more" },
       ],
       dimmed: "Lines ending in permanent are the switch's own doors and special names. You can ignore them for now.",

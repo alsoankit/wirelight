@@ -5,7 +5,7 @@ const A = [
   "silver",
   "quiet",
   "hollow",
-  "ember",
+  "bakery",
   "salt",
   "iron",
   "violet",
@@ -14,8 +14,8 @@ const A = [
   "golden",
 ];
 const B = [
-  "lantern",
-  "bell",
+  "kitchen",
+  "chapel",
   "thread",
   "harbor",
   "candle",
@@ -25,7 +25,7 @@ const B = [
   "mirror",
   "comet",
   "orchard",
-  "beacon",
+  "attic",
 ];
 
 /**
@@ -34,12 +34,12 @@ const B = [
  * checks every key is unique, so a new room that collides gets a line here.
  */
 const TAKEN: Record<string, string> = {
-  "f2.secret-48-bits": "salt-lantern",
+  "f2.secret-48-bits": "salt-kitchen",
   "f4.pinned-memory": "amber-mirror",
-  "f4.who-has-the-key": "ember-willow",
-  "f8.boss-closed-crossing": "iron-lantern",
-  "f9.two-envelopes": "salt-beacon",
-  "f9.secret-home-router": "ember-sparrow",
+  "f4.who-has-the-key": "bakery-willow",
+  "f8.boss-closed-crossing": "iron-kitchen",
+  "f9.two-envelopes": "salt-attic",
+  "f9.secret-home-router": "bakery-sparrow",
 };
 
 export function keyFor(roomId: string): string {

@@ -12,14 +12,14 @@ const topology: Topology = {
       interfaces: [{ name: "eth0", mac: "02:00:00:00:00:05" }],
     },
     {
-      id: "lantern",
-      hostname: "lantern",
+      id: "kitchen",
+      hostname: "kitchen",
       kind: "host",
       interfaces: [{ name: "eth0", mac: "02:00:00:00:00:07" }],
-      lab: { mode: "responder", reply: "key: copper-lantern" },
+      lab: { mode: "responder", reply: "key: copper-kitchen" },
     },
   ],
-  links: [{ id: "c1", a: { device: "observatory", iface: "eth0" }, b: { device: "lantern", iface: "eth0" } }],
+  links: [{ id: "c1", a: { device: "observatory", iface: "eth0" }, b: { device: "kitchen", iface: "eth0" } }],
 };
 
 function setup(tools: ToolId[] = ["ip link", "lab send-frame"], subtitles = true) {
@@ -54,7 +54,7 @@ describe("lab send-frame", () => {
     run("lab send-frame --to 02:00:00:00:00:07");
     b.advance(10);
     const got = b.trace().filter((e) => e.kind === "app.deliver" && e.device === "observatory");
-    expect(got).toMatchObject([{ text: "key: copper-lantern", from: "02:00:00:00:00:07" }]);
+    expect(got).toMatchObject([{ text: "key: copper-kitchen", from: "02:00:00:00:00:07" }]);
   });
 
   it("normalizes uppercase MACs and reports bad ones", () => {
@@ -64,7 +64,7 @@ describe("lab send-frame", () => {
       "stdout: sent 1 frame (to 02:00:00:00:00:ab, 19 bytes)",
     ]);
     // A machine's name stands for its first door (before Floor 2 teaches door names).
-    expect(run("lab send-frame --to lantern").out).toEqual(["stdout: sent 1 frame (to lantern, 19 bytes)"]);
+    expect(run("lab send-frame --to kitchen").out).toEqual(["stdout: sent 1 frame (to kitchen, 19 bytes)"]);
     expect(run("lab send-frame --to nowhere")).toMatchObject({
       code: 2,
       out: ['stderr: lab send-frame: "nowhere" is not a MAC address (like 02:00:00:00:00:07)'],
@@ -207,12 +207,12 @@ describe("lab card", () => {
 
   it("rejects bad input and machines without a card", () => {
     const { run } = cardSetup();
-    expect(run("lab card set --to lantern")).toEqual([
-      'stderr: lab card: "lantern" is not a MAC address (like 02:00:00:00:00:07)',
+    expect(run("lab card set --to kitchen")).toEqual([
+      'stderr: lab card: "kitchen" is not a MAC address (like 02:00:00:00:00:07)',
       "exit 2",
     ]);
     expect(run("lab card set 02:00:00:00:00:07").at(-1)).toBe("exit 2");
-    expect(run("lab card show", "lantern")).toEqual([
+    expect(run("lab card show", "kitchen")).toEqual([
       "stderr: lab card: there's no address card on this machine",
       "exit 1",
     ]);

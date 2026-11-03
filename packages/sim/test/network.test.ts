@@ -137,11 +137,11 @@ describe("ARP and the neighbour table", () => {
     expect(sim.device("observatory")?.neigh[0]).toMatchObject({ ip: "10.0.0.7", state: "INCOMPLETE" });
     sim.advance(5);
     expect(sim.device("observatory")?.neigh[0]).toMatchObject({ state: "REACHABLE", mac: "02:00:00:00:00:07" });
-    // lantern learned the asker from the request, unconfirmed (STALE); answering the ping used that
+    // kitchen learned the asker from the request, unconfirmed (STALE); answering the ping used that
     // entry, so it's in DELAY, and in 5 s it will check with a unicast probe (as real Linux does).
-    expect(sim.device("lantern")?.neigh[0]).toMatchObject({ ip: "10.0.0.5", mac: "02:00:00:00:00:05", state: "DELAY" });
+    expect(sim.device("kitchen")?.neigh[0]).toMatchObject({ ip: "10.0.0.5", mac: "02:00:00:00:00:05", state: "DELAY" });
     sim.advance(6_000); // the DELAY timer fires 5.0–5.5 s later (timer wheel)
-    expect(sim.device("lantern")?.neigh[0]?.state).toBe("REACHABLE");
+    expect(sim.device("kitchen")?.neigh[0]?.state).toBe("REACHABLE");
   });
 
   it("fails after three unanswered requests a second apart", () => {

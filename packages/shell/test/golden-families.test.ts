@@ -40,9 +40,9 @@ function topology(name: string): Topology {
     return {
       devices: [
         host("observatory", "eth0", "02:00:00:00:00:05", bare ? undefined : "10.0.0.5/24"),
-        host("lantern", "eth0", "02:00:00:00:00:07", bare ? undefined : "10.0.0.7/24"),
+        host("kitchen", "eth0", "02:00:00:00:00:07", bare ? undefined : "10.0.0.7/24"),
       ],
-      links: [{ id: "wire", a: { device: "observatory", iface: "eth0" }, b: { device: "lantern", iface: "eth0" } }],
+      links: [{ id: "wire", a: { device: "observatory", iface: "eth0" }, b: { device: "kitchen", iface: "eth0" } }],
     };
   }
   if (name === "switch" || name === "switch-ip") {
@@ -149,22 +149,22 @@ function cathedral(): Topology {
         ["eth1", "02:00:00:00:03:01", "10.0.3.1/24"],
         [{ dst: "default", via: "10.0.2.1" }],
       ),
-      host("vesper", "eth0", "02:00:00:00:02:07", "10.0.2.7/24", "10.0.2.1"),
+      host("gallery", "eth0", "02:00:00:00:02:07", "10.0.2.7/24", "10.0.2.1"),
       router(
         "spire",
         ["eth0", "02:00:00:00:03:02", "10.0.3.2/24"],
         ["eth1", "02:00:00:00:04:01", "10.0.4.1/24"],
         [{ dst: "default", via: "10.0.3.1" }],
       ),
-      host("halo", "eth0", "02:00:00:00:04:07", "10.0.4.7/24", "10.0.4.1"),
+      host("loft", "eth0", "02:00:00:00:04:07", "10.0.4.7/24", "10.0.4.1"),
     ],
     links: [
       { id: "nave", a: { device: "observatory", iface: "eth0" }, b: { device: "crossing", iface: "eth0" } },
       { id: "c1", a: { device: "cloister", iface: "eth1" }, b: { device: "crossing", iface: "eth1" } },
       { id: "c2", a: { device: "cloister", iface: "eth2" }, b: { device: "arch", iface: "eth0" } },
-      { id: "c3", a: { device: "cloister", iface: "eth3" }, b: { device: "vesper", iface: "eth0" } },
+      { id: "c3", a: { device: "cloister", iface: "eth3" }, b: { device: "gallery", iface: "eth0" } },
       { id: "tower", a: { device: "arch", iface: "eth1" }, b: { device: "spire", iface: "eth0" } },
-      { id: "window", a: { device: "spire", iface: "eth1" }, b: { device: "halo", iface: "eth0" } },
+      { id: "window", a: { device: "spire", iface: "eth1" }, b: { device: "loft", iface: "eth0" } },
     ],
   };
 }
@@ -199,7 +199,7 @@ function halls(stp: boolean): Topology {
 
 /**
  * Floor 7's square (tools/golden/capture-dhcp.sh): hall's br0 joins observatory (no address),
- * registry (10.0.1.2, the DHCP server, as dnsmasq: range .100-.150, 1 h) and lantern (10.0.1.7).
+ * registry (10.0.1.2, the DHCP server, as dnsmasq: range .100-.150, 1 h) and kitchen (10.0.1.7).
  */
 function square(variant: string): Topology {
   const server =
@@ -227,12 +227,12 @@ function square(variant: string): Topology {
       },
       host("observatory", "eth0", "02:00:00:00:00:05"),
       { ...host("registry", "eth0", "02:00:00:00:00:02", "10.0.1.2/24"), ...(server ? { dhcpServer: server } : {}) },
-      host("lantern", "eth0", "02:00:00:00:00:07", "10.0.1.7/24"),
+      host("kitchen", "eth0", "02:00:00:00:00:07", "10.0.1.7/24"),
     ],
     links: [
       { id: "l1", a: { device: "hall", iface: "eth1" }, b: { device: "observatory", iface: "eth0" } },
       { id: "l2", a: { device: "hall", iface: "eth2" }, b: { device: "registry", iface: "eth0" } },
-      { id: "l3", a: { device: "hall", iface: "eth3" }, b: { device: "lantern", iface: "eth0" } },
+      { id: "l3", a: { device: "hall", iface: "eth3" }, b: { device: "kitchen", iface: "eth0" } },
     ],
   };
 }

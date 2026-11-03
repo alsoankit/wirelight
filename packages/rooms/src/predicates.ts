@@ -177,7 +177,7 @@ export function ran(device: DeviceId | null, pattern: RegExp, n = 1): Predicate 
   return ({ trace }) => execs(trace, device, pattern).length >= n;
 }
 
-/** `first` ran on `device` before `then` had run anywhere (e.g. lantern's plate read while the cable was out). */
+/** `first` ran on `device` before `then` had run anywhere (e.g. kitchen's plate read while the cable was out). */
 export function ranBefore(device: DeviceId, first: RegExp, then: RegExp): Predicate {
   return ({ trace }) => {
     for (const e of trace) {
@@ -250,7 +250,7 @@ export function sentTo(device: DeviceId, to: string, n = 1, iface?: IfaceName): 
 
 /**
  * A lab message whose text starts with `text` reached `device`, and then the player's commands sent
- * nothing out of `iface` for `quietMs` of network time (e.g. quill said who it was, and the player
+ * nothing out of `iface` for `quietMs` of network time (e.g. library said who it was, and the player
  * stopped there).
  */
 export function quietAfter(device: DeviceId, text: string, iface: IfaceName, quietMs: number): Predicate {

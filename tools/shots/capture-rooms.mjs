@@ -7,7 +7,7 @@ const [base] = process.argv.slice(2);
 const OUT = new URL("../../apps/web/public/prerender/", import.meta.url).pathname;
 const ROOMS = [
   { id: "r1-observatory-d1", room: "f1.two-rooms" },
-  { id: "r1-house-d1", room: "f1.two-rooms", walk: "lantern" },
+  { id: "r1-house-d1", room: "f1.two-rooms", walk: "kitchen" },
   { id: "r2-observatory-d1", room: "f3.boss-busy-hall" },
 ];
 const browser = await chromium.launch({

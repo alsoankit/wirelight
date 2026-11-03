@@ -4,7 +4,7 @@ import type { DeviceSpec } from "@wirelight/sim";
 import { all, not, ran } from "../predicates";
 import { type Access, defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
 import { answeredBy, claims, echoReplies, hasAddr, onStreet } from "./predicates";
-import { ANVIL, BELL, IP, LANTERN, MOTH, QUILL, town } from "./topology";
+import { CELLAR, CHAPEL, FORGE, IP, KITCHEN, LIBRARY, town } from "./topology";
 
 const typed = (device: string, line: string, waitMs?: number): SolutionStep => ({
   device,
@@ -76,18 +76,18 @@ export const sameStreet = defineRoom({
   pathTag: "core",
   content: sameStreetId,
   seed: 71,
-  topology: town({ houses: ["lantern", "quill", "anvil"] }),
+  topology: town({ houses: ["kitchen", "library", "forge"] }),
   // The observatory lives on the lane, 10.0.2.0/24: a different street.
   faults: [
     { kind: "addr-remove", device: "observatory", cidr: OWN, dev: "eth0" },
     { kind: "addr-set", device: "observatory", cidr: "10.0.2.5/24", dev: "eth0" },
   ],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil"]),
+  access: access(["kitchen", "library", "forge"]),
   controls: { console: "typing", slate: SLATE, addressSlots: { "observatory:eth0": "works" } },
   tools: {},
   glow: "symptoms",
-  winCondition: answeredBy("observatory", IP.lantern, LANTERN),
+  winCondition: answeredBy("observatory", IP.kitchen, KITCHEN),
   key: { word: keyFor(sameStreetId), via: "mark" },
   healthChecks: [
     {
@@ -128,15 +128,18 @@ export const askForAnAddress = defineRoom({
   pathTag: "tool",
   content: askId,
   seed: 72,
-  topology: town({ houses: ["lantern", "quill", "anvil", "bell", "registry"], extra: { registry: registryService } }),
+  topology: town({
+    houses: ["kitchen", "library", "forge", "chapel", "registry"],
+    extra: { registry: registryService },
+  }),
   faults: [{ kind: "addr-remove", device: "observatory", cidr: OWN, dev: "eth0" }],
   playerDevice: "observatory",
   // The registry's room is open: journal page 7 is there.
-  access: access(["lantern", "quill", "anvil", "bell", "registry"], ["registry"]),
+  access: access(["kitchen", "library", "forge", "chapel", "registry"], ["registry"]),
   controls: { console: "typing", slate: SLATE, addressSlots: { "observatory:eth0": "broken" } },
   tools: { unlock: ["dhclient"] },
   glow: "symptoms",
-  winCondition: all(holdsLease, answeredBy("observatory", IP.lantern, LANTERN)),
+  winCondition: all(holdsLease, answeredBy("observatory", IP.kitchen, KITCHEN)),
   key: { word: keyFor(askId), via: "mark" },
   healthChecks: [
     { id: "holds-lease", object: { kind: "slot", device: "observatory", iface: "eth0" }, check: holdsLease },
@@ -160,11 +163,11 @@ export const askForAnAddress = defineRoom({
 
 const censusId = "f7.boss-census";
 const CENSUS = [
-  { ip: IP.lantern, door: LANTERN },
-  { ip: IP.quill, door: QUILL },
-  { ip: IP.anvil, door: ANVIL },
-  { ip: IP.bell, door: BELL },
-  { ip: IP.moth, door: MOTH },
+  { ip: IP.kitchen, door: KITCHEN },
+  { ip: IP.library, door: LIBRARY },
+  { ip: IP.forge, door: FORGE },
+  { ip: IP.chapel, door: CHAPEL },
+  { ip: IP.cellar, door: CELLAR },
 ];
 const answeredCensus = (f: Parameters<Predicate>[0]) =>
   CENSUS.filter((h) => echoReplies(f, "observatory").some((r) => r.ip === h.ip && r.mac === h.door));
@@ -178,12 +181,12 @@ const censusSkip: Predicate = (f) => {
   });
 };
 const FIX_BELL = [
-  typed("bell", "ip addr del 10.0.1.100/24 dev eth0"),
-  typed("bell", "ip addr add 10.0.1.18/24 dev eth0"),
+  typed("chapel", "ip addr del 10.0.1.100/24 dev eth0"),
+  typed("chapel", "ip addr add 10.0.1.18/24 dev eth0"),
 ];
 const FIX_MOTH = [
-  typed("moth", "ip addr del 10.0.2.14/24 dev eth0"),
-  typed("moth", "ip addr add 10.0.1.14/24 dev eth0"),
+  typed("cellar", "ip addr del 10.0.2.14/24 dev eth0"),
+  typed("cellar", "ip addr add 10.0.1.14/24 dev eth0"),
 ];
 const ASK = typed("observatory", "dhclient -v eth0", 10_000);
 const ROLL = CENSUS.map((h) => typed("observatory", `ping -c 1 ${h.ip}`));
@@ -197,23 +200,23 @@ export const census = defineRoom({
   content: censusId,
   seed: 79,
   topology: town({
-    houses: ["lantern", "quill", "anvil", "bell", "moth", "registry"],
+    houses: ["kitchen", "library", "forge", "chapel", "cellar", "registry"],
     extra: { registry: registryService },
   }),
   faults: [
     { kind: "addr-remove", device: "observatory", cidr: OWN, dev: "eth0" },
-    { kind: "addr-remove", device: "moth", cidr: "10.0.1.14/24", dev: "eth0" },
-    { kind: "addr-set", device: "moth", cidr: "10.0.2.14/24", dev: "eth0" },
-    { kind: "addr-remove", device: "bell", cidr: "10.0.1.18/24", dev: "eth0" },
-    { kind: "addr-set", device: "bell", cidr: "10.0.1.100/24", dev: "eth0" },
+    { kind: "addr-remove", device: "cellar", cidr: "10.0.1.14/24", dev: "eth0" },
+    { kind: "addr-set", device: "cellar", cidr: "10.0.2.14/24", dev: "eth0" },
+    { kind: "addr-remove", device: "chapel", cidr: "10.0.1.18/24", dev: "eth0" },
+    { kind: "addr-set", device: "chapel", cidr: "10.0.1.100/24", dev: "eth0" },
   ],
   playerDevice: "observatory",
-  access: access(["lantern", "quill", "anvil", "bell", "moth", "registry"], ["bell", "moth"]),
+  access: access(["kitchen", "library", "forge", "chapel", "cellar", "registry"], ["chapel", "cellar"]),
   controls: {
     console: "typing",
     slate: SLATE,
     ledgers: { observatory: "works" },
-    addressSlots: { "observatory:eth0": "broken", "bell:eth0": "broken", "moth:eth0": "broken" },
+    addressSlots: { "observatory:eth0": "broken", "chapel:eth0": "broken", "cellar:eth0": "broken" },
   },
   tools: {},
   glow: "none",
@@ -222,14 +225,14 @@ export const census = defineRoom({
   healthChecks: [
     { id: "holds-lease", object: { kind: "slot", device: "observatory", iface: "eth0" }, check: holdsLease },
     {
-      id: "moth-on-the-square",
-      object: { kind: "slot", device: "moth", iface: "eth0" },
-      check: hasAddr("moth", "10.0.1.14/24"),
+      id: "cellar-on-the-square",
+      object: { kind: "slot", device: "cellar", iface: "eth0" },
+      check: hasAddr("cellar", "10.0.1.14/24"),
     },
     {
-      id: "bell-own-house",
-      object: { kind: "slot", device: "bell", iface: "eth0" },
-      check: all(hasAddr("bell", "10.0.1.18/24"), not(claims("bell", "10.0.1.100"))),
+      id: "chapel-own-house",
+      object: { kind: "slot", device: "chapel", iface: "eth0" },
+      check: all(hasAddr("chapel", "10.0.1.18/24"), not(claims("chapel", "10.0.1.100"))),
     },
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
@@ -245,7 +248,7 @@ export const census = defineRoom({
   ],
   detectorTests: [
     { misconception: "guess-a-number", steps: [typed("observatory", "ip addr add 10.0.1.10/24 dev eth0")] },
-    { misconception: "right-street-wrong-prefix", steps: [typed("moth", "ip addr add 10.0.1.14/16 dev eth0")] },
+    { misconception: "right-street-wrong-prefix", steps: [typed("cellar", "ip addr add 10.0.1.14/16 dev eth0")] },
     {
       misconception: "flush-and-hope",
       steps: [typed("observatory", "ip neigh flush dev eth0"), typed("observatory", "ip neigh flush dev eth0")],
@@ -253,18 +256,18 @@ export const census = defineRoom({
     { misconception: "change-my-address", steps: [typed("observatory", "ip addr add 10.0.1.120/24 dev eth0")] },
     {
       misconception: "census-skip",
-      steps: [...FIX_BELL, ASK, ...ROLL.slice(0, 4), typed("observatory", `ping -c 1 ${IP.lantern}`)],
+      steps: [...FIX_BELL, ASK, ...ROLL.slice(0, 4), typed("observatory", `ping -c 1 ${IP.kitchen}`)],
     },
   ],
   solution: [...FIX_BELL, ...FIX_MOTH, ASK, ...ROLL],
-  // Asking the registry first: the observatory's client checks .100 (arping -D), finds bell on it,
-  // declines and takes the next address (decision 0063); fixing bell after still works.
+  // Asking the registry first: the observatory's client checks .100 (arping -D), finds chapel on it,
+  // declines and takes the next address (decision 0063); fixing chapel after still works.
   altSolutions: [
     [
       ASK,
       ...FIX_BELL,
-      typed("moth", "ip addr del 10.0.2.14/24 dev eth0"),
-      typed("moth", "ip addr add 10.0.1.14/24 dev eth0", 90_000),
+      typed("cellar", "ip addr del 10.0.2.14/24 dev eth0"),
+      typed("cellar", "ip addr add 10.0.1.14/24 dev eth0", 90_000),
       ...ROLL,
     ],
   ],
@@ -275,7 +278,7 @@ export const census = defineRoom({
 /**
  * Region 3's secret room (floors/floor-7.md, "Secret room"): behind the street sign, after the census.
  * The observatory's plate says `/25`: one bit more of street, so the square is cut in two halves
- * (.0–.127 and .128–.255). Lantern (.7) still answers; bell, at .200 on the same square, is on the
+ * (.0–.127 and .128–.255). Kitchen (.7) still answers; chapel, at .200 on the same square, is on the
  * other half, so the observatory doesn't even try (`connect: Network is unreachable`). Giving the
  * house its `/24` back makes the street whole. No `ip route` yet (Floor 8), so the only fix is the prefix.
  */
@@ -289,23 +292,23 @@ export const binaryBehind24 = defineRoom({
   kind: "secret",
   pathTag: "all",
   content: secretBinaryId,
-  vars: { bell: BELL_HOUSE, lantern: IP.lantern },
+  vars: { chapel: BELL_HOUSE, kitchen: IP.kitchen },
   seed: 750,
   topology: town({
-    houses: ["lantern", "bell"],
-    extra: { bell: { addrs: [{ dev: "eth0", cidr: `${BELL_HOUSE}/24` }] } },
+    houses: ["kitchen", "chapel"],
+    extra: { chapel: { addrs: [{ dev: "eth0", cidr: `${BELL_HOUSE}/24` }] } },
   }),
   faults: [
     { kind: "addr-remove", device: "observatory", cidr: OWN, dev: "eth0" },
     { kind: "addr-set", device: "observatory", cidr: "10.0.1.5/25", dev: "eth0" },
   ],
   playerDevice: "observatory",
-  // Bell's door is open: moving bell instead is a detector.
-  access: access(["lantern", "bell"], ["bell"]),
+  // Chapel's door is open: moving chapel instead is a detector.
+  access: access(["kitchen", "chapel"], ["chapel"]),
   controls: { console: "typing", slate: SLATE, addressSlots: { "observatory:eth0": "broken" } },
   tools: {},
   glow: "none",
-  winCondition: answeredBy("observatory", BELL_HOUSE, BELL),
+  winCondition: answeredBy("observatory", BELL_HOUSE, CHAPEL),
   key: { word: keyFor(secretBinaryId), via: "mark" },
   healthChecks: [
     {
@@ -318,21 +321,24 @@ export const binaryBehind24 = defineRoom({
   uses: ["ip-address", "subnet", "prefix-length", "ping"],
   cards: ["thirty-two-bits"],
   misconceptions: [
-    // A shorter prefix than the square's: bell answers, but the street is now far bigger than the square.
+    // A shorter prefix than the square's: chapel answers, but the street is now far bigger than the square.
     { id: "street-too-big", detect: ran("observatory", /^ip addr add 10\.0\.1\.\d+\/(1?\d|2[0-3]) /) },
-    // Moving house to bell's half: bell answers, lantern no longer does.
+    // Moving house to chapel's half: chapel answers, kitchen no longer does.
     {
       id: "other-half",
       detect: ran("observatory", /^ip addr add 10\.0\.1\.(12[89]|1[3-9]\d|2[0-4]\d|25[0-5])\/25 /),
     },
-    { id: "move-bell", detect: ran("bell", /^ip addr (add|del) /) },
+    { id: "move-chapel", detect: ran("chapel", /^ip addr (add|del) /) },
   ],
   detectorTests: [
     { misconception: "street-too-big", steps: [typed("observatory", "ip addr add 10.0.1.5/16 dev eth0")] },
     { misconception: "other-half", steps: [typed("observatory", "ip addr add 10.0.1.130/25 dev eth0")] },
     {
-      misconception: "move-bell",
-      steps: [typed("bell", "ip addr del 10.0.1.200/24 dev eth0"), typed("bell", "ip addr add 10.0.1.100/24 dev eth0")],
+      misconception: "move-chapel",
+      steps: [
+        typed("chapel", "ip addr del 10.0.1.200/24 dev eth0"),
+        typed("chapel", "ip addr add 10.0.1.100/24 dev eth0"),
+      ],
     },
   ],
   solution: [

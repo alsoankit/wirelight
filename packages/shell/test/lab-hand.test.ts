@@ -24,11 +24,11 @@ function backend(asleep: boolean): SimBackend {
         ],
         bridges: [{ name: "br0", ports: ["eth0", "eth1"] }],
       },
-      host("anvil", "02:00:00:00:00:0a"),
+      host("forge", "02:00:00:00:00:0a"),
     ],
     links: [
       { id: "a", a: { device: "observatory", iface: "eth0" }, b: { device: "hall", iface: "eth0" } },
-      { id: "b", a: { device: "hall", iface: "eth1" }, b: { device: "anvil", iface: "eth0" } },
+      { id: "b", a: { device: "hall", iface: "eth1" }, b: { device: "forge", iface: "eth0" } },
     ],
   };
   const b = new SimBackend(testContent);

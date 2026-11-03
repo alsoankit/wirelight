@@ -1,4 +1,4 @@
-# obs=up lantern=up
+# obs=up kitchen=up
 $ ip link set eth0 sideways
 Error: either "dev" is duplicate, or "sideways" is garbage.
 [exit 255]

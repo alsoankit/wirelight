@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Session } from "../src";
 
-const LANTERN = "02:00:00:00:00:07";
+const KITCHEN = "02:00:00:00:00:07";
 
 describe("the game session", () => {
   it("loads a room unsolved, with its health checks failing", () => {
@@ -20,7 +20,7 @@ describe("the game session", () => {
     expect(up.exitCode).toBe(0);
     expect(up.events.some((e) => e.kind === "cmd.exec")).toBe(true);
     take(up);
-    take(s.exec("observatory", `lab send-frame --to ${LANTERN}`, "typed"));
+    take(s.exec("observatory", `lab send-frame --to ${KITCHEN}`, "typed"));
     const later = s.advanceTo(10_000);
     take(later);
     expect(later.status.won).toBe(true);
@@ -56,7 +56,7 @@ describe("the game session", () => {
     const { status } = t.loadRoom("f2.lights-out", save);
     expect(status.health["door-up"]).toBe(true);
     expect(status.now).toBe(3_000);
-    t.exec("observatory", `lab send-frame --to ${LANTERN}`, "typed");
+    t.exec("observatory", `lab send-frame --to ${KITCHEN}`, "typed");
     expect(t.advanceTo(10_000).status.won).toBe(true);
   });
 
@@ -86,10 +86,10 @@ describe("what the room shows", () => {
     const s = new Session();
     const start = s.loadRoom("f2.lights-out").status;
     expect(start.doors["observatory:eth0"]).toEqual({ mac: "02:00:00:00:00:05", adminUp: false, up: false, addrs: [] });
-    expect(start.cableEnds).toEqual({ "observatory:eth0": "in", "lantern:eth0": "in" });
+    expect(start.cableEnds).toEqual({ "observatory:eth0": "in", "kitchen:eth0": "in" });
     expect(start.corridors).toEqual({ wire: "broken" });
     s.exec("observatory", "ip link set eth0 up", "typed");
-    s.exec("observatory", `lab send-frame --to ${LANTERN}`, "typed");
+    s.exec("observatory", `lab send-frame --to ${KITCHEN}`, "typed");
     const end = s.advanceTo(10_000).status;
     expect(end.doors["observatory:eth0"]?.up).toBe(true);
     expect(end.corridors).toEqual({ wire: "lit" });
@@ -98,8 +98,8 @@ describe("what the room shows", () => {
   it("can stop time the moment a message enters a cable, so the crossing can be shown", () => {
     const s = new Session();
     s.loadRoom("p.first-message");
-    s.exec("observatory", `lab send-frame --to ${LANTERN} --msg "hello"`, "click");
-    // The command put the message on the cable at once; step until lantern's answer goes on.
+    s.exec("observatory", `lab send-frame --to ${KITCHEN} --msg "hello"`, "click");
+    // The command put the message on the cable at once; step until kitchen's answer goes on.
     const out = s.advanceTo(10_000, "cable");
     const enter = out.events.find((e) => e.kind === "link.enter");
     expect(enter).toBeDefined();
@@ -114,7 +114,7 @@ describe("what the room shows", () => {
 describe("cable ends", () => {
   it("say which end of a cable is out (1.2: the observatory's)", () => {
     const s = new Session();
-    expect(s.loadRoom("f1.loose-cable").status.cableEnds).toEqual({ "observatory:eth0": "out", "lantern:eth0": "in" });
+    expect(s.loadRoom("f1.loose-cable").status.cableEnds).toEqual({ "observatory:eth0": "out", "kitchen:eth0": "in" });
     const fixed = s.exec("observatory", "lab cable plug eth0", "click").status;
     expect(fixed.cableEnds["observatory:eth0"]).toBe("in");
   });

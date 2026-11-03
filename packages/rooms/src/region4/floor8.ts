@@ -54,8 +54,8 @@ const VARS = {
   crossingCloister: IP.crossing1,
   archCloister: IP.arch0,
   archTower: IP.arch1,
-  vesper: IP.vesper,
-  lumen: IP.lumen,
+  gallery: IP.gallery,
+  belfry: IP.belfry,
   tower: STREET.tower,
   nowhere: "10.0.3.9",
 };
@@ -95,7 +95,7 @@ export const otherStreet = defineRoom({
   controls: { console: "typing" },
   tools: {},
   glow: "symptoms",
-  winCondition: all(pingAnswered("observatory", IP.crossing0), pingAnswered("vesper", IP.crossing1)),
+  winCondition: all(pingAnswered("observatory", IP.crossing0), pingAnswered("gallery", IP.crossing1)),
   key: { word: keyFor(otherId), via: "mark" },
   // Nothing is broken: each side comes back to life once it has talked to the crossing.
   healthChecks: [
@@ -105,9 +105,9 @@ export const otherStreet = defineRoom({
       check: pingAnswered("observatory", IP.crossing0),
     },
     {
-      id: "vesper-reached-crossing",
-      object: { kind: "door", device: "vesper", iface: "eth0" },
-      check: pingAnswered("vesper", IP.crossing1),
+      id: "gallery-reached-crossing",
+      object: { kind: "door", device: "gallery", iface: "eth0" },
+      check: pingAnswered("gallery", IP.crossing1),
     },
   ],
   teaches: ["router"],
@@ -128,7 +128,7 @@ export const otherStreet = defineRoom({
       ],
     },
   ],
-  solution: [typed("observatory", "ping -c 1 10.0.1.1"), typed("vesper", "ping -c 1 10.0.2.1")],
+  solution: [typed("observatory", "ping -c 1 10.0.1.1"), typed("gallery", "ping -c 1 10.0.2.1")],
 });
 
 // ── 8.2 · Across the Street ────────────────────────────────────────────────────────────────
@@ -153,7 +153,7 @@ export const acrossTheStreet = defineRoom({
   controls: { console: "typing", routingBoards: { observatory: "works" } },
   tools: { unlock: ["ip route"] },
   glow: "symptoms",
-  winCondition: pingAnswered("observatory", IP.vesper),
+  winCondition: pingAnswered("observatory", IP.gallery),
   key: { word: keyFor(acrossId), via: "mark" },
   healthChecks: [{ id: "gateway", object: { kind: "board", device: "observatory" }, check: observatoryGateway }],
   teaches: ["default-gateway", "routing-table"],
@@ -162,12 +162,12 @@ export const acrossTheStreet = defineRoom({
   commandMemory: "CMD-08",
   misconceptions: [
     farGateway,
-    { id: "gateway-is-vesper", detect: ran("observatory", /^ip route (?:add|replace) default via 10\.0\.2\.7$/) },
+    { id: "gateway-is-gallery", detect: ran("observatory", /^ip route (?:add|replace) default via 10\.0\.2\.7$/) },
     { id: "route-to-self", detect: ran("observatory", /^ip route (?:add|replace) default via 10\.0\.1\.5$/) },
   ],
   detectorTests: [
     { misconception: "far-gateway", steps: [click("observatory", "ip route add default via 10.0.2.1")] },
-    { misconception: "gateway-is-vesper", steps: [click("observatory", "ip route add default via 10.0.2.7")] },
+    { misconception: "gateway-is-gallery", steps: [click("observatory", "ip route add default via 10.0.2.7")] },
     { misconception: "route-to-self", steps: [typed("observatory", "ip route add default via 10.0.1.5")] },
   ],
   solution: [click("observatory", "ip route add default via 10.0.1.1"), typed("observatory", "ping -c 3 10.0.2.7")],
@@ -200,7 +200,7 @@ export const directions = defineRoom({
   controls: { console: "typing", routingBoards: crackedBoards(towerTopo) },
   tools: {},
   glow: "symptoms",
-  winCondition: pingAnswered("observatory", IP.lumen),
+  winCondition: pingAnswered("observatory", IP.belfry),
   key: { word: keyFor(directionsId), via: "mark" },
   healthChecks: [{ id: "crossing-knows-tower", object: { kind: "board", device: "crossing" }, check: crossingToTower }],
   teaches: ["specific-route"],
@@ -231,19 +231,19 @@ export const noWayBack = defineRoom({
   vars: VARS,
   seed: 84,
   topology: noWayTopo,
-  faults: [{ kind: "route-remove", device: "vesper", dst: "default" }],
+  faults: [{ kind: "route-remove", device: "gallery", dst: "default" }],
   playerDevice: "observatory",
   access: openRooms(noWayTopo),
   controls: { console: "typing", routingBoards: crackedBoards(noWayTopo), slate: { catch: true, capture: true } },
   tools: { unlock: ["tcpdump"] },
   glow: "symptoms",
-  winCondition: pingAnswered("observatory", IP.vesper),
+  winCondition: pingAnswered("observatory", IP.gallery),
   key: { word: keyFor(noWayId), via: "mark" },
   healthChecks: [
     {
-      id: "vesper-way-back",
-      object: { kind: "board", device: "vesper" },
-      check: hasRoute("vesper", "default", IP.crossing1),
+      id: "gallery-way-back",
+      object: { kind: "board", device: "gallery" },
+      check: hasRoute("gallery", "default", IP.crossing1),
     },
   ],
   teaches: ["return-path"],
@@ -266,9 +266,9 @@ export const noWayBack = defineRoom({
   ],
   solution: [
     typed("observatory", "ping -c 4 10.0.2.7", 1000),
-    // The Slate's Capture, in vesper's room: requests arrive, nothing leaves. It keeps listening.
-    click("vesper", "tcpdump -n -i eth0", 4000),
-    typed("vesper", "ip route add default via 10.0.2.1"),
+    // The Slate's Capture, in gallery's room: requests arrive, nothing leaves. It keeps listening.
+    click("gallery", "tcpdump -n -i eth0", 4000),
+    typed("gallery", "ip route add default via 10.0.2.1"),
     typed("observatory", "ping -c 3 10.0.2.7"),
   ],
 });
@@ -287,7 +287,7 @@ export const sleepingKeeper = defineRoom({
   kind: "break",
   pathTag: "tool",
   content: sleepingId,
-  vars: { ...VARS, crossingNaveDoor: MAC.crossing0, vesperDoor: MAC.vesper, observatoryDoor: MAC.observatory },
+  vars: { ...VARS, crossingNaveDoor: MAC.crossing0, vesperDoor: MAC.gallery, observatoryDoor: MAC.observatory },
   seed: 85,
   topology: sleepingTopo,
   faults: [
@@ -305,7 +305,7 @@ export const sleepingKeeper = defineRoom({
   tools: { unlock: ["sysctl"] },
   glow: "symptoms",
   // Three answers once the navigator does it itself (the key is a mark on the third).
-  winCondition: answeredAfterWake("observatory", IP.vesper, "crossing", 3),
+  winCondition: answeredAfterWake("observatory", IP.gallery, "crossing", 3),
   key: { word: keyFor(sleepingId), via: "mark" },
   healthChecks: [
     { id: "forwarding-on", object: { kind: "keeper", device: "crossing" }, check: sysctlIs("crossing", FORWARD, "1") },
@@ -332,15 +332,15 @@ export const sleepingKeeper = defineRoom({
       steps: [
         typed("observatory", "ping -c 1 10.0.2.7", 200),
         lectern("arp-ask 10.0.2.7"),
-        lectern(`wrap ${MAC.vesper}`),
+        lectern(`wrap ${MAC.gallery}`),
       ],
     },
   ],
   solution: [
     typed("observatory", "ping -c 1 10.0.2.7", 200),
     lectern("arp-ask 10.0.2.7"),
-    lectern(`forward ${MAC.vesper}`),
-    // Vesper's reply waits on the lectern too; the ledger already knows the observatory's door.
+    lectern(`forward ${MAC.gallery}`),
+    // Gallery's reply waits on the lectern too; the ledger already knows the observatory's door.
     lectern(`forward ${MAC.observatory}`, 1000),
     typed("crossing", `sysctl -w ${FORWARD}=1`, 200),
     typed("observatory", "ping -c 3 10.0.2.7"),
@@ -367,20 +367,24 @@ export const closedCrossing = defineRoom({
     { kind: "route-remove", device: "crossing", dst: STREET.tower },
     { kind: "sysctl", device: "arch", key: FORWARD, value: "0" },
     // A door nobody has.
-    { kind: "route-set", device: "lumen", route: { dst: "default", via: "10.0.3.9" } },
+    { kind: "route-set", device: "belfry", route: { dst: "default", via: "10.0.3.9" } },
   ],
   playerDevice: "observatory",
   access: openRooms(closedTopo),
   controls: { console: "typing", routingBoards: crackedBoards(closedTopo), slate: { catch: true, capture: true } },
   tools: {},
   glow: "none",
-  winCondition: pingAnswered("observatory", IP.lumen),
+  winCondition: pingAnswered("observatory", IP.belfry),
   key: { word: keyFor(closedId), via: "mark" },
   healthChecks: [
     { id: "observatory-gateway", object: { kind: "board", device: "observatory" }, check: observatoryGateway },
     { id: "crossing-knows-tower", object: { kind: "board", device: "crossing" }, check: crossingToTower },
     { id: "arch-forwards", object: { kind: "keeper", device: "arch" }, check: sysctlIs("arch", FORWARD, "1") },
-    { id: "lumen-way-back", object: { kind: "board", device: "lumen" }, check: hasRoute("lumen", "default", IP.arch1) },
+    {
+      id: "belfry-way-back",
+      object: { kind: "board", device: "belfry" },
+      check: hasRoute("belfry", "default", IP.arch1),
+    },
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
   teaches: [],
@@ -396,7 +400,12 @@ export const closedCrossing = defineRoom({
     { id: "routes-again", detect: ran("arch", ROUTE_CHANGE) },
     {
       id: "one-direction",
-      detect: changedNearAfterHearing("lumen", "> 10.0.3.7: ICMP echo request", ["observatory", "crossing", "arch"], 2),
+      detect: changedNearAfterHearing(
+        "belfry",
+        "> 10.0.3.7: ICMP echo request",
+        ["observatory", "crossing", "arch"],
+        2,
+      ),
     },
   ],
   detectorTests: [
@@ -415,7 +424,7 @@ export const closedCrossing = defineRoom({
         typed("crossing", "ip route add 10.0.3.0/24 via 10.0.2.2"),
         typed("arch", `sysctl -w ${FORWARD}=1`),
         typed("observatory", "ping -c 10 10.0.3.7", 1000),
-        click("lumen", "tcpdump -n -i eth0", 3000),
+        click("belfry", "tcpdump -n -i eth0", 3000),
         typed("crossing", "ip route add 10.0.4.0/24 via 10.0.2.2"),
         typed("observatory", "ip route add 10.0.4.0/24 via 10.0.1.1"),
       ],
@@ -425,8 +434,8 @@ export const closedCrossing = defineRoom({
     typed("observatory", "ip route add default via 10.0.1.1"),
     typed("crossing", "ip route add 10.0.3.0/24 via 10.0.2.2"),
     typed("arch", `sysctl -w ${FORWARD}=1`),
-    typed("lumen", "ip route del default"),
-    typed("lumen", "ip route add default via 10.0.3.1"),
+    typed("belfry", "ip route del default"),
+    typed("belfry", "ip route add default via 10.0.3.1"),
     typed("observatory", "ping -c 3 10.0.3.7"),
   ],
   altSolutions: [
@@ -434,7 +443,7 @@ export const closedCrossing = defineRoom({
       typed("observatory", "ip route add default via 10.0.1.1"),
       typed("crossing", "ip route add default via 10.0.2.2"),
       typed("arch", `sysctl -w ${FORWARD}=1`),
-      typed("lumen", "ip route replace default via 10.0.3.1"),
+      typed("belfry", "ip route replace default via 10.0.3.1"),
       typed("observatory", "ping -c 3 10.0.3.7"),
     ],
   ],

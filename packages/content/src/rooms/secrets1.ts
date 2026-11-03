@@ -7,18 +7,18 @@ import type { RoomText } from "./types";
 export const why48Bits: RoomText = {
   title: "Why 48 Bits?",
   mission: "Behind a narrow door in the corridor, one machine still wears its maker's name. Get it to answer you.",
-  access: { relic: "Sealed. It answers what's sent to it, by name." },
+  access: { vault: "Sealed. It answers what's sent to it, by name." },
   notes: ["Found a door out here that nobody named by hand. Its name doesn't start with 02. A factory made this one."],
   hints: [
-    { text: "You don't know its name yet. How did you learn quill's?" },
-    { text: "Call everyone out of the door the relic is behind, then read who answered." },
+    { text: "You don't know its name yet. How did you learn library's?" },
+    { text: "Call everyone out of the door the vault is behind, then read who answered." },
     {
       text: "Not every MAC address starts with 02: some were burned in by whoever made the door.",
       codex: "makers-mark",
     },
     { text: "Send a broadcast out of eth1, read the answer's from, then send a frame to that MAC address." },
     {
-      text: "Send to `ff:ff:ff:ff:ff:ff` out of eth1. The relic answers from `00:1b:21:3a:4f:9c`. Send a frame to that name, and it answers with the key.",
+      text: "Send to `ff:ff:ff:ff:ff:ff` out of eth1. The vault answers from `00:1b:21:3a:4f:9c`. Send a frame to that name, and it answers with the key.",
     },
   ],
   detectors: {

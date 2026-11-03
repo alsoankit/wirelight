@@ -5,7 +5,7 @@
 # Topology "square" (Floor 7's square, made small): hall's br0 over eth1..eth3, cabled to
 #   observatory eth0 02:00:00:00:00:05 (no address: the DHCP client),
 #   registry    eth0 02:00:00:00:00:02 10.0.1.2/24 (the DHCP server: dnsmasq),
-#   lantern     eth0 02:00:00:00:00:07 10.0.1.7/24.
+#   kitchen     eth0 02:00:00:00:00:07 10.0.1.7/24.
 # The registry runs dnsmasq with a range 10.0.1.100-10.0.1.150, a 1 h lease and no DNS. Variants
 # (the second word of the topology): ping (dnsmasq's default: it pings an address before offering
 # it), noping (--no-ping), seq (--dhcp-sequential-ip), norouter (--dhcp-option=3: no router
@@ -58,17 +58,17 @@ stop_daemons() { # dhclient goes to the background once bound; dnsmasq runs unti
 }
 
 topo_square() { # square: $1 = ping (default) | noping | seq | norouter | none
-  ns_add hall; ns_add observatory; ns_add registry; ns_add lantern
+  ns_add hall; ns_add observatory; ns_add registry; ns_add kitchen
   cable hall eth1 02:00:00:00:00:11 observatory eth0 02:00:00:00:00:05
   cable hall eth2 02:00:00:00:00:12 registry eth0 02:00:00:00:00:02
-  cable hall eth3 02:00:00:00:00:13 lantern eth0 02:00:00:00:00:07
+  cable hall eth3 02:00:00:00:00:13 kitchen eth0 02:00:00:00:00:07
   ip -n hall link add br0 type bridge vlan_default_pvid 0
   for p in eth1 eth2 eth3; do ip -n hall link set "$p" master br0; ip -n hall link set "$p" up; done
   ip -n hall link set br0 up
-  for h in observatory registry lantern; do ip -n "$h" link set eth0 up; done
+  for h in observatory registry kitchen; do ip -n "$h" link set eth0 up; done
   ip -n registry addr add 10.0.1.2/24 dev eth0
-  ip -n lantern addr add 10.0.1.7/24 dev eth0
-  wait_up hall eth1 eth2 eth3 br0; for h in observatory registry lantern; do wait_up "$h" eth0; done
+  ip -n kitchen addr add 10.0.1.7/24 dev eth0
+  wait_up hall eth1 eth2 eth3 br0; for h in observatory registry kitchen; do wait_up "$h" eth0; done
   local v="${1:-ping}" flags="" what=""
   case "$v" in
     ping) what="dnsmasq (pings before offering)" ;;
@@ -84,7 +84,7 @@ topo_square() { # square: $1 = ping (default) | noping | seq | norouter | none
       --pid-file=/run/dhcp/dnsmasq.pid $flags > /run/dhcp/dnsmasq.log 2>&1 &
   fi
   TOPO="square-$v"
-  TOPO_DESC="$TOPO: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->lantern eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: $what, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off"
+  TOPO_DESC="$TOPO: hall (lo=1 eth1=2 eth2=3 eth3=4 br0=5) br0 bridge (vlan_default_pvid 0) over eth1 02:00:00:00:00:11, eth2 02:00:00:00:00:12, eth3 02:00:00:00:00:13; eth1<->observatory eth0 02:00:00:00:00:05 (no address), eth2<->registry eth0 02:00:00:00:00:02 10.0.1.2/24, eth3<->kitchen eth0 02:00:00:00:00:07 10.0.1.7/24; all up; registry: $what, dhcp-range 10.0.1.100-10.0.1.150, lease 1h, no DNS; IPv6 off"
   # As in the switch topology: let br0's two IGMP reports pass so captures start quiet.
   sleep 2.5
 }
@@ -93,7 +93,7 @@ fresh() { stop_daemons; wipe; "topo_$1" "${@:2}"; sleep 0.1; STEPS=(); }
 
 S='square ping'
 BOUND='observatory|dhclient eth0'
-TAKEN='lantern|ip addr add 10.0.1.149/24 dev eth0'   # dnsmasq's first pick for 02:00:00:00:00:05
+TAKEN='kitchen|ip addr add 10.0.1.149/24 dev eth0'   # dnsmasq's first pick for 02:00:00:00:00:05
 
 # ── dhclient ─────────────────────────────────────────────────────────────────────────────────
 start_family dhcp dhcp
@@ -136,7 +136,7 @@ T() { fresh $1; [ -n "${PRE:-}" ] && on "${PRE%%|*}" "${PRE#*|}"; capture "${@:2
 PRE=""
 start_family tcpdump dhcp
 T "$S" tcpdump-dhcp           observatory 'tcpdump -n -c 4 -i eth0 udp' 12 "$BOUND"
-T "$S" tcpdump-dhcp-e         lantern 'tcpdump -n -e -c 2 -i eth0 udp' 12 "$BOUND"
+T "$S" tcpdump-dhcp-e         kitchen 'tcpdump -n -e -c 2 -i eth0 udp' 12 "$BOUND"
 T "$S" tcpdump-dhcp-names     observatory 'tcpdump -c 4 -i eth0 udp' 12 "$BOUND"
 
 # ── bytes: every byte of the DHCP frames ─────────────────────────────────────────────────────

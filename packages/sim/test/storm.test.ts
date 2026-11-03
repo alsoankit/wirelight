@@ -42,13 +42,13 @@ function halls(): Topology {
         bridges: [{ name: "br0", ports: ["eth0", "eth3", "eth4"] }],
       },
       host("a", "02:00:00:00:00:0a", "10.0.0.1/24"),
-      host("wren", "02:00:00:00:00:13", "10.0.0.2/24"),
+      host("laundry", "02:00:00:00:00:13", "10.0.0.2/24"),
     ],
     links: [
       { id: "la", a: { device: "hall-a", iface: "eth1" }, b: { device: "a", iface: "eth0" } },
       { id: "span", a: { device: "hall-a", iface: "eth3" }, b: { device: "hall-b", iface: "eth0" }, ...slow },
       { id: "span-2", a: { device: "hall-a", iface: "eth4" }, b: { device: "hall-b", iface: "eth4" }, ...slow },
-      { id: "lw", a: { device: "hall-b", iface: "eth3" }, b: { device: "wren", iface: "eth0" } },
+      { id: "lw", a: { device: "hall-b", iface: "eth3" }, b: { device: "laundry", iface: "eth0" } },
     ],
   };
 }
@@ -107,7 +107,7 @@ describe("a switching loop (4.B)", () => {
     expect(spanFrames(sim, 3200, 4000)).toBe(0);
   });
 
-  it("after the storm, deleting a pinned wrong entry lets wren be reached", () => {
+  it("after the storm, deleting a pinned wrong entry lets laundry be reached", () => {
     const sim = new Simulator(halls(), [
       { kind: "fdb-static", device: "hall-b", mac: "02:00:00:00:00:13", port: "eth0", sticky: true },
     ]);

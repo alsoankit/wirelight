@@ -155,7 +155,7 @@ describe("dhcp", () => {
             bridges: [{ name: "br0", ports: ["eth1", "eth2", "eth3"] }],
           },
           host("observatory", "02:00:00:00:00:05"),
-          host("quill", "02:00:00:00:00:0a"),
+          host("library", "02:00:00:00:00:0a"),
           {
             ...host("registry", "02:00:00:00:00:02", "10.0.1.2/24"),
             dhcpServer: { range: ["10.0.1.100", "10.0.1.150"] as [string, string] },
@@ -163,7 +163,7 @@ describe("dhcp", () => {
         ],
         links: [
           { id: "l1", a: { device: "hall", iface: "eth1" }, b: { device: "observatory", iface: "eth0" } },
-          { id: "l2", a: { device: "hall", iface: "eth2" }, b: { device: "quill", iface: "eth0" } },
+          { id: "l2", a: { device: "hall", iface: "eth2" }, b: { device: "library", iface: "eth0" } },
           { id: "l3", a: { device: "hall", iface: "eth3" }, b: { device: "registry", iface: "eth0" } },
         ],
       },
@@ -172,15 +172,15 @@ describe("dhcp", () => {
     );
     sim.startDhclient("observatory", 1, { doors: ["eth0"], verbose: false, release: false });
     sim.advance(1000);
-    sim.startDhclient("quill", 2, { doors: ["eth0"], verbose: false, release: false });
+    sim.startDhclient("library", 2, { doors: ["eth0"], verbose: false, release: false });
     sim.advance(20_000);
     const offers = dhcpSent(sim, "registry").filter((x) => x.type === 2);
-    // The first offer after its 3 s ping; quill's DISCOVER waited, then got its own 3 s ping.
+    // The first offer after its 3 s ping; library's DISCOVER waited, then got its own 3 s ping.
     expect(offers[0]?.dst).toBe("10.0.1.149");
     expect(offers[0]?.t).toBeGreaterThan(3000);
-    const quill = offers.find((x) => x.dst === "10.0.1.103");
-    expect(quill?.t).toBeGreaterThan(6000);
-    expect(sim.device("quill")?.addrs.find((x) => x.dev === "eth0")?.ip).toBe("10.0.1.103");
+    const library = offers.find((x) => x.dst === "10.0.1.103");
+    expect(library?.t).toBeGreaterThan(6000);
+    expect(sim.device("library")?.addrs.find((x) => x.dev === "eth0")?.ip).toBe("10.0.1.103");
   });
 
   it("release: DHCPRELEASE to the server, the address goes, the server forgets the lease", () => {

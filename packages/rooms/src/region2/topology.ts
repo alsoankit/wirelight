@@ -8,16 +8,16 @@
 import type { AnnouncerSpec, DeviceSpec, LabSpec, LinkSpec, MessengerSpec, Topology } from "@wirelight/sim";
 
 export const OBSERVATORY = "02:00:00:00:00:05";
-export const LANTERN = "02:00:00:00:00:07";
-export const ANVIL = "02:00:00:00:00:0a";
-export const BEACON = "02:00:00:00:00:0b";
-export const QUILL = "02:00:00:00:00:0c";
-export const COMPASS = "02:00:00:00:00:0d";
+export const KITCHEN = "02:00:00:00:00:07";
+export const FORGE = "02:00:00:00:00:0a";
+export const ATTIC = "02:00:00:00:00:0b";
+export const LIBRARY = "02:00:00:00:00:0c";
+export const PANTRY = "02:00:00:00:00:0d";
 export const GATE = "02:00:00:00:00:0f";
-export const EMBER = "02:00:00:00:00:10";
-export const THISTLE = "02:00:00:00:00:11";
-export const BELL = "02:00:00:00:00:12";
-export const WREN = "02:00:00:00:00:13";
+export const BAKERY = "02:00:00:00:00:10";
+export const LARDER = "02:00:00:00:00:11";
+export const CHAPEL = "02:00:00:00:00:12";
+export const LAUNDRY = "02:00:00:00:00:13";
 export const BROADCAST = "ff:ff:ff:ff:ff:ff";
 
 /** A machine behind one of a hall's doors. */

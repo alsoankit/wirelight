@@ -1,4 +1,4 @@
-# lan-bare: observatory eth0 02:00:00:00:00:05 <-> lantern eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off | setup: none | runs on: observatory
+# lan-bare: observatory eth0 02:00:00:00:00:05 <-> kitchen eth0 02:00:00:00:00:07; both doors up; no IPv4 addresses; IPv6 off | setup: none | runs on: observatory
 $ ip addr add 10.0.0.5/33 dev eth0
 Error: any valid prefix is expected rather than "10.0.0.5/33".
 [exit 1]

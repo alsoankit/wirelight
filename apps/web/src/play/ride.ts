@@ -107,9 +107,9 @@ const sendFrame = (to: string, msg: string, dev?: string) =>
   o(`lab send-frame${dev ? ` --dev ${dev}` : ""} --to ${to} --msg "${msg}"`);
 
 export const rideScripts: Record<number, RideScript> = {
-  // Lantern's message, out through its door, along the thread, into yours.
+  // Kitchen's message, out through its door, along the thread, into yours.
   1: { room: "f1.boss-dark-corridor", setup: "solution", legs: "won" },
-  // A frame for lantern's door, taken in; a broadcast, taken in by both doors; a frame for someone
+  // A frame for kitchen's door, taken in; a broadcast, taken in by both doors; a frame for someone
   // else, let fall.
   2: {
     room: "f2.boss-silent-line",
@@ -142,7 +142,7 @@ export const rideScripts: Record<number, RideScript> = {
       { id: "storm", steps: [sendFrame(BROADCAST, "who?", undefined)], pick: "lab", from: "observatory", maxBeats: 7 },
     ],
   },
-  // A ping to lantern's house and its echo (the address question is Floor 6's: left out here).
+  // A ping to kitchen's house and its echo (the address question is Floor 6's: left out here).
   5: {
     room: "f5.boss-quiet-street",
     setup: [
@@ -161,20 +161,20 @@ export const rideScripts: Record<number, RideScript> = {
   // A call from nobody to everyone, the registry's offer back; then a ping on the same street.
   7: {
     room: "f7.boss-census",
-    // Bell and moth back at their own numbers first (the boss's first steps), so the offer is free.
+    // Chapel and cellar back at their own numbers first (the boss's first steps), so the offer is free.
     setup: () => roomById("f7.boss-census")?.solution.slice(0, 4) ?? [],
     legs: [
       { id: "registry", steps: [o("dhclient -v eth0", 10000)], pick: "dhcp-first-two" },
       { id: "street", steps: [o("ping -c 1 10.0.1.7")], pick: "echo-request", oneWay: true },
     ],
   },
-  // A ping to vesper over the crossing, and the reply.
+  // A ping to gallery over the crossing, and the reply.
   8: {
     room: "f8.boss-closed-crossing",
     setup: "solution",
     legs: [{ id: "cross", steps: [o("ping -c 1 10.0.2.7")], pick: "ipv4" }],
   },
-  // One ping to halo, four streets, and the reply all the way back.
+  // One ping to loft, four streets, and the reply all the way back.
   9: {
     room: "f9.boss-crossing",
     setup: "solution",

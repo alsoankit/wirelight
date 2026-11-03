@@ -7,7 +7,7 @@ import type { RoomText } from "./types";
  * stay out: they're the Frontier's to teach.
  */
 export const insideYourHomeRouter: RoomText = {
-  title: "Inside Your Home Router",
+  title: "The Box at Home",
   mission: "At the foot of the spire, one small box hums with blinking lights. Plug in, and reach the world outside.",
   access: { world: "Sealed. It answers anyone who can reach it, from outside." },
   notes: [

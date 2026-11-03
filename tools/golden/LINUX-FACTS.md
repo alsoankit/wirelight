@@ -75,10 +75,10 @@ entry that is already REACHABLE keeps the timer it had.
 ## ARP and the neighbour table (measured)
 - **Unanswered neighbour:** 3 broadcast requests at +0, +1.0, +2.03 s; INCOMPLETE from the first;
   **FAILED at ~3.1 s** (mcast_solicit × retrans_time). Nothing else follows.
-- **A successful ping on one segment** (observatory → lantern, both fresh):
+- **A successful ping on one segment** (observatory → kitchen, both fresh):
   - observatory: request (broadcast), reply → entry **REACHABLE** at once.
-  - lantern: the request creates its entry for observatory (STALE); sending the echo reply makes
-    it **DELAY**; after 5.0–5.3 s lantern sends a **unicast** ARP probe to observatory, gets the
+  - kitchen: the request creates its entry for observatory (STALE); sending the echo reply makes
+    it **DELAY**; after 5.0–5.3 s kitchen sends a **unicast** ARP probe to observatory, gets the
     reply, and the entry becomes **REACHABLE**.
 - **REACHABLE → ?** When REACHABLE times out, the entry goes to **DELAY if it was used in the last
   `delay_first_probe_time` (5 s)**, otherwise **STALE**. With `base_reachable_time_ms=1000`
@@ -163,7 +163,7 @@ entry that is already REACHABLE keeps the timer it had.
   `ping -c 3 10.0.4.7` from the observatory prints `From 10.0.2.2 icmp_seq=N Time to live
   exceeded` three times (TTL 64: crossing sees even TTLs, arch odd, arch gets TTL 1).
   `-t 1` dies at crossing (`From 10.0.1.1`), `-t 2` at arch (`From 10.0.2.2`).
-- From a house **on the cloister** (vesper, default via crossing) to the bell tower: crossing
+- From a house **on the cloister** (gallery, default via crossing) to the bell tower: crossing
   redirects it: `From 10.0.2.1: icmp_seq=1 Redirect Host(New nexthop: 10.0.2.2)` (note the colon
   after the address). Redirects are **not** counted as errors in ping's statistics.
 - **Redirect bytes:** ICMP type 5 code 1 (host), gateway in bytes 4–7, TOS 0xc0, TTL 64, DF clear,
@@ -174,16 +174,16 @@ entry that is already REACHABLE keeps the timer it had.
   after 20 ms << (redirects sent) (40, 80, 160, 320, 640, 1280 ms…); at most 9, then none until 20.48 s
   of quiet (each refused packet restarts the quiet). Because a redirect resets the peer's
   `rate_last`, and after quiet also its tokens, it **starves the same peer's ICMP errors**: in the
-  loop seen from vesper (`ping -c 30 -i 0.2`), time exceeded came back only for seq 11, 15, 20, 27,
+  loop seen from gallery (`ping -c 30 -i 0.2`), time exceeded came back only for seq 11, 15, 20, 27,
   redirects for 1–4 (both routers), then 6, 8, 12, 16, 23, 30. The simulator reproduces this case
   exactly (`ping-redirect-loop-fast`).
 - **Accepting a redirect** (a host, accept_redirects 1): only if the route to that destination
   currently goes through the router that sent it; the new gateway must be an ordinary address. If its
   MAC isn't known yet the host only ARPs for it (no exception yet); once known, a **route exception**
   is kept for 300 s: `ip route get 10.0.3.2` → `10.0.3.2 via 10.0.2.2 dev eth0 src 10.0.2.7 uid 0`
-  / `    cache <redirected> expires 299sec `. So `ping -c 3` to the bell tower from vesper shows
+  / `    cache <redirected> expires 299sec `. So `ping -c 3` to the bell tower from gallery shows
   redirects for seq 1 and 2 and goes direct to arch from seq 3. In the loop, the two routers'
-  redirects flip vesper's exception back and forth between .1 and .2.
+  redirects flip gallery's exception back and forth between .1 and .2.
 - `ip route show cache` lists an exception (`10.0.3.2 via 10.0.2.2 dev eth0 ` /
   `    cache <redirected> expires 298sec `) **only after a packet has gone out through it**; it is
   listed once per route sharing that gateway (twice after `ip route add 10.9.0.0/16 via 10.0.2.1`).
@@ -194,7 +194,7 @@ entry that is already REACHABLE keeps the timer it had.
   but keeps using its gateway, so it gets one per ping (`ping-redirect-refused`).
   `send_redirects` 0 on both `all` and the door: no redirects.
 - **ping reads errors first:** when a redirect and a time exceeded for the same echo arrive 0.15 ms
-  apart (`ping -c 1 -t 2` from vesper), ping prints only the error (5 of 5 runs): the socket error is
+  apart (`ping -c 1 -t 2` from gallery), ping prints only the error (5 of 5 runs): the socket error is
   returned before queued data, and the count is then complete.
 
 ## Duplicate addresses (measured, topology "switch-ip" with c given b's address 10.0.0.2)
@@ -342,13 +342,13 @@ is created empty; dnsmasq needs `-u root` in a user namespace. Nothing else diff
   bytes) modulo the range size, then walks up, wrapping: 02:00:00:00:00:05 → .149, :0a → .103 (both
   measured). `--dhcp-sequential-ip` → the lowest free (.100). A client with a lease, or asking for a free
   address with option 50 (after a release), gets it **without a ping**.
-- **In use:** if the ping is answered (lantern holding .149 answered at once), dnsmasq moves to the next
+- **In use:** if the ping is answered (kitchen holding .149 answered at once), dnsmasq moves to the next
   address immediately and pings that (3 s again): offer .150.
 - **While dnsmasq waits on its ping it handles nothing else**: a second DISCOVER (forced with
   `backoff-cutoff 2`) waited, then got its own OFFER at once after the first (no second ping: a free result
   is cached 30 s).
 - **`--no-ping`:** OFFER within 1 ms. If the address is taken, **the client's ARP check catches it**:
-  lantern answers the probe, arping stops, the script runs a second arping (probe +15 ms, answered) to
+  kitchen answers the probe, arping stops, the script runs a second arping (probe +15 ms, answered) to
   read the MAC, then `DHCPDECLINE` (broadcast; options 53=4, 54, 50) ~20 ms later; dnsmasq holds the
   address back; 10 s later a fresh DISCOVER (new xid) gets .150. Total ~12.2 s. The registry's STALE
   entry for .149 → client's MAC then probes the client, which doesn't have .149: **FAILED**.
