@@ -265,14 +265,19 @@ export function cathedralObservatory(secondDoor: boolean) {
 // (0052): what the cathedral's builders left in each is in house/Traits.tsx.
 
 export const CATHEDRAL_HOUSE_PIECES: Placement[] = [
-  { piece: "Wall_ArchGothic", position: [0, 0, -4] },
   { piece: "Bricks", position: [2.9, 0, 2.0], rotationY: 0.9, scale: 0.7 },
-  { piece: "Brick", position: [-1.6, 0, 2.6], rotationY: 0.4 },
+  // Clear of the near-edge door's path (0111).
+  { piece: "Brick", position: [-3.2, 0, 1.2], rotationY: 0.4 },
 ];
 
 export function cathedralHouse() {
   const room = newRoom();
-  chapelWalls(room, { [-4]: "lancet", 2: "wall" }, { [-4]: "wall", [-2]: "tall", 0: "wall", 2: "wall" });
+  // The back wall whole (0111: the door is on the near edge).
+  chapelWalls(
+    room,
+    { [-4]: "lancet", [-2]: "wall", 0: "wall", 2: "wall" },
+    { [-4]: "wall", [-2]: "tall", 0: "wall", 2: "wall" },
+  );
   room.kit.push(...floor("floor_01"), ...piers());
   candles(room, [-3.1, -3.15]);
   return { placements: CATHEDRAL_HOUSE_PIECES, ...finish(room) };

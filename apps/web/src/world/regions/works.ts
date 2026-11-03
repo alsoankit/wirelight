@@ -460,7 +460,7 @@ export function worksHouse() {
   const gears: Gear[] = [];
   const steam: V3[] = [];
   const kitPieces: KitPlacement[] = [
-    ...wallRun("back", -4, 4, [0]),
+    ...wallRun("back", -4, 4, []), // whole: the door is on the near edge (0111)
     ...wallRun("left", -4.4, 4, []),
     ...drawerCabinet("back", -2.6, 2),
     ...sortingBench(bag, "left", -1.75),

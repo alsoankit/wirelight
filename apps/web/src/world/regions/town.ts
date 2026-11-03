@@ -405,11 +405,12 @@ function wallCaps(bag: Bag) {
  * A room's two walls from the inside: the back wall with its doorway at x = 0 (between whole pieces,
  * the gaps filled by plain pieces set a hair behind), the left wall plain with a window or two.
  */
-function interiorWalls(windowsBack: number[], windowsLeft: number[]): KitPlacement[] {
+function interiorWalls(windowsBack: number[], windowsLeft: number[], backDoor = true): KitPlacement[] {
   const out: KitPlacement[] = [];
-  // Back wall: the doorway, plain pieces at either end, fillers between (behind, so their edges hide).
-  out.push(wallPiece("back", "Wall_Plaster_Door_Round", 0));
-  out.push(doorFrame("back", 0));
+  // Back wall: the doorway (unless the door is on the near edge, 0111), plain pieces at either end,
+  // fillers between (behind, so their edges hide).
+  out.push(wallPiece("back", backDoor ? "Wall_Plaster_Door_Round" : "Wall_Plaster_Straight_Base", 0));
+  if (backDoor) out.push(doorFrame("back", 0));
   for (const at of [-3, 3]) {
     out.push(
       wallPiece("back", windowsBack.includes(at) ? "Wall_Plaster_Window_Wide_Round" : "Wall_Plaster_Straight_Base", at),
@@ -465,7 +466,7 @@ export function townObservatory(_secondDoor: boolean) {
 
 export const TOWN_HOUSE_PIECES: Placement[] = [];
 
-const HOUSE_KIT: KitPlacement[] = [...interiorWalls([-3], [-1, 3]), prop("Vase_Rubble_Medium", 2.6, -3.2, 0.6)];
+const HOUSE_KIT: KitPlacement[] = [...interiorWalls([-3], [-1, 3], false), prop("Vase_Rubble_Medium", 2.6, -3.2, 0.6)];
 
 export function townHouse() {
   const bag: Bag = {};
