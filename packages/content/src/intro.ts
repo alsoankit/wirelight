@@ -77,8 +77,8 @@ export const tour = {
       target: "door",
     },
     {
-      title: "Your notes",
-      body: "You worked here before you shut down, and you left notes for yourself. This room, the observatory, is where you woke up. When you're stuck, read your notes, like this one.",
+      title: "Memory fragments",
+      body: "Most of your memory went when you shut down. This room, the observatory, is where you woke up. When you're stuck, recall a memory fragment: each one is a hint.",
       target: "notes",
     },
     {
@@ -93,7 +93,7 @@ export const tour = {
     },
     {
       title: "The menu",
-      body: "The menu ([[M]]) has the full Field Guide, every room, and your keys. That's everything. Go on in.",
+      body: "The menu ([[M]]) has the Guide, every room, and your Memory: everything you've learned. That's all. Go on in.",
       target: "menu",
     },
   ] satisfies TourCard[],

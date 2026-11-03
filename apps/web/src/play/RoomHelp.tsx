@@ -6,7 +6,6 @@ import { useProgress } from "../progress/progress";
 import { cardDue, readForCards } from "./cardRules";
 import { attempts, hintsReady, useElapsed, useNewPath } from "./hints";
 import { type Line, Lines } from "./Lines";
-import { KeyringButton } from "./Moments";
 import { floorCleared, questionOpen, useMoments } from "./momentRules";
 import { RichText } from "./RichText";
 
@@ -107,7 +106,6 @@ export function TopBar() {
       <button type="button" onClick={() => openPanel({ kind: "ask" })}>
         {voice.bar.ask}
       </button>
-      <KeyringButton />
       {resetAt > 0 && (
         <output className="bar-status" aria-live="polite">
           {voice.bar.resetDone}
@@ -144,6 +142,7 @@ export function NotesPanel() {
   return (
     <section className="panel notes" aria-label={voice.notes.title}>
       <h2>{voice.notes.title}</h2>
+      <p className="panel-note">{voice.notes.about}</p>
       {text.notes.map((n) => (
         <p key={n} className="note">
           <RichText text={say(n)} />

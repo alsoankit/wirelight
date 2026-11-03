@@ -49,10 +49,7 @@ export function RoomHud() {
   const path = useProgress((s) => s.path ?? "new");
   const hintsOpened = useProgress((s) => (roomId ? (s.hints[roomId] ?? 0) : 0));
   const clear = useProgress((s) => s.clear);
-  const findJournalPage = useProgress((s) => s.findJournalPage);
-  const journalPages = useProgress((s) => s.journalPages);
   const [showDebrief, setShowDebrief] = useState(false);
-  const [page, setPage] = useState(false);
 
   const room = roomId ? roomById(roomId) : undefined;
   const text = room ? roomTexts[room.content] : undefined;
@@ -62,10 +59,6 @@ export function RoomHud() {
   const memoryShowing = useMemory((s) => s.show !== null);
   const ending = useMoments((s) => s.ending);
   const finale = !!room && room.id === LAST_BOSS && won && (!endingSeen || ending);
-
-  // A page read in one room's debrief doesn't stay open into the next.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: a new room is the trigger
-  useEffect(() => setPage(false), [roomId]);
 
   useEffect(() => {
     if (!won) return setShowDebrief(false);
@@ -104,7 +97,6 @@ export function RoomHud() {
   const floorText = floorTexts[room.floor];
   const guardian = regions[room.region]?.guardian ?? "";
   const isBoss = floor?.boss === room.id;
-  const isJournal = floor?.journalRoom === room.id;
   const tried = fired.map((id) => text.detectors[id]?.tried).filter((t): t is string => !!t);
   const capital = guardian.charAt(0).toUpperCase() + guardian.slice(1);
 
@@ -180,14 +172,6 @@ export function RoomHud() {
           <p className="debrief-key">
             {voice.after.key}: <code>{room.key.word}</code>
           </p>
-          {page && floorText && (
-            <blockquote className="journal">
-              <strong>{floorText.journal.title}</strong>
-              <p>
-                <RichText text={floorText.journal.text} />
-              </p>
-            </blockquote>
-          )}
           <div className="panel-actions">
             {text.building && (
               <button type="button" className="quiet" onClick={() => openMemory({ kind: "building", roomId: room.id })}>
@@ -197,19 +181,6 @@ export function RoomHud() {
             {isBoss && floorText && (
               <button type="button" className="quiet" onClick={() => openMemory({ kind: "floor", floor: room.floor })}>
                 {fill(voice.after.floorMemory, { guardian: capital })}
-              </button>
-            )}
-            {/* The page also lies glowing in the room (Moments: JournalPage); here for whoever didn't see it. */}
-            {isJournal && floorText && !page && !journalPages.includes(floorText.journal.page) && (
-              <button
-                type="button"
-                className="quiet"
-                onClick={() => {
-                  findJournalPage(floorText.journal.page);
-                  setPage(true);
-                }}
-              >
-                {voice.after.journal}
               </button>
             )}
             <button

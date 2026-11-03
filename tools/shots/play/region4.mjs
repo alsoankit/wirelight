@@ -97,7 +97,7 @@ await p.click(".console-term");
 await p.keyboard.type("ping -c 1 10.0.2.7");
 await p.keyboard.press("Enter");
 await walk("nave", "crossing");
-await p.click("text=Lectern");
+await p.click("text=Keeper's desk");
 await p.waitForSelector(".panel button:has-text('Ask everyone')", { timeout: 10000 });
 await p.click(".panel button:has-text('Ask everyone')");
 await p.waitForTimeout(800);

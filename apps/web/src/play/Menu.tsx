@@ -1,9 +1,7 @@
 import {
   cards,
   commandMemories,
-  fill,
   floors,
-  floorTexts,
   guide,
   pathChoice,
   regions,
@@ -17,8 +15,6 @@ import { type Panel, useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { CommandMemory } from "./CommandMemory";
 import { GuideVisual } from "./GuideVisual";
-import { MemoryList } from "./Memory";
-import { KeyIcon } from "./Moments";
 import { RichText } from "./RichText";
 import { goToRoom } from "./RoomHud";
 
@@ -28,7 +24,7 @@ import { goToRoom } from "./RoomHud";
 
 type Tab = NonNullable<Extract<Panel, { kind: "menu" }>["tab"]>;
 // UI-13's order: Field Guide, Codex, the dungeon, the keyring, Settings.
-const TABS: Tab[] = ["guide", "codex", "dungeon", "keys", "settings"];
+const TABS: Tab[] = ["guide", "codex", "dungeon", "settings"];
 
 function useOpened(): Set<string> {
   // A room is open when it's cleared, or it's the first on the path not yet cleared (CORE-04),
@@ -122,7 +118,6 @@ function Dungeon() {
 function Codex() {
   const cardsSeen = useProgress((s) => s.cardsSeen);
   const cleared = useProgress((s) => s.cleared);
-  const pages = useProgress((s) => s.journalPages);
   const [memory, setMemory] = useState<string | null>(null);
   const words = Object.entries(terms).filter(([, t]) => cleared[t.room]);
   const seen = useProgress((s) => s.memoriesSeen);
@@ -178,19 +173,6 @@ function Codex() {
           <code>{commandMemories[id]?.command}</code>
         </button>
       ))}
-      <MemoryList />
-      <h3>{voice.menu.journal}</h3>
-      {pages.length === 0 && <p className="panel-note">{voice.menu.empty}</p>}
-      {Object.values(floorTexts)
-        .filter((f) => pages.includes(f.journal.page))
-        .map((f) => (
-          <blockquote key={f.journal.page} className="journal">
-            <strong>{f.journal.title}</strong>
-            <p>
-              <RichText text={f.journal.text} />
-            </p>
-          </blockquote>
-        ))}
     </div>
   );
 }
@@ -229,27 +211,6 @@ function Guide() {
         </ul>
       )}
     </div>
-  );
-}
-
-function Keys() {
-  const keys = useProgress((s) => s.keys);
-  const cleared = useProgress((s) => s.cleared);
-  if (keys.length === 0) return <p className="panel-note">{voice.menu.noKeys}</p>;
-  return (
-    <ul className="keyring">
-      {keys.map((k) => {
-        // The room it came back from (the first cleared room whose key it is).
-        const from = rooms.find((r) => r.key.word === k && cleared[r.id]) ?? rooms.find((r) => r.key.word === k);
-        const title = from ? roomTexts[from.content]?.title : undefined;
-        return (
-          <li key={k}>
-            <KeyIcon /> <code>{k}</code>
-            {title && <span className="keyring-from">{fill(voice.menu.keyFrom, { room: title })}</span>}
-          </li>
-        );
-      })}
-    </ul>
   );
 }
 
@@ -412,7 +373,6 @@ export function Menu() {
         {tab === "dungeon" && <Dungeon />}
         {tab === "codex" && <Codex />}
         {tab === "guide" && <Guide />}
-        {tab === "keys" && <Keys />}
         {tab === "settings" && <Settings />}
       </div>
     </aside>

@@ -199,14 +199,14 @@ export const guide: GuideTopic[] = [
   {
     id: "stuck",
     title: "When you're stuck",
-    blurb: "Notes and questions",
+    blurb: "Memory fragments and questions",
     visual: {
       kind: "notes",
       note: "Your message reached their door. They looked at it and decided it wasn't for them. Whose name did you write on it?",
-      caption: "A note reacting to something you tried",
+      caption: "A fragment reacting to something you tried",
     },
     body: [
-      "You left notes for yourself before you shut down. The Notes button in the top bar shows how many hints you've opened out of five, and glows when a new one is ready. Some notes react to what you just tried.",
+      "Most of your memory went when you shut down, and it comes back in fragments. The Fragments button in the top bar shows how many hints you've recalled out of five, and glows when a new one is ready. Some fragments react to what you just tried.",
       "Ask opens a few questions about what's in front of you, with plain answers. They explain, but never give the answer away.",
       "Getting something wrong costs nothing. Often it's the fastest way to see what's going on.",
     ],
@@ -226,19 +226,19 @@ export const guide: GuideTopic[] = [
     title: "After you restore a room",
     blurb: "The debrief, keys and memories",
     body: [
-      "When a room works again, an answer comes back to you carrying the room's key. The key goes on your keyring.",
+      "When a room works again, an answer comes back to you carrying the room's key: a word that opens the way on.",
       "Then the debrief: what happened, the new words you met (each with a plain meaning), and a kind line about each thing you tried along the way.",
-      "In the first regions you can also see why each room is built the way it is. After a floor's last room, your memory of the whole floor working comes back. Both play on the Map, and the Notebook keeps them to watch again.",
+      "In the first regions you can also see why each room is built the way it is. After a floor's last room, your memory of the whole floor working comes back. Both play on the Map.",
     ],
   },
   {
     id: "menu",
     title: "The menu",
-    blurb: "The palace, the Notebook, this guide and more",
+    blurb: "The palace, your Memory, this guide and settings",
     body: [
       "Press [[M]] or click Menu to open it.",
       "The palace tab lists every floor and room, with what you've cleared. You can play any cleared room again from here.",
-      "The Notebook keeps everything you've found: objects, the words you've learned, the Command book, memories and log pages. The Keyring shows every key you've won.",
+      "Memory keeps what you've learned: the things you know, the words, and the Command book.",
     ],
   },
   {

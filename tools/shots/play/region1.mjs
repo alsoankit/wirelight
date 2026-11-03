@@ -55,7 +55,7 @@ await check("2.3");
 // 2.4 in a fresh browser would play the gift; with onboarding seen here, the gift still plays once.
 await open(p, base, "f2.lights-out");
 await p.click("button.plate");
-await p.click("text=The switch is cracked");
+await p.click("text=This switch is broken");
 await p.waitForSelector(".lines", { timeout: 5000 });
 while (await p.$(".lines")) await p.click(".lines button");
 await p.waitForSelector(".cmd-memory");

@@ -372,7 +372,7 @@ export const voice = {
     play: "Play",
     speed: "Speed",
     reset: "Reset room",
-    notes: "Notes",
+    notes: "Fragments",
     ask: "Ask",
     menu: "Menu",
     /** The top bar, for screen readers. */
@@ -384,14 +384,16 @@ export const voice = {
   },
   /** The Knight's notes (HELP-08..10): his notes in the room, reactions, hints. */
   notes: {
-    title: "Notes",
-    hint: "Hint {n} of 5",
-    nextHint: "Read the next hint",
-    waiting: "The next hint isn't ready yet. Look around, try something.",
+    title: "Memory fragments",
+    /** Under the title: what the fragments are (0112). */
+    about: "Bits of what you knew before you shut down. Each one is a hint.",
+    hint: "Fragment {n} of 5",
+    nextHint: "Recall the next fragment",
+    waiting: "The next fragment hasn't come back yet. Look around, try something.",
     /** Under the hint button once the room is won: no more hints are needed here. */
-    solved: "This room is restored. No more hints needed here.",
-    allRead: "That's every hint.",
-    codex: "In the Notebook: {card}",
+    solved: "This room is restored. No more fragments needed here.",
+    allRead: "That's every fragment.",
+    codex: "In your Memory: {card}",
     memories: "Tips",
     replay: "Play again",
   },
@@ -415,7 +417,7 @@ export const voice = {
     sections: "Menu sections",
     back: "Back to the topics",
     here: "you are here",
-    tabs: { dungeon: "The palace", codex: "Notebook", guide: "Field Guide", keys: "Keyring", settings: "Settings" },
+    tabs: { dungeon: "The palace", codex: "Memory", guide: "Guide", keys: "Keyring", settings: "Settings" },
     status: {
       cleared: "cleared",
       next: "next",
@@ -425,7 +427,7 @@ export const voice = {
     },
     play: "Play",
     replay: "Play again",
-    objects: "Things you've found",
+    objects: "Things you know",
     words: "Words you've learned",
     commands: "Command book",
     journal: "Log pages",

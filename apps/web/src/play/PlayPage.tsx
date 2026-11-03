@@ -37,7 +37,7 @@ import { Keyboard } from "./Keyboard";
 import { isTyping, withModifier } from "./keys";
 import { LoadingScreen } from "./LoadingScreen";
 import { Menu } from "./Menu";
-import { Ending, JournalPage, KeyFlight, KnightMoments, MomentsDriver, WayBack } from "./Moments";
+import { Ending, KnightMoments, MomentsDriver, WayBack } from "./Moments";
 import { Onboarding } from "./Onboarding";
 import { PlatePanel } from "./PlatePanel";
 import { AskPanel, DiscoveryCards, NotesPanel, Reaction, TopBar } from "./RoomHelp";
@@ -277,9 +277,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         {hydrated && tourDone && <DiscoveryCards />}
         {hydrated && tourDone && <KnightMoments />}
         <MomentsDriver />
-        <JournalPage />
         <WayBack />
-        <KeyFlight />
         <Ending />
         {room && room.controls.console === "typing" && voiceGiven && (
           <Suspense fallback={null}>

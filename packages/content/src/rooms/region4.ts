@@ -50,7 +50,7 @@ export const firstReleaseEnding: {
 } = {
   lines: [
     { id: "END1-01", speaker: "You", text: "There it is: light all the way up to the high window." },
-    { id: "END1-02", speaker: "You", text: "My last log said I couldn't fix this. I just did." },
+    { id: "END1-02", speaker: "You", text: "When I shut down, I couldn't fix this. Now I have." },
     { id: "END1-03", speaker: "You", text: "Every machine from the gardens to the cathedral is talking again." },
     {
       id: "END1-04",
