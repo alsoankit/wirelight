@@ -11,7 +11,7 @@ import type { FloorText, RoomText } from "./types";
 
 export const otherStreet: RoomText = {
   title: "Next Door Over",
-  mission: "Gallery is on the next subnet. Find out who stands between you.",
+  mission: "Gallery is on the next subnet, and you can't reach it. Find the machine that stands between you.",
   notes: [],
   hints: [
     { text: "Who has a door on both subnets?" },
@@ -113,7 +113,7 @@ export const acrossTheStreet: RoomText = {
 
 export const directions: RoomText = {
   title: "No Way There",
-  mission: "Belfry lives up in the bell tower, on another subnet. Crossing doesn't go there.",
+  mission: "Belfry is on the bell tower's subnet, and your pings reach crossing but go no further. Find out why.",
   notes: [],
   hints: [
     { text: "Read the error. Who sent it?" },
@@ -162,7 +162,7 @@ export const directions: RoomText = {
 
 export const noWayBack: RoomText = {
   title: "No Way Back",
-  mission: "Your pings to gallery vanish. No error, no answer, nothing.",
+  mission: "Your pings to gallery get no reply and no error message. Find out where they stop.",
   notes: [],
   hints: [
     { text: "No error means nothing turned your packet back. Where did it go?" },
@@ -263,7 +263,7 @@ export const sleepingKeeper: RoomText = {
 export const closedCrossing: RoomText = {
   title: "The Blocked Crossing",
   mission:
-    "The great router between the nave and the bell tower has been blocked for a hundred years. Get a ping from your house to belfry, and back.",
+    "Several things block the way from the nave to the bell tower. Get a ping from your house to belfry, and a reply back.",
   notes: [],
   hints: [
     { text: "Four things are wrong, all along one road." },
@@ -314,7 +314,7 @@ export const closedCrossing: RoomText = {
     {
       id: "F8-BOSS-01",
       speaker: "You",
-      text: "The great router, and it won't pass anything on. My logs don't say who blocked it, or why.",
+      text: "The main router between the nave and the bell tower. Nothing gets through it.",
     },
   ],
 };

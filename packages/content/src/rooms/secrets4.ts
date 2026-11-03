@@ -8,7 +8,8 @@ import type { RoomText } from "./types";
  */
 export const insideYourHomeRouter: RoomText = {
   title: "The Box at Home",
-  mission: "At the foot of the spire, one small box hums with blinking lights. Plug in, and reach the world outside.",
+  mission:
+    "A small box at the foot of the spire works like the one in a home. Plug into it, and reach the world outside.",
   access: { world: "Sealed. It answers anyone who can reach it, from outside." },
   notes: [
     "Found this at the foot of the spire. It looks like the little boxes people keep at home, with the blinking lights. A whole network in one box.",

@@ -5,7 +5,7 @@ import type { FloorText, RoomText } from "./types";
 
 export const sameStreet: RoomText = {
   title: "Moved House",
-  mission: "You've moved house again. Now nobody on the square can hear you.",
+  mission: "Your machine got a new address, and now nobody on the square can hear you. Find out why.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
@@ -76,7 +76,8 @@ export const sameStreet: RoomText = {
 
 export const askForAnAddress: RoomText = {
   title: "Ask for an Address",
-  mission: "Every house on the square is taken, and you don't know which numbers are free. The town keeps a registry.",
+  mission:
+    "You need an address on the square, but you don't know which ones are free. The town has a registry that hands them out.",
   access: {
     kitchen: HOUSE_LOCKED,
     library: HOUSE_LOCKED,
@@ -128,7 +129,7 @@ export const askForAnAddress: RoomText = {
 
 export const census: RoomText = {
   title: "The Census",
-  mission: "The town is taking a census, the first in years. Every house on the square must answer.",
+  mission: "Every machine on the census board must answer your ping. Some don't, and you have no address yet.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED, registry: HOUSE_LOCKED },
   notes: ["Census: kitchen .7 · library .12 · forge .10 · chapel .18 · cellar .14"],
   hints: [
@@ -176,7 +177,7 @@ export const census: RoomText = {
     {
       id: "F7-BOSS-01",
       speaker: "You",
-      text: "A census: every house, every number. My last full count is years old.",
+      text: "A census: every machine on the square has to answer.",
     },
   ],
 };

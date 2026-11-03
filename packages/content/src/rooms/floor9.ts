@@ -92,7 +92,8 @@ export const showTheWay: RoomText = {
 
 export const oneStepOnly: RoomText = {
   title: "One Step Only",
-  mission: "Two locks: one at the first router, one at the second. Each opens only for a ping that dies right there.",
+  mission:
+    "Two locks: one at the first router, one at the second. Each opens only for a ping that runs out exactly there.",
   notes: [],
   hints: [
     { text: "Each router takes one off a packet's countdown." },
@@ -144,7 +145,7 @@ export const oneStepOnly: RoomText = {
 
 export const roundAndRound: RoomText = {
   title: "Round and Round",
-  mission: "Loft lives at the high window. Every ping for it goes out, and none ever arrives.",
+  mission: "Loft is on the high window's subnet, and pings for it go out but never arrive. Find out where they go.",
   notes: [],
   hints: [
     { text: "Trace a ping to loft and look at the strip." },
@@ -188,7 +189,7 @@ export const roundAndRound: RoomText = {
 
 export const theCrossing: RoomText = {
   title: "Up to the High Window",
-  mission: "Light hasn't reached the high window in a hundred years. Send it a ping, and bring one back.",
+  mission: "Nothing reaches the high window. Get a ping from your house to loft, and a reply back.",
   notes: [],
   hints: [
     { text: "Find where your ping stops. Then fix that step, and look again." },
@@ -238,7 +239,7 @@ export const theCrossing: RoomText = {
     {
       id: "F9-BOSS-01",
       speaker: "You",
-      text: "The high window. Light used to reach all the way up here. Not for years.",
+      text: "The high window, at the top of the cathedral. Several things stand in the way.",
     },
   ],
 };

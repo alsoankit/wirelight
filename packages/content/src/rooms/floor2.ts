@@ -4,7 +4,7 @@ import type { FloorText, RoomText } from "./types";
 
 export const firstLight: RoomText = {
   title: "Write Your Own",
-  mission: "The big button is gone. Kitchen is still waiting to hear from you.",
+  mission: "There's no Send button this time. Write a message to kitchen yourself, on the table, and get an answer.",
   notes: [],
   hints: [
     { text: "The table is waiting for something in its first slot." },
@@ -71,7 +71,7 @@ export const firstLight: RoomText = {
 
 export const wrongName: RoomText = {
   title: "Wrong Address",
-  mission: "Someone in your room keeps sending messages to kitchen. Kitchen never answers.",
+  mission: "The messenger in your room keeps sending messages to kitchen, but kitchen never answers. Find out why.",
   notes: [],
   hints: [
     { text: "Look at kitchen's door. Something is piling up there." },
@@ -143,8 +143,7 @@ export const wrongName: RoomText = {
 
 export const whoAreYou: RoomText = {
   title: "Who Are You?",
-  mission:
-    "A second door in your room has opened, and someone is behind it. The room beyond is sealed, and you don't know their name.",
+  mission: "Your room has a second door now, to a machine you can't enter. Get it to answer you.",
   access: { library: "Sealed. You can't go in, but anything you send can." },
   notes: ["Found a room I couldn't get into. Didn't know its name. So I called out to everyone."],
   hints: [
@@ -226,7 +225,7 @@ export const lightsOut: RoomText = {
       tried: "You told the door to switch off, but it was already off.",
     },
     "keeps-clicking": {
-      note: "The switch is gone. The machine will listen if you tell it.",
+      note: "The switch is broken. Use the terminal instead.",
       tried: "You kept clicking the broken switch after the terminal came online.",
     },
   },
@@ -280,7 +279,7 @@ export const lightsOut: RoomText = {
 
 export const silentLine: RoomText = {
   title: "Nobody Answers",
-  mission: "Deep in the old halls, someone has been calling for years and never been answered. Answer them.",
+  mission: "A machine behind your second door keeps calling, and nobody ever answers it. Answer it.",
   access: { cellar: "Sealed. You can't go in, but anything you send can." },
   notes: [],
   hints: [
@@ -330,7 +329,7 @@ export const silentLine: RoomText = {
     {
       id: "F2-BOSS-01",
       speaker: "You",
-      text: "Out here at the far end of the gardens, a machine has been calling for as long as my logs go back. Nothing has ever answered.",
+      text: "A machine out here keeps calling, and nothing answers it. Let's answer.",
     },
   ],
 };
@@ -358,7 +357,7 @@ export const floor2: FloorText = {
     {
       id: "F2-FM-04",
       title: "What they couldn't solve",
-      text: "But many machines on many cables was too much for doors alone. Further in, the machines got cleverer. I can hear gears from here.",
+      text: "But many machines on many cables was too much for doors alone. Further in, there are machines that sort messages for many doors at once.",
       shown: "the world map: the Overgrown Halls fully restored; the Sorting Works further in through thin mist",
     },
   ],
@@ -371,6 +370,6 @@ export const floor2: FloorText = {
   farewell: {
     id: "F2-BYE-01",
     speaker: "You",
-    text: "This floor is working again. Cellar finally got its answer. On to the gears.",
+    text: "This floor works again, and cellar finally got its answer. Next: the halls that sort messages.",
   },
 };

@@ -5,7 +5,8 @@ import type { FloorText, RoomText } from "./types";
 
 export const insideTheEnvelope: RoomText = {
   title: "Open It Up",
-  mission: "Kitchen has been sending the same sealed letter since the day you met. Your Scanner can open it now.",
+  mission:
+    "Kitchen keeps sending a message you couldn't open before. Your Scanner can open it all the way now: read what's inside.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: ["Found this in the post office. Try it on kitchen's messages."],
   hints: [
@@ -64,7 +65,8 @@ export const insideTheEnvelope: RoomText = {
 
 export const whoHasThisAddress: RoomText = {
   title: "Who Has This Address?",
-  mission: "Your house has forgotten how to address its envelopes. A ping for kitchen is stuck on your desk.",
+  mission:
+    "Your machine has stopped addressing its own messages. A ping for kitchen is waiting on the desk: address it and send it by hand.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
@@ -133,7 +135,8 @@ export const whoHasThisAddress: RoomText = {
 
 export const twoOfMe: RoomText = {
   title: "Two Answers",
-  mission: "Sometimes kitchen answers you. Sometimes a stranger answers in its place.",
+  mission:
+    "When you ping kitchen, sometimes kitchen answers and sometimes a different machine does. Find out why, and fix it.",
   access: { forge: HOUSE_LOCKED },
   notes: ["Register: kitchen 10.0.1.7 · library 10.0.1.12 · forge 10.0.1.10."],
   hints: [
@@ -178,8 +181,7 @@ export const twoOfMe: RoomText = {
 
 export const mixedUpLetters: RoomText = {
   title: "Wrong Deliveries",
-  mission:
-    "The post office has been delivering packets to the wrong houses for years. Two houses need to hear from you: kitchen, and forge.",
+  mission: "Packets are going to the wrong machines. Get pings through to both kitchen and forge.",
   access: { library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: ["Register: kitchen 10.0.1.7 · forge 10.0.1.10 · library 10.0.1.12 · chapel 10.0.1.18."],
   hints: [

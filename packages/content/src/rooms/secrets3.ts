@@ -7,11 +7,9 @@ import type { RoomText } from "./types";
  */
 export const binaryBehind24: RoomText = {
   title: "Half a Street",
-  mission: "Behind the street sign, chapel lives on the square at house 200. Your house won't even try to reach it.",
+  mission: "Chapel is on the square at .200, but your machine won't even try to reach it. Find out why.",
   access: { kitchen: HOUSE_LOCKED },
-  notes: [
-    "Someone changed my plate from /24 to /25 while I was counting houses. Just one more. Half the square went quiet. One more what?",
-  ],
+  notes: ["Someone changed my plate from /24 to /25 while I was counting houses. Half the square went quiet."],
   hints: [
     { text: "Ping kitchen, then ping chapel. Only one of them answers. Why that one?" },
     { text: "Compare the `/` on your plate with the one on the street sign." },

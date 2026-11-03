@@ -8,7 +8,7 @@ import type { RoomText } from "./types";
 export const peacekeeper: RoomText = {
   title: "Keep the Peace",
   mission:
-    "The halls are joined twice again, and the storm is back. Get them to keep the peace, then pull the cable they rely on and let the spare take over.",
+    "The halls are joined by two cables again, and the copies are back. Make the halls handle the second cable safely, then unplug the one in use and let the spare take over.",
   access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED, laundry: SEALED },
   notes: [
     "Found it in the old plans. The halls can keep the peace themselves: they talk, and hold one door shut so nothing goes round. The switch for it is on each hall's br0, and it's off.",

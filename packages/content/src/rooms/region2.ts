@@ -30,7 +30,8 @@ export const region2Arrival: { id: string; speaker: string; text: string }[] = [
 
 const manyDoors: RoomText = {
   title: "Sort It by Hand",
-  mission: "Your messenger is writing to forge, but the hall's keeper has forgotten how to sort. Show it.",
+  mission:
+    "Your messenger writes to forge through the hall, but the hall's keeper has stopped passing messages on. Do its job by hand until it remembers how.",
   notes: [],
   hints: [
     { text: "A frame is waiting at the desk. Read it." },
@@ -119,7 +120,7 @@ const manyDoors: RoomText = {
 const keepersMemory: RoomText = {
   title: "What the Hall Remembers",
   mission:
-    "Something behind the hall's third door keeps a key. Nobody remembers its MAC address, and the hall's board can't be read.",
+    "The machine behind the hall's third door has the key, but you don't know its MAC address and the hall's board can't be read. Find out its address.",
   access: { pantry: SEALED, attic: SEALED, gate: SEALED },
   notes: ["The one behind the third door has the key."],
   hints: [
@@ -181,7 +182,7 @@ const keepersMemory: RoomText = {
 const findEveryone: RoomText = {
   title: "Fill In the Cards",
   mission:
-    "You left three letters before you shut down, one for each door of the hall. You only wrote down the doors, not the names.",
+    "You left three messages, one for each door of the hall, but only wrote down the doors. Find out which machine is behind each door and fill in the cards.",
   access: { bakery: SEALED, larder: SEALED, chapel: SEALED },
   notes: [],
   hints: [
@@ -216,7 +217,7 @@ const findEveryone: RoomText = {
 
 const busyHall: RoomText = {
   title: "The Busy Hall",
-  mission: "Your last letter to this hall never got an answer. Something here is still waiting for it.",
+  mission: "One machine on the hall never got your message, and it's still waiting. Find out why, and deliver it.",
   access: { pantry: SEALED, attic: SEALED, laundry: SEALED },
   notes: [],
   hints: [
@@ -261,7 +262,7 @@ const busyHall: RoomText = {
     {
       id: "F3-BOSS-01",
       speaker: "You",
-      text: "This was the busiest hall in the Works. One message here has been waiting longer than I was switched off.",
+      text: "The busiest hall in the Works. One machine here never got its message.",
     },
   ],
 };
@@ -305,7 +306,7 @@ const floor3: FloorText = {
 
 const pinnedMemory: RoomText = {
   title: "Moved Out",
-  mission: "Kitchen moved to a new door in the hall last night. Since then, nothing reaches it.",
+  mission: "Kitchen was moved to a different door of the hall. Since then, nothing sent to it arrives.",
   access: { alcove: "Nobody lives at the far end of this corridor any more. Its cable lies loose on the floor." },
   notes: [],
   hints: [
@@ -373,7 +374,8 @@ const pinnedMemory: RoomText = {
 
 const whoHasTheKey: RoomText = {
   title: "Ask Everyone",
-  mission: "Somewhere in these two halls, one machine keeps the key. You don't know which, or where.",
+  mission:
+    "One machine somewhere in these two halls has the key, and you don't know which one or where it is. Find it.",
   access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED, bakery: SEALED },
   notes: [],
   hints: [
@@ -490,7 +492,8 @@ const spareCable: RoomText = {
 
 const storm: RoomText = {
   title: "The Storm",
-  mission: "The great hall is drowning in its own messages. Somewhere inside, the key is still waiting.",
+  mission:
+    "The halls are flooded with copies of the same messages, and nothing gets through. Stop the flood, then get a message to laundry.",
   access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED, laundry: SEALED },
   notes: [],
   hints: [
@@ -553,7 +556,7 @@ const floor4: FloorText = {
     {
       id: "F4-FM-02",
       title: "What happened",
-      text: "One broadcast went round and round. Each switch did exactly what it should, and together they drowned the Works.",
+      text: "One broadcast went round and round. Each switch did exactly what it should, and together they flooded the Works.",
     },
     {
       id: "F4-FM-03",
@@ -579,7 +582,7 @@ const floor4: FloorText = {
   farewell: {
     id: "F4-BYE-01",
     speaker: "You",
-    text: "The Works can hear themselves again. Next: the town up the hill.",
+    text: "The Works pass messages again. Next: the town up the hill.",
   },
 };
 

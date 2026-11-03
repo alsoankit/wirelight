@@ -6,7 +6,7 @@ import type { RoomText } from "./types";
  */
 export const why48Bits: RoomText = {
   title: "Why 48 Bits?",
-  mission: "Behind a narrow door in the corridor, one machine still wears its maker's name. Get it to answer you.",
+  mission: "Behind a narrow door is a machine whose door name wasn't set by hand. Get it to answer you.",
   access: { vault: "Sealed. It answers what's sent to it, by name." },
   notes: ["Found a door out here that nobody named by hand. Its name doesn't start with 02. A factory made this one."],
   hints: [

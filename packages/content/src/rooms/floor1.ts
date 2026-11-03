@@ -58,7 +58,7 @@ export const twoRooms: RoomText = {
 
 export const looseCable: RoomText = {
   title: "Unplugged",
-  mission: "Nothing arrives at your door anymore. The corridor has gone dark and cracked.",
+  mission: "Messages from kitchen have stopped arriving, and the corridor to it has gone dark. Find out what broke.",
   notes: [],
   hints: [
     { text: "Look at your door's light, then at the corridor." },
@@ -165,7 +165,7 @@ export const bothEnds: RoomText = {
 
 export const darkCorridor: RoomText = {
   title: "Bring the Line Back",
-  mission: "Kitchen hasn't heard from anyone in years, and you can't hear kitchen. Bring the line back.",
+  mission: "You and kitchen can't reach each other, and more than one thing is wrong. Get messages through again.",
   notes: [],
   hints: [
     { text: "More than one thing is wrong. Check every end and every door." },
@@ -199,7 +199,7 @@ export const darkCorridor: RoomText = {
     {
       id: "F1-BOSS-01",
       speaker: "You",
-      text: "The longest corridor in these halls. It's been dark for as long as my logs go back.",
+      text: "The corridor to kitchen is completely dark. More than one thing must be broken.",
     },
   ],
 };

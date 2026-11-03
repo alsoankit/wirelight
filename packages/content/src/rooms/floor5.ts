@@ -26,7 +26,8 @@ export const REGION_3_ARRIVAL = [
 
 export const whereNotWho: RoomText = {
   title: "A New Door",
-  mission: "Kitchen got a new door last winter. Your messenger still writes to its old one.",
+  mission:
+    "Kitchen's door was replaced, so its door name changed. Your messenger still writes to the old name, and nothing arrives.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
@@ -77,7 +78,8 @@ export const whereNotWho: RoomText = {
 
 export const placeToLive: RoomText = {
   title: "No Address",
-  mission: "You've moved into the Lantern Town, but your house has no address yet. Then see if kitchen is home.",
+  mission:
+    "Your machine has no address yet, so it can't reach anyone in town. Give it one, then check that kitchen answers.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: ["Our house: 10.0.1.5/24."],
   hints: [
@@ -138,7 +140,7 @@ export const placeToLive: RoomText = {
 
 export const rollCall: RoomText = {
   title: "Roll Call",
-  mission: "A roll on the wall lists five houses. Each one's lamp lights only when it answers.",
+  mission: "A list on the wall names five houses. Check which of them answer you: each one's lamp lights when it does.",
   access: {
     kitchen: HOUSE_LOCKED,
     library: HOUSE_LOCKED,
@@ -172,7 +174,7 @@ export const rollCall: RoomText = {
 
 export const quietStreet: RoomText = {
   title: "The Quiet Street",
-  mission: "No house on this street has answered anyone in years. Kitchen, at least, should.",
+  mission: "Nothing on this street answers you, and more than one thing is wrong. Get kitchen to answer.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
@@ -218,7 +220,7 @@ export const quietStreet: RoomText = {
     {
       id: "F5-BOSS-01",
       speaker: "You",
-      text: "My logs say this was the busiest street in town. Not a sound now.",
+      text: "The busiest street in town, and nothing answers. Several things must be broken.",
     },
   ],
 };
