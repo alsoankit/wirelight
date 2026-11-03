@@ -119,7 +119,7 @@ function glowMaterial() {
 
 export function Sealed({ slot, region, size }: { slot: DoorSlot; region: RegionId; size?: [number, number] }) {
   const g = doorGeometry(slot);
-  const rotationY = slot.wall === "back" ? 0 : Math.PI / 2;
+  const rotationY = slot.wall === "left" ? Math.PI / 2 : 0;
   const [width, height] = size ?? (slot.plate === "above" ? [1.75, 2.4] : [1.6, 2.5]);
   const seed = Math.round((slot.at + 10) * 97 + (slot.wall === "back" ? 0 : 7));
   const parts = useMemo(() => {

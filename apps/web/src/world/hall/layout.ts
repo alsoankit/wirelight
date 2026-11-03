@@ -17,7 +17,7 @@ import type { StatuePlace } from "../room/standing";
 
 const QUARTER = Math.PI / 2;
 
-export const HALL_SLOTS: DoorSlot[] = [
+export const HALL_SLOTS: (DoorSlot & { wall: "back" | "left" })[] = [
   { wall: "back", at: -3, plate: "above" },
   { wall: "back", at: 1, plate: "above" },
   { wall: "left", at: -1, plate: "above" },

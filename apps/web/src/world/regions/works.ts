@@ -5,7 +5,10 @@ import type { Extra, Placement } from "../kit/StaticRoom";
 import { addTo, ball, box, extras, gearGeometry, onWall, pipe, ring, rod, type V3 } from "../kit/shapes";
 import type { KitPlacement } from "../kits/placement";
 import { MOON_POSITION, MOON_TARGET } from "../moon";
-import type { Beams, Gear, Glow, Wall } from "../room/layout";
+import type { Beams, Wall as DoorWall, Gear, Glow } from "../room/layout";
+
+/** The two walls a room has (the near edge, 0111, has no wall to dress). */
+type Wall = Exclude<DoorWall, "front">;
 
 // Region 2, the Sorting Works (world/art-briefs/region-2-sorting-works.md): a clockwork workshop of
 // brass, gears and pipes, where the sorting machines learned where everyone lived.

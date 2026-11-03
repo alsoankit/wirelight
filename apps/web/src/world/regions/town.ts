@@ -4,7 +4,10 @@ import { FLOORS, makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import { addTo, box, extras, gable, placed, rod, type V3 } from "../kit/shapes";
 import type { KitPlacement } from "../kits/placement";
-import type { Glow, Wall } from "../room/layout";
+import type { Wall as DoorWall, Glow } from "../room/layout";
+
+/** The two walls a room has (the near edge, 0111, has no wall to dress). */
+type Wall = Exclude<DoorWall, "front">;
 
 // Region 3, the Lantern Town (world/art-briefs/region-3-lantern-town.md; 0095): the courtiers' quarter
 // on the palace terraces, asleep under lanterns. Quaternius' Medieval Village and Fantasy Props kits

@@ -2,18 +2,20 @@ import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { type Group, MeshBasicMaterial, type Object3D } from "three";
+import { BoxGeometry, type Group, MeshBasicMaterial, type Object3D } from "three";
 import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { useMachineLabel } from "../../play/roles";
 import { goThrough, stepIntoCorridor } from "../corridor/move";
+import { regionMaterial } from "../kit/regionMaterials";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { useRegion } from "../region";
 import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
 import { Sealed } from "./Sealed";
+import { FRAME } from "./SecretDoor";
 
 // One door of a machine's room (CORE-08..13): its corridor's cable, the messages on it, its plate,
 // the way through to the room at the other end, and, when the cable is out at this end, the loose
@@ -248,6 +250,7 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
 
   return (
     <>
+      {slot.wall === "front" && <NearFrame slot={slot} />}
       <Cable slot={slot} state={corridor} />
       <CableStep slot={slot} name={info.peer} onStep={() => stepIntoCorridor(info.link, info.device)} />
       <Messages
@@ -322,6 +325,29 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
         )}
       </Html>
     </>
+  );
+}
+
+const POST = new BoxGeometry(0.22, 2.5, 0.22);
+const LINTEL = new BoxGeometry(2.1, 0.24, 0.26);
+const PATH = new BoxGeometry(1.5, 0.06, 2.4);
+
+/**
+ * A doorway on the near edge (0111): no wall there, so a frame of its own (two posts and a lintel),
+ * and the corridor's floor running off the edge toward the camera, so you can see where it goes.
+ */
+function NearFrame({ slot }: { slot: DoorSlot }) {
+  const region = useRegion();
+  const frame = regionMaterial(FRAME[region], region);
+  const path = regionMaterial("Black", region);
+  const x = slot.at;
+  return (
+    <group>
+      <mesh geometry={POST} material={frame} position={[x - 0.95, 1.25, 3.95]} />
+      <mesh geometry={POST} material={frame} position={[x + 0.95, 1.25, 3.95]} />
+      <mesh geometry={LINTEL} material={frame} position={[x, 2.55, 3.95]} />
+      <mesh geometry={PATH} material={path} position={[x, -0.04, 5.15]} />
+    </group>
   );
 }
 

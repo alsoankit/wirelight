@@ -12,7 +12,8 @@ import type { StatuePlace } from "./standing";
 // z = −4 and the left wall at x = −4 are built). A doorway on the back wall leads out along −z; one on
 // the left wall leads out along −x.
 
-export type Wall = "back" | "left";
+/** "front": the near edge, open toward the camera; its corridor runs out toward you (0111). */
+export type Wall = "back" | "left" | "front";
 export type Vec3 = [number, number, number];
 
 export type DoorSlot = {
@@ -83,6 +84,17 @@ const FACE = -4;
 
 /** Where a doorway is, where its corridor goes, and where its plate hangs. */
 export function doorGeometry(slot: DoorSlot) {
+  if (slot.wall === "front") {
+    // The near edge: no wall, a frame of its own; the plate on its right post, as seen from inside.
+    const doorway: Vec3 = [slot.at, 0.9, -FACE];
+    return {
+      out: [0, 0, 1] as Vec3,
+      doorway,
+      corridorEnd: [slot.at, 0.35, -FACE + 1.8] as Vec3,
+      plate: [slot.at - 1.15, 1.55, -FACE - 0.15] as Vec3,
+      looseEnd: [slot.at - 0.7, 0.06, -FACE - 0.9] as Vec3,
+    };
+  }
   const out: Vec3 = slot.wall === "back" ? [0, 0, -1] : [-1, 0, 0];
   const doorway: Vec3 = slot.wall === "back" ? [slot.at, 0.9, FACE] : [FACE, 0.9, slot.at];
   const corridorEnd: Vec3 = [doorway[0] + out[0] * 1.8, 0.35, doorway[2] + out[2] * 1.8];
@@ -105,6 +117,7 @@ export function cableSpan(slot: DoorSlot): { centre: Vec3; length: number; along
   const inside = 0.5;
   const length = 1.7;
   const mid = FACE + inside - length / 2;
+  if (slot.wall === "front") return { centre: [slot.at, 0.05, -mid], length, along: "z" };
   return slot.wall === "back"
     ? { centre: [slot.at, 0.05, mid], length, along: "z" }
     : { centre: [mid, 0.05, slot.at], length, along: "x" };

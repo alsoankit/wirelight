@@ -350,8 +350,8 @@ export function hallsObservatory(secondDoor: boolean): HallsRoom {
 // fountain ran, and the next court's ruined arch beyond the fallen corner.
 
 export const HALLS_HOUSE_PIECES: Placement[] = [
-  // Back wall: the arch the corridor comes through, plain walls either side.
-  { piece: "Wall_ArchRound_Overgrown", position: [0, 0, -4] },
+  // Back wall: whole now (0111: the door is on the near edge), plain walls either side.
+  { piece: "Wall_Overgrown", position: [0, 0, -4] },
   { piece: "Wall", position: [-3, 0, -4] },
   { piece: "Wall_Overgrown", position: [-3, 2, -4] },
   { piece: "Wall_Broken", position: [3, 0, -4] },

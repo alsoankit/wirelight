@@ -14,7 +14,9 @@ export const HOUSE_PIECES = [...HALLS_HOUSE_PIECES, ...TOWN_HOUSE_PIECES, ...CAT
 
 export function houseLayout(region: RegionId = 1): RoomLayout {
   const frame = {
-    doorSlots: [{ wall: "back", at: 0 }] as RoomLayout["doorSlots"],
+    // A computer's one door is always the way back toward the player: the near edge (0111). Regions
+    // whose house walls still have their back arch keep the door there until they are rebuilt.
+    doorSlots: (region === 1 ? [{ wall: "front", at: -1.8 }] : [{ wall: "back", at: 0 }]) as RoomLayout["doorSlots"],
     keeper: [0, 0, -0.8] as RoomLayout["keeper"],
     air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
   };

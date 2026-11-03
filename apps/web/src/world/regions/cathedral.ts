@@ -17,7 +17,10 @@ import {
   wallWithDoor,
 } from "../kit/shapes";
 import type { KitPlacement } from "../kits/placement";
-import type { Beams, Glow, Wall } from "../room/layout";
+import type { Beams, Wall as DoorWall, Glow } from "../room/layout";
+
+/** The two walls a room has (the near edge, 0111, has no wall to dress). */
+type Wall = Exclude<DoorWall, "front">;
 
 // Region 4, the Cathedral of Crossings (world/art-briefs/region-4-cathedral-of-crossings.md): vaulted
 // stone, tall pointed arches, stained glass in jewel tones (kept away from cyan), polished brass.

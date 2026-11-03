@@ -21,7 +21,8 @@ import { AT, secretHere, secretInCorridor } from "./secretPlaces";
 // - The Binary Behind /24 — after the census, behind the street sign on the square's corner post.
 // - Inside Your Home Router — after the finale, at the foot of the spire.
 
-const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Walnut", 3: "Timber", 4: "Sandstone" };
+/** Each region's door-frame material (also the near-edge doorways' frames, 0111). */
+export const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Walnut", 3: "Timber", 4: "Sandstone" };
 
 function DoorBody({
   region,
