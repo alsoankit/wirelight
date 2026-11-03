@@ -6,6 +6,7 @@ import { progress } from "../engine/clock";
 import { journey } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { messageSummary } from "../world/messageKind";
+import { depthsFrom } from "../world/room/doorSides";
 import { RoomCommandMemory } from "./CommandMemory";
 import { CLOSE_GLASS, OPEN_GLASS } from "./keys";
 import { Memory } from "./Memory";
@@ -27,22 +28,7 @@ export const MAP_H = 520;
 
 /** Lays the floor out in columns by distance from the player's machine (a breadth-first walk). */
 export function layout(t: Topology, start: string, w: number, h: number): Map<string, Node> {
-  const next = new Map<string, string[]>();
-  for (const l of t.links) {
-    next.set(l.a.device, [...(next.get(l.a.device) ?? []), l.b.device]);
-    next.set(l.b.device, [...(next.get(l.b.device) ?? []), l.a.device]);
-  }
-  const depth = new Map<string, number>([[start, 0]]);
-  const queue = [start];
-  while (queue.length) {
-    const d = queue.shift() as string;
-    for (const n of next.get(d) ?? [])
-      if (!depth.has(n)) {
-        depth.set(n, (depth.get(d) ?? 0) + 1);
-        queue.push(n);
-      }
-  }
-  for (const d of t.devices) if (!depth.has(d.id)) depth.set(d.id, 0);
+  const depth = depthsFrom(t, start);
   const columns = Math.max(...depth.values()) + 1;
   const byColumn = new Map<number, string[]>();
   for (const d of t.devices) byColumn.set(depth.get(d.id) ?? 0, [...(byColumn.get(depth.get(d.id) ?? 0) ?? []), d.id]);

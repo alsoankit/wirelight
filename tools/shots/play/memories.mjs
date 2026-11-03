@@ -33,7 +33,7 @@ await shot("f1-ride");
 await p.keyboard.press("Escape");
 console.log("closed with Esc:", !(await p.$(".glass.memory")));
 
-// 2. From the Codex: Floor 9's memory, marked seen, replayed.
+// 2. From the Notebook: Floor 9's memory, marked seen, replayed.
 await p.evaluate(() => {
   const w = window.__wirelight;
   w.useProgress.getState().seeFloorMemory(9);
@@ -42,7 +42,7 @@ await p.evaluate(() => {
   w.useProgress.getState().seeMemory("F1-BLD-02");
 });
 await p.keyboard.press("m");
-await p.click("text=Codex");
+await p.click("text=Notebook");
 await p.waitForTimeout(300);
 await shot("codex");
 await p.click("text=How they built it: ");

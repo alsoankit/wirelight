@@ -18,7 +18,7 @@ try {
   await wait(1500);
   await shot("p1-prologue");
   await page.getByRole("button", { name: "Skip intro" }).click();
-  await page.getByRole("button", { name: "Accept the sight" }).click();
+  await page.getByRole("button", { name: "Switch on message view" }).click();
   await page.getByRole("button", { name: "Send", exact: true }).click();
   await page.keyboard.press("Escape"); // the Glass opens on Send; close it to see the room
   await wait(1200);

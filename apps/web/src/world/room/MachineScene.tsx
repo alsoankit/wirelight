@@ -26,7 +26,8 @@ import { Haze } from "../regions/Haze";
 import { Steam } from "../regions/Steam";
 import { BossPiece } from "./BossPiece";
 import { type DoorInfo, Doorway, EmptyDoor } from "./Doorway";
-import { doorGeometry, type RoomLayout, type Vec3 } from "./layout";
+import { doorSides, slotsFor } from "./doorSides";
+import { type DoorSlot, doorGeometry, type RoomLayout, type Vec3 } from "./layout";
 import { Statue } from "./Statue";
 
 // One machine's room (CORE-06): its layout, its keeper, and a doorway for each of its real doors,
@@ -81,7 +82,7 @@ type Props = {
 /** Where RoomCamera stands, for the picture (target and distance as below). */
 const PICTURE_HOME = new Vector3(0, 1.1, -0.6).addScaledVector(VIEW_DIRECTION, 19);
 
-export function MachineScene({ device, layout, barred, glows, arriving = false, children }: Props) {
+export function MachineScene({ device, layout: given, barred, glows, arriving = false, children }: Props) {
   const watch = useRef<Object3D>(null);
   const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
   const quality = useQuality();
@@ -97,6 +98,17 @@ export function MachineScene({ device, layout, barred, glows, arriving = false, 
     const linked = new Set(doors.map((d) => d.iface));
     return (spec?.interfaces ?? []).map((i) => i.name).filter((n) => n !== "lo" && !linked.has(n));
   }, [room, device, doors]);
+  // Doors follow the Map (0111): each door takes a slot on the side facing the machine at its other end.
+  const layout = useMemo(() => {
+    if (!room) return given;
+    const sides = doorSides(room.topology, room.playerDevice, device);
+    // Only among the slots the room's walls open for this many doors (they are cut for the first N), so
+    // walls and bakes stay right; new openings on the near edge come with the layouts (0111).
+    const used = doors.length + empty.length;
+    const { placed, rest } = slotsFor([...doors.map((d) => d.iface), ...empty], sides, given.doorSlots.slice(0, used));
+    const doorSlots = [...placed, ...rest, ...given.doorSlots.slice(used)];
+    return { ...given, doorSlots: doorSlots.filter((s): s is DoorSlot => !!s) };
+  }, [given, room, device, doors, empty]);
   // The room restores on the win, all at once (playtest 2026-10-13, amending CORE-38's share of
   // failing checks): partial progress relights only the thing that was fixed (its corridor, its
   // plate's light), never the room. A room with no health checks still restores when won.
