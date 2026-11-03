@@ -59,6 +59,19 @@ export const landing = {
   closing: "No score, no timer and no way to lose. Trying things is how you learn here.",
 };
 
+/** The opening (0114): the robot switching back on, a few system lines before the first room. */
+export const boot = {
+  title: "Repair unit · starting up",
+  lines: [
+    { label: "Power", state: "restored", tone: "ok" },
+    { label: "Motors", state: "ok", tone: "ok" },
+    { label: "Memory", state: "damaged", tone: "warn" },
+    { label: "Message view", state: "off", tone: "warn" },
+    { label: "Terminal", state: "offline", tone: "warn" },
+  ],
+  skip: "Press any key to skip",
+} as const;
+
 /** What a tour card spotlights on the real screen. */
 export type TourTarget = "door" | "notes" | "plate" | "glass" | "menu";
 
@@ -72,9 +85,9 @@ export interface TourCard {
 export const tour = {
   cards: [
     {
-      title: "Welcome to Wirelight",
-      body: "You're a repair robot, and you've just switched back on. This palace has a network running through its walls: machines that once talked to each other through cables. Now it's dark and silent. That doorway leads to one of its corridors. Your job is to bring it all back.",
-      target: "door",
+      title: "Click anything",
+      body: "Every room is a machine, and every door is where a cable plugs in. Click anything to look at it closely, like this plate. [[Esc]] steps back. Nothing breaks for good, and there's no timer.",
+      target: "plate",
     },
     {
       title: "Memory fragments",
@@ -82,19 +95,9 @@ export const tour = {
       target: "notes",
     },
     {
-      title: "Click anything",
-      body: "Every room is a machine, and every door is where a cable plugs in. Click anything to look at it closely, like this plate. [[Esc]] steps back. Nothing breaks for good, and there's no timer.",
-      target: "plate",
-    },
-    {
       title: "The Map",
       body: "This is the Map, a live view of the whole floor. Open it any time with [[G]] or a click.",
       target: "glass",
-    },
-    {
-      title: "The menu",
-      body: "The menu ([[M]]) has the Guide, every room, and your Memory: everything you've learned. That's all. Go on in.",
-      target: "menu",
     },
   ] satisfies TourCard[],
   next: "Next",

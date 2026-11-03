@@ -1,24 +1,17 @@
 import { landing } from "@wirelight/content/intro";
-import { lazy, Suspense, useEffect, useMemo, useRef } from "react";
-import type { Descent } from "./GateScene";
+import { useEffect } from "react";
 import { onPhone } from "./phone";
 
-// The landing's text comes from content's small `intro` entry (not every room's text), and the 3D
-// gate loads after it, in its own chunk with three.js and the renderer: the text shows first.
-const GateCanvas = lazy(() => import("./GateCanvas").then((m) => ({ default: m.GateCanvas })));
-
-// The landing page (ONB-01..04, 0010, 0044): every visit starts here. The 3D gate scene fills the
-// screen; over it, on the left, the name, what Wirelight is, and the way in. Below the fold, how it
-// works and what you'll learn. All text is HTML (crisp at every tier) from packages/content.
+// The landing page (ONB-01..04, 0010, 0044): every visit starts here. A still picture of a restored
+// room fills the screen (decision 0114: no 3D here, so the page is light on any laptop); over it, on
+// the left, the name, what Wirelight is, and the way in. Below the fold, how it works and what you'll
+// learn. All text is HTML from packages/content.
 
 type Props = {
   /** The main button: "Enter the palace", or "Play <room>" for a link to a room (0044). */
   main: string;
   onStart: (skipIntro: boolean) => void;
-  /** Set once the player has gone in: the approach plays (quickly after Skip intro), then `onArrived`. */
-  descending: { quick: boolean } | null;
-  onArrived: () => void;
-  /** Reduced motion: no camera move, the page just fades out. */
+  /** Going in: the page fades out. */
   fading?: boolean;
 };
 
@@ -34,45 +27,18 @@ function PhoneNote() {
   );
 }
 
-export function LandingPage({ main, onStart, descending, onArrived, fading = false }: Props) {
-  // ONB-06: a click or key during the approach speeds it up.
-  const hurried = useRef(false);
+export function LandingPage({ main, onStart, fading = false }: Props) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (descending) hurried.current = true;
-      else if (e.key === "Enter" && !PHONE && !(e.target instanceof HTMLButtonElement)) onStart(false);
-    };
-    const onClick = () => {
-      if (descending) hurried.current = true;
+      if (e.key === "Enter" && !PHONE && !fading && !(e.target instanceof HTMLButtonElement)) onStart(false);
     };
     window.addEventListener("keydown", onKey);
-    window.addEventListener("pointerdown", onClick);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("pointerdown", onClick);
-    };
-  }, [onStart, descending]);
-
-  const descent = useMemo<Descent | null>(
-    () => (descending ? { quick: descending.quick, faster: () => hurried.current, onDone: onArrived } : null),
-    [descending, onArrived],
-  );
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onStart, fading]);
 
   return (
-    <div
-      className="landing"
-      data-descending={descending ? "yes" : "no"}
-      data-fading={fading ? "yes" : "no"}
-      data-phone={PHONE ? "yes" : "no"}
-    >
-      {/* On a phone, a still picture instead of the 3D gate. */}
-      <div className="landing-scene" aria-hidden="true">
-        {!PHONE && (
-          <Suspense fallback={null}>
-            <GateCanvas descent={descent} />
-          </Suspense>
-        )}
-      </div>
+    <div className="landing" data-fading={fading ? "yes" : "no"} data-phone={PHONE ? "yes" : "no"}>
+      <div className="landing-scene" aria-hidden="true" />
 
       <section className="landing-hero">
         <div className="landing-intro">

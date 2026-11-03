@@ -273,6 +273,10 @@ html:has(.landing) {
 .landing-scene {
   position: fixed;
   inset: 0;
+  /* A still of a restored room (0114), set to the right of the text, darkened toward the left. */
+  background:
+    linear-gradient(to right, #0b0d12 18%, rgba(11, 13, 18, 0.55) 48%, rgba(11, 13, 18, 0.1) 75%),
+    #0b0d12 url("/art/landing.webp") 70% center / cover no-repeat;
 }
 
 .landing-hero {
@@ -387,7 +391,7 @@ html:has(.landing) {
   /* The preview image's own title line sits along its bottom: faded out under the text. */
   background:
     linear-gradient(to bottom, transparent 35%, #0b0d12 70%),
-    #0b0d12 url("/og.jpg") center top / cover no-repeat;
+    #0b0d12 url("/art/landing.webp") 65% top / cover no-repeat;
   opacity: 0.55;
 }
 
@@ -2884,4 +2888,73 @@ body:has(.glass.memory, .ending-stage, .cmd-memory)
   stroke-opacity: 0.35;
   stroke-width: 10;
   stroke-linecap: round;
+}
+
+/* The opening (0114): the robot switching back on. */
+.boot {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background: #07090d;
+  color: var(--text);
+  font-family: var(--mono);
+  cursor: pointer;
+}
+
+.boot-lines {
+  width: min(420px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.boot-title {
+  margin: 0 0 12px;
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.boot-line {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  animation: boot-in 0.4s ease-out;
+}
+
+.boot-dots {
+  flex: 1;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.25);
+  transform: translateY(-4px);
+}
+
+.boot-state.ok {
+  color: var(--cyan);
+}
+
+.boot-state.warn {
+  color: #f2a54a;
+}
+
+.boot-skip {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+@keyframes boot-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+:root[data-reduced="yes"] .boot-line {
+  animation: none;
 }
