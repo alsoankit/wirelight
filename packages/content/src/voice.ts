@@ -220,6 +220,11 @@ export const voice = {
     message: "Message",
     close: "Close",
   },
+  /** Command reminders beside the terminal (0109). */
+  reminders: {
+    title: "Commands to remember",
+    note: "Each one stays here until you've typed it in a few more rooms.",
+  },
   console: {
     title: "Terminal",
     open: "open",

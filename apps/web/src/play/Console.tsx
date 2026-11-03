@@ -6,12 +6,23 @@
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
-import { shellContent, voice } from "@wirelight/content";
+import { commandMemories, shellContent, voice } from "@wirelight/content";
 import type { SimEvent } from "@wirelight/sim";
 import { useEffect, useRef } from "react";
 import { ask, useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
+import { CommandReminders } from "./CommandReminders";
 import { noteMoment } from "./momentRules";
+import { commandOf } from "./reminders";
+
+const BOOK = Object.values(commandMemories).map((c) => c.command);
+
+/** A command the player typed and that worked counts toward learning it (0109). */
+function noteTyped(line: string): void {
+  const command = commandOf(line, BOOK);
+  const room = useSession.getState().roomId;
+  if (command && room) useProgress.getState().useCommand(command, room);
+}
 
 const RESET = "\x1b[0m";
 const DIM = "\x1b[38;2;185;173;156m";
@@ -122,6 +133,7 @@ export function Console({ device, subtitles: byRoom }: { device: string; subtitl
         if (e.line.startsWith("lab")) st.labExecs.add(e.execId);
         // A typed line is already on screen; a click's command is shown for it (UI-07).
         if (e.source !== "typed") out += `${DIM}↳ ${e.line}${RESET}\r\n`;
+        else if (e.exitCode === 0 || e.exitCode === null) noteTyped(e.line);
         if (e.exitCode === null) st.running = e.execId;
         else needPrompt = true;
       } else if (e.kind === "proc.output") {
@@ -262,6 +274,7 @@ export function Console({ device, subtitles: byRoom }: { device: string; subtitl
       {/* Slid down, the terminal is out of reach (Tab skips it, UI-18); ` or the bar brings it back. */}
       <div className="console-body" inert={!open}>
         <div ref={host} className="console-term" />
+        <CommandReminders />
       </div>
     </section>
   );

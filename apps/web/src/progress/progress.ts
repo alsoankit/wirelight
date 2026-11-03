@@ -61,6 +61,8 @@ type Progress = {
   secretsFound: string[];
   /** Hints opened per room (kept through Reset, HELP-03). */
   hints: Record<string, number>;
+  /** Command reminders (0109): for each Command book entry, the rooms where it was typed and worked. */
+  commandUses: Record<string, string[]>;
 
   giveSight(): void;
   choosePath(path: Path): void;
@@ -74,6 +76,7 @@ type Progress = {
   seeFloorMemory(floor: number): void;
   findSecret(roomId: string): void;
   openHint(roomId: string): void;
+  useCommand(command: string, roomId: string): void;
   /** Settings: Replay intro (ONB-21). */
   replayIntro(): void;
 };
@@ -108,6 +111,7 @@ export const useProgress = create<Progress>()(
       floorMemoriesSeen: [],
       secretsFound: [],
       hints: {},
+      commandUses: {},
 
       giveSight: () => setState({ sightGiven: true }),
       choosePath: (path) => setState({ path }),
@@ -127,6 +131,11 @@ export const useProgress = create<Progress>()(
       findSecret: (roomId) => setState((s) => ({ secretsFound: add(s.secretsFound, roomId) })),
       openHint: (roomId) =>
         setState((s) => ({ hints: { ...s.hints, [roomId]: Math.min(5, (s.hints[roomId] ?? 0) + 1) } })),
+      useCommand: (command, roomId) =>
+        setState((s) => {
+          const had = s.commandUses[command] ?? [];
+          return had.includes(roomId) ? s : { commandUses: { ...s.commandUses, [command]: [...had, roomId] } };
+        }),
       replayIntro: () => setState({ sightGiven: false, tourDone: false }),
     }),
     { name: "wirelight-progress", version: 1, storage: createJSONStorage(() => idb) },
