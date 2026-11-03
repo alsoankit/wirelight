@@ -40,7 +40,9 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
 
   // The path, then the tour.
   await path.click();
-  for (let i = 0; i < 5; i++) await page.locator(".tour-card .panel-actions button:not(.quiet)").click();
+  // However many tour cards there are (three since 0114): Next until the tour is gone.
+  for (let i = 0; i < 10 && (await page.locator(".tour-card").isVisible()); i++)
+    await page.locator(".tour-card .panel-actions button:not(.quiet)").click();
   await tidy(page);
 
   // The Prologue: Send, and the answer comes back.
@@ -49,9 +51,9 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
   await page.locator(".debrief .panel-actions button").last().click();
 
   // 1.1: walk to lantern's room and read its plate.
-  await expect(page.locator(".room-title")).toHaveText("Two Rooms, One Cable");
+  await expect(page.locator(".room-title")).toHaveText("First Contact");
   await tidy(page);
-  await page.getByRole("button", { name: /lantern's room/ }).click();
+  await page.getByRole("button", { name: /kitchen's room/ }).click();
   await tidy(page);
   await page.locator("button.plate").first().click();
   await expect(page.locator(".debrief")).toBeVisible({ timeout: 90_000 });
