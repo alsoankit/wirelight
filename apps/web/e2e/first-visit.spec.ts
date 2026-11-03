@@ -1,8 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
 
 // The first visit, as a new player, on the production build (gameplay/onboarding.md): the landing,
-// the descent, the gift of sight, the path, the tour, the Prologue won by pressing Send, then on into
-// Floor 1 and its first room won by walking to lantern's room and reading its plate. A reload then
+// the boot screen, switching on the message view, the path, the tour, the Prologue won by pressing Send, then on into
+// Floor 1 and its first room won by walking to kitchen's room and reading its plate. A reload then
 // goes on from there: Continue opens the next room on the path (ONB-20).
 
 /** Takes whatever waits on screen: spoken lines, discovery cards. */
@@ -29,7 +29,7 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
     .first()
     .click();
 
-  // The gift of sight: the Gardener's lines, until the path choice comes. Not "while a line shows":
+  // Switching on: the robot's own lines, until the path choice comes. Not "while a line shows":
   // between one line and the next nothing shows for a moment, and a slow machine can land in that gap.
   await expect(page.locator(".lines")).toBeVisible({ timeout: 60_000 });
   const path = page.locator(".path-options button").first();
@@ -50,7 +50,7 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
   await expect(page.locator(".debrief")).toBeVisible({ timeout: 90_000 });
   await page.locator(".debrief .panel-actions button").last().click();
 
-  // 1.1: walk to lantern's room and read its plate.
+  // 1.1: walk to kitchen's room and read its plate.
   await expect(page.locator(".room-title")).toHaveText("First Contact");
   await tidy(page);
   await page.getByRole("button", { name: /kitchen's room/ }).click();
@@ -64,7 +64,7 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
     .getByRole("button", { name: /Continue/ })
     .first()
     .click();
-  await expect(page.locator(".room-title")).toHaveText("The Loose Cable", { timeout: 60_000 });
+  await expect(page.locator(".room-title")).toHaveText("Unplugged", { timeout: 60_000 });
   await expect(page.locator(".path-choice, .tour-card")).toHaveCount(0);
 
   expect(errors).toEqual([]);
