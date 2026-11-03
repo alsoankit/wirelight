@@ -104,6 +104,58 @@ export type StatuePlace = Partial<CarvedOptions> & {
   scale?: number;
 };
 
+const LEFT = -3.55;
+const TABLE_TOP = 0.845;
+
+/**
+ * The machines in the player's room (0110): real network hardware, still and silent, where the
+ * Knight's corner stood. A server cabinet on the left wall, a control panel on the back wall, a cable
+ * spool in the back corner, and one thing on the planning table or by the right wall per region.
+ * Reworked models face +z: a quarter turn faces the room from the left wall.
+ */
+/** Each machine's paint: worn and greyed in ruin, its own colour restored. */
+const MACHINE_LOOK: Record<string, CarvedOptions> = {
+  "server-console": { tint: { restored: "#8C9096", ruined: "#5E636B" }, detail: 0.6, metalness: 0.3, roughness: 0.6 },
+  "control-panel": { tint: { restored: "#A3A8A0", ruined: "#666B72" }, detail: 0.55, metalness: 0.25, roughness: 0.65 },
+  "cable-spool": { tint: { restored: "#9A7A55", ruined: "#6B655C" }, detail: 0.5 },
+  "vintage-terminal": { tint: { restored: "#D8CDB2", ruined: "#8E8F92" }, detail: 0.6, roughness: 0.6 },
+  radio: { tint: { restored: "#CDB68C", ruined: "#8A8A88" }, detail: 0.6, roughness: 0.6 },
+  "robot-arm": { tint: { restored: "#C98A3A", ruined: "#77757A" }, detail: 0.55, metalness: 0.2, roughness: 0.6 },
+};
+
+type MachinePlace = StatuePlace & CarvedOptions;
+
+function machine(slug: string, position: [number, number, number], turn = 0): MachinePlace {
+  return { slug, position, turn, ...(MACHINE_LOOK[slug] as CarvedOptions) };
+}
+
+export const MACHINES_AT: Record<number, MachinePlace[]> = {
+  1: [
+    machine("server-console", [LEFT, 0, 0.15], Math.PI / 2),
+    machine("control-panel", [1.6, 0, -3.7]),
+    machine("cable-spool", [-3.1, 0, -3.1], 0.4),
+    machine("vintage-terminal", [2.75, TABLE_TOP, 1.45], Math.PI / 4),
+  ],
+  2: [
+    machine("server-console", [LEFT, 0, 0.15], Math.PI / 2),
+    machine("control-panel", [1.6, 0, -3.7]),
+    machine("cable-spool", [-3.1, 0, -3.1], 0.4),
+    machine("robot-arm", [3.0, 0, -1.0], -Math.PI / 2),
+  ],
+  3: [
+    machine("server-console", [LEFT, 0, 1.0], Math.PI / 2),
+    machine("control-panel", [1.6, 0, -3.7]),
+    machine("cable-spool", [-3.1, 0, -3.1], 0.4),
+    machine("radio", [2.8, TABLE_TOP, 1.4], Math.PI / 4),
+  ],
+  4: [
+    machine("server-console", [LEFT, 0, 0.6], Math.PI / 2),
+    machine("control-panel", [1.6, 0, -3.7]),
+    machine("cable-spool", [-3.1, 0, -3.1], 0.4),
+    machine("vintage-terminal", [2.75, TABLE_TOP, 1.45], Math.PI / 4),
+  ],
+};
+
 /** The live models standing in a room of this kind: what the bake takes as shadow casters. */
 export function standing(
   kind: string,
@@ -122,5 +174,8 @@ export function standing(
       turn: dressing.turn ?? 0,
       scale: dressing.scale ?? 1,
     });
+  if (kind === "observatory")
+    for (const m of MACHINES_AT[region] ?? [])
+      out.push({ slug: m.slug, position: m.position, turn: m.turn ?? 0, scale: m.scale ?? 1 });
   return out;
 }

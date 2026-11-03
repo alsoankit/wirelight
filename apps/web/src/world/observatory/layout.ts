@@ -46,5 +46,3 @@ export const KEEPER = { position: [0, 0, -0.6] as [number, number, number] } as 
 // The corridor itself isn't built in the room view: beyond the doorway is darkness, and the cable
 // runs a little way into it and fades. (Anything built behind the walls shows outside the cutaway.)
 export const CORRIDOR_END_Z = -6.5;
-// Where the Knight's unfinished letter lies, under a brick, near the Glass.
-export const LETTER: [number, number, number] = [1.65, 0.035, 2.45];

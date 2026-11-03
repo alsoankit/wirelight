@@ -22,6 +22,13 @@
 - **Rock Moss Set 01** and **Lion Head** — [Poly Haven](https://polyhaven.com/a/rock_moss_set_01), CC0. Reworked (carved look).
 - **3TD Fantasy Ruins Pack** — by [3TD](https://opengameart.org/content/3td-fantasy-ruins-pack), CC0. Backdrops, reworked.
 
+- **Vintage Terminal** — by [NoMoreFeelings](https://sketchfab.com/3d-models/847c174b86e24d868d25217ca2297886), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
+- **Server V2 +console** — by [FlevasGR](https://sketchfab.com/3d-models/f24594ece9634cec9c1210c041838371), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
+- **Electrical Control Panel sci-fi** — by [aleksfotoart](https://sketchfab.com/3d-models/c0dfab99f2c34b4aa76e895362608677), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
+- **Cable Spool** — by [wolfgar74](https://sketchfab.com/3d-models/22ddb8e02f944fb7b5662f14fdc50e5e), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
+- **Space Age Radio** — by [Tom Seddon](https://sketchfab.com/3d-models/a3c888aed8424954b8e93980cd107fc6), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look).
+- **Industrial robot arm** — by [olofunot](https://sketchfab.com/3d-models/b4b5931851754747a734f72234c87e38), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reworked (carved look, base and lower arm only).
+
 ## Sound effects and ambience
 - **Interface Sounds**, **UI Audio**, **Impact Sounds** and **RPG Audio** — by [Kenney](https://kenney.nl/assets?q=audio) (www.kenney.nl), CC0 1.0. Licence files and source pages in `assets-src/licenses/kenney-*`. Clicks, switches, latches, the key jingle, doors, footsteps, creaks and the far bell, softened and levelled by `tools/audio/make-sfx.sh`.
 - Every other effect (the broadcast chime, capture chime, restoration swell, shimmer, memory rewind, swooshes, wind gust, drip, keeper's gears, the Sorting Works gate and the Cathedral's stone door) and every ambience bed and hum was made for Wirelight, synthesised with FFmpeg by `tools/audio/make-sfx.sh` (the beds mix in a few of the Kenney creaks, a clank and the bell).

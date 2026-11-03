@@ -963,5 +963,90 @@
     "height": 1.3,
     "licence": "CC BY 4.0",
     "credit": "Ancient Maintenance Bot by Lagst"
+  },
+  {
+    "slug": "vintage-terminal",
+    "zip": "9-extras/vintage-terminal.zip",
+    "role": "prop",
+    "tris": 3000,
+    "height": 0.55,
+    "licence": "CC BY 4.0",
+    "credit": "Vintage Terminal by NoMoreFeelings"
+  },
+  {
+    "slug": "server-rack",
+    "zip": "9-extras/server-rack.zip",
+    "role": "prop",
+    "tris": 1500,
+    "height": 2.0,
+    "licence": "CC BY 4.0",
+    "credit": "Server Rack by Spellkaze",
+    "file": "source/model_x/model/model.obj"
+  },
+  {
+    "slug": "server-console",
+    "zip": "9-extras/server-v2-console.zip",
+    "role": "prop",
+    "tris": 2000,
+    "height": 1.9,
+    "licence": "CC BY 4.0",
+    "credit": "Server V2 +console by FlevasGR"
+  },
+  {
+    "slug": "control-panel",
+    "zip": "9-extras/electrical-control-panel-sci-fi.zip",
+    "role": "prop",
+    "tris": 4000,
+    "height": 1.3,
+    "licence": "CC BY 4.0",
+    "credit": "Electrical Control Panel sci-fi by aleksfotoart",
+    "file": "source/Pack_x/DistributionBoard.fbx"
+  },
+  {
+    "slug": "wire-pipes",
+    "zip": "9-extras/low-poly-electrical-wirespipe-set.zip",
+    "role": "prop",
+    "tris": 6000,
+    "height": 1.0,
+    "licence": "CC BY 4.0",
+    "credit": "[Low Poly] Electrical Wires/Pipe Set by Zillious"
+  },
+  {
+    "slug": "cable-spool",
+    "zip": "9-extras/cable-spool.zip",
+    "role": "prop",
+    "tris": 1700,
+    "height": 0.8,
+    "licence": "CC BY 4.0",
+    "credit": "Cable Spool by wolfgar74",
+    "file": "source/model_x/model/model.obj"
+  },
+  {
+    "slug": "radio",
+    "zip": "9-extras/space-age-radio.zip",
+    "role": "prop",
+    "tris": 4000,
+    "height": 0.45,
+    "licence": "CC BY 4.0",
+    "credit": "Space Age Radio by Tom Seddon"
+  },
+  {
+    "slug": "comms-room",
+    "zip": "9-extras/comms-room-assets.zip",
+    "role": "prop",
+    "tris": 9000,
+    "height": 1.6,
+    "licence": "CC BY 4.0",
+    "credit": "Comms Room - Assets by Evan Petrov"
+  },
+  {
+    "slug": "robot-arm",
+    "zip": "9-extras/industrial-robot-arm.zip",
+    "role": "prop",
+    "tris": 6000,
+    "height": 1.5,
+    "licence": "CC BY 4.0",
+    "credit": "Industrial robot arm by olofunot",
+    "only": ["Box001", "Circle001", "Circle002", "Cylinder002", "Cylinder003", "Line002", "Line004", "NGon003"]
   }
 ]
