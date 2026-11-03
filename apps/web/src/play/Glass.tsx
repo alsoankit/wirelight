@@ -12,6 +12,7 @@ import { CLOSE_GLASS, OPEN_GLASS } from "./keys";
 import { Memory } from "./Memory";
 import { noteMoment } from "./momentRules";
 import { arrivalText, machineNamer } from "./names";
+import { useMachineLabel } from "./roles";
 import { WorldMap } from "./WorldMap";
 
 // The Scrying Glass (CORE-31..33, 0064): a live map of the whole floor, view-only. Machines are
@@ -121,6 +122,7 @@ export function FloorMap({
   memory?: boolean;
   children?: ReactNode;
 }) {
+  const label = useMachineLabel();
   const here = useSession((s) => s.here);
   /** Standing in a corridor (0081): its cable is where the player is, not a machine. */
   const inCorridor = useSession((s) => (s.corridor && !s.corridor.through ? s.corridor.link : null));
@@ -243,7 +245,7 @@ export function FloorMap({
           )}
           {!mini && (
             <text y={30} textAnchor="middle" className="glass-name">
-              {n.id}
+              {label(n.id)}
               {streets.get(n.id) && <tspan className="glass-street"> {streets.get(n.id)}</tspan>}
             </text>
           )}
@@ -312,6 +314,7 @@ export function Glass() {
   const [view, setView] = useState<"floor" | "world">("floor");
   const replay = useSession((s) => s.replay);
   const here = useSession((s) => s.here);
+  const label = useMachineLabel();
   const corridorLink = useSession((s) => (s.corridor && !s.corridor.through ? s.corridor.link : null));
   const corridorLinkDef = corridorLink ? room?.topology.links.find((x) => x.id === corridorLink) : undefined;
   const corridorEnds = corridorLinkDef ? ([corridorLinkDef.a.device, corridorLinkDef.b.device] as const) : null;
@@ -362,8 +365,8 @@ export function Glass() {
         {here && (
           <span className="mini-glass-here">
             {corridorEnds
-              ? fill(voice.hereCorridor, { a: corridorEnds[0], b: corridorEnds[1] })
-              : fill(voice.here, { machine: here })}
+              ? fill(voice.hereCorridor, { a: label(corridorEnds[0]), b: label(corridorEnds[1]) })
+              : fill(voice.here, { machine: label(here) })}
           </span>
         )}
       </button>

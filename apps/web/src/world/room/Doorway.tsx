@@ -7,6 +7,7 @@ import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } fro
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
+import { useMachineLabel } from "../../play/roles";
 import { goThrough, stepIntoCorridor } from "../corridor/move";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
@@ -240,7 +241,8 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
     // Reading a plate is the machine telling you about its door (1.1): the click runs the command.
     void exec(info.device, `ip link show ${info.iface}`, "click");
   };
-  const label = fill(voice.doorway.go, { door: info.iface, name: info.peer });
+  const peer = useMachineLabel()(info.peer);
+  const label = fill(voice.doorway.go, { door: info.iface, name: peer });
   // Number keys 1–9 go through the doors in order (CORE-47).
   const shortcut = index < 9 ? String(index + 1) : undefined;
 
@@ -301,7 +303,7 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
             aria-label={label}
             aria-keyshortcuts={shortcut}
           >
-            {shortcut && <kbd className="chip-key">{shortcut}</kbd>}→ {info.peer}
+            {shortcut && <kbd className="chip-key">{shortcut}</kbd>}→ {peer}
           </button>
         ) : (
           <span
