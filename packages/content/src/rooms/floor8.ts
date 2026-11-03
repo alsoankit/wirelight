@@ -147,7 +147,7 @@ export const directions: RoomText = {
       q: "Who sent that message back?",
       a: "The crossing. It had nowhere to send your letter, so it told you.",
     },
-    { q: "Do routers have boards too?", a: "Every navigator reads one. A navigator only knows what its board says." },
+    { q: "Do routers have boards too?", a: "Every keeper at a crossing reads one. It only knows what its board says." },
     {
       q: "Why not a default on crossing?",
       a: "You could. Then crossing would send everything it doesn't know to arch. Is that what you want?",
@@ -162,7 +162,7 @@ export const noWayBack: RoomText = {
   notes: [],
   hints: [
     { text: "No error means nothing turned your letter back. Where did it go?" },
-    { text: "The Slate can listen at doors now. Try one at each step." },
+    { text: "The Scanner can listen at doors now. Try one at each step." },
     { text: "A reply needs its own way back: the far house needs a route too.", codex: "return-path" },
     { text: "Find the door where requests arrive but nothing leaves, and give that house its way back." },
     {
@@ -196,11 +196,11 @@ export const noWayBack: RoomText = {
 
 export const sleepingKeeper: RoomText = {
   title: "The Sleeping Keeper",
-  mission: "Crossing's navigator has stopped passing anything along. Your pings for vesper pile up at its lectern.",
+  mission: "Crossing's keeper has stopped passing anything along. Your pings for vesper pile up at its desk.",
   notes: [],
   hints: [
     { text: "Your packets reach the crossing and stop." },
-    { text: "Try doing the navigator's job yourself, at the lectern." },
+    { text: "Try doing the keeper's job yourself, at the desk." },
     { text: "A router only forwards if it's allowed to: that's a setting.", codex: "navigator" },
     { text: "Forward a packet or two by hand, then switch on the setting that lets crossing do it." },
     {
@@ -209,7 +209,7 @@ export const sleepingKeeper: RoomText = {
   ],
   detectors: {
     "routes-again": {
-      note: "The board is right. The navigator knows the way; it's just not allowed to go.",
+      note: "The board is right. The keeper knows the way; it just isn't allowed to go.",
       tried: "You changed a routing board, but every board was already right.",
     },
     "reuse-the-frame": {
@@ -217,7 +217,7 @@ export const sleepingKeeper: RoomText = {
       tried: "You sent the packet on in a frame addressed to crossing's own door on the nave.",
     },
     "skip-ttl": {
-      note: "A navigator always takes one off. You'll see why soon.",
+      note: "A crossing always takes one off. You'll see why soon.",
       tried: "You wrapped the packet as a house does, without taking one off its countdown.",
     },
   },
@@ -245,13 +245,13 @@ export const sleepingKeeper: RoomText = {
   voice: [
     {
       id: "F8-NAV-01",
-      speaker: "navigator",
-      text: "I remember. Every step. But I'm not allowed. Someone told me not to pass anything along.",
+      speaker: "You",
+      text: "Its screen says it knows every step. But it isn't allowed to pass anything along. Someone switched that off.",
     },
     {
       id: "F8-NAV-02",
-      speaker: "navigator",
-      text: "This frame was for my door, on the nave. It can't walk the cloister.",
+      speaker: "You",
+      text: "This frame was for its door on the nave. A frame can't cross into the cloister.",
     },
   ],
 };
@@ -293,7 +293,7 @@ export const closedCrossing: RoomText = {
       tried: "You took a line off your own house's board, but your requests were already leaving.",
     },
     "routes-again": {
-      note: "The board is right. The navigator knows the way; it's just not allowed to go.",
+      note: "The board is right. The keeper knows the way; it just isn't allowed to go.",
       tried: "You changed arch's board, but its board was right. It wasn't allowed to pass things along.",
     },
     "one-direction": {
@@ -309,8 +309,8 @@ export const closedCrossing: RoomText = {
   voice: [
     {
       id: "F8-BOSS-01",
-      speaker: "stone warden",
-      text: "The great crossing. Barred. I stood here when they barred it. I don't remember why.",
+      speaker: "You",
+      text: "The great crossing, and it's barred. My logs don't say who barred it, or why.",
     },
   ],
 };
@@ -321,31 +321,31 @@ export const floor8: FloorText = {
     {
       id: "F8-FM-01",
       title: "The problem",
-      text: "The town's streets could each talk to themselves. Not to each other. Every street, an island.",
+      text: "Memory restored. The town's streets could each talk among themselves, but not to each other. Every street, an island.",
     },
     {
       id: "F8-FM-02",
       title: "What they built",
-      text: "So the cathedral folk built crossings. A machine standing on two streets, with a board of directions, and permission to carry letters across. Every house was told: if it's not for your street, give it to the crossing.",
+      text: "So crossings were built: a machine standing on two streets, with a board of directions and permission to carry letters across. Every house was told: if it's not for your street, give it to the crossing.",
     },
     {
       id: "F8-FM-03",
       title: "Ride-along",
       text: "New frame at every crossing. The letter inside, untouched.",
       shown:
-        "the camera rides a ping from the observatory: the house's board says default, so the frame is addressed to crossing's door; at the lectern the frame falls away, the board is read, a new frame closes around the packet, the countdown ticks 64 → 63; out onto the cloister to vesper; and the reply back the same way",
+        "the camera rides a ping from the observatory: the house's board says default, so the frame is addressed to crossing's door; at the desk the frame falls away, the board is read, a new frame closes around the packet, the countdown ticks 64 → 63; out onto the cloister to vesper; and the reply back the same way",
     },
     {
       id: "F8-FM-04",
       title: "What's next",
-      text: "Untouched… almost. Something changes on every crossing. Follow one all the way. Then you'll see what I see.",
+      text: "Untouched, almost. Something changes at every crossing. Following one all the way will show it.",
       shown: "the world map: the cathedral's lower nave lit; Floor 9's great crossing in mist",
     },
   ],
   journal: {
     page: 8,
-    title: "The navigator",
-    where: "on the lectern in 8.5 (glows after the win)",
-    text: "Spent an afternoon being a router. Open, read, look up, ask, count, wrap, send. Then do it all again backwards. When the navigator woke up and did it a thousand times a second, I sat down on the steps and laughed.",
+    title: "The crossing's keeper",
+    where: "on the desk in 8.5 (glows after the win)",
+    text: "Log 3,380. The crossing's keeper was told not to pass anything along. I did its job by hand for an afternoon: open, read, look up, ask, count, wrap, send. It does that a thousand times a second.",
   },
 };

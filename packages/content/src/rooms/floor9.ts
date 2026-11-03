@@ -12,7 +12,7 @@ export const twoEnvelopes: RoomText = {
   notes: [],
   hints: [
     { text: "Tag a ping before you send it." },
-    { text: "The Slate catches a traced packet on every street it crosses." },
+    { text: "The Scanner catches a traced packet on every street it crosses." },
     { text: "A packet's journey is made of hops: one frame per street.", codex: "hop" },
     { text: "Trace a ping to lumen, then compare its catches from two different streets." },
     { text: "Press Trace, `ping -c 1 {lumen}`, then Compare the nave catch with the cloister catch." },
@@ -42,8 +42,8 @@ export const twoEnvelopes: RoomText = {
     {
       id: "F9-MEM-01",
       title: "Trace and compare",
-      trigger: "first use of the Slate's tracer",
-      text: "Tag a packet, send it, and the Slate will catch it everywhere it goes. Then lay two of the catches side by side.",
+      trigger: "first use of the Scanner's tracer",
+      text: "If I tag a packet and send it, the Scanner catches it everywhere it goes. Then I can lay two catches side by side.",
       action: "press Trace",
     },
   ],
@@ -59,8 +59,8 @@ export const twoEnvelopes: RoomText = {
   voice: [
     {
       id: "F9-SEE-01",
-      speaker: "stone warden",
-      text: "Yes. This. The envelope for the road is new at every crossing. The letter inside goes all the way.",
+      speaker: "You",
+      text: "There it is. The envelope for the road is new at every crossing. The letter inside goes all the way.",
     },
   ],
 };
@@ -209,7 +209,7 @@ export const theCrossing: RoomText = {
       tried: "You told crossing to hand letters to a door on a street it doesn't stand on.",
     },
     "routes-again": {
-      note: "The board is right. The navigator knows the way; it's just not allowed to go.",
+      note: "The board is right. The keeper knows the way; it just isn't allowed to go.",
       tried: "You changed spire's board, but its board was right. It wasn't allowed to pass things along.",
     },
     "gateway-far": {
@@ -237,8 +237,8 @@ export const theCrossing: RoomText = {
   voice: [
     {
       id: "F9-BOSS-01",
-      speaker: "stone warden",
-      text: "The high window. The light used to come all the way up. I've waited here so long I forgot what it looked like.",
+      speaker: "You",
+      text: "The high window. Light used to reach all the way up here. Not for years.",
     },
   ],
 };
@@ -249,12 +249,12 @@ export const floor9: FloorText = {
     {
       id: "F9-FM-01",
       title: "The problem",
-      text: "Crossings joined the streets. But roads grew long, and sometimes crooked, and a lost letter could wander forever.",
+      text: "Memory restored. Crossings joined the streets. But roads grew long, and sometimes crooked, and a lost letter could wander forever.",
     },
     {
       id: "F9-FM-02",
       title: "What they built",
-      text: "So every letter was given a countdown. Every crossing takes one off. At zero, it stops, and the crossing writes home to say where.",
+      text: "So every letter got a countdown. Every crossing takes one off. At zero it stops, and the crossing sends a note home to say where.",
     },
     {
       id: "F9-FM-03",
@@ -266,14 +266,14 @@ export const floor9: FloorText = {
     {
       id: "F9-FM-04",
       title: "What's next",
-      text: "Above us the roads become a maze. Stairs that go up and arrive lower down. Someone made a tool to find the way through. The Knight went looking for it.",
+      text: "Above here the roads become a maze, and there's a tool that finds the way through. My logs stop at the foot of the stair.",
       shown: "leads into the first release's ending (END1)",
     },
   ],
   journal: {
     page: 9,
     title: "Someone made a tool",
-    where: "on arch's lectern in 9.3 (glows after the win)",
-    text: "I spent a whole day sending pings that died one step further each time, writing down who sent the notes. Then I found scratches on the wall of the next stair up. Someone made a tool that does it all at once. I'm going up to find it.",
+    where: "on arch's desk in 9.3 (glows after the win)",
+    text: "Log 3,402. Power at 3%. The roads above are a maze and I can't fix them like this. Going back to my room to shut down. Whoever switches me on next: that's me. Start at the first cable. Notes are in the rooms.",
   },
 };

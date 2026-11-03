@@ -14,22 +14,25 @@ import {
 
 export type VoiceLine = { id: string; speaker: string; text: string };
 
+/** One voice (0108): every line is the robot's own. */
+const VOICE = "You";
+
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** Every voiced line (gameplay/audio.md: memories, gifts, Guardians, bosses, floor memories, journal pages, the ending). */
+/** Every voiced line (gameplay/audio.md, 0108: tips, boot lines, bosses, floor memories, log pages, the ending; all one voice). */
 export function voiceLines(): VoiceLine[] {
   const out: VoiceLine[] = [];
   for (const t of Object.values(roomTexts)) {
-    for (const m of t.memories ?? []) out.push({ id: m.id, speaker: "The Knight", text: m.text });
+    for (const m of t.memories ?? []) out.push({ id: m.id, speaker: VOICE, text: m.text });
     for (const v of t.voice ?? []) out.push({ id: v.id, speaker: cap(v.speaker), text: v.text });
-    if (t.building) out.push({ id: t.building.id, speaker: "Guardian", text: t.building.text });
+    if (t.building) out.push({ id: t.building.id, speaker: VOICE, text: t.building.text });
   }
   for (const [floor, f] of Object.entries(floorTexts)) {
-    for (const c of f.memory) out.push({ id: c.id, speaker: "Guardian", text: c.text });
+    for (const c of f.memory) out.push({ id: c.id, speaker: VOICE, text: c.text });
     if (f.farewell) out.push({ id: f.farewell.id, speaker: cap(f.farewell.speaker), text: f.farewell.text });
-    out.push({ id: `F${floor}-JOURNAL`, speaker: "The Knight", text: f.journal.text });
+    out.push({ id: `F${floor}-JOURNAL`, speaker: VOICE, text: f.journal.text });
   }
-  for (const m of Object.values(commandMemories)) out.push({ id: m.id, speaker: "The Knight", text: m.intro });
+  for (const m of Object.values(commandMemories)) out.push({ id: m.id, speaker: VOICE, text: m.intro });
   const extra = [region2Arrival, region3Arrival, region4Arrival].flatMap((r) =>
     (Array.isArray(r) ? r : (r as { lines: VoiceLine[] }).lines).map((l) => ({ ...l, speaker: cap(l.speaker) })),
   );

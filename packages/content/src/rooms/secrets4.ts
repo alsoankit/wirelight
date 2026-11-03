@@ -11,7 +11,7 @@ export const insideYourHomeRouter: RoomText = {
   mission: "At the foot of the spire, one small box hums with blinking lights. Plug in, and reach the world outside.",
   access: { world: "Sealed. It answers anyone who can reach it, from outside." },
   notes: [
-    "Found this at the foot of the spire. It looks just like the box under my desk back home. Same blinking lights. I never once wondered what was inside.",
+    "Found this at the foot of the spire. It looks like the little boxes people keep at home, with the blinking lights. A whole network in one box.",
   ],
   hints: [
     { text: "You have no address. In the Lantern Town, how did you get one without guessing?" },

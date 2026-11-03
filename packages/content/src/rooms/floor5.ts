@@ -9,18 +9,18 @@ export const HOUSE_LOCKED = "Locked. Nobody here has opened the door in years, b
 export const REGION_3_ARRIVAL = [
   {
     id: "R3-ARRIVE-01",
-    speaker: "Lamplighter",
-    text: "Well now. A new face in the Lantern Town. Come in out of the dark, love.",
+    speaker: "You",
+    text: "Streets, houses and lamps. The Lantern Town.",
   },
   {
     id: "R3-ARRIVE-02",
-    speaker: "Lamplighter",
-    text: "The owl tells me you're good with doors and names. Up here, every house had an address too. I used to know them all by heart.",
+    speaker: "You",
+    text: "Down in the halls, every door had a name. Up here, every house has an address too.",
   },
   {
     id: "R3-ARRIVE-03",
-    speaker: "Lamplighter",
-    text: "These days I can't remember why we needed both. Names *and* addresses. Help an old woman remember?",
+    speaker: "You",
+    text: "Names and addresses: why would anything need both? I'll find out.",
   },
 ];
 
@@ -61,7 +61,7 @@ export const whereNotWho: RoomText = {
   guardian: [
     {
       q: "Why not just use names?",
-      a: "Names belong to doors, love, and doors get changed. A house stays where it is.",
+      a: "Names belong to doors, and doors get replaced. A house stays where it is.",
     },
     {
       q: "Can I use the new door name instead?",
@@ -69,7 +69,7 @@ export const whereNotWho: RoomText = {
     },
     {
       q: "What's that little question flying out first?",
-      a: "I'll remember. Something about… asking the neighbours. Give me time.",
+      a: "There's a way: asking the neighbours. You'll find it soon.",
     },
   ],
   fieldGuide: ["Houses and addresses", "Plates (now with addresses)"],
@@ -82,7 +82,7 @@ export const placeToLive: RoomText = {
   notes: ["Our house: 10.0.1.5/24."],
   hints: [
     { text: "Your plate is missing something." },
-    { text: "Look at the note on the Observatory table." },
+    { text: "Look at the note on the table in your room." },
     { text: "A house needs its own address before it can send or receive.", codex: "ip-address" },
     { text: "Write the address from the note in your plate's address slot, then ping lantern." },
     {
@@ -92,7 +92,7 @@ export const placeToLive: RoomText = {
   detectors: {
     "ping-no-address": {
       // The same words as F5-NOTE-01 (the Knight's line after this first, failed ping).
-      note: "A house with no address can't send letters, or get answers.",
+      note: "A house with no address can't send messages, or get answers.",
       tried:
         "You pinged before your house had an address: `Network is unreachable`. Nothing could leave without a return address.",
     },
@@ -124,21 +124,21 @@ export const placeToLive: RoomText = {
   guardian: [
     {
       q: "Why can't I ping without an address?",
-      a: "Who would the answer go back to, love? Every letter needs a return address.",
+      a: "Who would the answer go back to? Every message needs a return address.",
     },
     {
       q: "What's the `/24` on the note?",
       a: "Part of how an address is written. The street sign explains it, further into town. For now, just copy it.",
     },
-    { q: "Why does ping go on forever?", a: "It's patient. Like me. Ctrl+C tells it you've heard enough." },
+    { q: "Why does ping go on forever?", a: "It keeps going until you stop it. Ctrl+C tells it you've seen enough." },
   ],
   fieldGuide: ["Command book: `ping`", "Your address"],
-  voice: [{ id: "F5-NOTE-01", speaker: "Knight", text: "A house with no address can't send letters, or get answers." }],
+  voice: [{ id: "F5-NOTE-01", speaker: "You", text: "A house with no address can't send messages, or get answers." }],
 };
 
 export const rollCall: RoomText = {
   title: "Roll Call",
-  mission: "The Lamplighter's roll has five houses on it. Her lamp is lit only for the ones that answer.",
+  mission: "A roll on the wall lists five houses. Each one's lamp lights only when it answers.",
   access: {
     lantern: HOUSE_LOCKED,
     quill: HOUSE_LOCKED,
@@ -217,8 +217,8 @@ export const quietStreet: RoomText = {
   voice: [
     {
       id: "F5-BOSS-01",
-      speaker: "Lamplighter",
-      text: "This was the liveliest street in town. Now listen. Not a sound.",
+      speaker: "You",
+      text: "My logs say this was the busiest street in town. Not a sound now.",
     },
   ],
 };
@@ -229,12 +229,12 @@ export const floor5: FloorText = {
     {
       id: "F5-FM-01",
       title: "The problem",
-      text: "The owls' halls knew every door by name. But doors wore out and were replaced, and machines moved house, and every time, everyone's letters went astray.",
+      text: "Memory restored. The halls knew every door by name. But doors were replaced, and machines moved, and every time, messages went astray.",
     },
     {
       id: "F5-FM-02",
       title: "What they built",
-      text: "So we gave every house an address. Not the door's name, the house's. Write to the house, and it doesn't matter whose door it has this year.",
+      text: "So every house got an address. Not the door's name, the house's. Write to the house, and it doesn't matter which door it has this year.",
     },
     {
       id: "F5-FM-03",
@@ -246,7 +246,7 @@ export const floor5: FloorText = {
     {
       id: "F5-FM-04",
       title: "What's next",
-      text: "But… how does a letter with a house address find the right door? There's a little question that flies out first. I nearly have it.",
+      text: "But how does a message with a house address find the right door? A little question goes out first. That part is still missing.",
       shown: "the world map: Floor 6 appears in mist",
     },
   ],
@@ -254,6 +254,6 @@ export const floor5: FloorText = {
     page: 5,
     title: "Addresses",
     where: "on the square's notice board in 5.2",
-    text: "Everyone up here has two names: the one on their door, and the one on their house. I kept writing to doors. The Lamplighter laughed at me for a week.",
+    text: "Log 3,318. Everyone up here has two names: one on the door, one on the house. I kept writing to doors and wondered why nothing arrived.",
   },
 };

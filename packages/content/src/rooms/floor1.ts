@@ -29,28 +29,28 @@ export const twoRooms: RoomText = {
       id: "F1-MEM-01",
       title: "Doors and plates",
       trigger: "on entering",
-      text: "Every door has a plate beside it. The plate tells you that door's name. This one says eth0. And see the light? Filled means the cable behind it works. Go on, click the plate.",
+      text: "Every door has a plate beside it, with the door's name on it. Mine says eth0. The light is filled, so the cable behind it works. I'll read the plate.",
       action: "click your own plate",
     },
     {
       id: "F1-MEM-02",
       title: "Walking",
       trigger: "first time near the doorway",
-      text: "Corridors are cables. You can walk them. Click the doorway, and the other end is on your right.",
+      text: "Corridors are cables, and I can walk them. The doorway leads into one. The other end is on the right.",
       action: "step into the corridor",
     },
   ],
   guardian: [
     {
       q: "What is a door?",
-      a: "Where a cable meets a machine. I remember the weavers carving them… each one with its own name.",
+      a: "Where a cable meets a machine. Every door has its own name.",
     },
     { q: "Why does the plate say eth0?", a: "That's the door's name. Every door on a machine has a different one." },
     { q: "What's at the other end?", a: "Another machine, another room. The cable only ever joins two doors." },
   ],
   building: {
     id: "F1-BLD-01",
-    text: "The weavers gave every door a name, carved into a plate beside it, so nobody would mix up one door with another.",
+    text: "Every door has a name on a plate beside it, so nobody mixes up one door with another.",
     shown: "plates being carved and set beside doors",
   },
   fieldGuide: ["Doors and plates"],
@@ -88,20 +88,20 @@ export const looseCable: RoomText = {
       id: "F1-MEM-03",
       title: "Cables",
       trigger: "on first seeing the broken corridor",
-      text: "When a corridor cracks like that, its cable isn't carrying anything. Check both ends.",
+      text: "That corridor's cracked: its cable isn't carrying anything. I'll check both ends.",
       action: "look at the cable where it meets your door",
     },
   ],
   guardian: [
     {
       q: "Why is the corridor broken?",
-      a: "It isn't carrying anything. Something between the two doors… I can't remember what.",
+      a: "It isn't carrying anything. Something between the two doors is wrong.",
     },
     { q: "Is lantern broken?", a: "Lantern's light is dark too. Both ends go dark when the line between them is cut." },
   ],
   building: {
     id: "F1-BLD-02",
-    text: "The weavers set a small light by every door, so anyone could see at a glance if the thread behind it still carried.",
+    text: "Every door has a small light, so anyone can see at a glance whether the cable behind it works.",
     shown: "lights set into plates, glowing as the cable connects",
   },
   fieldGuide: ["Messages, corridors and marks"],
@@ -142,13 +142,13 @@ export const bothEnds: RoomText = {
       id: "F1-MEM-04",
       title: "Door switches",
       trigger: "first time a plate's switch is seen",
-      text: "Plates have a little switch. I flipped mine off once to see what would happen. Nothing happened, which was the point.",
+      text: "Plates have a little switch. A door that's switched off can't send or receive anything.",
     },
   ],
   guardian: [
     {
       q: "The cable is fine. Why doesn't it work?",
-      a: "A cable has two doors. Both have to be… open? Awake? Something like that.",
+      a: "A cable has two doors, and both have to be switched on.",
     },
     {
       q: "Why is my light off when my door is on?",
@@ -157,7 +157,7 @@ export const bothEnds: RoomText = {
   ],
   building: {
     id: "F1-BLD-03",
-    text: "Every door got a switch, so a machine could rest its door without unplugging anything. They always meant to switch them back on…",
+    text: "Every door has a switch, so a machine can rest a door without unplugging anything. Someone switched this one off and never switched it back on.",
     shown: "switches set into plates; one left off, gathering dust",
   },
   fieldGuide: ["Doors and plates"],
@@ -198,8 +198,8 @@ export const darkCorridor: RoomText = {
   voice: [
     {
       id: "F1-BOSS-01",
-      speaker: "Gardener",
-      text: "This is the longest corridor in the old halls. It's been dark for as long as I can remember.",
+      speaker: "You",
+      text: "The longest corridor in these halls. It's been dark for as long as my logs go back.",
     },
   ],
 };
@@ -210,12 +210,12 @@ export const floor1: FloorText = {
     {
       id: "F1-FM-01",
       title: "The problem",
-      text: "I remember now. Two machines, far apart, that needed to talk, and nothing between them.",
+      text: "Memory restored. Two machines, far apart, that needed to talk, and nothing between them.",
     },
     {
       id: "F1-FM-02",
       title: "What they built",
-      text: "So the weavers dug a corridor and laid a thread of copper along it, door to door. A door at each end, each with a name. A light to show the thread was alive. A switch to rest a door.",
+      text: "So a cable was laid, door to door. A door at each end, each with a name. A light to show the cable works. A switch to rest a door.",
     },
     {
       id: "F1-FM-03",
@@ -227,13 +227,13 @@ export const floor1: FloorText = {
     {
       id: "F1-FM-04",
       title: "What's next",
-      text: "But a thread only carries. It doesn't know who a message is for. The weavers needed something more… I'll remember, when you get there.",
+      text: "But a cable only carries. It doesn't know who a message is for. The rest of that memory is still missing.",
     },
   ],
   journal: {
     page: 1,
     title: "The first hall",
     where: "hidden in the roots of the corridor in 1.2 (glows faintly when you walk the corridor)",
-    text: "Found the old halls today. Everything dark. There's a cable running out of the room I'm calling my observatory. I followed it. Someone's at the other end, and they still answer if you ask nicely.",
+    text: "Log 3,140. Lantern stopped answering today, the first time in years. The cable from my room to its room looks fine. Checking again tomorrow.",
   },
 };

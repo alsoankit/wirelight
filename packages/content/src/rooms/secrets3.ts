@@ -46,7 +46,7 @@ export const binaryBehind24: RoomText = {
   guardian: [
     {
       q: "Why 24?",
-      a: "Count the bits, love. Each of the four numbers is 8: that's 8, 16, 24. Three numbers' worth is the street.",
+      a: "Count the bits. Each of the four numbers is 8 bits: that's 8, 16, 24. Three numbers' worth is the street.",
     },
     {
       q: "What's a bit?",

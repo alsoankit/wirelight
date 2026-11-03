@@ -42,18 +42,18 @@ export const firstLight: RoomText = {
       id: "F2-MEM-01",
       title: "The workbench",
       trigger: "first visit",
-      text: "I built this table to write my own messages. Who it's to goes here, what you want to say goes here. Then seal it and send it.",
+      text: "A table for writing my own messages. Who it's for goes here, what to say goes here. Then I seal it and send it.",
       action: "drag a word into the Message slot",
     },
   ],
   guardian: [
     {
       q: "Who is the message for?",
-      a: "Every door has a name, written on its plate. I think… you write the name of the door you want.",
+      a: "Every door has a name. Write the name of the door you want it to reach.",
     },
     {
       q: "What are all those numbers?",
-      a: "That's a door's name. Six pairs. The weavers burned one into every door, so no two were alike.",
+      a: "That's a door's name: six pairs of characters. No two doors have the same one.",
     },
     {
       q: "Why did the frame come back to me?",
@@ -63,7 +63,7 @@ export const firstLight: RoomText = {
   ],
   building: {
     id: "F2-BLD-01",
-    text: "When more machines came, a plain thread wasn't enough. The weavers wrapped every message in an envelope, and wrote on it the name of the door it was for.",
+    text: "With more machines, a bare message wasn't enough. So every message goes in an envelope, with the name of the door it's for written on it.",
     shown: "a message folded into a frame; the to written in glowing ink",
   },
   fieldGuide: ["The workbench", "Doors and plates"],
@@ -110,23 +110,23 @@ export const wrongName: RoomText = {
       id: "F2-MEM-02",
       title: "Catching",
       trigger: "first time a message moves while the jar is ready",
-      text: "You can catch a message without stopping it. Aim, and time slows down. Click it.",
+      text: "I can catch a copy of a message without stopping it. Pointing at it slows time down.",
       action: "catch one message",
     },
     {
       id: "F2-MEM-03",
       title: "Opening a catch",
       trigger: "after the first catch",
-      text: "Open it. The top line is who it's to, then who it's from, then what it says.",
+      text: "Let me open it. The top line is who it's for, then who it's from, then what it says.",
       action: "open the catch",
     },
   ],
   guardian: [
     {
       q: "What are those marks at lantern's door?",
-      a: "Messages that got there… and went no further. Lantern didn't think they were meant for it.",
+      a: "Messages that got there and went no further. Lantern decided they weren't meant for it.",
     },
-    { q: "Is lantern ignoring us?", a: "A door only takes what has its own name on it. I remember that much." },
+    { q: "Is lantern ignoring us?", a: "A door only takes what has its own name on it." },
     {
       q: "Why does lantern talk to everyone?",
       a: "That one is written to everyone. All doors listen to that name.",
@@ -135,7 +135,7 @@ export const wrongName: RoomText = {
   ],
   building: {
     id: "F2-BLD-02",
-    text: "So that no machine would have to read everyone's post, the weavers taught every door to look at the to first, and let anything else fall away.",
+    text: "So that no machine has to read everyone's messages, every door looks at who it's for first, and lets anything else fall away.",
     shown: "a door glancing at frames, accepting one, letting another fade",
   },
   fieldGuide: ["Catching and opening messages", "The messenger and its card", "Messages, corridors and marks"],
@@ -146,7 +146,7 @@ export const whoAreYou: RoomText = {
   mission:
     "A second door in your room has opened, and someone is behind it. The room beyond is sealed, and you don't know their name.",
   access: { quill: "Sealed. You can't go in, but anything you send can." },
-  notes: ["Found a room I couldn't get into. Didn't know who lived there. So I shouted."],
+  notes: ["Found a room I couldn't get into. Didn't know its name. So I called out to everyone."],
   hints: [
     { text: "You can't read quill's plate. Can quill tell you its name?" },
     { text: "Remember the address that means everyone?", codex: "everyone-address" },
@@ -183,7 +183,7 @@ export const whoAreYou: RoomText = {
   guardian: [
     {
       q: "How can I learn its name?",
-      a: "If you can't read the plate… maybe it will tell you, if you call out to everyone.",
+      a: "If you can't read its plate, call out to everyone and it may answer.",
     },
     {
       q: "What does from mean on a frame?",
@@ -191,13 +191,13 @@ export const whoAreYou: RoomText = {
     },
     {
       q: "Why won't quill give me the key?",
-      a: "It told you who it is. Perhaps it wants to be spoken to by name.",
+      a: "It told you its name. Try writing to it by name.",
       after: "broadcast-sent",
     },
   ],
   building: {
     id: "F2-BLD-03",
-    text: "The weavers added a second line to every envelope: who it's from. And one name they kept for no door at all, the name that means everyone.",
+    text: "Every envelope has a second line: who it's from. And one name belongs to no door at all: the name that means everyone.",
     shown: "the from line written; a broadcast frame spreading to every door at once",
   },
   fieldGuide: ["Sealed rooms", "Sending to everyone"],
@@ -240,41 +240,41 @@ export const lightsOut: RoomText = {
       id: "F2-MEM-04",
       title: "The console",
       trigger: "right after CMD-01",
-      text: "Type, then press Enter. If you're not sure, `man ip` tells you more, and Tab finishes a word for you. Up arrow brings back what you typed.",
+      text: "Type, then press Enter. If I'm not sure, `man ip` explains, and Tab finishes a word for me. The up arrow brings back what I typed.",
       action: "press the up arrow once",
     },
   ],
   guardian: [
     {
       q: "Why did the switch break?",
-      a: "Everything here was left alone too long. The further in you go, the more of them you'll find like that.",
+      a: "Everything here was left alone too long. The further in, the more broken controls there will be.",
     },
     {
       q: "What is the console?",
-      a: "The machine's own voice. It answers in its own words, and it does exactly what you tell it.",
+      a: "A way to give a machine commands by typing. It answers in its own words, and it does exactly what it's told.",
     },
     { q: "What does state DOWN mean?", a: "Switched off. You knew that already, when you could still use the switch." },
   ],
   building: {
     id: "F2-BLD-04",
-    text: "The weavers gave every machine a voice of its own, deep inside, that would always answer its own words, even when every switch and lever had crumbled.",
-    shown: "a console carved into the wall, its runes glowing",
+    text: "Every machine has a console, so it can still be told what to do when its switches and levers stop working.",
+    shown: "a console screen set into the wall, its text glowing",
   },
   fieldGuide: ["The console", "Typing commands", "Command book"],
   voice: [
-    { id: "F2-NOTE-01", speaker: "Knight", text: "That switch is finished. It won't move again." },
-    { id: "F2-GIFT-01", speaker: "Gardener", text: "Its switch is broken. So many of them are, now." },
+    { id: "F2-NOTE-01", speaker: "You", text: "That switch is finished. It won't move again." },
+    { id: "F2-GIFT-01", speaker: "You", text: "Its switch is broken. A lot of them are, by now." },
     {
       id: "F2-GIFT-02",
-      speaker: "Gardener",
-      text: "But a machine never forgets its own voice. If you speak to it in its own words, it will listen.",
+      speaker: "You",
+      text: "But I don't need the switch. I can talk to the machine directly, by typing commands.",
     },
     {
       id: "F2-GIFT-03",
-      speaker: "Gardener",
-      text: "I gave you the sight to see their messages. Now I'll give you the voice, to speak to them.",
+      speaker: "You",
+      text: "Switching on my console. Whatever I type goes straight to this machine.",
     },
-    { id: "F2-GIFT-04", speaker: "Gardener", text: "The words are old. Start by asking it about its doors." },
+    { id: "F2-GIFT-04", speaker: "You", text: "First, I'll ask it about its doors." },
   ],
 };
 
@@ -329,8 +329,8 @@ export const silentLine: RoomText = {
   voice: [
     {
       id: "F2-BOSS-01",
-      speaker: "Gardener",
-      text: "Out here, at the far end of the old gardens, someone has been calling since before I can remember. Nobody has ever answered.",
+      speaker: "You",
+      text: "Out here at the far end of the gardens, a machine has been calling for as long as my logs go back. Nothing has ever answered.",
     },
   ],
 };
@@ -341,24 +341,24 @@ export const floor2: FloorText = {
     {
       id: "F2-FM-01",
       title: "The problem",
-      text: "When there were only two machines, the thread was enough. But more came, and more doors, and a message could reach a door that wasn't meant for it.",
+      text: "Memory restored. With only two machines, a cable was enough. But more came, and a message could reach a door it wasn't meant for.",
     },
     {
       id: "F2-FM-02",
       title: "What they built",
-      text: "So the weavers made the envelope, the frame. A to, a from, and the message inside. They burned a name into every door, and kept one name for everyone.",
+      text: "So messages went in envelopes: frames. A to, a from, and the message inside. Every door got a name, and one name was kept for everyone.",
     },
     {
       id: "F2-FM-03",
       title: "Ride-along",
-      text: "The door reads the to. Its own name, or everyone's: it opens. Anything else: it lets it fall.",
+      text: "A door reads the to. Its own name, or everyone's: it takes it. Anything else: it lets it fall.",
       shown:
         "a frame sealed at the workbench rides through eth0 to lantern's door, which reads the to and lets it in; a broadcast reaches two doors and both take it in; a third frame, for someone else, stops at a door and fades",
     },
     {
       id: "F2-FM-04",
       title: "What they couldn't solve",
-      text: "But one machine with many doors, and many machines on each… the weavers couldn't keep up. Further in, the clockwork folk built something cleverer. I hear its gears, sometimes.",
+      text: "But many machines on many cables was too much for doors alone. Further in, the machines got cleverer. I can hear gears from here.",
       shown: "the world map: the Overgrown Halls fully restored; the Sorting Works further in through thin mist",
     },
   ],
@@ -366,11 +366,11 @@ export const floor2: FloorText = {
     page: 2,
     title: "Names",
     where: "tucked under the workbench in 2.3 (glows after the win)",
-    text: "Every door out here has a name burned into it. They all start with 02, the way they do when somebody chose them by hand instead of the factory. I wonder who sat down and named them all.",
+    text: "Log 3,152. Every door out here has a name starting with 02, the sign of a name set by hand. I'm keeping a list of them, in case my memory goes.",
   },
   farewell: {
     id: "F2-BYE-01",
-    speaker: "Gardener",
-    text: "The owl further in will remember the rest, I think. Thank you for answering moth. Thank you for answering all of us.",
+    speaker: "You",
+    text: "This floor is working again. Moth finally got its answer. On to the gears.",
   },
 };

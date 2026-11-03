@@ -5,7 +5,7 @@
 export const memoryText = {
   /** Small labels drawn in a memory's picture. `{door}` and the like are filled by the scene. */
   scene: {
-    weavers: "the weavers",
+    weavers: "the builders",
     nothing: "nothing between them",
     thread: "a copper thread",
     name: "a name",
@@ -118,7 +118,7 @@ export const memoryText = {
   world: {
     title: "The Palace of a Thousand Doors",
     label:
-      "The Palace of a Thousand Doors on its hill, the Deep Network in its walls: every region and floor. {restored} of {total} floors restored.",
+      "The Palace of a Thousand Doors on its hill, its network in the walls: every region and floor. {restored} of {total} floors restored.",
     deeper: "The keep: further up, in the mist",
     turn: "Drag the palace, or use the arrow keys, to turn it.",
     floor: "Floor {n}",

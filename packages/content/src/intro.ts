@@ -1,5 +1,5 @@
 /**
- * The way in (gameplay/onboarding.md): the landing page, the short tour, and the gift of sight.
+ * The way in (gameplay/onboarding.md): the landing page, the short tour, and switching on the message view.
  * Plain modern voice (D2). The tour explains the game, never a networking idea (P-9).
  */
 
@@ -27,7 +27,7 @@ export const landing = {
     steps: [
       {
         title: "A network in ruins",
-        body: "Behind the gate stands a ruined palace, the Palace of a Thousand Doors, and it is really a computer network. Rooms are machines, doors are where cables plug in, and corridors are the cables.",
+        body: "You're a repair robot, waking up inside a ruined palace, the Palace of a Thousand Doors. It is really a computer network: rooms are machines, doors are where cables plug in, and corridors are the cables.",
       },
       {
         title: "Watch the messages",
@@ -73,12 +73,12 @@ export const tour = {
   cards: [
     {
       title: "Welcome to Wirelight",
-      body: "Beyond this gate stands a palace with a network running through its walls: machines that once talked to each other through cables of light. Now it's in ruins. That dark doorway leads to one of its silent corridors. Your job is to bring it all back.",
+      body: "You're a repair robot, and you've just switched back on. This palace has a network running through its walls: machines that once talked to each other through cables. Now it's dark and silent. That doorway leads to one of its corridors. Your job is to bring it all back.",
       target: "door",
     },
     {
-      title: "Someone tried before you",
-      body: "Long ago a Knight came up here to restore it. He never finished, but he left his tools, his notes, and his base: this room, the Observatory. When you're stuck, read his notes, like this one.",
+      title: "Your notes",
+      body: "You worked here before you shut down, and you left notes for yourself. This room, the observatory, is where you woke up. When you're stuck, read your notes, like this one.",
       target: "notes",
     },
     {
@@ -117,4 +117,4 @@ export const pathChoice = {
 } as const;
 
 /** The gift of sight (ONB-08..10): the Guardian's lines are the Prologue's voice lines P-GIFT-01…04. */
-export const sightGift = { accept: "Accept the sight" };
+export const sightGift = { accept: "Switch on message view" };

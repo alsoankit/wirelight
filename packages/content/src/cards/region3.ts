@@ -8,7 +8,7 @@ export const REGION_3_CARDS: Card[] = [
     title: "IP address",
     text: "Where a machine lives: its house address in the town, like 10.0.1.7.",
   },
-  { id: "register", floor: 5, title: "The register", text: "The Lamplighter's list of every house on the street." },
+  { id: "register", floor: 5, title: "The register", text: "The list of every house on the street." },
   {
     id: "address-slot",
     floor: 5,
@@ -19,8 +19,8 @@ export const REGION_3_CARDS: Card[] = [
   {
     id: "slate",
     floor: 6,
-    title: "The Slate",
-    text: "The Knight's tablet. It keeps every message you catch, labelled, and opens them one layer at a time.",
+    title: "The Scanner",
+    text: "Your scanner. It keeps every message you catch, labelled, and opens them one layer at a time.",
   },
   {
     id: "packet",

@@ -6,7 +6,7 @@ export const firstMessage: RoomText = {
   mission: "There's someone at the other end of this cable. Press Send and see what happens.",
   access: { lantern: "Not yet. Send your message first." },
   notes: [
-    "If you're reading this, you found my base. There's someone at the other end of that cable. I never got an answer. Maybe you will.",
+    "Note to self: there's someone at the other end of that cable. I sent a message and never got an answer. Try again when you wake up.",
   ],
   hints: [
     { text: "The big button is the only thing you need here." },
@@ -26,32 +26,32 @@ export const firstMessage: RoomText = {
       id: "P-MEM-01",
       title: "The Map",
       trigger: "the first time the Map opens (New path: automatic; otherwise a button)",
-      text: "This is the Map. I used it to watch the whole floor at once. Every light you see moving is a message. Go on, follow that one with your eyes.",
+      text: "This is my map: the whole floor at once. Every light moving on it is a message. I'll follow that one.",
       action: "hover the moving message",
     },
   ],
   guardian: [
     {
       q: "What is this place?",
-      a: "This was the Knight's room, long ago. He called it the Observatory. Now it's yours, I think.",
+      a: "The room I shut down in. It's a machine, like every room here. The palace calls it the observatory, so that's its name.",
     },
     {
       q: "What is that light in the corridor?",
-      a: "A message. Machines used to send them all the time. I remember the corridors full of them…",
+      a: "A message. Machines send them to each other along the cables. These corridors used to be full of them.",
     },
     {
       q: "Why is everything so dark?",
-      a: "The light went out a little at a time. Nobody was left who remembered how to keep it on.",
+      a: "The machines stopped passing messages, a little at a time, and nobody was left to fix them. Fixing them is my job.",
     },
     {
       q: "Who is at the other end?",
-      a: "Someone who has been waiting a long time to hear from you. Send something and see.",
+      a: "Another machine. Send something and see if it answers.",
     },
   ],
   building: {
     id: "P-BLD-01",
-    text: "I remember now… two machines, far apart, that wanted to talk. The first weavers built a passage between them and laid a copper thread along its floor. Whatever one machine said, the thread carried to the other.",
-    shown: "weavers laying the glowing cable; the corridor and both rooms light up on the world map",
+    text: "Two machines, far apart, needed to talk. So a cable was laid between them. Whatever one machine sends, the cable carries to the other.",
+    shown: "a glowing cable laid along a corridor; the corridor and both rooms light up on the map",
   },
   fieldGuide: [
     "Welcome to the palace",
@@ -67,22 +67,22 @@ export const firstMessage: RoomText = {
     "Keys at a glance",
   ],
   voice: [
-    { id: "P-GIFT-01", speaker: "Gardener", text: "Oh… you came. Welcome to the palace." },
+    { id: "P-GIFT-01", speaker: "You", text: "Power's back. I'm awake. How long was I switched off?" },
     {
       id: "P-GIFT-02",
-      speaker: "Gardener",
-      text: "I've watched over the Knight's Observatory since he left. I've been waiting a long time for someone like you.",
+      speaker: "You",
+      text: "This is the room I shut down in. Everything's dark, and the machines have stopped talking to each other.",
     },
     {
       id: "P-GIFT-03",
-      speaker: "Gardener",
-      text: "Most people can't see the messages that travel these cables. Let me give you something.",
+      speaker: "You",
+      text: "My message view is still off, so the messages on these cables are invisible to me. Switching it on.",
     },
     {
       id: "P-GIFT-04",
-      speaker: "Gardener",
-      text: "There. From now on you'll see them as small lights moving through the rooms and corridors. Watch them closely. Where they go, and where they stop, will tell you what's wrong.",
+      speaker: "You",
+      text: "There. Messages show up as small lights moving through the rooms and corridors. Where they go, and where they stop, will tell me what's wrong.",
     },
-    { id: "P-PATH-01", speaker: "Gardener", text: "Before we begin… how much do you already know?" },
+    { id: "P-PATH-01", speaker: "You", text: "Before I start: how much do I already know about networks?" },
   ],
 };

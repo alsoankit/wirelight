@@ -65,17 +65,17 @@ export const REGION_1_CARDS: Card[] = [
     title: "MAC address",
     text: "Every door has a name like 02:00:00:00:00:07. It's written on the plate, and it's how frames find the right door.",
   },
-  { id: "workbench", floor: 2, title: "Workbench", text: "The Knight's table for building a frame by hand." },
+  { id: "workbench", floor: 2, title: "Workbench", text: "A table for building a frame by hand." },
   {
     id: "messenger",
     floor: 2,
     title: "Messenger",
-    text: "A small automaton that sends the same message over and over, to the name on its card.",
+    text: "A small machine that sends the same message over and over, to the name on its card.",
   },
   {
     id: "capture-jar",
     floor: 2,
-    title: "Capture jar",
+    title: "Captures",
     text: "Catch a message in flight and you keep a copy to open and read. The message still goes on its way.",
   },
   {

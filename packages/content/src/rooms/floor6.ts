@@ -5,17 +5,18 @@ import type { FloorText, RoomText } from "./types";
 
 export const insideTheEnvelope: RoomText = {
   title: "Inside the Envelope",
-  mission:
-    "Lantern has been sending the same sealed letter since the day you met. The Knight finally found a way to open it.",
+  mission: "Lantern has been sending the same sealed letter since the day you met. Your Scanner can open it now.",
   access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
-  notes: ["Found this in the post office. Try it on lantern's letters."],
+  notes: ["Found this in the post office. Try it on lantern's messages."],
   hints: [
-    // The Slate is the button at the bottom left (it replaced the jar), not an object on the table.
-    { text: "The Knight left you a new tool: the Slate, at the bottom left. Open it." },
-    { text: "Catch one of lantern's sealed letters with the Slate." },
+    // The Scanner is the button at the bottom left (it replaced the jar), not an object on the table.
+    { text: "A new tool is online: the Scanner, at the bottom left. Open it." },
+    { text: "Catch one of lantern's sealed letters with the Scanner." },
     { text: "A frame can carry another envelope inside it: a packet.", codex: "packet" },
     { text: "Open a catch, then open what's inside the frame, then what's inside that." },
-    { text: "Catch a lantern announcement on the Slate and open it to the message layer. The key is in the message." },
+    {
+      text: "Catch a lantern announcement on the Scanner and open it to the message layer. The key is in the message.",
+    },
   ],
   detectors: {
     "frame-is-everything": {
@@ -34,10 +35,10 @@ export const insideTheEnvelope: RoomText = {
   memories: [
     {
       id: "F6-MEM-01",
-      title: "The Slate",
+      title: "The Scanner",
       trigger: "when picked up",
-      text: "I found this in the post office. It catches messages and keeps them in order, with labels. And look: you can open them all the way down.",
-      action: "catch one message with the Slate",
+      text: "My scanner works again. It catches messages and keeps them in order, with labels, and it can open them all the way down.",
+      action: "catch one message with the Scanner",
     },
   ],
   guardian: [
@@ -49,14 +50,14 @@ export const insideTheEnvelope: RoomText = {
       q: "Why does the packet say `.255`?",
       a: "That's the whole street at once. Everyone on it. Like the everyone name, but for houses.",
     },
-    { q: "Has this always been inside?", a: "Every one of them. Since the halls. You just couldn't open it yet." },
+    { q: "Has this always been inside?", a: "Every one of them, since the halls. You couldn't open it yet." },
   ],
-  fieldGuide: ["The Slate", "Envelopes inside envelopes"],
+  fieldGuide: ["The Scanner", "Envelopes inside envelopes"],
   voice: [
     {
       id: "F6-SEAL-01",
-      speaker: "Lamplighter",
-      text: "Oh… *that's* what we did. The house letter went inside the door letter. All this time.",
+      speaker: "You",
+      text: "So that's how it works. The house letter goes inside the door letter. It always did.",
     },
   ],
 };
@@ -109,11 +110,11 @@ export const whoHasThisAddress: RoomText = {
   guardian: [
     {
       q: "Why not just remember everyone's door?",
-      a: "We do! That's the ledger. But doors change, so the lines go stale, and we ask again.",
+      a: "They do: that's the neighbour ledger. But doors change, so its lines go stale, and the machine asks again.",
     },
     {
       q: "Why does everyone hear the question?",
-      a: "You don't know whose door it is yet, love. So you ask the whole street.",
+      a: "You don't know whose door it is yet. So you ask the whole street.",
     },
     {
       q: "What did that little question have to do with ping?",
@@ -124,8 +125,8 @@ export const whoHasThisAddress: RoomText = {
   voice: [
     {
       id: "F6-KEEP-01",
-      speaker: "keeper",
-      text: "I remember. Look it up. If it's not there, ask. Write it down. Wrap. Send.",
+      speaker: "You",
+      text: "It's awake. Its screen says: look it up. If it's not there, ask. Write it down. Wrap. Send.",
     },
   ],
 };
@@ -137,7 +138,7 @@ export const twoOfMe: RoomText = {
   notes: ["Register: lantern 10.0.1.7 · quill 10.0.1.12 · anvil 10.0.1.10."],
   hints: [
     { text: "Look at who each answer is *from*." },
-    { text: "Your Slate shows the door name on every reply. So does your ledger." },
+    { text: "Your Scanner shows the door name on every reply. So does your ledger." },
     { text: "Two houses can't share one address: the street can't tell them apart.", codex: "two-answers" },
     { text: "Find which door name isn't lantern's, find its house, and give it its own address." },
     {
@@ -170,8 +171,8 @@ export const twoOfMe: RoomText = {
     ],
   },
   guardian: [
-    { q: "Who is answering for lantern?", a: "Ask your Slate, love. Every answer carries the door it came from." },
-    { q: "Can two houses share an address?", a: "Two houses, one number? The post would never know where to go." },
+    { q: "Who is answering for lantern?", a: "Ask the Scanner. Every answer carries the door it came from." },
+    { q: "Can two houses share an address?", a: "Two houses, one number? Nobody would know where to deliver." },
   ],
 };
 
@@ -219,8 +220,8 @@ export const mixedUpLetters: RoomText = {
   voice: [
     {
       id: "F6-BOSS-01",
-      speaker: "Lamplighter",
-      text: "The post office. Every letter in town went through here, once. Now half of them go to the wrong door.",
+      speaker: "You",
+      text: "The post office. Every message in town used to go through here. Now half of them go to the wrong door.",
     },
   ],
 };
@@ -231,12 +232,12 @@ export const floor6: FloorText = {
     {
       id: "F6-FM-01",
       title: "The problem",
-      text: "We had our house addresses. But the owls' halls only understood door names. A house letter couldn't travel on its own.",
+      text: "Memory restored. Houses had addresses, but the halls only understood door names. A house letter couldn't travel on its own.",
     },
     {
       id: "F6-FM-02",
       title: "What they built",
-      text: "So we folded the house letter inside a door letter. And when we didn't know a neighbour's door, we asked the whole street, and wrote the answer in a ledger.",
+      text: "So the house letter was folded inside a door letter. And when a neighbour's door was unknown, the machine asked the whole street and wrote the answer in a ledger.",
     },
     {
       id: "F6-FM-03",
@@ -248,14 +249,14 @@ export const floor6: FloorText = {
     {
       id: "F6-FM-04",
       title: "What's next",
-      text: "But how does a house know which addresses are its neighbours, and which aren't? That was the street signs. Nearly there.",
+      text: "But how does a house know which addresses are its neighbours? Street signs. Nearly there.",
       shown: "the world map: Floor 7 in mist",
     },
   ],
   journal: {
     page: 6,
     title: "The little question",
-    where: "tucked into the Slate's cover in 6.2 (glows after the win)",
-    text: "Every time I wrote to a house, a tiny question flew out first. I asked the Lamplighter about it. She looked at me like I'd asked why people knock before they open a door.",
+    where: "tucked into the Scanner's cover in 6.2 (glows after the win)",
+    text: "Log 3,325. Every time I write to a house, a tiny question goes out first: who has this address? I used to think it was noise. It's the most important message on the street.",
   },
 };

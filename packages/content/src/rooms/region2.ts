@@ -11,18 +11,18 @@ import type { FloorText, RoomText } from "./types";
 export const region2Arrival: { id: string; speaker: string; text: string }[] = [
   {
     id: "R2-ARRIVE-01",
-    speaker: "owl",
-    text: "A visitor. Click, click. Forgive me, it's been a long time since anything moved in here.",
+    speaker: "You",
+    text: "Gears, iron, and a lot of doors. The Sorting Works.",
   },
   {
     id: "R2-ARRIVE-02",
-    speaker: "owl",
-    text: "The Gardener sent word you were coming. I'm the keeper of keepers in the Sorting Works. Or I was.",
+    speaker: "You",
+    text: "These halls sort messages between many machines at once. Or they did.",
   },
   {
     id: "R2-ARRIVE-03",
-    speaker: "owl",
-    text: "I remember this hall full of messages, every one going exactly where it should. How… I've forgotten. Perhaps you can help me remember.",
+    speaker: "You",
+    text: "My logs say this place was always busy. Now it's silent. Let's find out why.",
   },
 ];
 
@@ -79,39 +79,39 @@ const manyDoors: RoomText = {
       id: "F3-MEM-01",
       title: "The keeper",
       trigger: "on entering",
-      text: "Every machine has a keeper that decides where messages go. This one's asleep. Its desk still works, though. Try it yourself.",
+      text: "Every room has a keeper, the machine that decides where messages go. This one's asleep, but its desk still works. I can do its job by hand.",
       action: "press Remember on the waiting frame",
     },
   ],
   guardian: [
     {
       q: "What is this hall?",
-      a: "A sorting hall. Many doors, one keeper. Every frame came in one door and left by another. Which one… that was the clever part.",
+      a: "A sorting hall: many doors, one keeper. Every frame comes in one door and leaves by another. Choosing which one is the clever part.",
     },
     {
       q: "Why write down the from?",
-      a: "Hm. Whoever sends a frame must be behind the door it came in by. That seems… useful to remember.",
+      a: "Whoever sent a frame must be behind the door it came in by. That's worth writing down.",
     },
     {
       q: "What if the keeper doesn't know the to?",
-      a: "Then it can't choose. I think we sent it everywhere and let the doors sort it out.",
+      a: "Then it can't choose, so it sends the frame out of every other door and lets the doors sort it out.",
     },
     {
       q: "Why not send everything everywhere?",
-      a: "Imagine every machine reading every letter in the hall. Click. It would be terribly slow, and terribly nosy.",
+      a: "Every machine would read every message in the hall. Slow, and nosy.",
     },
   ],
   building: {
     id: "F3-BLD-01",
-    text: "Yes… the clockwork folk built halls with many doors, and set a keeper in the middle with a ledger. It wrote down every sender, and soon it knew the whole floor.",
-    shown: "brass keepers writing in ledgers; chutes sending frames to single doors",
+    text: "A hall with many doors needs a keeper in the middle with a list. It writes down every sender, and soon it knows where everyone is.",
+    shown: "keepers writing in their lists; frames sent to single doors",
   },
   fieldGuide: ["Switches and their keepers", "The MAC board"],
   voice: [
     {
       id: "F3-KEEP-01",
-      speaker: "keeper",
-      text: "I remember now. Read the from, write it down. Read the to, look it up. Known: one door. Unknown: every other door.",
+      speaker: "You",
+      text: "It's awake. Its screen says: read the from, write it down. Read the to, look it up. Known: one door. Unknown: every other door.",
     },
   ],
 };
@@ -163,24 +163,25 @@ const keepersMemory: RoomText = {
     },
     {
       q: "How do I make gate speak?",
-      a: "Most machines answer when someone calls out to everyone. I'm almost sure of it.",
+      a: "Most machines answer when someone calls out to everyone.",
     },
     {
       q: "Why does Linux say bridge?",
-      a: "An old word for a switch. Same job, older name. The clockwork folk used both.",
+      a: "Another word for a switch. Same job, older name.",
     },
   ],
   building: {
     id: "F3-BLD-02",
-    text: "We never told the keepers where anyone lived. Nobody had to. Every frame told them, just by arriving.",
-    shown: "a ledger filling itself line by line as frames arrive",
+    text: "Nobody tells a switch where anyone is. Every frame tells it, just by arriving.",
+    shown: "a list filling itself line by line as frames arrive",
   },
   fieldGuide: ["Reading a switch's memory", "Command book: bridge fdb"],
 };
 
 const findEveryone: RoomText = {
   title: "Find Everyone",
-  mission: "The Knight left three letters, one for each door of the hall. He only wrote down the doors, not the names.",
+  mission:
+    "You left three letters before you shut down, one for each door of the hall. You only wrote down the doors, not the names.",
   access: { ember: SEALED, thistle: SEALED, bell: SEALED },
   notes: [],
   hints: [
@@ -212,7 +213,7 @@ const findEveryone: RoomText = {
 
 const busyHall: RoomText = {
   title: "The Busy Hall",
-  mission: "The Knight's last letter to this hall never got an answer. Someone here is still waiting for it.",
+  mission: "Your last letter to this hall never got an answer. Something here is still waiting for it.",
   access: { compass: SEALED, beacon: SEALED, wren: SEALED },
   notes: [],
   hints: [
@@ -256,8 +257,8 @@ const busyHall: RoomText = {
   voice: [
     {
       id: "F3-BOSS-01",
-      speaker: "owl",
-      text: "This was the busiest hall in the Works. One letter here has been waiting longer than I have.",
+      speaker: "You",
+      text: "This was the busiest hall in the Works. One message here has been waiting longer than I was switched off.",
     },
   ],
 };
@@ -268,12 +269,12 @@ const floor3: FloorText = {
     {
       id: "F3-FM-01",
       title: "The problem",
-      text: "When the weavers' halls grew, every frame went to every door. Every machine read every letter. Everything slowed to a crawl.",
+      text: "Memory restored. As halls grew, every frame went to every door. Every machine read every message. Everything slowed to a crawl.",
     },
     {
       id: "F3-FM-02",
       title: "What they built",
-      text: "So we built the switch. A keeper at a desk, a ledger on the wall. Every frame tells it who sent it and which door it came by. It writes that down. Then it reads the to: known, one door. Unknown, every other door, just this once.",
+      text: "So the switch was built: a keeper with a list. Every frame tells it who sent it and which door it came by. It writes that down. Then it reads the to: known, one door. Unknown, every other door, just this once.",
     },
     {
       id: "F3-FM-03",
@@ -285,7 +286,7 @@ const floor3: FloorText = {
     {
       id: "F3-FM-04",
       title: "What's next",
-      text: "But a ledger can be wrong, you know. And a memory can be kept too long. I remember… something went very wrong, once.",
+      text: "But a list can be wrong, and a line can be kept too long. Something went very wrong here once. That part is still missing.",
       shown: "the world map: the hall glows; Floor 4 still in mist",
     },
   ],
@@ -293,7 +294,7 @@ const floor3: FloorText = {
     page: 3,
     title: "The sorting hall",
     where: "in the dust under the keeper's desk in 3.2 (glows after the win)",
-    text: "The keeper in here was asleep when I found it. I sorted the first few letters myself, the way the ledger said. Then it opened one eye and took the pen out of my hand. I think it was embarrassed.",
+    text: "Log 3,201. The keeper in the sorting hall stopped. I sorted frames by hand, the way its list said, until it restarted. Note to self: the desk works even when the keeper doesn't.",
   },
 };
 
@@ -344,25 +345,25 @@ const pinnedMemory: RoomText = {
       id: "F4-MEM-01",
       title: "Time",
       trigger: "first time the time control is needed",
-      text: "You can speed time up. The network doesn't mind; it just gets there faster. Watch the hall's memory while you do.",
+      text: "I can speed time up. The network doesn't mind; things just happen sooner. I'll watch the hall's memory while it runs fast.",
       action: "set time to fast, then back to normal",
     },
   ],
   guardian: [
     {
       q: "Why do memories fade?",
-      a: "Machines move. If the keeper never forgot, it would keep sending to doors where nobody lives anymore. Forgetting the quiet ones keeps the ledger true.",
+      a: "Machines move. If the keeper never forgot, it would keep sending to doors where nobody is anymore. Forgetting the quiet ones keeps its list true.",
     },
-    { q: "How long does it remember?", a: "Five minutes of silence, I believe. Then the line fades." },
+    { q: "How long does it remember?", a: "Five minutes of silence. Then the line goes." },
     {
       q: "Why does lantern's line never fade?",
-      a: "Somebody pinned it. A pinned line never fades. That was the whole point of pinning it… and the whole trouble, too.",
+      a: "Somebody pinned it. A pinned line never goes. That's the point of pinning it, and the trouble too.",
     },
   ],
   building: {
     id: "F4-BLD-01",
-    text: "We made the ledgers forget on purpose. Ink that fades, slowly, unless you keep writing it. A few proud keepers pinned their favourite lines in brass… we should have stopped them.",
-    shown: "ink fading line by line; one line in brass that doesn't",
+    text: "Switches forget on purpose: a line goes unless it keeps being written. Pinned lines never go, and that's how they get stale.",
+    shown: "lines fading one by one; one pinned line that doesn't",
   },
   fieldGuide: ["Time", "Memories that fade", "Command book: bridge fdb del"],
 };
@@ -408,12 +409,12 @@ const whoHasTheKey: RoomText = {
     },
     {
       q: "How far does it go, then?",
-      a: "As far as switches go. Everything joined by switches hears it. That's one… neighbourhood? We had a word. I'll remember.",
+      a: "As far as switches go. Everything joined by switches hears it, and that has a name you'll learn soon.",
     },
   ],
   building: {
     id: "F4-BLD-02",
-    text: "The halls grew, so we joined them, hall to hall, with spans. A frame could go anywhere in the Works now. So could every broadcast.",
+    text: "Halls grew, so they were joined hall to hall. A frame could go anywhere in the Works now, and so could every broadcast.",
     shown: "halls joined by spans; a broadcast spreading through all of them",
   },
 };
@@ -421,7 +422,7 @@ const whoHasTheKey: RoomText = {
 const spareCable: RoomText = {
   title: "The Spare Cable",
   mission:
-    "The Knight left a spare cable between the two halls, in case the first one ever broke. Plug it in, then get a message to anvil.",
+    "Someone left a spare cable between the two halls, in case the first one ever broke. Plug it in, then get a message to anvil.",
   access: { compass: SEALED, beacon: SEALED, anvil: SEALED, bell: SEALED },
   notes: ["Left a spare cable between the halls, just in case. Two cables are safer than one. Surely."],
   hints: [
@@ -438,7 +439,7 @@ const spareCable: RoomText = {
   ],
   detectors: {
     "message-in-the-storm": {
-      note: "In all those copies, a letter can get lost or sent the wrong way. Let the halls settle first.",
+      note: "In all those copies, a message can get lost or sent the wrong way. Let the halls settle first.",
       tried: "You wrote to anvil while the copies were still circling.",
     },
     "loop-again": {
@@ -473,13 +474,13 @@ const spareCable: RoomText = {
     },
     {
       q: "So a spare cable is a bad idea?",
-      a: "It shouldn't be. There was a way to keep one safely, I'm sure of it. Something about the halls talking to each other… It's gone again.",
+      a: "Not on its own. There's a way to keep one safely, where the halls talk to each other. I haven't found it yet.",
     },
   ],
   building: {
     id: "F4-BLD-03",
-    text: "Someone always wanted a second cable. In case the first one breaks, they said. Nobody asked what a hall does with a message that comes back to it.",
-    shown: "an old plan of two halls; a careful hand draws a second span beside the first",
+    text: "Someone always wants a second cable, in case the first one breaks. Nobody asked what a hall does with a message that comes back to it.",
+    shown: "an old plan of two halls; a second cable drawn beside the first",
   },
   fieldGuide: ["Loops and storms"],
 };
@@ -532,8 +533,8 @@ const storm: RoomText = {
   voice: [
     {
       id: "F4-BOSS-01",
-      speaker: "owl",
-      text: "I remember this now. The storm. It's why the Works went quiet. Listen. It's still going.",
+      speaker: "You",
+      text: "So this is why the Works went quiet: a storm of copies. It's still going.",
     },
   ],
 };
@@ -544,12 +545,12 @@ const floor4: FloorText = {
     {
       id: "F4-FM-01",
       title: "The problem",
-      text: "Machines moved, so we taught the ledgers to forget. Halls grew, so we joined them. And then someone joined two halls twice, to be safe.",
+      text: "Memory restored. Machines moved, so the lists learned to forget. Halls grew, so they were joined. Then someone joined two halls twice, to be safe.",
     },
     {
       id: "F4-FM-02",
       title: "What happened",
-      text: "One broadcast went round, and round. Each switch did exactly what it should, and together they drowned the Works.",
+      text: "One broadcast went round and round. Each switch did exactly what it should, and together they drowned the Works.",
     },
     {
       id: "F4-FM-03",
@@ -561,7 +562,7 @@ const floor4: FloorText = {
     {
       id: "F4-FM-04",
       title: "What they did, and what's next",
-      text: "Afterwards, the clockwork folk taught the switches to talk to each other, so they'd switch off any path that made a circle. But the halls had grown too big for names alone. Up the hill, the lantern people gave every machine an address…",
+      text: "Later the switches learned to talk to each other and switch off any path that made a circle. But the halls had grown too big for door names alone. Up the hill, every machine got an address.",
       shown:
         "the world map: the Sorting Works fully restored; the Lantern Town appears through thin mist on the terraces above",
     },
@@ -570,12 +571,12 @@ const floor4: FloorText = {
     page: 4,
     title: "Two of everything",
     where: "in the restored storm hall (glows after the win)",
-    text: "Someone in this hall was very careful. Two cables between every pair of halls, in case one broke. I think being careful is what killed it.",
+    text: "Log 3,260. Someone added a second cable between every pair of halls, in case one broke. The Works went silent within the hour. Power at 41%.",
   },
   farewell: {
     id: "F4-BYE-01",
-    speaker: "owl",
-    text: "Thank you. The Works can hear themselves think again. The Lamplighter up the hill will be glad of you. She always did like company.",
+    speaker: "You",
+    text: "The Works can hear themselves again. Next: the town up the hill.",
   },
 };
 

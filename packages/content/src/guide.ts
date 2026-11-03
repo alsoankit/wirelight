@@ -70,13 +70,13 @@ export const guide: GuideTopic[] = [
         { target: "plate", label: "A plate beside every door" },
         { target: "keeper", label: "The keeper, in the middle of the room" },
         { target: "glass", label: "The planning table (your room only)" },
-        { target: "workbench", label: "The Knight's workbench (some rooms)" },
+        { target: "workbench", label: "The workbench (some rooms)" },
       ],
     },
     body: [
       "You see each room from above, with the front wall cut away so the whole room fits on screen. Every room of the same kind is laid out the same way, so you only have to learn it once.",
       "Doors are archways in the back and left walls, and each one has a plate beside it. The keeper, a hooded figure with a lantern, stands in the middle of the room.",
-      "Your own machine is the Observatory, the Knight's old base. It has a few extra things: a planning table, and in some rooms the Knight's workbench and his messenger.",
+      "Your own machine is the observatory, the room you woke up in. It has a few extra things: a planning table, and in some rooms a workbench and a messenger.",
     ],
   },
   {
@@ -127,7 +127,7 @@ export const guide: GuideTopic[] = [
       ],
     },
     body: [
-      "Messages are small cyan lights. You can see them because the Guardian gave you the sight when you arrived. A longer message makes a bigger light, and some kinds of message have their own shape.",
+      "Messages are small cyan lights. You can see them because your message view is on. A longer message makes a bigger light, and some kinds of message have their own shape.",
       "Point at a message to read a one-line description of it. Parts you haven't learned about yet show as sealed.",
       "Corridors show how their cable is doing. Dark means nothing has made it there and back yet. Lit means a message crossed and an answer came back. Broken (dashed and cracked) means the cable isn't working.",
       "When a message is lost, it leaves a faded ✕ at the door where it stopped. The mark never tells you why. Click it to watch that message's journey again.",
@@ -199,15 +199,15 @@ export const guide: GuideTopic[] = [
   {
     id: "stuck",
     title: "When you're stuck",
-    blurb: "The Knight's notes and the Guardian's questions",
+    blurb: "Notes and questions",
     visual: {
       kind: "notes",
       note: "Your message reached their door. They looked at it and decided it wasn't for them. Whose name did you write on it?",
-      caption: "A Knight's note reacting to something you tried",
+      caption: "A note reacting to something you tried",
     },
     body: [
-      "Long ago a Knight explored this palace and left notes behind. The Knight's notes button in the top bar shows how many hints you've opened out of five, and glows when a new one is ready. Some of his notes react to what you just tried.",
-      "Ask opens the Guardian's questions: a few things it still remembers about what's in front of you. It explains, but never gives the answer away.",
+      "You left notes for yourself before you shut down. The Notes button in the top bar shows how many hints you've opened out of five, and glows when a new one is ready. Some notes react to what you just tried.",
+      "Ask opens a few questions about what's in front of you, with plain answers. They explain, but never give the answer away.",
       "Getting something wrong costs nothing. Often it's the fastest way to see what's going on.",
     ],
   },
@@ -228,17 +228,17 @@ export const guide: GuideTopic[] = [
     body: [
       "When a room works again, an answer comes back to you carrying the room's key. The key goes on your keyring.",
       "Then the debrief: what happened, the new words you met (each with a plain meaning), and a kind line about each thing you tried along the way.",
-      "In the first regions you can also see how the room's builders made it. After a floor's last room, its Guardian remembers the whole floor working. Both play on the Map, and the Codex keeps them to watch again.",
+      "In the first regions you can also see why each room is built the way it is. After a floor's last room, your memory of the whole floor working comes back. Both play on the Map, and the Notebook keeps them to watch again.",
     ],
   },
   {
     id: "menu",
     title: "The menu",
-    blurb: "The palace, the Codex, this guide and more",
+    blurb: "The palace, the Notebook, this guide and more",
     body: [
       "Press [[M]] or click Menu to open it.",
       "The palace tab lists every floor and room, with what you've cleared. You can play any cleared room again from here.",
-      "The Codex keeps everything you've found: objects, the words you've learned, the Command book, memories and journal pages. The Keyring shows every key you've won.",
+      "The Notebook keeps everything you've found: objects, the words you've learned, the Command book, memories and log pages. The Keyring shows every key you've won.",
     ],
   },
   {
@@ -306,7 +306,7 @@ export const guide: GuideTopic[] = [
     },
     from: "f2.first-light",
     body: [
-      "The Knight's workbench builds a frame by hand: the envelope a message travels in across a cable. Write who it's for, add a message, then seal it and send it.",
+      "The workbench builds a frame by hand: the envelope a message travels in across a cable. Write who it's for, add a message, then seal it and send it.",
       "The bench keeps what you wrote, so you can come back and change it.",
     ],
   },
@@ -329,21 +329,21 @@ export const guide: GuideTopic[] = [
   {
     id: "catching",
     title: "Catching and opening messages",
-    blurb: "The capture jar",
+    blurb: "Captures",
     from: "f2.wrong-name",
     body: [
       "Point at a moving message and time slows right down. Click it to keep a copy. The message itself carries on as if nothing happened.",
-      "Your copies go into the capture jar. Open the jar and open a catch to read it one layer at a time, from the outside in. Parts you haven't learned to open yet stay sealed.",
-      "The jar belongs to the room you're in: it keeps its catches when you reset the room, and empties when you move on to another one.",
+      "Your copies go into Captures. Open Captures and open a catch to read it one layer at a time, from the outside in. Parts you haven't learned to open yet stay sealed.",
+      "Captures belong to the room you're in: it keeps its catches when you reset the room, and empties when you move on to another one.",
     ],
   },
   {
     id: "messenger",
     title: "The messenger and its card",
-    blurb: "The Knight's small brass automaton",
+    blurb: "A small machine that sends messages",
     from: "f2.wrong-name",
     body: [
-      "The messenger is a small brass automaton the Knight left in the Observatory. It holds an address card, and it sends a message to whatever is written on the card, again and again.",
+      "The messenger is a small machine in the observatory. It holds an address card, and it sends a message to whatever is written on the card, again and again.",
       "Click the messenger's card to read it, or to write something new on it. The messenger uses the new card from its next message on.",
     ],
   },
@@ -373,7 +373,7 @@ export const guide: GuideTopic[] = [
     },
     from: "f2.lights-out",
     body: [
-      "The Guardian's second gift is the voice: the console, every machine's command line. Press [[`]] (the key above Tab) to open or close it. Commands run on the machine whose room you're in. The Map has no console.",
+      "Your console lets you type commands to any machine: its command line. Press [[`]] (the key above Tab) to open or close it. Commands run on the machine whose room you're in. The Map has no console.",
       "[[Tab]] finishes a command or name you've started. [[↑]] and [[↓]] bring back earlier commands. [[Ctrl]]+[[C]] stops a command that keeps on running. Type help to list what you can use, and man and a command's name to read about it.",
       "When you click to do something, the console shows the real command that click ran, marked with ↳.",
       "Commands that start with lab are Wirelight's own tools, and show in violet. Everything else works the same on a real Linux machine. When a command fails, a dim line under the error says what it means.",
@@ -436,13 +436,13 @@ export const guide: GuideTopic[] = [
   },
   {
     id: "slate",
-    title: "The Slate",
-    blurb: "The Knight's tablet for catching messages",
+    title: "The Scanner",
+    blurb: "Your tool for catching messages",
     from: "f6.inside-the-envelope",
     body: [
-      "The Slate replaces the capture jar. Press Catch the next message and the next one that passes is copied onto it. You can choose to catch only messages from one machine.",
+      "The Scanner replaces Captures. Press Catch the next message and the next one that passes is copied onto it. You can choose to catch only messages from one machine.",
       "Open a catch to peel it one layer at a time, from the outside in. Every field shows its real name and value.",
-      "The Slate only reads. It never changes anything.",
+      "The Scanner only reads. It never changes anything.",
     ],
   },
   {
@@ -500,21 +500,21 @@ export const guide: GuideTopic[] = [
   },
   {
     id: "slate-capture",
-    title: "The Slate: Capture at a door",
+    title: "The Scanner: Capture at a door",
     blurb: "Listening to everything that crosses a door",
     from: "f8.no-way-back",
     body: [
-      "The Slate can now listen at a door of the room you're in. Choose Capture at a door, pick the door, and press Start. Every message that crosses it is written down until you press Stop.",
+      "The Scanner can now listen at a door of the room you're in. Choose Capture at a door, pick the door, and press Start. Every message that crosses it is written down until you press Stop.",
       "It runs tcpdump, the real tool, so what you see is what a real machine would print.",
     ],
   },
   {
     id: "slate-trace",
-    title: "The Slate: Trace and Compare",
+    title: "The Scanner: Trace and Compare",
     blurb: "Following one message, and comparing two catches",
     from: "f9.two-envelopes",
     body: [
-      "Trace my next packet tags the next one you send. It's caught at every machine it passes through, so you can follow its whole journey on the Slate.",
+      "Trace my next packet tags the next one you send. It's caught at every machine it passes through, so you can follow its whole journey on the Scanner.",
       "Compare puts two catches side by side and marks every field that changed between them.",
     ],
   },

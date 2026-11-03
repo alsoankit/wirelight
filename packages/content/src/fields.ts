@@ -28,15 +28,15 @@ export const fields = {
     text: "There's more in here. You'll learn to open it later.",
   },
   jar: {
-    title: "Capture jar",
+    title: "Captures",
     empty: "Nothing caught yet. Click a message as it passes to catch a copy.",
     hint: "Catches stay here while you're in this room, even after a reset.",
     open: "Open",
-    back: "Back to the jar",
+    back: "Back to Captures",
   },
   card: {
     title: "The address card",
-    about: "The Knight's messenger sends to whatever address is written here, every few seconds.",
+    about: "The messenger sends to whatever address is written here, every few seconds.",
     to: "Sends to",
     every: "Every",
     message: "Message",

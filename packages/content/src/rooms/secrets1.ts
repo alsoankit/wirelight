@@ -8,7 +8,7 @@ export const why48Bits: RoomText = {
   title: "Why 48 Bits?",
   mission: "Behind a narrow door in the corridor, one machine still wears its maker's name. Get it to answer you.",
   access: { relic: "Sealed. It answers what's sent to it, by name." },
-  notes: ["Found a door out here that nobody named by hand. Its name doesn't start with 02. Somebody made this one."],
+  notes: ["Found a door out here that nobody named by hand. Its name doesn't start with 02. A factory made this one."],
   hints: [
     { text: "You don't know its name yet. How did you learn quill's?" },
     { text: "Call everyone out of the door the relic is behind, then read who answered." },
@@ -35,11 +35,11 @@ export const why48Bits: RoomText = {
   guardian: [
     {
       q: "Who made this door?",
-      a: "Not the weavers. Someone far away, who made many doors and burned their mark into each one.",
+      a: "A factory. Factories burn a name into every door they make, and part of it says which factory.",
     },
     {
       q: "Why do our names start with 02?",
-      a: "The weavers chose them by hand. That little 02 says so, to anyone who reads it.",
+      a: "They were chosen by hand. That 02 says so, to anyone who reads it.",
     },
   ],
 };

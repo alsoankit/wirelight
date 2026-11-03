@@ -27,7 +27,7 @@ export const sameStreet: RoomText = {
       tried: "You moved onto the right street, but with a different `/` from everyone else's.",
     },
     "take-lanterns-house": {
-      note: "That's lantern's house. Two houses, one address: remember?",
+      note: "That's lantern's house. Two houses, one address doesn't work.",
       tried: "You took lantern's address for your own house.",
     },
     "ping-the-lane": {
@@ -57,19 +57,19 @@ export const sameStreet: RoomText = {
     },
     {
       q: "What does `/24` count?",
-      a: "Bits, if you want the long answer. There's a little room in town that tells it. The short answer: three numbers of street, one of house.",
+      a: "Bits, for the long answer. The short answer: three numbers of street, one of house.",
     },
     {
       q: "Could I be on two streets?",
-      a: "A door can have more than one address, yes. But let's keep you in one house for now.",
+      a: "A door can have more than one address. One is enough here.",
     },
   ],
   fieldGuide: ["Streets and house numbers", "Plates (street colours)"],
   voice: [
     {
       id: "F7-SIGN-01",
-      speaker: "Lamplighter",
-      text: "Here's what that `/24` means, love. An address is four numbers. The `/24` says the first three of them are the street, and the last one is the house. So `10.0.1.7/24` lives on street `10.0.1` at house number 7. You're on `10.0.2`: a different street altogether.",
+      speaker: "You",
+      text: "So that's what the `/24` means. An address is four numbers. The `/24` says the first three are the street, and the last one is the house. So `10.0.1.7/24` is on street `10.0.1` at house number 7. I'm on `10.0.2`: a different street altogether.",
     },
   ],
 };
@@ -83,7 +83,7 @@ export const askForAnAddress: RoomText = {
     anvil: HOUSE_LOCKED,
     bell: HOUSE_LOCKED,
   },
-  notes: ["Don't guess numbers, love. Ask the registry."],
+  notes: ["Don't guess numbers. Ask the registry."],
   hints: [
     { text: "Don't guess. Someone keeps track of free addresses." },
     { text: "The registry hands them out, if you ask." },
@@ -116,7 +116,7 @@ export const askForAnAddress: RoomText = {
     },
     {
       q: "Why only a loan?",
-      a: "Folk move away. If addresses were given forever, the registry would run out of numbers.",
+      a: "Machines leave. If addresses were given forever, the registry would run out of numbers.",
     },
     {
       q: "What else does the registry give?",
@@ -128,7 +128,7 @@ export const askForAnAddress: RoomText = {
 
 export const census: RoomText = {
   title: "The Census",
-  mission: "The Lamplighter is taking the census, the first in a hundred years. Every house on the square must answer.",
+  mission: "The town is taking a census, the first in years. Every house on the square must answer.",
   access: { lantern: HOUSE_LOCKED, quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED, registry: HOUSE_LOCKED },
   notes: ["Census: lantern .7 · quill .12 · anvil .10 · bell .18 · moth .14"],
   hints: [
@@ -175,8 +175,8 @@ export const census: RoomText = {
   voice: [
     {
       id: "F7-BOSS-01",
-      speaker: "Lamplighter",
-      text: "A census! Every house, every number, every lamp. I haven't had a full count since… well. Since before I forgot how to count them.",
+      speaker: "You",
+      text: "A census: every house, every number. My last full count is years old.",
     },
   ],
 };
@@ -187,12 +187,12 @@ export const floor7: FloorText = {
     {
       id: "F7-FM-01",
       title: "The problem",
-      text: "The town grew and grew. If every house asked the whole town every question, nobody would ever sleep.",
+      text: "Memory restored. The town kept growing. If every house asked the whole town every question, nothing else would get through.",
     },
     {
       id: "F7-FM-02",
       title: "What they built",
-      text: "So we built streets. A house talks directly only to its own street, and the street sign says where the street ends. And because people kept guessing numbers and taking each other's, we opened the registry.",
+      text: "So the town was split into streets. A house talks directly only to its own street, and its street sign says where the street ends. And because machines kept guessing numbers and taking each other's, the registry opened.",
     },
     {
       id: "F7-FM-03",
@@ -204,7 +204,7 @@ export const floor7: FloorText = {
     {
       id: "F7-FM-04",
       title: "What's next",
-      text: "But other streets… to reach them you need someone at the crossing who knows the way. The cathedral folk above built the crossings. A stone warden watches them, I think. Mind you, she doesn't talk much.",
+      text: "Other streets need someone at the crossing who knows the way. The crossings are further up, in the cathedral.",
       shown: "the world map: the Lantern Town fully lit; the Cathedral of Crossings rising through mist above",
     },
   ],
@@ -212,11 +212,11 @@ export const floor7: FloorText = {
     page: 7,
     title: "The registry",
     where: "in the registry's room in 7.2",
-    text: "Spent an hour guessing addresses before the Lamplighter took pity on me and pointed at the registry. It just… gives you one. Politely. On loan.",
+    text: "Log 3,351. Spent an hour guessing addresses before I remembered the registry. It gives you one. On loan. Power at 22%.",
   },
   farewell: {
     id: "F7-BYE-01",
-    speaker: "Lamplighter",
-    text: "Look at them all. Every lamp. Off you go, love. And come back and visit an old woman sometime.",
+    speaker: "You",
+    text: "Every lamp in town is lit. On to the cathedral.",
   },
 };

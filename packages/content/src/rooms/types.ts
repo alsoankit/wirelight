@@ -10,7 +10,7 @@ export interface RoomText {
   mission: string;
   /** The Knight's notes found in the room. */
   notes: string[];
-  /** Exactly five; the third (the idea) links to a Codex entry. */
+  /** Exactly five; the third (the idea) links to a Notebook entry. */
   hints: [Hint, Hint, Hint, Hint, Hint];
   /** For each of the room's detectors, by id: the Knight's note when it fires, and one line for the debrief. */
   detectors: Record<string, { note: string; tried: string }>;
@@ -26,7 +26,7 @@ export interface RoomText {
   building?: { id: string; text: string; shown: string };
   /** Field Guide topics this room opens. */
   fieldGuide?: string[];
-  /** Other voiced lines (a boss introduction, the gift of the voice, a navigator…), by id. */
+  /** Other voiced lines (a boss introduction, the gift of the voice, a keeper…), by id. */
   voice?: { id: string; speaker: string; text: string }[];
 }
 

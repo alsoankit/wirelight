@@ -14,10 +14,10 @@ export interface FloorInfo {
 }
 
 export const regions: Record<number, RegionInfo> = {
-  1: { n: 1, name: "The Overgrown Halls", guardian: "the Gardener" },
-  2: { n: 2, name: "The Sorting Works", guardian: "the clockwork owl" },
-  3: { n: 3, name: "The Lantern Town", guardian: "the Lamplighter" },
-  4: { n: 4, name: "The Cathedral of Crossings", guardian: "the stone warden" },
+  1: { n: 1, name: "The Overgrown Halls", guardian: "you" },
+  2: { n: 2, name: "The Sorting Works", guardian: "you" },
+  3: { n: 3, name: "The Lantern Town", guardian: "you" },
+  4: { n: 4, name: "The Cathedral of Crossings", guardian: "you" },
 };
 
 export const floors: Record<number, FloorInfo> = {
@@ -35,5 +35,5 @@ export const floors: Record<number, FloorInfo> = {
 
 export const lore = {
   intro:
-    "Long ago a Knight walked these halls and kept them lit. Then the light went out, one corridor at a time. The Knight left notes for whoever came next. That's you.",
+    "You are a repair robot. You've just switched back on in a palace whose machines stopped talking to each other years ago. Getting them talking again is your job.",
 };

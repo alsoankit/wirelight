@@ -8,7 +8,7 @@ export const town = {
   register: {
     /** The label on the register board in the square. */
     name: "Register",
-    title: "The Lamplighter's register",
+    title: "The street register",
     about: "Every house on the street, and its address.",
     house: "House",
     address: "Address",

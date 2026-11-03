@@ -45,7 +45,7 @@ export const REGION_4_COMMANDS: Record<string, CommandMemory> = {
     id: "CMD-09",
     command: "tcpdump",
     room: "f8.no-way-back",
-    intro: "Listen at a door and print every message that passes. The Slate's Capture button does exactly this.",
+    intro: "Listen at a door and print every message that passes. The Scanner's Capture button does exactly this.",
     anatomy: [
       { word: "tcpdump", role: "tool", meaning: "listen at a door and print every message that passes" },
       { word: "-n", role: "how", meaning: "show numbers, don't look up names" },
@@ -77,7 +77,7 @@ export const REGION_4_COMMANDS: Record<string, CommandMemory> = {
       ],
       dimmed: "The first two lines, and id and length: ignore for now.",
     },
-    action: { say: "Press Capture on the Slate (or type it) at your own door.", type: "tcpdump -n -i eth0" },
+    action: { say: "Press Capture on the Scanner (or type it) at your own door.", type: "tcpdump -n -i eth0" },
   },
   "CMD-10": {
     id: "CMD-10",

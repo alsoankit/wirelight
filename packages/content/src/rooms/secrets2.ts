@@ -11,7 +11,7 @@ export const peacekeeper: RoomText = {
     "The halls are joined twice again, and the storm is back. Get them to keep the peace, then pull the cable they rely on and let the spare take over.",
   access: { compass: SEALED, beacon: SEALED, anvil: SEALED, bell: SEALED, wren: SEALED },
   notes: [
-    "Found it in the old plans. The halls used to keep the peace themselves: they talked, and held one door shut so nothing could go round. The switch for it is on each hall's br0, and it's off.",
+    "Found it in the old plans. The halls can keep the peace themselves: they talk, and hold one door shut so nothing goes round. The switch for it is on each hall's br0, and it's off.",
   ],
   hints: [
     { text: "Each hall has a peacekeeper, switched off. It lives on br0, the part of the hall that joins its doors." },

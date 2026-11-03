@@ -12,7 +12,7 @@ export const REGION_4_CARDS: Card[] = [
   {
     id: "navigator",
     floor: 8,
-    title: "Navigator",
+    title: "Crossing keeper",
     text: "The router's keeper. It reads where each packet is going and sends it the right way.",
   },
   {
@@ -37,10 +37,10 @@ export const REGION_4_CARDS: Card[] = [
     id: "capture",
     floor: 8,
     title: "Capture",
-    text: "The Slate can listen at a door and catch everything that passes, labelled, until you stop.",
+    text: "The Scanner can listen at a door and catch everything that passes, labelled, until you stop.",
   },
   {
-    // 8.4's hint 3 links it (floors/floor-8.md: "Codex: Return path"); the spec gives it no card text,
+    // 8.4's hint 3 links it (floors/floor-8.md: "Notebook: Return path"); the spec gives it no card text,
     // so it's written from the debrief's meaning, and found through the hint rather than on arrival.
     id: "return-path",
     floor: 8,
@@ -50,15 +50,15 @@ export const REGION_4_CARDS: Card[] = [
   {
     id: "lectern",
     floor: 8,
-    title: "Lectern",
-    text: "Where packets wait for the navigator to decide which way they go.",
+    title: "Keeper's desk",
+    text: "Where packets wait for the keeper to decide which way they go.",
   },
   // Floor 9 · The Journey
   {
     id: "tracer",
     floor: 9,
     title: "Tracer",
-    text: "Tag one packet and the Slate catches it at every door it passes.",
+    text: "Tag one packet and the Scanner catches it at every door it passes.",
   },
   {
     id: "compare",

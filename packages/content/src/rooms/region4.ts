@@ -27,14 +27,18 @@ type Line = { id: string; speaker: string; text: string };
  * a tall winged statue, turns its head as you enter. Short, calm sentences, never unkind.
  */
 export const region4Arrival: { guardian: string; lines: Line[] } = {
-  guardian: "stone warden",
+  guardian: "you",
   lines: [
-    { id: "R4-ARRIVE-01", speaker: "stone warden", text: "…You came up through the town." },
-    { id: "R4-ARRIVE-02", speaker: "stone warden", text: "I keep the crossings. Streets meet here. Or they did." },
+    { id: "R4-ARRIVE-01", speaker: "You", text: "Up through the town, and into the cathedral." },
+    {
+      id: "R4-ARRIVE-02",
+      speaker: "You",
+      text: "This is where the streets meet: the crossings. Or where they used to.",
+    },
     {
       id: "R4-ARRIVE-03",
-      speaker: "stone warden",
-      text: "I don't remember how. I remember that it mattered more than anything.",
+      speaker: "You",
+      text: "If streets can't reach each other, the whole palace is just islands. Let's open the way.",
     },
   ],
 };
@@ -45,17 +49,17 @@ export const firstReleaseEnding: {
   card: { text: string; continue: string; next: string };
 } = {
   lines: [
-    { id: "END1-01", speaker: "stone warden", text: "There it is. I remember now." },
-    { id: "END1-02", speaker: "stone warden", text: "Thank you." },
-    { id: "END1-03", speaker: "Gardener", text: "You answered us all." },
+    { id: "END1-01", speaker: "You", text: "There it is: light all the way up to the high window." },
+    { id: "END1-02", speaker: "You", text: "My last log said I couldn't fix this. I just did." },
+    { id: "END1-03", speaker: "You", text: "Every machine from the gardens to the cathedral is talking again." },
     {
       id: "END1-04",
-      speaker: "Knight",
-      text: "If you've read this far, you've done more than I did. I'm further up. Come and find me.",
+      speaker: "You",
+      text: "My old logs stop at the foot of the stair. That's where I'm going next.",
     },
   ],
   card: {
-    text: "You've restored the first four regions of the Deep Network.",
+    text: "You've restored the first four regions of the palace.",
     continue: "Continue exploring",
     next: "What's next",
   },

@@ -53,8 +53,8 @@ export function keeperSays(d: Decision, reason?: DropReason, name?: (mac: string
 export const voice = {
   keeper: {
     name: "Keeper",
-    /** In the Cathedral (Region 4) the keeper is the navigator, at its lectern (region-4 brief). */
-    navigator: "Navigator",
+    /** In the Cathedral (Region 4) the keeper is the keeper, at its desk (region-4 brief). */
+    navigator: "Keeper",
     title: "The keeper",
     about: "Ask it about something it handled. It tells you exactly what it did, and why.",
     idle: "Nothing has arrived yet.",
@@ -116,8 +116,8 @@ export const voice = {
   /** A keeper's desk in hand mode (0042): what waits, and the keeper's job, step by step. */
   desk: {
     name: "Keeper's desk",
-    /** Region 4's desk is the navigator's lectern. */
-    lecternName: "Lectern",
+    /** Region 4's desk is the keeper's desk. */
+    lecternName: "Keeper's desk",
     title: "The keeper's desk",
     asleep: "The keeper has forgotten its job. Messages wait here until you do it.",
     empty: "Nothing is waiting.",
@@ -133,12 +133,12 @@ export const voice = {
     go: "Send",
     awake: "The keeper remembers its job now.",
     close: "Close",
-    /** The router's lectern (8.5): the navigator remembers every step, but isn't allowed to pass anything along. */
+    /** The router's desk (8.5): the keeper remembers every step, but isn't allowed to pass anything along. */
     lectern: {
-      title: "The navigator's lectern",
+      title: "The keeper's desk",
       asleep:
-        "The navigator isn't allowed to pass anything along, so packets for other streets wait here. You can do its job by hand.",
-      awake: "The navigator is allowed again: it passes every packet along itself.",
+        "The keeper isn't allowed to pass anything along, so packets for other streets wait here. You can do its job by hand.",
+      awake: "The keeper is allowed again: it passes every packet along itself.",
     },
     /** The frame or packet the next step acts on (the first waiting). */
     now: "this one",
@@ -154,10 +154,10 @@ export const voice = {
     countdown: "Take one off its countdown first",
     wrapSend: "Wrap it in a new frame to",
   },
-  /** The Slate (0043): catches tagged and peeled; Capture (tcpdump), Trace and Compare later. */
+  /** The Scanner (0043): catches tagged and peeled; Capture (tcpdump), Trace and Compare later. */
   slate: {
-    name: "Slate",
-    title: "The Slate",
+    name: "Scanner",
+    title: "The Scanner",
     catchNext: "Catch the next message",
     from: "only from (optional)",
     layers: { frame: "Frame", packet: "Packet", message: "Message" },
@@ -178,7 +178,7 @@ export const voice = {
     changed: "changed",
     same: "same",
     empty: "Nothing caught yet.",
-    /** Capture runs in the background; the Slate remembers it. */
+    /** Capture runs in the background; the Scanner remembers it. */
     listening: "Listening at {device}'s door {door}. The console stays free.",
     listened: "Listened at {device}'s door {door}.",
     nothingHeard: "Nothing has crossed that door yet.",
@@ -204,8 +204,8 @@ export const voice = {
   },
   /** The capture jar (CORE-19, CORE-20): catches, opened one layer at a time. */
   jar: {
-    name: "Capture jar",
-    title: "Capture jar",
+    name: "Captures",
+    title: "Captures",
     empty: "Nothing caught yet. Point at a moving message: time slows down. Click it to keep a copy.",
     catchHint: "Click to catch a copy",
     /** Catching by keyboard: messages crossing this room's doors right now. */
@@ -225,8 +225,8 @@ export const voice = {
     open: "open",
     hide: "hide",
     reset: "— room reset —",
-    /** The Slate's Capture runs in the background: its lines show on the Slate, not here. */
-    onSlate: "(listening on the Slate: its lines show there)",
+    /** The Scanner's Capture runs in the background: its lines show on the Scanner, not here. */
+    onSlate: "(listening on the Scanner: its lines show there)",
   },
   debrief: {
     title: "Restored",
@@ -316,15 +316,15 @@ export const voice = {
   },
   /** Guardian memories in the Glass (0036, 0037): back in time, chaptered, voiced, always captioned. */
   memory: {
-    floor: "{guardian} remembers",
-    building: "How they built it",
-    farewell: "Farewell",
+    floor: "Memory restored",
+    building: "Why it's built this way",
+    farewell: "Floor restored",
     chapter: "{n} of {total}",
     back: "Back",
     next: "Next",
     done: "Close",
     skip: "Skip",
-    map: "The floor as it was, long ago: every machine and every cable, whole and lit.",
+    map: "The floor as it was when it worked: every machine and every cable, whole and lit.",
   },
   /** A ride-along (0036): one message followed through the floor, its headers at every hop. */
   ride: {
@@ -367,7 +367,7 @@ export const voice = {
     play: "Play",
     speed: "Speed",
     reset: "Reset room",
-    notes: "Knight's notes",
+    notes: "Notes",
     ask: "Ask",
     menu: "Menu",
     /** The top bar, for screen readers. */
@@ -379,27 +379,27 @@ export const voice = {
   },
   /** The Knight's notes (HELP-08..10): his notes in the room, reactions, hints. */
   notes: {
-    title: "The Knight's notes",
+    title: "Notes",
     hint: "Hint {n} of 5",
     nextHint: "Read the next hint",
     waiting: "The next hint isn't ready yet. Look around, try something.",
     /** Under the hint button once the room is won: no more hints are needed here. */
     solved: "This room is restored. No more hints needed here.",
     allRead: "That's every hint.",
-    codex: "In the Codex: {card}",
-    memories: "Knight's Memories",
+    codex: "In the Notebook: {card}",
+    memories: "Tips",
     replay: "Play again",
   },
   /** The Guardian's questions (CORE-43). */
-  ask: { title: "Ask {guardian}", close: "Close" },
+  ask: { title: "Questions", close: "Close" },
   /** A discovery card (CORE-46). */
   discovery: { new: "New", more: "Tell me more", ok: "Got it" },
   /** After the win (HELP-13). */
   after: {
     key: "Key",
-    building: "See how they built it",
-    floorMemory: "{guardian} remembers",
-    journal: "A page of the Knight's journal",
+    building: "Why it's built this way",
+    floorMemory: "Memory restored",
+    journal: "A log page",
     next: "Continue",
     nextRoom: "Next: {room}",
     end: "That's the end of the first release. Thank you for playing.",
@@ -410,7 +410,7 @@ export const voice = {
     sections: "Menu sections",
     back: "Back to the topics",
     here: "you are here",
-    tabs: { dungeon: "The palace", codex: "Codex", guide: "Field Guide", keys: "Keyring", settings: "Settings" },
+    tabs: { dungeon: "The palace", codex: "Notebook", guide: "Field Guide", keys: "Keyring", settings: "Settings" },
     status: {
       cleared: "cleared",
       next: "next",
@@ -423,11 +423,11 @@ export const voice = {
     objects: "Things you've found",
     words: "Words you've learned",
     commands: "Command book",
-    journal: "Journal pages",
+    journal: "Log pages",
     /** Guardian memories seen (CORE-46), each replayable. */
-    guardianMemories: "Guardian memories",
-    floorMemory: "{guardian} remembers {floor}",
-    buildingMemory: "How they built it: {room}",
+    guardianMemories: "Memories restored",
+    floorMemory: "Memory restored: {floor}",
+    buildingMemory: "Why it's built this way: {room}",
     noKeys: "No keys yet. Keys come back with answers.",
     path: "Your path",
     sound: "Sound",
@@ -461,7 +461,7 @@ export const voice = {
   },
   /** Knight's Memories (0008): offered on other paths, then the one small thing to do after. */
   knightMemory: {
-    offer: "Knight's memory",
+    offer: "Tip",
     watch: "Watch",
     later: "Not now",
     yourTurn: "Your turn: {action}.",
@@ -469,7 +469,7 @@ export const voice = {
     done: "Done: {action}.",
     dismiss: "Close",
     /** Who speaks a Knight's memory (the memory's topic shows under it). */
-    speaker: "The Knight",
+    speaker: "You",
   },
   /** The gentle way back (HELP-12): the Knight's offer in a boss, on the Know a little and Know networking paths. */
   wayBack: {
@@ -480,9 +480,9 @@ export const voice = {
   /** A journal page lying in its room (CORE-45). */
   journalPage: {
     glow: "A page, glowing faintly",
-    label: "Pick up a page of the Knight's journal",
-    title: "A page of the Knight's journal",
-    kept: "Kept with your journal pages, in the Codex.",
+    label: "Pick up the log page",
+    title: "A log page",
+    kept: "Kept with your log pages, in the Notebook.",
     close: "Close",
   },
   /** The first release's ending card (END1): what "What's next" says. */
@@ -493,7 +493,7 @@ export const voice = {
   /** UI-06: before the gift of the voice, a click shows the command it ran under this caption. */
   heard: "the machine heard:",
   // ── Agent B additions ──
-  /** Saying who a message is for before door names are taught (Floor 2), and in plain words before the Slate. */
+  /** Saying who a message is for before door names are taught (Floor 2), and in plain words before the Scanner. */
   names: {
     everyone: "everyone",
     toFrom: "to {to} · from {from}",
@@ -520,7 +520,7 @@ export const voice = {
     exportTitle: "Download this playtest as a file",
   },
   cannotDraw: {
-    title: "This browser can't draw the Deep Network",
+    title: "This browser can't draw the palace",
     body: "Wirelight needs 3D drawing (WebGL2 or WebGPU), and it couldn't start here. Nothing is lost: your progress is saved in this browser.",
     tipsTitle: "Things that usually help:",
     tips: [

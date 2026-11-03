@@ -1,15 +1,14 @@
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { PointLight } from "three";
-import { useSession } from "../../engine/store";
 import type { RegionId } from "../region";
 import { ruin } from "../ruin";
 import { Statue } from "./Statue";
 import { GUARDIANS, type GuardianPlace } from "./standing";
 
 // The region's Guardian (decision 0094): a statue of its part of the palace, standing in the room.
-// Static (one mesh, one draw); it comes alive only through light. Clicking it opens its questions
-// (the Ask panel), as the top bar's Ask does.
+// Static (one mesh, one draw); it comes alive only through light. Silent decoration since 0108:
+// questions live behind the top bar's Ask.
 
 /**
  * The Lamplighter's lantern, held out at his side: a faint ember while his town is in ruin, lit as it
@@ -37,18 +36,9 @@ function HeldLantern() {
 
 export function Guardian({ region, place }: { region: RegionId; place: GuardianPlace }) {
   const look = GUARDIANS[region];
-  const openPanel = useSession((s) => s.openPanel);
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: a 3D statue is pointed at (raycast); the top bar's Ask is the keyboard way
-    <group
-      onClick={(e) => {
-        e.stopPropagation();
-        openPanel({ kind: "ask" });
-      }}
-    >
-      <Statue {...look} position={place.at} turn={place.turn}>
-        {region === 3 && <HeldLantern />}
-      </Statue>
-    </group>
+    <Statue {...look} position={place.at} turn={place.turn}>
+      {region === 3 && <HeldLantern />}
+    </Statue>
   );
 }
