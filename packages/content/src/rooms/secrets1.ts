@@ -13,10 +13,10 @@ export const why48Bits: RoomText = {
     { text: "You don't know its name yet. How did you learn quill's?" },
     { text: "Call everyone out of the door the relic is behind, then read who answered." },
     {
-      text: "Not every door's name starts with 02: some names were burned in by whoever made the door.",
+      text: "Not every MAC address starts with 02: some were burned in by whoever made the door.",
       codex: "makers-mark",
     },
-    { text: "Send to everyone out of eth1, read the answer's from, then send a frame to that name." },
+    { text: "Send a broadcast out of eth1, read the answer's from, then send a frame to that MAC address." },
     {
       text: "Send to `ff:ff:ff:ff:ff:ff` out of eth1. The relic answers from `00:1b:21:3a:4f:9c`. Send a frame to that name, and it answers with the key.",
     },
@@ -29,7 +29,7 @@ export const why48Bits: RoomText = {
   },
   debrief: {
     happened:
-      "A door's name is 48 bits long. A bit is one tiny light, on or off: each pair in a name is 8 of them, and six pairs make 48, enough names for every door ever made. The first three pairs say who made the door (00:1b:21 is one maker's mark); the last three are that door's own number. One light in the very first pair says whether a person chose the name: that's why every name in these halls starts with 02. The relic's name was the factory's.",
+      "A MAC address is 48 bits long. A bit is one tiny light, on or off: each pair in the address is 8 of them, and six pairs make 48, enough addresses for every door ever made. The first three pairs say who made the door (00:1b:21 is one maker's mark); the last three are that door's own number. Addresses starting with 02 were set by hand.",
     terms: [],
   },
   guardian: [

@@ -37,7 +37,7 @@ export const whereNotWho: RoomText = {
       text: "A door has a name; a house has an address. The address stays when the door changes.",
       codex: "ip-address",
     },
-    { text: "Give the messenger lantern's house address instead of a door name." },
+    { text: "Give the messenger lantern's house address instead of its MAC address." },
     {
       // The spec says "The messenger's ping reaches lantern"; the word arrives in 5.2, so it waits until then.
       text: "Set the card to `10.0.1.7`. The messenger's letter reaches lantern, and its reply carries the key.",
@@ -46,7 +46,7 @@ export const whereNotWho: RoomText = {
   detectors: {
     "chase-the-new-name": {
       note: "It answered. What stays the same when a door changes?",
-      tried: "You wrote lantern's new door name on the card. It answered, but the next new door would lose it again.",
+      tried: "You wrote lantern's new MAC address on the card. It answered, but the next new door would lose it again.",
     },
     "own-address": {
       note: "That's your own house.",
@@ -55,7 +55,7 @@ export const whereNotWho: RoomText = {
   },
   debrief: {
     happened:
-      "Lantern's door changed, so its door name changed, and the messenger's letters went nowhere. Its house address didn't. Writing to the address instead of the name found lantern, wherever its door came from.",
+      "Lantern's door changed, so its MAC address changed, and the messenger's frames went nowhere. Its house address didn't: that's its IP address. Writing to the IP address instead of the MAC address found lantern, whichever door it has.",
     terms: [{ id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" }],
   },
   guardian: [
@@ -64,7 +64,7 @@ export const whereNotWho: RoomText = {
       a: "Names belong to doors, and doors get replaced. A house stays where it is.",
     },
     {
-      q: "Can I use the new door name instead?",
+      q: "Can I use the new MAC address instead?",
       a: "You could. And next time they change the door, you'd be stuck again.",
     },
     {

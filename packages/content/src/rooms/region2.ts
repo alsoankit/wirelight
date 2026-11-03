@@ -119,11 +119,11 @@ const manyDoors: RoomText = {
 const keepersMemory: RoomText = {
   title: "The Keeper's Memory",
   mission:
-    "Something behind the hall's third door keeps a key. Nobody remembers its door name, and the hall's board can't be read.",
+    "Something behind the hall's third door keeps a key. Nobody remembers its MAC address, and the hall's board can't be read.",
   access: { compass: SEALED, beacon: SEALED, gate: SEALED },
   notes: ["The one behind the third door has the key."],
   hints: [
-    { text: "The board can't be read. Can the hall tell you what it remembers?" },
+    { text: "The board can't be read. Can the hall tell you what's in its MAC table?" },
     { text: "Go into the hall's room and ask it from the terminal there." },
     { text: "A switch only learns a name when that machine sends something.", codex: "switch" },
     { text: "Get gate to send something, then ask the hall which name is behind eth3, then write to that name." },
@@ -134,7 +134,7 @@ const keepersMemory: RoomText = {
   detectors: {
     "expects-gate-listed": {
       note: "Same list. What would make the keeper learn something new?",
-      tried: "You read the hall's memory again before anyone new had spoken.",
+      tried: "You read the hall's MAC table again before anyone new had sent anything.",
     },
     guessing: {
       note: "Guessing names could take forever. Is there a name that everyone listens to?",
@@ -158,12 +158,12 @@ const keepersMemory: RoomText = {
   },
   guardian: [
     {
-      q: "Why isn't gate on the list?",
+      q: "Why isn't gate in the MAC table?",
       a: "The keeper only writes down names it has seen. Has gate ever sent anything?",
     },
     {
       q: "How do I make gate send something?",
-      a: "Most machines answer when someone calls out to everyone.",
+      a: "Most machines answer a broadcast.",
     },
     {
       q: "Why does Linux say bridge?",
@@ -191,7 +191,7 @@ const findEveryone: RoomText = {
       text: "The hall learns the name of every machine that sends something, and remembers its door.",
       codex: "mac-board",
     },
-    { text: "Make them all send something, read the hall's memory, then fill in each card by its door." },
+    { text: "Make them all send something, read the hall's MAC table, then fill in each card by its door." },
     {
       text: "Broadcast, then `bridge fdb show` in the hall: eth1 is `…:10`, eth2 is `…:11`, eth3 is `…:12`. Put each on the matching card.",
     },
@@ -204,7 +204,7 @@ const findEveryone: RoomText = {
   },
   debrief: {
     happened:
-      "One broadcast taught the hall every name at once, and its memory told you who lives behind which door. That's a switch at work: it learns everyone without being told.",
+      "One broadcast taught the hall every MAC address at once, and its MAC table told you who is behind which door. That's a switch at work: it learns everyone without being told.",
     terms: [],
   },
   building: {
@@ -224,7 +224,7 @@ const busyHall: RoomText = {
     { text: "Its switch is broken. Use the hall's terminal." },
     { text: "A machine behind a dark door can't hear a broadcast, or answer one.", codex: "everyone-address" },
     {
-      text: "Switch the door on in the hall, make wren send something, read its name from the hall's memory, then fix the card.",
+      text: "Switch the door on in the hall, make wren send something, read its MAC address from the hall's MAC table, then fix the card.",
     },
     {
       text: "In the hall: `ip link set eth2 up`. Broadcast. `bridge fdb show` shows `02:00:00:00:00:13 dev eth2`. Set the card to it; wren answers with the key.",
@@ -233,7 +233,7 @@ const busyHall: RoomText = {
   detectors: {
     "expects-gate-listed": {
       note: "Same list. What would make the keeper learn something new?",
-      tried: "You read the hall's memory again before anyone new had spoken.",
+      tried: "You read the hall's MAC table again before anyone new had sent anything.",
     },
     "wrong-console": {
       note: "Your machine isn't a switch. Whose memory do you want to read?",
@@ -249,7 +249,7 @@ const busyHall: RoomText = {
     },
     "broadcast-before-link": {
       note: "Everyone answered… except whoever's behind the dark door.",
-      tried: "You called out to everyone while wren's door was still switched off.",
+      tried: "You sent a broadcast while wren's door was still switched off.",
     },
   },
   debrief: {
@@ -348,7 +348,7 @@ const pinnedMemory: RoomText = {
       id: "F4-MEM-01",
       title: "Time",
       trigger: "first time the time control is needed",
-      text: "I can speed time up. The network doesn't mind; things just happen sooner. I'll watch the hall's memory while it runs fast.",
+      text: "I can speed time up. The network doesn't mind; things just happen sooner. I'll watch the hall's MAC table while it runs fast.",
       action: "set time to fast, then back to normal",
     },
   ],
@@ -430,7 +430,7 @@ const spareCable: RoomText = {
   notes: ["Left a spare cable between the halls, just in case. Two cables are safer than one. Surely."],
   hints: [
     { text: "Plug in the spare, then watch one broadcast. Where does it go after it crosses to the other hall?" },
-    { text: "Read a hall's board, then read it again a few seconds later. Where is anvil now?" },
+    { text: "Read a hall's MAC table, then read it again a few seconds later. Where is anvil now?" },
     {
       text: "Two halls joined by two cables make a circle: each hall floods every broadcast on to the other, round and round.",
       codex: "loop",

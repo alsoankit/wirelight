@@ -91,7 +91,7 @@ export const wrongName: RoomText = {
     },
     "card-to-self": {
       note: "Now the messenger is writing to you. Who should it be writing to?",
-      tried: "You put your own door's name on the messenger's card.",
+      tried: "You put your own MAC address (your door's name) on the messenger's card.",
     },
   },
   debrief: {
@@ -174,7 +174,7 @@ export const whoAreYou: RoomText = {
   },
   debrief: {
     happened:
-      "You didn't know quill's name, so you called to everyone with the broadcast address. Quill answered, and every answer carries the name of the door that sent it, its source. Then you could speak to quill by name.",
+      "You didn't know quill's MAC address, so you called to everyone with the broadcast address. Quill answered, and every answer carries the MAC address of the door that sent it: its source. Then you could write to quill directly.",
     terms: [
       { id: "broadcast", term: "broadcast", meaning: "a frame for everyone, sent to ff:ff:ff:ff:ff:ff" },
       { id: "source-address", term: "source address", meaning: "the from on a frame: who sent it" },
@@ -187,7 +187,7 @@ export const whoAreYou: RoomText = {
     },
     {
       q: "What does from mean on a frame?",
-      a: "The name of the door that sent it. Every answer carries the name of who answered.",
+      a: "The MAC address of the door that sent it. Every answer carries the address of whoever answered.",
     },
     {
       q: "Why won't quill give me the key?",
@@ -310,7 +310,7 @@ export const silentLine: RoomText = {
     },
     "card-to-self": {
       note: "Now the messenger is writing to you. Who should it be writing to?",
-      tried: "You put your own door's name on the messenger's card.",
+      tried: "You put your own MAC address (your door's name) on the messenger's card.",
     },
     "link-blame": {
       note: "Your door is on and the corridor works. What does the messenger need now?",

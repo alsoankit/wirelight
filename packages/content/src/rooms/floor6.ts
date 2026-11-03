@@ -26,7 +26,7 @@ export const insideTheEnvelope: RoomText = {
   },
   debrief: {
     happened:
-      "The sealed letter was a packet, inside a frame. The frame gets it across one cable, door to door; the packet carries the house addresses, who wrote it and who it's for. Putting one envelope inside another is called encapsulation.",
+      "The sealed letter was a packet, inside a frame. The frame gets it across one cable, door to door, using MAC addresses; the packet carries the IP addresses: who wrote it and who it's for. Putting one inside the other is called encapsulation.",
     terms: [
       { id: "packet", term: "packet", meaning: "the letter inside a frame, with house (IP) addresses" },
       { id: "encapsulation", term: "encapsulation", meaning: "putting one envelope inside another" },
@@ -69,26 +69,26 @@ export const whoHasThisAddress: RoomText = {
   notes: [],
   hints: [
     { text: "The packet on your desk needs a frame around it." },
-    { text: "A frame needs a door name. Do you know lantern's?" },
+    { text: "A frame needs a MAC address. Do you know lantern's?" },
     {
       text: "When a house doesn't know a neighbour's door, it asks everyone: 'Who has this address?'",
       codex: "arp-question",
     },
     {
-      text: "Look it up; if it's missing, ask everyone; then wrap the packet to the door name you got back and send it.",
+      text: "Look it up; if it's missing, send a broadcast asking for it; then wrap the packet in a frame to the MAC address you got back and send it.",
     },
     {
-      text: "Ask everyone for `10.0.1.7`; lantern answers `02:00:00:00:00:17`. Wrap to that and send. Do it once more, and the keeper takes over.",
+      text: "Ask everyone (a broadcast) for `10.0.1.7`; lantern answers `02:00:00:00:00:17`. Wrap to that and send. Do it once more, and the keeper takes over.",
     },
   ],
   detectors: {
     "wrap-with-ip": {
       note: "A frame is door to door. Whose door is 10.0.1.7?",
-      tried: "You tried to wrap a frame to a house address, but a frame needs a door name.",
+      tried: "You tried to wrap a frame to an IP address, but a frame needs a MAC address.",
     },
     "wrap-to-everyone": {
-      note: "That reaches lantern… and every other house too. Is there a way to learn lantern's own door name?",
-      tried: "You wrapped the packet to everyone instead of to lantern's door.",
+      note: "A broadcast reaches lantern… and every other machine too. Is there a way to learn lantern's own MAC address?",
+      tried: "You wrapped the packet in a broadcast frame instead of a frame to lantern's MAC address.",
     },
     "ask-again": {
       note: "It's already written down. Look first.",
@@ -118,7 +118,7 @@ export const whoHasThisAddress: RoomText = {
     },
     {
       q: "What did that little question have to do with ping?",
-      a: "Everything. A ping is a house letter. It can't leave without a door name on its frame.",
+      a: "Everything. A ping is a packet. It can't leave without a MAC address on its frame.",
     },
   ],
   fieldGuide: ["Asking the street", "Command book: `ip neigh`"],
@@ -138,17 +138,17 @@ export const twoOfMe: RoomText = {
   notes: ["Register: lantern 10.0.1.7 · quill 10.0.1.12 · anvil 10.0.1.10."],
   hints: [
     { text: "Look at who each answer is *from*." },
-    { text: "Your Scanner shows the door name on every reply. So does your ledger." },
+    { text: "Your Scanner shows the MAC address on every reply. So does your neighbour ledger (the ARP table)." },
     { text: "Two houses can't share one address: the street can't tell them apart.", codex: "two-answers" },
-    { text: "Find which door name isn't lantern's, find its house, and give it its own address." },
+    { text: "Find which MAC address isn't lantern's, find its machine, and give it its own IP address." },
     {
       text: "Some replies come from `02:00:00:00:00:17` (lantern), some from `…:0c` (quill). In quill's room: `ip addr del 10.0.1.7/24 dev eth0`, then `ip addr add 10.0.1.12/24 dev eth0`.",
     },
   ],
   detectors: {
     "flush-and-hope": {
-      note: "The ledger learns it again, and maybe wrong again. Why are two doors answering?",
-      tried: "You cleared your ledger more than once, but it kept learning from two doors.",
+      note: "The ARP table learns it again, and maybe wrong again. Why are two doors answering?",
+      tried: "You cleared your ARP table more than once, but it kept learning from two doors.",
     },
     "change-my-address": {
       note: "Your address was fine. Someone else is answering as lantern.",
@@ -161,7 +161,7 @@ export const twoOfMe: RoomText = {
   },
   debrief: {
     happened:
-      "Quill had been given lantern's address. Both answered 'who has 10.0.1.7?'. Your ledger kept whichever answered first, and switched whenever the other one spoke up, so your pings went to one door, then the other. Giving quill its own address fixed it.",
+      "Quill had been given lantern's IP address. Both answered the ARP question 'who has 10.0.1.7?'. Your ARP table kept whichever answered first, and switched whenever the other one spoke up, so your pings went to one door, then the other. Giving quill its own address fixed it.",
     terms: [
       {
         id: "duplicate-address",
@@ -179,14 +179,14 @@ export const twoOfMe: RoomText = {
 export const mixedUpLetters: RoomText = {
   title: "The Mixed-Up Letters",
   mission:
-    "The post office has been delivering letters to the wrong houses for years. Two houses need to hear from you: lantern, and anvil.",
+    "The post office has been delivering packets to the wrong houses for years. Two houses need to hear from you: lantern, and anvil.",
   access: { quill: HOUSE_LOCKED, anvil: HOUSE_LOCKED },
   notes: ["Register: lantern 10.0.1.7 · anvil 10.0.1.10 · quill 10.0.1.12 · bell 10.0.1.18."],
   hints: [
     { text: "Two houses, two different problems." },
-    { text: "Read your ledger. Read the door name on every reply." },
+    { text: "Read your ARP table. Read the MAC address on every reply." },
     {
-      text: "A pinned ledger line never gets checked again; two houses with one address confuse everyone.",
+      text: "A pinned ARP entry never gets checked again; two machines with one IP address confuse everyone.",
       codex: "neighbour-ledger",
     },
     { text: "Cross out the wrong pinned line; give the imposter its own address." },
@@ -196,8 +196,8 @@ export const mixedUpLetters: RoomText = {
   ],
   detectors: {
     "flush-and-hope": {
-      note: "The ledger learns it again, and maybe wrong again. Why are two doors answering?",
-      tried: "You cleared your ledger more than once.",
+      note: "The ARP table learns it again, and maybe wrong again. Why are two doors answering?",
+      tried: "You cleared your ARP table more than once.",
     },
     "change-my-address": {
       note: "Your address was fine. Someone else is answering in another house's place.",
@@ -214,7 +214,7 @@ export const mixedUpLetters: RoomText = {
   },
   debrief: {
     happened:
-      "Your ledger had a pinned line for lantern's old door, so your letters went to a door that no longer exists. And bell was claiming anvil's address. You removed the pinned line and gave bell its own house.",
+      "Your ARP table had a pinned entry for lantern's old door, so your packets went to a door that no longer exists. And bell was claiming anvil's IP address. You removed the pinned entry and gave bell its own address.",
     terms: [],
   },
   voice: [

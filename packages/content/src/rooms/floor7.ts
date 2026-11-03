@@ -93,7 +93,7 @@ export const askForAnAddress: RoomText = {
   ],
   detectors: {
     "guess-a-number": {
-      note: "That one's lived in. The registry knows which are free.",
+      note: "That one's taken. The DHCP server (the registry) knows which are free.",
       tried: "You guessed a number that was already someone's house.",
     },
     "dhclient-wrong-door": {
@@ -103,7 +103,7 @@ export const askForAnAddress: RoomText = {
   },
   debrief: {
     happened:
-      "You didn't know which addresses were free, so you asked. Your machine called out to everyone, the registry offered an address, you asked for it, and it confirmed: that's DHCP. The address is a lease, a loan that gets renewed.",
+      "You didn't know which addresses were free, so you asked. Your machine sent a broadcast, the registry offered an address, you asked for it, and it confirmed: that's DHCP. The address is a lease, a loan that gets renewed.",
     terms: [
       { id: "dhcp", term: "DHCP", meaning: "asking the network for an address instead of writing one yourself" },
       { id: "lease", term: "lease", meaning: "an address on loan for a while" },
@@ -112,7 +112,7 @@ export const askForAnAddress: RoomText = {
   guardian: [
     {
       q: "How do I call out without an address?",
-      a: "You call to everyone, from nobody. The registry is used to it.",
+      a: "You send a broadcast, from no address at all. The registry is used to it.",
     },
     {
       q: "Why only a loan?",
@@ -120,7 +120,7 @@ export const askForAnAddress: RoomText = {
     },
     {
       q: "What else does the registry give?",
-      a: "Directions out of the street, if there are any. You'll want those, further up.",
+      a: "Directions out of the subnet (the street), if there are any. You'll want those further up.",
     },
   ],
   fieldGuide: ["Getting an address", "Command book: `dhclient`"],
@@ -133,13 +133,13 @@ export const census: RoomText = {
   notes: ["Census: lantern .7 · quill .12 · anvil .10 · bell .18 · moth .14"],
   hints: [
     { text: "Ping each house on the census. Note who's silent." },
-    { text: "Compare the street colour on every plate, and on the census board." },
+    { text: "Compare the subnet colour (the street colour) on every plate, and on the census board." },
     {
-      text: "Same street to talk; one address per house; ask the registry when you need one.",
+      text: "Same subnet to talk directly; one IP address per machine; ask the DHCP server (the registry) when you need one.",
       codex: "street-sign",
     },
     {
-      text: "Get yourself an address the right way, bring the house on the wrong street onto the square, and make sure nobody's borrowing a number that isn't theirs.",
+      text: "Get yourself an address from DHCP, bring the machine on the wrong subnet onto the square's subnet, and make sure nobody's using an address that isn't theirs.",
     },
     {
       text: "In bell's room: `ip addr del 10.0.1.100/24 dev eth0`, then `ip addr add 10.0.1.18/24 dev eth0`. In moth's room: `ip addr del 10.0.2.14/24 dev eth0`, then `ip addr add 10.0.1.14/24 dev eth0`. In your house: `dhclient -v eth0`. Then ping all five.",
@@ -147,29 +147,29 @@ export const census: RoomText = {
   ],
   detectors: {
     "guess-a-number": {
-      note: "That one's lived in. The registry knows which are free.",
-      tried: "You guessed a number for your house instead of asking the registry.",
+      note: "That one's taken. The DHCP server (the registry) knows which are free.",
+      tried: "You guessed an address for your house instead of asking DHCP.",
     },
     "right-street-wrong-prefix": {
       note: "The house number is fine. Look at the `/` part on everyone else's plate.",
       tried: "You gave an address a different `/` from everyone else's.",
     },
     "flush-and-hope": {
-      note: "The ledger learns it again, and maybe wrong again. Why are two doors answering?",
-      tried: "You cleared your ledger more than once.",
+      note: "The ARP table learns it again, and maybe wrong again. Why are two doors answering?",
+      tried: "You cleared your ARP table more than once.",
     },
     "change-my-address": {
-      note: "Don't write your own number. Ask the registry for one.",
-      tried: "You wrote your own address instead of asking the registry.",
+      note: "Don't write your own address. Ask the DHCP server for one.",
+      tried: "You wrote your own address instead of asking DHCP.",
     },
     "census-skip": {
-      note: "Four on the board. Who's missing, and which street are they on?",
+      note: "Four on the census board. Who's missing, and which subnet are they on?",
       tried: "You called the four who'd already answered again.",
     },
   },
   debrief: {
     happened:
-      "Moth lived on the wrong street, bell was using a number that belonged to the registry, and you had no address at all. You moved moth onto the square, gave bell its own house, and asked the registry for yours. Every house answered the census.",
+      "Moth was on the wrong subnet, bell was using an address that belonged to the DHCP server's pool, and you had no address at all. You moved moth onto the square's subnet, gave bell its own address, and asked DHCP for yours. Every house answered the census.",
     terms: [],
   },
   voice: [
