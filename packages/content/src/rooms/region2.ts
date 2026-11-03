@@ -119,14 +119,14 @@ const manyDoors: RoomText = {
 const keepersMemory: RoomText = {
   title: "The Keeper's Memory",
   mission:
-    "Something behind the hall's third door keeps a key. Nobody remembers its door name, and the hall's board has clouded over.",
+    "Something behind the hall's third door keeps a key. Nobody remembers its door name, and the hall's board can't be read.",
   access: { compass: SEALED, beacon: SEALED, gate: SEALED },
   notes: ["The one behind the third door has the key."],
   hints: [
     { text: "The board can't be read. Can the hall tell you what it remembers?" },
-    { text: "Ask the hall in its own console." },
+    { text: "Go into the hall's room and ask it from the terminal there." },
     { text: "A switch only learns a name when that machine sends something.", codex: "switch" },
-    { text: "Get gate to speak, then ask the hall which name is behind eth3, then write to that name." },
+    { text: "Get gate to send something, then ask the hall which name is behind eth3, then write to that name." },
     {
       text: "Send a broadcast from the workbench. Then in the hall: `bridge fdb show` shows `02:00:00:00:00:0f dev eth3`. Send a frame to `02:00:00:00:00:0f`; gate answers with the key.",
     },
@@ -162,7 +162,7 @@ const keepersMemory: RoomText = {
       a: "The keeper only writes down names it has seen. Has gate ever sent anything?",
     },
     {
-      q: "How do I make gate speak?",
+      q: "How do I make gate send something?",
       a: "Most machines answer when someone calls out to everyone.",
     },
     {
@@ -187,8 +187,11 @@ const findEveryone: RoomText = {
   hints: [
     { text: "Three letters, three doors, three names you don't know yet." },
     { text: "You've done this before, one name at a time." },
-    { text: "The hall learns every name that speaks, and remembers its door.", codex: "mac-board" },
-    { text: "Make them all speak, read the hall's memory, then fill in each card by its door." },
+    {
+      text: "The hall learns the name of every machine that sends something, and remembers its door.",
+      codex: "mac-board",
+    },
+    { text: "Make them all send something, read the hall's memory, then fill in each card by its door." },
     {
       text: "Broadcast, then `bridge fdb show` in the hall: eth1 is `…:10`, eth2 is `…:11`, eth3 is `…:12`. Put each on the matching card.",
     },
@@ -218,10 +221,10 @@ const busyHall: RoomText = {
   notes: [],
   hints: [
     { text: "One of the hall's doors is dark." },
-    { text: "Its switch is broken, but the hall still listens." },
+    { text: "Its switch is broken. Use the hall's terminal." },
     { text: "A machine behind a dark door can't hear a broadcast, or answer one.", codex: "everyone-address" },
     {
-      text: "Switch the door on in the hall, make wren speak, read its name from the hall's memory, then fix the card.",
+      text: "Switch the door on in the hall, make wren send something, read its name from the hall's memory, then fix the card.",
     },
     {
       text: "In the hall: `ip link set eth2 up`. Broadcast. `bridge fdb show` shows `02:00:00:00:00:13 dev eth2`. Set the card to it; wren answers with the key.",

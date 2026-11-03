@@ -26,7 +26,7 @@ export const memoryText = {
     ledger: "ledger",
     unknown: "unknown: every door",
     known: "known: one door",
-    brass: "pinned in brass",
+    brass: "pinned",
     span: "a span",
     secondSpan: "a second span, to be safe",
     replaced: "a new door",

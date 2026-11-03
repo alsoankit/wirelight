@@ -19,7 +19,7 @@ export const REGION_2_COMMANDS: Record<string, CommandMemory> = {
     id: "CMD-02",
     command: "bridge fdb",
     room: "f3.keepers-memory",
-    intro: "The board has clouded over, but the hall still remembers. Ask it in its own words.",
+    intro: "The board can't be read any more, but the hall still remembers. Ask it from the terminal.",
     anatomy: [
       { word: "bridge", role: "tool", meaning: "the tool for switches (Linux calls a switch a bridge)" },
       { word: "fdb", role: "about what", meaning: "its forwarding database: the MAC table" },

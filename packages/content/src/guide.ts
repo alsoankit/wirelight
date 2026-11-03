@@ -94,7 +94,7 @@ export const guide: GuideTopic[] = [
     body: [
       "Click an object to look at it closely. It opens as a panel you can read. Press [[Esc]] or click outside the panel to step back.",
       "When you do something in a panel, like sending a message, the panel closes straight away so you can watch what happens.",
-      'Every click that changes something runs a real command on the machine. A short caption shows which one: "the machine heard:" and the command itself.',
+      'Every click that changes something runs a real command on the machine. A short caption shows which one: "this click ran:" and the command itself.',
     ],
   },
   {
@@ -193,7 +193,7 @@ export const guide: GuideTopic[] = [
     body: [
       "Every machine has a keeper. It reads each message that arrives and decides what to do with it.",
       "Click the keeper (or the Keeper button) to see the messages it handled recently. Choose one, and it tells you in plain words what it did with it, and why.",
-      "Keepers never lie, and they never fix anything for you. They do exactly what their machine tells them, even when that's wrong. Once you can speak to machines, the panel also offers the real command that shows the same thing.",
+      "Keepers never lie, and they never fix anything for you. They do exactly what their machine tells them, even when that's wrong. Once you have the terminal, the panel also offers the real command that shows the same thing.",
     ],
   },
   {
@@ -259,7 +259,7 @@ export const guide: GuideTopic[] = [
     body: [
       "[[M]] open or close the menu",
       "[[G]] open or close the Map",
-      "[[`]] open or close the console, once you have it",
+      "[[`]] open or close the terminal, once you have it",
       "[[Esc]] step back: close a panel or the Map",
       "[[1]]–[[9]] go through a door",
       "[[Enter]] go on to the next spoken line",
@@ -359,11 +359,11 @@ export const guide: GuideTopic[] = [
   },
   {
     id: "console",
-    title: "The console",
+    title: "The terminal",
     blurb: "Speaking to a machine",
     visual: {
       kind: "console",
-      caption: "After you send from the workbench, the console shows the command it ran.",
+      caption: "After you send from the workbench, the terminal shows the command it ran.",
       lines: [
         { text: 'lab send-frame --to 02:00:00:00:00:07 --msg "hello"', tone: "echo" },
         { text: "lab tools exist only in Wirelight. Real Linux doesn't have this command.", tone: "note" },
@@ -373,9 +373,9 @@ export const guide: GuideTopic[] = [
     },
     from: "f2.lights-out",
     body: [
-      "Your console lets you type commands to any machine: its command line. Press [[`]] (the key above Tab) to open or close it. Commands run on the machine whose room you're in. The Map has no console.",
+      "The terminal is a text window where you type commands to a machine: the same tool people use on real Linux computers. Press [[`]] (the key above Tab) to open or close it. Commands run on the machine whose room you're in. The Map has no terminal.",
       "[[Tab]] finishes a command or name you've started. [[↑]] and [[↓]] bring back earlier commands. [[Ctrl]]+[[C]] stops a command that keeps on running. Type help to list what you can use, and man and a command's name to read about it.",
-      "When you click to do something, the console shows the real command that click ran, marked with ↳.",
+      "When you click to do something, the terminal shows the real command that click ran, marked with ↳.",
       "Commands that start with lab are Wirelight's own tools, and show in violet. Everything else works the same on a real Linux machine. When a command fails, a dim line under the error says what it means.",
     ],
   },
@@ -385,8 +385,8 @@ export const guide: GuideTopic[] = [
     blurb: "When a button won't move",
     from: "f2.lights-out",
     body: [
-      "Some controls have worn out over the centuries. They look cracked and dark, and they won't move.",
-      "The machine still listens to its console. If a control won't do it, say it: type the command instead.",
+      "Some controls are broken. They look cracked and dark, and they won't move.",
+      "Every control only runs a command. When a control is broken, open the terminal and type that command instead.",
     ],
   },
 
@@ -408,7 +408,7 @@ export const guide: GuideTopic[] = [
     from: "f3.many-doors",
     body: [
       "The board on a hall's wall is its memory. Click it to read it. Each line is a door name the hall has seen, and which of its own doors it saw it behind.",
-      "Reading the board runs a real command. Later, when the board's glass is clouded and cracked, you can still ask the console the same thing.",
+      "Reading the board runs a real command. Later, when the board's glass is clouded and cracked, you can still read it from the terminal.",
     ],
   },
   {

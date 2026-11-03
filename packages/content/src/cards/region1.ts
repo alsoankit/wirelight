@@ -105,8 +105,8 @@ export const REGION_1_CARDS: Card[] = [
   {
     id: "console",
     floor: 2,
-    title: "Console",
-    text: "Where you speak to a machine in its own words. Each machine has its own; you speak to the one in the room you're in.",
+    title: "Terminal",
+    text: "A text window where you type commands to a machine. Commands run on the machine whose room you're in.",
   },
   {
     id: "makers-mark",

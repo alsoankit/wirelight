@@ -205,11 +205,11 @@ export const whoAreYou: RoomText = {
 
 export const lightsOut: RoomText = {
   title: "Lights Out",
-  mission: "Your door has gone dark, and its switch won't move.",
+  mission: "Your door has gone dark, and its switch is broken. You'll need the terminal.",
   notes: [],
   hints: [
-    { text: "The switch won't help any more. What else can talk to this machine?" },
-    { text: "The console. Ask the machine about its doors." },
+    { text: "The switch is broken. Open the terminal: press ` (the key above Tab)." },
+    { text: "In the terminal, ask the machine about its doors." },
     { text: "`ip link` lists every door and whether it's switched on.", codex: "console" },
     { text: "Look for your door's state in the list, then tell the machine to switch that door on." },
     {
@@ -227,7 +227,7 @@ export const lightsOut: RoomText = {
     },
     "keeps-clicking": {
       note: "The switch is gone. The machine will listen if you tell it.",
-      tried: "You kept clicking the broken switch after the console woke.",
+      tried: "You kept clicking the broken switch after the terminal came online.",
     },
   },
   debrief: {
@@ -238,7 +238,7 @@ export const lightsOut: RoomText = {
   memories: [
     {
       id: "F2-MEM-04",
-      title: "The console",
+      title: "The terminal",
       trigger: "right after CMD-01",
       text: "Type, then press Enter. If I'm not sure, `man ip` explains, and Tab finishes a word for me. The up arrow brings back what I typed.",
       action: "press the up arrow once",
@@ -250,31 +250,31 @@ export const lightsOut: RoomText = {
       a: "Everything here was left alone too long. The further in, the more broken controls there will be.",
     },
     {
-      q: "What is the console?",
-      a: "A way to give a machine commands by typing. It answers in its own words, and it does exactly what it's told.",
+      q: "What is a terminal?",
+      a: "A text window for giving a machine commands. You type a command and press Enter; the machine runs it and prints the result. Every Linux computer has one, and network engineers use it every day.",
     },
     { q: "What does state DOWN mean?", a: "Switched off. You knew that already, when you could still use the switch." },
   ],
   building: {
     id: "F2-BLD-04",
-    text: "Every machine has a console, so it can still be told what to do when its switches and levers stop working.",
-    shown: "a console screen set into the wall, its text glowing",
+    text: "Every machine can be controlled from a terminal by typing commands. Switches and buttons are only shortcuts for those commands.",
+    shown: "a terminal screen on the wall, its text glowing",
   },
-  fieldGuide: ["The console", "Typing commands", "Command book"],
+  fieldGuide: ["The terminal", "Typing commands", "Command book"],
   voice: [
     { id: "F2-NOTE-01", speaker: "You", text: "That switch is finished. It won't move again." },
     { id: "F2-GIFT-01", speaker: "You", text: "Its switch is broken. A lot of them are, by now." },
     {
       id: "F2-GIFT-02",
       speaker: "You",
-      text: "But I don't need the switch. I can talk to the machine directly, by typing commands.",
+      text: "But I don't need the switch. Every machine has a terminal: a text window where I type commands and the machine runs them.",
     },
     {
       id: "F2-GIFT-03",
       speaker: "You",
-      text: "Switching on my console. Whatever I type goes straight to this machine.",
+      text: "Opening the terminal. Commands I type here run on this machine, the one whose room I'm in.",
     },
-    { id: "F2-GIFT-04", speaker: "You", text: "First, I'll ask it about its doors." },
+    { id: "F2-GIFT-04", speaker: "You", text: "First command: ask it about its doors." },
   ],
 };
 
@@ -285,12 +285,12 @@ export const silentLine: RoomText = {
   notes: [],
   hints: [
     { text: "Three things stand between you and moth. Start with your doors." },
-    { text: "One of your doors is off, and its switch is gone. The console still works." },
+    { text: "One of your doors is off, and its switch is broken. Use the terminal." },
     {
       text: "Once the door works, you need moth's name: from a broadcast, or from the from on something moth sends.",
       codex: "source-address",
     },
-    { text: "Switch eth1 on with the console, learn moth's name, then put it on the messenger's card." },
+    { text: "Switch eth1 on from the terminal, learn moth's name, then put it on the messenger's card." },
     {
       text: "`ip link set eth1 up`; catch one of moth's frames (or broadcast on eth1) and read its from: `02:00:00:00:00:0e`; set the messenger's card to it. Moth answers with the key.",
     },
@@ -323,7 +323,7 @@ export const silentLine: RoomText = {
   },
   debrief: {
     happened:
-      "Three things kept moth unheard: your door was off, the messenger had no name to send to, and you didn't know moth's name. You switched the door on in the machine's own words, learned moth's name from what it sent, and gave the messenger the right card. A link, a frame, two names: that's everything the old halls were built on.",
+      "Three things kept moth unheard: your door was off, the messenger had no name to send to, and you didn't know moth's name. You switched the door on with a terminal command, learned moth's name from what it sent, and gave the messenger the right card. A link, a frame, two names: that's everything the old halls were built on.",
     terms: [],
   },
   voice: [

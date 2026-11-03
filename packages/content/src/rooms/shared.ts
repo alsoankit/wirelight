@@ -1,6 +1,6 @@
 // Text more than one room uses.
 
-export const SEALED = "This room has been sealed for ages. You can watch its door, but you can't go in.";
+export const SEALED = "You can't enter this machine. You can still watch its door and send it messages.";
 
 export const DETECTORS = {
   "not-addressed-to-them": {

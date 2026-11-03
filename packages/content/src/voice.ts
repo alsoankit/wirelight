@@ -93,7 +93,7 @@ export const voice = {
     name: "MAC board",
     title: "The hall's memory",
     about: "Each line: a door name the hall has seen, and the door it was seen behind.",
-    clouded: "The board's glass is clouded and cracked. You can't read it from here.",
+    clouded: "This board is too damaged to read. Read it from the terminal instead.",
     close: "Close",
   },
   /** A machine's neighbour ledger (CORE-27): reading it runs `ip neigh show`. */
@@ -111,7 +111,7 @@ export const voice = {
     door: "door",
     addDefault: "Add a line: everywhere else, via",
     add: "Add",
-    cracked: "The board is cracked. You can read it, but it won't take anything new.",
+    cracked: "This board is cracked: you can read it, but it won't take new lines. Add them from the terminal instead.",
   },
   /** A keeper's desk in hand mode (0042): what waits, and the keeper's job, step by step. */
   desk: {
@@ -179,7 +179,7 @@ export const voice = {
     same: "same",
     empty: "Nothing caught yet.",
     /** Capture runs in the background; the Scanner remembers it. */
-    listening: "Listening at {device}'s door {door}. The console stays free.",
+    listening: "Listening at {device}'s door {door}. The terminal stays free.",
     listened: "Listened at {device}'s door {door}.",
     nothingHeard: "Nothing has crossed that door yet.",
     /** Where a catch was made: the street it was on. */
@@ -221,7 +221,7 @@ export const voice = {
     close: "Close",
   },
   console: {
-    title: "Console",
+    title: "Terminal",
     open: "open",
     hide: "hide",
     reset: "— room reset —",
@@ -249,7 +249,7 @@ export const voice = {
     switchedOff: "Switched off: nothing can cross this door.",
     switchOn: "Switch the door on",
     switchOff: "Switch the door off",
-    switchBroken: "The switch is cracked and stuck. It won't move.",
+    switchBroken: "This switch is broken. Use the terminal instead: press ` to open it.",
     unplug: "Pull the cable out",
     address: "House address",
     /** A crossing's door (a router: more than one door, on different streets) has an address per door. */
@@ -259,7 +259,7 @@ export const voice = {
     noAddress: "No address yet.",
     addAddress: "Give this door an address",
     removeAddress: "Remove",
-    slotBroken: "The address slot is cracked. It won't take anything now.",
+    slotBroken: "This address slot is broken. Give the door its address from the terminal instead.",
     close: "Close",
   },
   /** A loose cable end on the floor by a door. */
@@ -491,7 +491,7 @@ export const voice = {
   },
   send: "Send",
   /** UI-06: before the gift of the voice, a click shows the command it ran under this caption. */
-  heard: "the machine heard:",
+  heard: "this click ran:",
   // ── Agent B additions ──
   /** Saying who a message is for before door names are taught (Floor 2), and in plain words before the Scanner. */
   names: {

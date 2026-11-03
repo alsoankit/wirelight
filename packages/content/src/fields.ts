@@ -42,7 +42,7 @@ export const fields = {
     message: "Message",
     newTo: "New address",
     write: "Write it on the card",
-    runs: "runs in the console:",
+    runs: "runs in the terminal:",
   },
 };
 

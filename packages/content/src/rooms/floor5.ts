@@ -149,7 +149,7 @@ export const rollCall: RoomText = {
   notes: ["Roll: 10.0.1.7, 10.0.1.10, 10.0.1.12, 10.0.1.16, 10.0.1.18."],
   hints: [
     { text: "Before you can call on anyone, you need your own address back." },
-    { text: "The slot's broken. The machine still listens." },
+    { text: "The slot's broken. Use the terminal instead." },
     { text: "`ip addr add` gives a door an address, the same as the slot did.", codex: "address-slot" },
     { text: "Give yourself `10.0.1.5/24`, then ping each house on the roll." },
     {
@@ -164,7 +164,7 @@ export const rollCall: RoomText = {
   },
   debrief: {
     happened:
-      "You gave your house its address in the machine's own words, then called the roll. Four houses answered. One stayed dark, and that's an answer too.",
+      "You gave your house its address with a terminal command, then called the roll. Four houses answered. One stayed dark, and that's an answer too.",
     terms: [],
   },
   fieldGuide: ["Command book: `ip addr`"],
