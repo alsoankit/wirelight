@@ -44,11 +44,11 @@ export const SIDE_PLACE = (region: RegionId): GuardianPlace => ({ at: [3.0, 0, -
  * The scans of the Gardener, the owl and the warden face −z: turned about 3.9 they face the camera.
  */
 export const GUARDIAN_AT: Record<number, GuardianPlace> = {
-  // In the open, clear of the fallen column and the ferns, facing the room.
-  1: { at: [2.5, 0, -1.9], turn: 3.7 },
+  // The far end (0110): statues and wall art at the back, machines at the near end.
+  1: { at: [2.6, 0, -3.1], turn: 3.7 },
   // Perched on the sorters' card cabinet, right of the door.
   2: { at: [2.95, 1.73, -3.55], turn: 3.9 },
-  3: { at: [3.0, 0, -1.6], turn: 0.4 },
+  3: { at: [2.8, 0, -3.1], turn: 0.4 },
   // Where the code-made statue stood, in the far corner.
   4: { at: [3.0, 0, -2.9], turn: 3.9 },
 };
@@ -104,14 +104,14 @@ export type StatuePlace = Partial<CarvedOptions> & {
   scale?: number;
 };
 
-const LEFT = -3.55;
 const TABLE_TOP = 0.845;
 
 /**
- * The machines in the player's room (0110): real network hardware, still and silent, where the
- * Knight's corner stood. A server cabinet on the left wall, a control panel on the back wall, a cable
- * spool in the back corner, and one thing on the planning table or by the right wall per region.
- * Reworked models face +z: a quarter turn faces the room from the left wall.
+ * The machines in the player's room (0110): real network hardware, still and silent, at the near end
+ * of the room (the robot's workspace); statues and wall art keep the far end. A server cabinet and a
+ * control panel on the near-right edge, a cable spool by the front, and one thing per region on the
+ * planning table or the near corner. The near-left stays low: it is in front of the left door.
+ * Reworked models face +z: a quarter turn faces +x, toward the camera's side.
  */
 /** Each machine's paint: worn and greyed in ruin, its own colour restored. */
 const MACHINE_LOOK: Record<string, CarvedOptions> = {
@@ -129,31 +129,19 @@ function machine(slug: string, position: [number, number, number], turn = 0): Ma
   return { slug, position, turn, ...(MACHINE_LOOK[slug] as CarvedOptions) };
 }
 
+/** The near-right edge (x 3.3): no door can be there, and nothing tall hides a door from the camera. */
+const NEAR = 3.3;
+const NEAR_EDGE = [
+  machine("server-console", [NEAR, 0, -0.3], Math.PI / 2),
+  machine("control-panel", [NEAR, 0, 0.5], Math.PI / 2),
+];
+const TERMINAL_ON_TABLE = machine("vintage-terminal", [2.75, TABLE_TOP, 1.45], Math.PI / 4);
+
 export const MACHINES_AT: Record<number, MachinePlace[]> = {
-  1: [
-    machine("server-console", [LEFT, 0, 0.15], Math.PI / 2),
-    machine("control-panel", [1.6, 0, -3.7]),
-    machine("cable-spool", [-3.1, 0, -3.1], 0.4),
-    machine("vintage-terminal", [2.75, TABLE_TOP, 1.45], Math.PI / 4),
-  ],
-  2: [
-    machine("server-console", [LEFT, 0, 0.15], Math.PI / 2),
-    machine("control-panel", [1.6, 0, -3.7]),
-    machine("cable-spool", [-3.1, 0, -3.1], 0.4),
-    machine("robot-arm", [3.0, 0, -1.0], -Math.PI / 2),
-  ],
-  3: [
-    machine("server-console", [LEFT, 0, 1.0], Math.PI / 2),
-    machine("control-panel", [1.6, 0, -3.7]),
-    machine("cable-spool", [-3.1, 0, -3.1], 0.4),
-    machine("radio", [2.8, TABLE_TOP, 1.4], Math.PI / 4),
-  ],
-  4: [
-    machine("server-console", [LEFT, 0, 0.6], Math.PI / 2),
-    machine("control-panel", [1.6, 0, -3.7]),
-    machine("cable-spool", [-3.1, 0, -3.1], 0.4),
-    machine("vintage-terminal", [2.75, TABLE_TOP, 1.45], Math.PI / 4),
-  ],
+  1: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), TERMINAL_ON_TABLE],
+  2: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), machine("robot-arm", [3.1, 0, 2.9], Math.PI / 2)],
+  3: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), machine("radio", [2.8, TABLE_TOP, 1.4], Math.PI / 4)],
+  4: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), TERMINAL_ON_TABLE],
 };
 
 /** The live models standing in a room of this kind: what the bake takes as shadow casters. */
