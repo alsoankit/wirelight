@@ -159,9 +159,12 @@ export const ask = {
   setSubtitles: (on: boolean | null) => engine.setSubtitles(on),
 };
 
-/** A batch caught something (the Scanner by command, 0043): the list of catches is fetched again. */
-function refreshJarIfCaught(batch: Batch): void {
-  if (!batch.events.some((e) => e.kind === "scanner.catch")) return;
+/**
+ * A batch caught something (the Scanner by command, 0043), or reset the room (the network is back as
+ * it was, with nothing caught): the list of catches is fetched again.
+ */
+function refreshJarIfChanged(batch: Batch): void {
+  if (!batch.events.some((e) => e.kind === "scanner.catch" || e.kind === "world.reset")) return;
   void engine.catches().then((jar) => useSession.setState({ jar }));
 }
 
@@ -177,7 +180,7 @@ const hopsOf = new Map<string, number>();
 const heading = new Map<string, { door: string; bytes: Uint8Array }>();
 
 function apply(state: Session, batch: Batch): Partial<Session> {
-  refreshJarIfCaught(batch);
+  refreshJarIfChanged(batch);
   let onCables = state.onCables;
   let arrivals = state.arrivals;
   const arrive = (door: string, change: (a: Arrival | undefined) => Arrival) => {
