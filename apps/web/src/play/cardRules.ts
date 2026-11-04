@@ -22,7 +22,7 @@ export const CARD_WHEN: Record<string, When> = {
   // Prologue
   cable: "arrive",
   message: any("moving"),
-  "scrying-glass": any("glass-open"),
+  map: any("glass-open"),
   // Floor 1
   door: "arrive",
   plate: any("panel:plate"),
@@ -67,12 +67,12 @@ export const CARD_WHEN: Record<string, When> = {
   "thirty-two-bits": "after-win",
   // Floors 8–9
   router: "after-win",
-  navigator: any("panel:keeper", "panel:desk"),
+  "crossing-keeper": any("panel:keeper", "panel:desk"),
   "routing-board": any("board:routes"),
   "default-gateway": "after-win",
   "specific-route": "after-win",
   capture: any("scanner-open"),
-  lectern: any("panel:desk"),
+  "crossing-desk": any("panel:desk"),
   tracer: any("trace-armed", "scanner-open"),
   compare: any("compared"),
   hop: "after-win",

@@ -1,6 +1,6 @@
 import { cards } from "@wirelight/content";
 import { describe, expect, it } from "vitest";
-import { renameCards } from "../src/progress/renamedCards";
+import { RENAMED_CARDS, renameCards } from "../src/progress/renamedCards";
 
 describe("cards found under an old id (saved progress)", () => {
   it("count as found under their new id, in the same order", () => {
@@ -14,5 +14,12 @@ describe("cards found under an old id (saved progress)", () => {
   it("leave every current card id as it is", () => {
     const ids = Object.keys(cards);
     expect(renameCards(ids)).toEqual(ids);
+  });
+
+  it("each old id is gone, and its new id is a card", () => {
+    for (const [old, now] of RENAMED_CARDS) {
+      expect(cards[old], old).toBeUndefined();
+      expect(cards[now], now).toBeDefined();
+    }
   });
 });

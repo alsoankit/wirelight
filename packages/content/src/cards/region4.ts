@@ -10,7 +10,7 @@ export const REGION_4_CARDS: Card[] = [
     text: "A machine with doors on more than one street, that passes packets from one street to another.",
   },
   {
-    id: "navigator",
+    id: "crossing-keeper",
     floor: 8,
     title: "Crossing keeper",
     text: "The router's keeper. It reads where each packet is going and sends it the right way.",
@@ -48,7 +48,7 @@ export const REGION_4_CARDS: Card[] = [
     text: "The way the answers come back. A reply needs a route home, just as the question needed a route there.",
   },
   {
-    id: "lectern",
+    id: "crossing-desk",
     floor: 8,
     title: "Keeper's desk",
     text: "Where packets wait for the keeper to decide which way they go.",

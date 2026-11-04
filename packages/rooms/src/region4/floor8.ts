@@ -112,7 +112,7 @@ export const otherStreet = defineRoom({
   ],
   teaches: ["router"],
   uses: ["subnet", "ip-address", "ping"],
-  cards: ["router", "navigator"],
+  cards: ["router", "crossing-keeper"],
   misconceptions: [
     { id: "same-street-trick", detect: hasAddrOn("observatory", "10.0.2.") },
     { id: "far-door-from-here", detect: ran("observatory", /^ping\b.*\s10\.0\.2\.1$/, 3) },
@@ -312,7 +312,7 @@ export const sleepingKeeper = defineRoom({
   ],
   teaches: ["ip-forwarding"],
   uses: ["routing-table", "neighbour-ledger", "arp", "packet", "frame", "encapsulation"],
-  cards: ["lectern"],
+  cards: ["crossing-desk"],
   commandMemory: "CMD-10",
   misconceptions: [
     { id: "routes-again", detect: ranOn(["crossing", "observatory"], ROUTE_CHANGE) },

@@ -205,7 +205,7 @@ export const sleepingKeeper: RoomText = {
   hints: [
     { text: "Your packets reach the router, crossing, and stop." },
     { text: "Try doing the keeper's job yourself, at the desk." },
-    { text: "A router only forwards if it's allowed to: that's a setting.", codex: "navigator" },
+    { text: "A router only forwards if it's allowed to: that's a setting.", codex: "crossing-keeper" },
     { text: "Forward a packet or two by hand, then switch on the setting that lets crossing do it." },
     {
       text: "Unwrap, read the routing table (eth1), ask who has `{gallery}` (ARP), take one off the countdown, wrap to gallery's MAC address, send. Then in crossing: `sysctl -w net.ipv4.ip_forward=1`.",
