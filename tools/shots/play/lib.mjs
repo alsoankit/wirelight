@@ -2,11 +2,23 @@
 // already seen, overlays (cards, memories, lines) taken as they come, and a win check.
 import { chromium } from "playwright-core";
 
-export async function launch() {
-  const browser = await chromium.launch({
-    executablePath: "/usr/bin/google-chrome",
+/**
+ * Which browser plays: $CHROME if it's set (a Chrome of your own, drawing on the GPU with WebGPU),
+ * else Playwright's own Chromium (`pnpm --filter @wirelight/web exec playwright install chromium`).
+ * That one usually has no GPU to use, so it gets none of the GPU flags: it draws in software, and the
+ * game falls back to WebGL2 by itself.
+ */
+export function browserOptions() {
+  const chrome = process.env.CHROME;
+  if (!chrome) return {};
+  return {
+    executablePath: chrome,
     args: ["--enable-unsafe-webgpu", "--enable-features=Vulkan", "--use-angle=vulkan", "--ignore-gpu-blocklist"],
-  });
+  };
+}
+
+export async function launch() {
+  const browser = await chromium.launch(browserOptions());
   const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
   const errors = [];
   page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));

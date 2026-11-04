@@ -73,7 +73,7 @@ http://localhost:5173/play?room=prologue&autoplay=1&until=game&speed=1&pace=1
 
 `until` is `floor`, `region` or `game`; `speed` is `1`, `4` or `16`; `pace` (reading time) is `0.6`, `1` or `1.6`. **Shift+N** writes a note about what's on screen, and the notes download as Markdown, grouped by room.
 
-**Play-through checks:** `node tools/shots/play/region1.mjs http://localhost:5173/play` (and `region2` to `region4`) plays every room of a region in Chrome, as a player would, and reports each win.
+**Play-through checks:** `node tools/shots/play/region1.mjs http://localhost:5173/play` (and `region2` to `region4`) plays every room of a region in Chrome, as a player would, and reports each win. Set `CHROME` to a Chrome binary to play on the GPU; without it, Playwright's own Chromium plays, drawing in software.
 
 ## Status
 All 40 first-release rooms and the four secret rooms are playable. In progress: rooms drawn as pictures behind the live scene for speed, every door placed to face its corridor, room dressing, and the final light bake. Then music, voices and playtests with real beginners.
