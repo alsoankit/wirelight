@@ -1,5 +1,5 @@
 import { useGLTF } from "@react-three/drei";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { roomById } from "@wirelight/rooms";
 import {
   type Dispatch,
@@ -104,15 +104,6 @@ export function preloadRoom(): void {
     useGLTF.preload(pieceUrl(name));
 }
 
-// Resolution follows the tier, capped at twice the CSS pixels.
-function Resolution({ scale }: { scale: number }) {
-  const setDpr = useThree((s) => s.setDpr);
-  useEffect(() => {
-    setDpr(Math.min(window.devicePixelRatio * scale, 2));
-  }, [scale, setDpr]);
-  return null;
-}
-
 /** `arriving`: coming down from the landing; the room fades in from dark and the camera settles. */
 /** Settings that act outside React's tree: text size, motion, error subtitles (UI-17). */
 function SettingsApplied() {
@@ -198,13 +189,15 @@ const WorldCanvas = memo(function WorldCanvas({
         if (e.type === "click" && e.target instanceof HTMLCanvasElement) useSession.getState().closePanel();
       }}
       gl={nodeRendererFactory(backend)}
+      // Resolution follows the tier, capped at twice the CSS pixels. Given to the canvas itself: each
+      // time it renders again (a new tier does that), the canvas sets its resolution from this.
+      dpr={Math.min(window.devicePixelRatio * dpr, 2)}
       frameloop={FPS ? "demand" : "always"}
       // Dev aid: the renderer, for reading draw calls and triangles from scripts.
       onCreated={(state) => {
         (window as unknown as { __renderer?: unknown }).__renderer = state.gl;
       }}
     >
-      <Resolution scale={dpr} />
       <FrameCap />
       {/* Steps down when frames stay slow and back up when they recover (agent C: render/AutoQuality). */}
       <AutoQuality auto={auto} setTier={setTier} ceiling={backend === "webgpu" ? "high" : "medium"} />
