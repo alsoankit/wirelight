@@ -7,8 +7,8 @@
 #
 # Steps: export the layouts from the rooms as they are in this checkout → bake them in Blender (CPU)
 # → verify every map against the export → import into apps/web/public/bake → pnpm check, test and
-# rooms:validate. Safe to stop: run the same command again and finished layouts are kept, as long as the
-# rooms haven't changed since; if they have, the old maps are thrown away and the bake starts clean.
+# rooms:validate. Safe to stop: run the same command again and finished layouts are kept. After the
+# rooms change, only the layouts whose geometry changed are baked again.
 # The machine is kept awake while Blender runs. Everything is logged to <work>/bake.log.
 set -uo pipefail
 
@@ -49,18 +49,22 @@ only_args=()
 if ! (cd "$repo" && node tools/bake/export.mjs --out "$fresh") >>"$log" 2>&1 || [[ ! -f "$fresh/layouts.json" ]]; then
   say "Export failed: see $log"; exit 1
 fi
-same_rooms=0
-if [[ -f "$work/in/layouts.json" ]] && cmp -s "$work/in/layouts.json" "$fresh/layouts.json" &&
-  [[ -f "$work/quality" ]] && [[ "$(cat "$work/quality")" == "$quality" ]]; then
-  same_rooms=1
-fi
-rm -rf "$work/in" && mv "$fresh" "$work/in"
-if [[ "$same_rooms" == 1 ]]; then
-  say "Rooms unchanged since the last run: finished layouts are kept."
+# Throw away only the layouts whose geometry changed (each has a signature); all of them if the
+# quality changed or this is the first run.
+if [[ -f "$work/in/layouts.json" && -f "$work/quality" && "$(cat "$work/quality")" == "$quality" && -d "$work/out" ]]; then
+  changed=$(node -e '
+    const [a, b] = process.argv.slice(1).map((f) => require(f));
+    const before = new Map(a.map((l) => [l.id, l.signature]));
+    console.log(b.filter((l) => before.get(l.id) !== l.signature).map((l) => l.id).join(" "));
+  ' "$work/in/layouts.json" "$fresh/layouts.json")
+  for id in $changed; do rm -f "$work/out/$id"-*.webp "$work/out/$id".log.json; done
+  if [[ -z "$changed" ]]; then say "Rooms unchanged since the last run: finished layouts are kept."
+  else say "Changed since the last run, baked again: $changed"; fi
 else
-  say "Starting clean (the rooms or the quality changed, or this is the first run)."
+  say "Starting clean (the quality changed, or this is the first run)."
   rm -rf "$work/out"
 fi
+rm -rf "$work/in" && mv "$fresh" "$work/in"
 echo "$quality" >"$work/quality"
 mkdir -p "$work/out"
 layouts=$(node -e 'console.log(require(process.argv[1]).length)' "$work/in/layouts.json")
