@@ -9,6 +9,14 @@ function textOf(room: RoomDef): RoomText {
   return text;
 }
 
+/** Whether `text` names `term` as a whole word, in any case: "typing" doesn't name "ping". */
+function namesTerm(text: string, term: string): boolean {
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const start = /^\w/.test(term) ? "\\b" : "";
+  const end = /\w$/.test(term) ? "\\b" : "";
+  return new RegExp(`${start}${escaped}${end}`, "i").test(text);
+}
+
 describe.each(rooms.map((r) => [r.id, r] as const))("%s", (_id, room) => {
   it("does not start already won (a)", () => {
     const f = play(room, loadRoom(room, rooms), [], 30_000);
@@ -89,13 +97,19 @@ describe("field guide", () => {
     expect(new Set(guide.map((t) => t.id)).size).toBe(guide.length);
   });
 
+  it("finds a term only as a whole word, in any case", () => {
+    expect(namesTerm("Keep typing until it works.", "ping")).toBe(false);
+    expect(namesTerm("Send a ping to the house.", "ping")).toBe(true);
+    expect(namesTerm("Ping the house.", "ping")).toBe(true);
+  });
+
   it("never names an idea before the room that teaches it (P-9)", () => {
     // A term a debrief introduces may only appear in topics that open in or after that room.
     const order = new Map(rooms.map((r, i) => [r.id, i]));
     for (const r of rooms)
       for (const term of textOf(r).debrief.terms)
         for (const t of guide) {
-          if (!t.body.join(" ").toLowerCase().includes(term.term.toLowerCase())) continue;
+          if (!namesTerm(t.body.join(" "), term.term)) continue;
           const opens = t.from ? (order.get(t.from) ?? 0) : -1;
           expect(opens, `"${term.term}" in guide topic ${t.id}`).toBeGreaterThanOrEqual(order.get(r.id) ?? 0);
         }
