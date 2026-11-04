@@ -408,7 +408,6 @@ export const voice = {
     key: "Key",
     building: "Why it's built this way",
     floorMemory: "Memory restored",
-    journal: "A log page",
     next: "Continue",
     nextRoom: "Next: {room}",
     end: "That's the end of the first release. Thank you for playing.",
@@ -419,7 +418,7 @@ export const voice = {
     sections: "Menu sections",
     back: "Back to the topics",
     here: "you are here",
-    tabs: { dungeon: "The palace", codex: "Memory", guide: "Guide", keys: "Keyring", settings: "Settings" },
+    tabs: { dungeon: "The palace", codex: "Memory", guide: "Guide", settings: "Settings" },
     status: {
       cleared: "cleared",
       next: "next",
@@ -432,12 +431,6 @@ export const voice = {
     objects: "Things you know",
     words: "Words you've learned",
     commands: "Command book",
-    journal: "Log pages",
-    /** Guardian memories seen (CORE-46), each replayable. */
-    guardianMemories: "Memories restored",
-    floorMemory: "Memory restored: {floor}",
-    buildingMemory: "Why it's built this way: {room}",
-    noKeys: "No keys yet. Keys come back with answers.",
     path: "Your path",
     sound: "Sound",
     volume: { master: "Everything", music: "Music", effects: "Effects", voices: "Voices" },
@@ -454,19 +447,8 @@ export const voice = {
       title: "Privacy",
       text: "Your progress and settings are saved only in this browser, so you can pick up where you left off. Nothing is sent anywhere: no account, no analytics, no tracking.",
     },
-    /** In the keyring: the room a key came from. */
-    keyFrom: "from {room}",
     empty: "Nothing here yet.",
     close: "Close",
-  },
-  /** The keyring (CORE-36): in the top bar, and the key flying to it when a room is won. */
-  keyring: {
-    name: "Keyring",
-    /** For screen readers: the button, and the key arriving. */
-    count: "Keyring: {n} keys",
-    /** The same, for exactly one key. */
-    countOne: "Keyring: 1 key",
-    arrived: "The key: {word}",
   },
   /** Knight's Memories (0008): offered on other paths, then the one small thing to do after. */
   knightMemory: {
@@ -485,14 +467,6 @@ export const voice = {
     text: "This one puts several things together at once. When I got stuck here, I went back to {room} and looked at one piece on its own. Want to?",
     go: "Go there",
     stay: "Stay",
-  },
-  /** A journal page lying in its room (CORE-45). */
-  journalPage: {
-    glow: "A page, glowing faintly",
-    label: "Pick up the log page",
-    title: "A log page",
-    kept: "Kept with your log pages, in the Notebook.",
-    close: "Close",
   },
   /** The first release's ending card (END1): what "What's next" says. */
   ending: {

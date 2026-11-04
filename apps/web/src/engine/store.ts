@@ -22,7 +22,7 @@ export type Panel =
   | { kind: "keeper"; device: string }
   | { kind: "notes" }
   | { kind: "ask" }
-  | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "keys" | "settings" };
+  | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "settings" };
 
 /** What reached one door lately (see Session.arrivals). */
 /** A corridor the player is in (0081): which cable, from which machine, and where they're gliding to. */

@@ -56,7 +56,6 @@ type Progress = {
   keys: string[];
   cardsSeen: string[];
   memoriesSeen: string[];
-  journalPages: number[];
   floorMemoriesSeen: number[];
   /** Secret rooms whose door the player has found in the world (0065: shown after the floor's boss). */
   secretsFound: string[];
@@ -73,7 +72,6 @@ type Progress = {
   clear(roomId: string, record: RoomRecord): void;
   seeCard(id: string): void;
   seeMemory(id: string): void;
-  findJournalPage(page: number): void;
   seeFloorMemory(floor: number): void;
   findSecret(roomId: string): void;
   openHint(roomId: string): void;
@@ -108,7 +106,6 @@ export const useProgress = create<Progress>()(
       keys: [],
       cardsSeen: [],
       memoriesSeen: [],
-      journalPages: [],
       floorMemoriesSeen: [],
       secretsFound: [],
       hints: {},
@@ -127,7 +124,6 @@ export const useProgress = create<Progress>()(
         })),
       seeCard: (id) => setState((s) => ({ cardsSeen: add(s.cardsSeen, id) })),
       seeMemory: (id) => setState((s) => ({ memoriesSeen: add(s.memoriesSeen, id) })),
-      findJournalPage: (page) => setState((s) => ({ journalPages: add(s.journalPages, page) })),
       seeFloorMemory: (floor) => setState((s) => ({ floorMemoriesSeen: add(s.floorMemoriesSeen, floor) })),
       findSecret: (roomId) => setState((s) => ({ secretsFound: add(s.secretsFound, roomId) })),
       openHint: (roomId) =>

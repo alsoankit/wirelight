@@ -16,7 +16,7 @@ const NONE: never[] = [];
 // The HTML layer over the room (gameplay/interface.md): all readable text is HTML, crisp at every
 // tier. The floor and room title with the mission (top left), the room's own controls (bottom), and
 // after the win the debrief (HELP-13): what happened, new words, what you tried, the key, then the
-// Guardian's memories (building, floor), the journal page, and on to the next room on your path.
+// Guardian's memories (building, floor), and on to the next room on your path.
 
 const DEBRIEF_AFTER_MS = 2600; // let the restoration wave finish first
 

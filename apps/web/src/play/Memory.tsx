@@ -1,5 +1,5 @@
-import { fill, firstReleaseEnding, floors, floorTexts, regions, roomTexts, voice } from "@wirelight/content";
-import { floorDefs, roomById, rooms } from "@wirelight/rooms";
+import { fill, firstReleaseEnding, floorTexts, regions, roomTexts, voice } from "@wirelight/content";
+import { floorDefs, roomById } from "@wirelight/rooms";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { create } from "zustand";
 import { speak, stopVoice } from "../audio/audio";
@@ -17,7 +17,7 @@ import { floorStates, WorldMapView } from "./WorldMap";
 // time"). A floor memory comes in chapters (the problem, what they built, a ride-along, what's next),
 // each line spoken from its audio slot (0047) and always written out; Next and Back move between
 // chapters, Skip closes it. A building memory is the same view with one chapter. Opened from the
-// debrief and replayable from the Codex.
+// debrief.
 
 export type MemoryShow = { kind: "floor"; floor: number } | { kind: "building"; roomId: string };
 
@@ -27,7 +27,7 @@ export const useMemory = create<{ show: MemoryShow | null; open(show: MemoryShow
   close: () => set({ show: null }),
 }));
 
-/** Opens a memory and remembers it was seen (the Codex lists what's been seen, CORE-46). */
+/** Opens a memory and remembers it was seen. */
 export function openMemory(show: MemoryShow): void {
   const p = useProgress.getState();
   if (show.kind === "floor") p.seeFloorMemory(show.floor);
@@ -156,7 +156,7 @@ function MemoryView({ show, onClose }: { show: MemoryShow; onClose: () => void }
 /** After the last floor's memory closes, the first release's ending plays, once (END1 follows 9.B's). */
 function afterFloorMemory(floor: number): void {
   const last = floorDefs.reduce((a, f) => (f.floor > a.floor ? f : a));
-  // Only from the last boss's debrief, not a replay from the Codex elsewhere.
+  // Only from the last boss's debrief, not a replay elsewhere.
   const s = useSession.getState();
   if (floor !== last.floor || s.roomId !== last.boss || !s.status?.won) return;
   if (useProgress.getState().memoriesSeen.includes(firstReleaseEnding.lines[0]?.id ?? "")) return;
@@ -175,42 +175,6 @@ export function Memory() {
     if (show.kind === "floor") afterFloorMemory(show.floor);
   };
   return <MemoryView key={JSON.stringify(show)} show={show} onClose={done} />;
-}
-
-/** The Codex's list of Guardian memories seen (CORE-46), each one replayable. */
-export function MemoryList() {
-  const floorsSeen = useProgress((s) => s.floorMemoriesSeen);
-  const seen = useProgress((s) => s.memoriesSeen);
-  const built = rooms.filter((r) => {
-    const id = roomTexts[r.content]?.building?.id;
-    return id !== undefined && seen.includes(id);
-  });
-  const floorList = [...floorsSeen].sort((a, b) => a - b).filter((n) => floorTexts[n]);
-  return (
-    <>
-      <h3>{voice.menu.guardianMemories}</h3>
-      {floorList.length + built.length === 0 && <p className="panel-note">{voice.menu.empty}</p>}
-      {floorList.map((n) => {
-        const def = floorDefs.find((f) => f.floor === n);
-        const guardian = capitalise(regions[def?.region ?? 0]?.guardian ?? "");
-        return (
-          <button key={`f${n}`} type="button" className="link" onClick={() => openMemory({ kind: "floor", floor: n })}>
-            {fill(voice.menu.floorMemory, { guardian, floor: floors[n]?.name ?? String(n) })}
-          </button>
-        );
-      })}
-      {built.map((r) => (
-        <button
-          key={r.id}
-          type="button"
-          className="link"
-          onClick={() => openMemory({ kind: "building", roomId: r.id })}
-        >
-          {fill(voice.menu.buildingMemory, { room: roomTexts[r.content]?.title ?? r.id })}
-        </button>
-      ))}
-    </>
-  );
 }
 
 // The play scripts open memories directly (tools/shots/play/memory-chapters.mjs).

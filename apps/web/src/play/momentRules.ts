@@ -4,10 +4,10 @@ import type { SimEvent } from "@wirelight/sim";
 import { create } from "zustand";
 import type { Panel } from "../engine/store";
 
-// Game-feel moments (core-loop.md CORE-36, CORE-43..45; failure-and-hints.md HELP-12; 0008): what
-// has happened in this visit to a room, read from the trace and from the interface, and the rules
-// that turn it into a Knight's memory starting, its action being done, a Guardian question opening,
-// a journal page glowing, or the Knight offering a gentle way back. Everything here is derived: the
+// Game-feel moments (core-loop.md CORE-43, CORE-44; failure-and-hints.md HELP-12; 0008): what has
+// happened in this visit to a room, read from the trace and from the interface, and the rules that
+// turn it into a Knight's memory starting, its action being done, a Guardian question opening, or
+// the Knight offering a gentle way back. Everything here is derived: the
 // trace says what the network did; the interface notes only what the trace can't see (a hover, the
 // up arrow in the console, the Glass opening).
 
@@ -228,60 +228,31 @@ export function matchingRoom(boss: RoomDef, fired: readonly string[]): RoomDef |
   return earlier[0];
 }
 
-/**
- * Where a floor's journal page lies (CORE-45, the floor specs' "where"), and when it shows: after the
- * win ("glows after the win"), when the corridor has been walked (1.2), in the registry's room (7.2),
- * or from the start (5.2's notice board).
- */
-export function journalShows(where: string, c: { won: boolean; here: string | null; player: string }): boolean {
-  if (/after the win/i.test(where)) return c.won;
-  if (/walk the corridor/i.test(where)) return c.won || (!!c.here && c.here !== c.player);
-  if (/registry's room/i.test(where)) return c.here === "registry";
-  return true;
-}
-
 type Moments = {
   roomId: string | null;
   happened: string[];
-  /** The keys on the keyring when this room was entered (so the key's flight knows if it's new). */
-  keysBefore: string[];
   /** Bosses whose way-back offer was answered (Go there or Stay): it isn't offered again this session. */
   wayBackAnswered: string[];
-  /** A new key on its way to the keyring (it's counted once it lands), or null. */
-  flight: string | null;
-  /** The keyring glows for a moment when a key lands. */
-  landed: boolean;
   /** The first release's ending is playing (after 9.B's floor memory). */
   ending: boolean;
-  enter(roomId: string, keys: string[]): void;
+  enter(roomId: string): void;
   note(...what: string[]): void;
   answerWayBack(bossId: string): void;
-  fly(word: string | null): void;
-  land(): void;
   setEnding(on: boolean): void;
 };
 
 export const useMoments = create<Moments>((set, get) => ({
   roomId: null,
   happened: [],
-  keysBefore: [],
   wayBackAnswered: [],
-  flight: null,
-  landed: false,
   ending: false,
-  enter: (roomId, keys) => set({ roomId, happened: [], keysBefore: keys, flight: null }),
+  enter: (roomId) => set({ roomId, happened: [] }),
   note: (...what) => {
     const had = get().happened;
     const fresh = what.filter((w) => !had.includes(w));
     if (fresh.length) set({ happened: [...had, ...fresh] });
   },
   answerWayBack: (bossId) => set((s) => ({ wayBackAnswered: [...s.wayBackAnswered, bossId] })),
-  fly: (flight) => set({ flight, landed: false }),
-  land: () => {
-    if (get().flight === null && get().landed) return;
-    set({ flight: null, landed: true });
-    setTimeout(() => set({ landed: false }), 1400);
-  },
   setEnding: (ending) => set({ ending }),
 }));
 

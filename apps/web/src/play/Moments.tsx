@@ -1,39 +1,27 @@
 import {
   fill,
   firstReleaseEnding,
-  floorTexts,
   region2Arrival,
   region3Arrival,
   region4Arrival,
   roomTexts,
   voice,
 } from "@wirelight/content";
-import { floorDefs, type RoomDef, roomById } from "@wirelight/rooms";
+import { type RoomDef, roomById } from "@wirelight/rooms";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "../engine/store";
-import { useReducedMotion } from "../progress/motion";
 import { useProgress } from "../progress/progress";
 import { useDialogFocus } from "./focus";
 import { useElapsed, useNewPath } from "./hints";
 import { type Line, Lines } from "./Lines";
-import {
-  journalShows,
-  linesDue,
-  matchingRoom,
-  memoriesDue,
-  readEvents,
-  readView,
-  ruleFor,
-  useMoments,
-} from "./momentRules";
+import { linesDue, matchingRoom, memoriesDue, readEvents, readView, ruleFor, useMoments } from "./momentRules";
 import { RichText } from "./RichText";
 import { goToRoom } from "./RoomHud";
 import { WorldBackdrop } from "./WorldMap";
 
-// The game-feel moments around a room (CORE-36, CORE-45, HELP-12, 0008, END1): the key flying to the
-// keyring, region arrivals and boss introductions, Knight's Memories when their moment comes (with
-// the one small thing to do after), a journal page glowing where it lies, the Knight's gentle way
-// back in a boss, and the first release's ending. The rules are in moments.ts.
+// The game-feel moments around a room (HELP-12, 0008, END1): region arrivals and boss introductions,
+// Knight's Memories when their moment comes (with the one small thing to do after), the Knight's
+// gentle way back in a boss, and the first release's ending. The rules are in moments.ts.
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
@@ -62,7 +50,7 @@ export function MomentsDriver() {
         started = s.startedAt;
         last = 0;
         everyone = new Set();
-        useMoments.getState().enter(room.id, useProgress.getState().keys);
+        useMoments.getState().enter(room.id);
       }
       const had = new Set(useMoments.getState().happened);
       const out = new Set<string>();
@@ -252,170 +240,6 @@ function ActionPrompt({ text, done, onClose }: { text: string; done: boolean; on
         </button>
       )}
     </aside>
-  );
-}
-
-/** A small key, drawn (no font needed). */
-export function KeyIcon() {
-  return (
-    <svg className="key-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <circle cx="7" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path d="M11 12h10M17 12v4M20 12v3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-const FLIGHT_MS = 2000;
-const FADE_MS = 1600;
-
-/**
- * The key's moment (CORE-36): when the room is won, the key word arrives with the answer in the
- * middle of the room, rests a moment, then flies to the keyring in the top bar, which glows as it
- * lands. Reduced motion: it fades in and out where it is.
- */
-export function KeyFlight() {
-  const roomId = useSession((s) => s.roomId);
-  const startedAt = useSession((s) => s.startedAt);
-  const won = useSession((s) => s.status?.won ?? false);
-  const reduced = useReducedMotion();
-  const [word, setWord] = useState<string | null>(null);
-  const was = useRef(won);
-  const ref = useRef<HTMLDivElement>(null);
-
-  // A new visit starts unwon; only a win seen happening here sends the key flying.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: startedAt marks a new visit
-  useEffect(() => {
-    was.current = false;
-    setWord(null);
-  }, [startedAt]);
-
-  useEffect(() => {
-    const room = roomId ? roomById(roomId) : undefined;
-    if (won && !was.current && room) {
-      const isNew = !useMoments.getState().keysBefore.includes(room.key.word);
-      useMoments.getState().fly(isNew ? room.key.word : null);
-      setWord(room.key.word);
-    }
-    was.current = won;
-  }, [won, roomId]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !word) return;
-    const to = document.querySelector("[data-keyring]")?.getBoundingClientRect();
-    const from = el.getBoundingClientRect();
-    const dx = to ? to.left + to.width / 2 - (from.left + from.width / 2) : 0;
-    const dy = to ? to.top + to.height / 2 - (from.top + from.height / 2) : 0;
-    const at = (x: number, y: number, s: number) => `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${s})`;
-    const frames: Keyframe[] =
-      reduced || !to
-        ? [{ opacity: 0 }, { opacity: 1, offset: 0.25 }, { opacity: 1, offset: 0.75 }, { opacity: 0 }]
-        : [
-            { opacity: 0, transform: at(0, 12, 0.85) },
-            { opacity: 1, transform: at(0, 0, 1), offset: 0.2 },
-            { opacity: 1, transform: at(0, 0, 1), offset: 0.5 },
-            { opacity: 0.25, transform: at(dx, dy, 0.3) },
-          ];
-    const flight = el.animate(frames, {
-      duration: reduced || !to ? FADE_MS : FLIGHT_MS,
-      easing: "cubic-bezier(0.45, 0, 0.25, 1)",
-      fill: "forwards",
-    });
-    let ended = false;
-    const land = () => {
-      if (ended) return;
-      ended = true;
-      useMoments.getState().land();
-      setWord(null);
-    };
-    flight.onfinish = land;
-    return () => {
-      flight.cancel();
-      // Gone before it landed (a new room): it's on the keyring all the same.
-      if (!ended) useMoments.getState().land();
-    };
-  }, [word, reduced]);
-
-  if (!word) return null;
-  return (
-    <div ref={ref} className="key-flight" role="status" aria-label={fill(voice.keyring.arrived, { word })}>
-      <KeyIcon />
-      <code>{word}</code>
-    </div>
-  );
-}
-
-/** The keyring in the top bar (CORE-36): how many keys, and it opens the Keyring tab. */
-export function KeyringButton() {
-  const keys = useProgress((s) => s.keys.length);
-  const flight = useMoments((s) => s.flight);
-  const landed = useMoments((s) => s.landed);
-  const openPanel = useSession((s) => s.openPanel);
-  // A new key in the air isn't on the ring until it lands.
-  const n = Math.max(0, keys - (flight ? 1 : 0));
-  return (
-    <button
-      type="button"
-      data-keyring=""
-      data-landed={landed ? "yes" : "no"}
-      onClick={() => openPanel({ kind: "menu", tab: "keys" })}
-      aria-label={n === 1 ? voice.keyring.countOne : fill(voice.keyring.count, { n: String(n) })}
-      title={voice.keyring.name}
-    >
-      <KeyIcon /> {n}
-    </button>
-  );
-}
-
-/**
- * The floor's journal page (CORE-45), lying in the room its spec names: a faint glow where it lies,
- * once the spec says it shows (after the win, on walking the corridor, in the registry's room).
- * Clicking it reads it and keeps it; the Codex lists it from then on.
- */
-export function JournalPage() {
-  const roomId = useSession((s) => s.roomId);
-  const room = roomId ? roomById(roomId) : undefined;
-  const won = useSession((s) => s.status?.won ?? false);
-  const here = useSession((s) => s.here);
-  const pages = useProgress((s) => s.journalPages);
-  const findJournalPage = useProgress((s) => s.findJournalPage);
-  const [reading, setReading] = useState<string | null>(null);
-  const floor = room ? floorDefs.find((f) => f.floor === room.floor) : undefined;
-  const journal = room ? floorTexts[room.floor]?.journal : undefined;
-  if (!room || !journal || floor?.journalRoom !== room.id) return null;
-  if (reading === room.id)
-    return (
-      <section className="panel journal-read" aria-label={voice.journalPage.title}>
-        <h2>{voice.journalPage.title}</h2>
-        <blockquote className="journal">
-          <strong>{journal.title}</strong>
-          <p>
-            <RichText text={journal.text} />
-          </p>
-        </blockquote>
-        <p className="panel-note">{voice.journalPage.kept}</p>
-        <div className="panel-actions">
-          <button type="button" data-autofocus="" onClick={() => setReading(null)}>
-            {voice.journalPage.close}
-          </button>
-        </div>
-      </section>
-    );
-  if (pages.includes(journal.page) || !journalShows(journal.where, { won, here, player: room.playerDevice }))
-    return null;
-  return (
-    <button
-      type="button"
-      className="journal-glow"
-      aria-label={voice.journalPage.label}
-      onClick={() => {
-        findJournalPage(journal.page);
-        setReading(room.id);
-      }}
-    >
-      <span className="journal-leaf" aria-hidden="true" />
-      {voice.journalPage.glow}
-    </button>
   );
 }
 

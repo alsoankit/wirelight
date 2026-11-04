@@ -72,7 +72,7 @@ function startingRoom(): string {
   return current && roomById(current) ? current : "p.first-message";
 }
 
-/** Starts fetching the room's kit pieces (during the descent), so arriving doesn't wait on them. */
+/** Starts fetching the room's kit pieces on the way in (the fade, the boot screen), so arriving doesn't wait. */
 export function preloadRoom(): void {
   for (const name of new Set([...OBSERVATORY, ...HOUSE_PIECES, ...HALL_PIECES].map((p) => p.piece)))
     useGLTF.preload(pieceUrl(name));

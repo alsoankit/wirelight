@@ -3,7 +3,7 @@ import { useProgress } from "./progress";
 
 // Reduced motion (UI-23, rendering.md "Accessibility in the 3D layer"): from Settings (Reduced or
 // Full), or the system's choice when Settings says "Follow my system". With it, camera moves and
-// travel become fades: no parallax, no settling in, the descent and the restoration wave as fades.
+// travel become fades: no parallax, no settling in, the restoration wave as a fade.
 // The page carries the answer as `data-reduced` on <html>, so the stylesheet follows it too.
 
 const query = typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
