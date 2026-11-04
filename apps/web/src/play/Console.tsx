@@ -77,6 +77,9 @@ export function Console({ device, subtitles: byRoom }: { device: string; subtitl
       allowTransparency: true,
       theme: { background: "#00000000", foreground: "#f3e9dc", cursor: "#5ee0e8" },
     });
+    // ` belongs to the page, not the command line: it opens and closes the terminal (UI-06) even while
+    // the terminal has the keyboard. Left to xterm, it's typed as a character and never reaches the page.
+    t.attachCustomKeyEventHandler((e) => e.key !== "`");
     const f = new FitAddon();
     t.loadAddon(f);
     t.open(host.current);
