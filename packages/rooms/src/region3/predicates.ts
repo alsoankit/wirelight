@@ -1,4 +1,4 @@
-/** Region 3's predicates: echo replies by who really sent them, addresses, the ledger, the Slate. */
+/** Region 3's predicates: echo replies by who really sent them, addresses, the ledger, the Scanner. */
 import { decodeEth, decodeIcmp, decodeIPv4, ETHERTYPE, type SimEvent } from "@wirelight/sim";
 import type { Facts, Predicate } from "../types";
 
@@ -135,22 +135,22 @@ export function askedWhatTheLedgerKnew(device: string): Predicate {
   };
 }
 
-/** The frame (as sent or received) behind a Slate catch. */
+/** The frame (as sent or received) behind a Scanner catch. */
 function caughtFrame(trace: readonly SimEvent[], frameId: number): Uint8Array | null {
   for (const e of trace) if ((e.kind === "frame.tx" || e.kind === "frame.rx") && e.frameId === frameId) return e.bytes;
   return null;
 }
 
-/** A catch of something `door` sent was opened on the Slate down to its message (6.1). */
+/** A catch of something `door` sent was opened on the Scanner down to its message (6.1). */
 export function openedToMessage(door: string): Predicate {
   return ({ trace }) => {
     const from = new Map<number, string>();
     for (const e of trace) {
-      if (e.kind === "slate.catch") {
+      if (e.kind === "scanner.catch") {
         const bytes = caughtFrame(trace, e.frameId);
         if (bytes) from.set(e.n, decodeEth(bytes).src);
       }
-      if (e.kind === "slate.open" && e.layer === "message" && e.reached && from.get(e.n) === door) return true;
+      if (e.kind === "scanner.open" && e.layer === "message" && e.reached && from.get(e.n) === door) return true;
     }
     return false;
   };
@@ -161,7 +161,7 @@ export function openedFramesOnly(n: number): Predicate {
   return ({ trace }) => {
     const opened = new Set<number>();
     for (const e of trace) {
-      if (e.kind !== "slate.open") continue;
+      if (e.kind !== "scanner.open") continue;
       if (e.layer !== "frame") return false;
       opened.add(e.n);
       if (opened.size >= n) return true;

@@ -1484,13 +1484,13 @@ button.link.inline {
   cursor: pointer;
 }
 
-.panel.slate {
+.panel.scanner {
   width: min(460px, calc(100vw - 32px));
   max-height: calc(100vh - 220px);
   overflow: auto;
 }
 
-.panel.slate .catch-list li {
+.panel.scanner .catch-list li {
   padding: 3px 0;
   font: 12px / 1.4 var(--mono);
 }
@@ -1500,7 +1500,7 @@ button.link.inline {
   flex: 0 0 auto;
 }
 
-.panel.slate .catch-list button.link.inline {
+.panel.scanner .catch-list button.link.inline {
   display: inline;
   width: auto;
   padding: 0 4px;
@@ -2626,7 +2626,7 @@ body:has(.menu, .gift-stage, .tour) .dev-toggle {
   }
 }
 
-/* ── Agent B · panels and teaching: where you are, arrivals, desk, boards, Slate, Glass ─────────── */
+/* ── Agent B · panels and teaching: where you are, arrivals, desk, boards, Scanner, Glass ───────── */
 .mini-glass {
   overflow: hidden;
 }
@@ -2712,7 +2712,7 @@ body:has(.menu, .gift-stage, .tour) .dev-toggle {
 }
 
 .board-output,
-.slate-capture {
+.scanner-capture {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -2721,15 +2721,15 @@ body:has(.menu, .gift-stage, .tour) .dev-toggle {
   opacity: 0.55;
 }
 
-.slate-strip li {
+.scanner-strip li {
   overflow-wrap: anywhere;
 }
 
-.slate-fold > span {
+.scanner-fold > span {
   color: var(--amber);
 }
 
-.slate-compare {
+.scanner-compare {
   width: 100%;
   margin: 8px 0;
   border-collapse: collapse;
@@ -2737,31 +2737,31 @@ body:has(.menu, .gift-stage, .tour) .dev-toggle {
   table-layout: fixed;
 }
 
-.slate-compare th,
-.slate-compare td {
+.scanner-compare th,
+.scanner-compare td {
   padding: 3px 6px;
   text-align: left;
   vertical-align: top;
   overflow-wrap: anywhere;
 }
 
-.slate-compare thead th {
+.scanner-compare thead th {
   color: var(--text-dim);
   font-weight: 600;
 }
 
-.slate-compare tbody th {
+.scanner-compare tbody th {
   width: 34%;
   font-weight: 500;
 }
 
-.slate-compare tr[data-changed="yes"] td,
-.slate-compare tr[data-changed="yes"] th {
+.scanner-compare tr[data-changed="yes"] td,
+.scanner-compare tr[data-changed="yes"] th {
   background: rgba(242, 165, 74, 0.14);
   color: var(--text);
 }
 
-.slate-compare tr[data-changed="no"] td {
+.scanner-compare tr[data-changed="no"] td {
   color: var(--text-dim);
 }
 

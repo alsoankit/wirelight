@@ -1,10 +1,17 @@
 import { fill, voice } from "@wirelight/content";
 import { type RoomDef, roomById } from "@wirelight/rooms";
-import { fromHex, peel, type SlateCatch, type SlateLayer, type SlateLayerName, type SlateOpen } from "@wirelight/sim";
+import {
+  fromHex,
+  peel,
+  type ScannerCatch,
+  type ScannerLayer,
+  type ScannerLayerName,
+  type ScannerOpen,
+} from "@wirelight/sim";
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "../engine/store";
 
-// The Slate (0043, CORE-22a): every catch tagged and listed; opened one envelope at a time, frame →
+// The Scanner (0043, CORE-22a): every catch tagged and listed; opened one envelope at a time, frame →
 // packet → message. Floor 8 adds Capture (listen at a door: `tcpdump -n -i <door>`), Floor 9 the
 // tracer and Compare. It only reads; every button runs the real command it stands for.
 
@@ -12,11 +19,11 @@ const NONE: never[] = [];
 const ETHERTYPE: Record<number, string> = { 2048: "IPv4", 2054: "ARP", 34997: "lab", 34998: "lab answer" };
 const PROTOCOL: Record<number, string> = { 1: "ICMP", 17: "UDP" };
 
-function LayerView({ l }: { l: SlateLayer }) {
+function LayerView({ l }: { l: ScannerLayer }) {
   if (l.layer === "frame")
     return (
       <dl className="catch-layer">
-        <dt>{voice.slate.layers.frame}</dt>
+        <dt>{voice.scanner.layers.frame}</dt>
         <dd>
           {voice.jar.to} <code>{l.to}</code> · {voice.jar.from} <code>{l.from}</code>
         </dd>
@@ -28,19 +35,20 @@ function LayerView({ l }: { l: SlateLayer }) {
   if (l.layer === "packet")
     return (
       <dl className="catch-layer">
-        <dt>{voice.slate.layers.packet}</dt>
+        <dt>{voice.scanner.layers.packet}</dt>
         <dd>
           {voice.jar.to} <code>{l.to}</code> · {voice.jar.from} <code>{l.from}</code>
         </dd>
         <dd>
-          {voice.slate.ttl} <code>{l.ttl}</code> · {voice.slate.protocol} <code>{PROTOCOL[l.proto] ?? l.proto}</code> ·{" "}
-          {voice.slate.checksum} <code>0x{l.checksum.toString(16).padStart(4, "0")}</code>
+          {voice.scanner.ttl} <code>{l.ttl}</code> · {voice.scanner.protocol}{" "}
+          <code>{PROTOCOL[l.proto] ?? l.proto}</code> · {voice.scanner.checksum}{" "}
+          <code>0x{l.checksum.toString(16).padStart(4, "0")}</code>
         </dd>
       </dl>
     );
   const text =
     l.kind === "udp"
-      ? `${l.text} (${voice.slate.port} ${l.toPort})`
+      ? `${l.text} (${voice.scanner.port} ${l.toPort})`
       : l.kind === "icmp"
         ? l.type === 8
           ? `echo request ${l.seq}: are you there?`
@@ -56,20 +64,20 @@ function LayerView({ l }: { l: SlateLayer }) {
             : `${l.bytes} bytes`;
   return (
     <dl className="catch-layer">
-      <dt>{voice.slate.layers.message}</dt>
+      <dt>{voice.scanner.layers.message}</dt>
       <dd>{text}</dd>
     </dl>
   );
 }
 
 /** A catch's packet countdown (TTL), if it carries a packet. */
-function ttlOf(c: SlateCatch): number | null {
+function ttlOf(c: ScannerCatch): number | null {
   const p = peel(fromHex(c.hex)).find((l) => l.layer === "packet");
   return p?.layer === "packet" ? p.ttl : null;
 }
 
 /** The street a catch was made on: the hall at the other end of that door's cable, or the cable's name. */
-function streetOf(room: RoomDef, c: SlateCatch): string {
+function streetOf(room: RoomDef, c: ScannerCatch): string {
   const t = room.topology;
   const link = t.links.find(
     (l) => (l.a.device === c.device && l.a.iface === c.iface) || (l.b.device === c.device && l.b.iface === c.iface),
@@ -80,20 +88,20 @@ function streetOf(room: RoomDef, c: SlateCatch): string {
 }
 
 type Row =
-  | { kind: "one"; c: SlateCatch }
-  | { kind: "fold"; first: SlateCatch; last: SlateCatch; a: string; b: string; n: number };
+  | { kind: "one"; c: ScannerCatch }
+  | { kind: "fold"; first: ScannerCatch; last: ScannerCatch; a: string; b: string; n: number };
 
 /**
  * The strip (9.4): a run of traced catches of one packet going back and forth between the same two
  * machines is folded into one row ("crossing ⇄ arch ×31, countdown 62 → 1"), so a loop reads as a loop.
  */
-export function foldRows(jar: SlateCatch[]): Row[] {
-  const key = (c: SlateCatch) => `${c.device}|${c.iface}|${c.dir}|${c.traced}`;
+export function foldRows(jar: ScannerCatch[]): Row[] {
+  const key = (c: ScannerCatch) => `${c.device}|${c.iface}|${c.dir}|${c.traced}`;
   const rows: Row[] = [];
   let i = 0;
   while (i < jar.length) {
     let j = i + 2;
-    const ci = jar[i] as SlateCatch;
+    const ci = jar[i] as ScannerCatch;
     const cj = jar[i + 1];
     // A period-two run: catch k is like catch k-2, for traced catches at two different machines.
     while (
@@ -101,11 +109,11 @@ export function foldRows(jar: SlateCatch[]): Row[] {
       cj &&
       cj.device !== ci.device &&
       j < jar.length &&
-      key(jar[j] as SlateCatch) === key(jar[j - 2] as SlateCatch)
+      key(jar[j] as ScannerCatch) === key(jar[j - 2] as ScannerCatch)
     )
       j++;
     if (cj && j - i >= 4) {
-      rows.push({ kind: "fold", first: ci, last: jar[j - 1] as SlateCatch, a: ci.device, b: cj.device, n: j - i });
+      rows.push({ kind: "fold", first: ci, last: jar[j - 1] as ScannerCatch, a: ci.device, b: cj.device, n: j - i });
       i = j;
     } else {
       rows.push({ kind: "one", c: ci });
@@ -116,14 +124,14 @@ export function foldRows(jar: SlateCatch[]): Row[] {
 }
 
 /** Compare (9.1), as a table: plain labels, unlearned fields left out, what changed glows. */
-function CompareTable({ a, b, room }: { a: SlateCatch; b: SlateCatch; room: RoomDef }) {
+function CompareTable({ a, b, room }: { a: ScannerCatch; b: ScannerCatch; room: RoomDef }) {
   const la = peel(fromHex(a.hex));
   const lb = peel(fromHex(b.hex));
   const fa = la.find((l) => l.layer === "frame");
   const fb = lb.find((l) => l.layer === "frame");
   const pa = la.find((l) => l.layer === "packet");
   const pb = lb.find((l) => l.layer === "packet");
-  const R = voice.slate.compareRows;
+  const R = voice.scanner.compareRows;
   const ttlTaught = room.floor > 9 || (room.floor === 9 && room.order >= 3);
   const rows: [string, string, string][] = [];
   if (fa?.layer === "frame" && fb?.layer === "frame") {
@@ -133,20 +141,22 @@ function CompareTable({ a, b, room }: { a: SlateCatch; b: SlateCatch; room: Room
     rows.push(
       [R.packetTo, pa.to, pb.to],
       [R.packetFrom, pa.from, pb.from],
-      [ttlTaught ? R.ttl : voice.slate.ttlPlain, String(pa.ttl), String(pb.ttl)],
+      [ttlTaught ? R.ttl : voice.scanner.ttlPlain, String(pa.ttl), String(pb.ttl)],
       [R.checksum, `0x${pa.checksum.toString(16).padStart(4, "0")}`, `0x${pb.checksum.toString(16).padStart(4, "0")}`],
     );
   }
   return (
-    <table className="slate-compare">
+    <table className="scanner-compare">
       <thead>
         <tr>
           <th />
           <th>
-            {fill(voice.slate.catchN, { n: String(a.n) })} · {fill(voice.slate.onStreet, { street: streetOf(room, a) })}
+            {fill(voice.scanner.catchN, { n: String(a.n) })} ·{" "}
+            {fill(voice.scanner.onStreet, { street: streetOf(room, a) })}
           </th>
           <th>
-            {fill(voice.slate.catchN, { n: String(b.n) })} · {fill(voice.slate.onStreet, { street: streetOf(room, b) })}
+            {fill(voice.scanner.catchN, { n: String(b.n) })} ·{" "}
+            {fill(voice.scanner.onStreet, { street: streetOf(room, b) })}
           </th>
         </tr>
       </thead>
@@ -158,7 +168,8 @@ function CompareTable({ a, b, room }: { a: SlateCatch; b: SlateCatch; room: Room
               <code>{x}</code>
             </td>
             <td>
-              <code>{y}</code> <span className="panel-note">{x !== y ? voice.slate.changed : voice.slate.same}</span>
+              <code>{y}</code>{" "}
+              <span className="panel-note">{x !== y ? voice.scanner.changed : voice.scanner.same}</span>
             </td>
           </tr>
         ))}
@@ -181,7 +192,7 @@ function useOutput(execId: number | null) {
   );
 }
 
-export function SlatePanel() {
+export function ScannerPanel() {
   const roomId = useSession((s) => s.roomId);
   const here = useSession((s) => s.here) ?? "observatory";
   const jar = useSession((s) => s.jar);
@@ -190,7 +201,7 @@ export function SlatePanel() {
   const openCatch = useSession((s) => s.openCatch);
   const close = useSession((s) => s.closePanel);
   const [from, setFrom] = useState("");
-  const [open, setOpen] = useState<{ n: number; shown: SlateOpen } | null>(null);
+  const [open, setOpen] = useState<{ n: number; shown: ScannerOpen } | null>(null);
   const [door, setDoor] = useState("eth0");
   const capture = useSession((s) => s.capture);
   const startCapture = useSession((s) => s.startCapture);
@@ -204,41 +215,41 @@ export function SlatePanel() {
   const rows = useMemo(() => foldRows(jar), [jar]);
   const firstDoor = doors[0] ?? "eth0";
   useEffect(() => setDoor(firstDoor), [firstDoor]);
-  if (!room?.controls.slate) return null;
-  const slate = room.controls.slate;
+  if (!room?.controls.scanner) return null;
+  const scanner = room.controls.scanner;
 
-  const show = async (n: number, layer: SlateLayerName) => setOpen({ n, shown: await openCatch(here, n, layer) });
+  const show = async (n: number, layer: ScannerLayerName) => setOpen({ n, shown: await openCatch(here, n, layer) });
 
   return (
-    <section className="panel slate" aria-label={voice.slate.title}>
-      <h2>{voice.slate.title}</h2>
-      {slate.catch && (
+    <section className="panel scanner" aria-label={voice.scanner.title}>
+      <h2>{voice.scanner.title}</h2>
+      {scanner.catch && (
         <form
           className="addr-form"
           onSubmit={(e) => {
             e.preventDefault();
-            void exec(here, `lab slate catch --next${from.trim() ? ` --from ${from.trim()}` : ""}`, "click");
+            void exec(here, `lab scanner catch --next${from.trim() ? ` --from ${from.trim()}` : ""}`, "click");
           }}
         >
           <input
-            aria-label={voice.slate.from}
+            aria-label={voice.scanner.from}
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            placeholder={voice.slate.from}
+            placeholder={voice.scanner.from}
             spellCheck={false}
           />
-          <button type="submit">{voice.slate.catchNext}</button>
+          <button type="submit">{voice.scanner.catchNext}</button>
         </form>
       )}
-      {slate.trace && (
+      {scanner.trace && (
         <div className="panel-actions">
-          <button type="button" onClick={() => void exec(here, "lab slate trace --next", "click")}>
-            {voice.slate.trace}
+          <button type="button" onClick={() => void exec(here, "lab scanner trace --next", "click")}>
+            {voice.scanner.trace}
           </button>
         </div>
       )}
-      {jar.length === 0 && captured.length === 0 && <p className="panel-note">{voice.slate.empty}</p>}
-      <ol className="catch-list slate-strip">
+      {jar.length === 0 && captured.length === 0 && <p className="panel-note">{voice.scanner.empty}</p>}
+      <ol className="catch-list scanner-strip">
         {rows.map((r) => {
           const c = r.kind === "one" ? r.c : r.last;
           const ttl = ttlOf(c);
@@ -247,18 +258,18 @@ export function SlatePanel() {
               key={layer}
               type="button"
               className="link inline"
-              aria-label={fill(voice.slate.openLayer, { n: String(c.n), layer: voice.slate.layers[layer] })}
+              aria-label={fill(voice.scanner.openLayer, { n: String(c.n), layer: voice.scanner.layers[layer] })}
               onClick={() => void show(c.n, layer)}
             >
-              {voice.slate.layers[layer]}
+              {voice.scanner.layers[layer]}
             </button>
           ));
           if (r.kind === "fold")
             return (
-              <li key={`f${r.first.n}`} className="slate-fold">
+              <li key={`f${r.first.n}`} className="scanner-fold">
                 <span>
                   {r.first.n}–{r.last.n}.{" "}
-                  {fill(voice.slate.folded, {
+                  {fill(voice.scanner.folded, {
                     a: r.a,
                     b: r.b,
                     n: String(Math.floor(r.n / 2)),
@@ -274,8 +285,8 @@ export function SlatePanel() {
             <li key={c.n}>
               <span>
                 {c.n}. {(c.t / 1000).toFixed(1)} s · {c.device} {c.iface} {c.dir}
-                {room ? ` · ${fill(voice.slate.onStreet, { street: streetOf(room, c) })}` : ""}
-                {slate.trace && ttl !== null ? ` · ${fill(voice.slate.countdownShort, { ttl: String(ttl) })}` : ""}
+                {room ? ` · ${fill(voice.scanner.onStreet, { street: streetOf(room, c) })}` : ""}
+                {scanner.trace && ttl !== null ? ` · ${fill(voice.scanner.countdownShort, { ttl: String(ttl) })}` : ""}
                 {c.traced ? " ◆" : ""}
               </span>{" "}
               {layers}
@@ -291,18 +302,18 @@ export function SlatePanel() {
           {!open.shown.reached && <p className="panel-note">{voice.jar.sealed}</p>}
         </div>
       )}
-      {slate.trace && jar.length >= 2 && (
+      {scanner.trace && jar.length >= 2 && (
         <form
           className="addr-form"
           onSubmit={async (e) => {
             e.preventDefault();
-            await exec(here, `lab slate compare ${a} ${b}`, "click");
+            await exec(here, `lab scanner compare ${a} ${b}`, "click");
             setCompared([a, b]);
           }}
         >
           <input
             type="number"
-            aria-label={voice.slate.compareA}
+            aria-label={voice.scanner.compareA}
             min={1}
             max={jar.length}
             value={a}
@@ -310,47 +321,47 @@ export function SlatePanel() {
           />
           <input
             type="number"
-            aria-label={voice.slate.compareB}
+            aria-label={voice.scanner.compareB}
             min={1}
             max={jar.length}
             value={b}
             onChange={(e) => setB(Number(e.target.value))}
           />
-          <button type="submit">{voice.slate.compare}</button>
+          <button type="submit">{voice.scanner.compare}</button>
         </form>
       )}
       {compared && room && jar[compared[0] - 1] && jar[compared[1] - 1] && (
-        <CompareTable a={jar[compared[0] - 1] as SlateCatch} b={jar[compared[1] - 1] as SlateCatch} room={room} />
+        <CompareTable a={jar[compared[0] - 1] as ScannerCatch} b={jar[compared[1] - 1] as ScannerCatch} room={room} />
       )}
-      {slate.capture && (
+      {scanner.capture && (
         <div className="field">
-          <span>{voice.slate.capture}</span>
+          <span>{voice.scanner.capture}</span>
           <div className="addr-form">
-            <select aria-label={voice.slate.capture} value={door} onChange={(e) => setDoor(e.target.value)}>
+            <select aria-label={voice.scanner.capture} value={door} onChange={(e) => setDoor(e.target.value)}>
               {doors.map((d) => (
                 <option key={d}>{d}</option>
               ))}
             </select>
             {running && capture ? (
               <button type="button" onClick={() => void interrupt(capture.device, capture.execId)}>
-                {voice.slate.stop}
+                {voice.scanner.stop}
               </button>
             ) : (
               <button type="button" onClick={() => void startCapture(here, door)}>
-                {voice.slate.start}
+                {voice.scanner.start}
               </button>
             )}
           </div>
           {capture && (
             <p className="panel-note">
-              {fill(running ? voice.slate.listening : voice.slate.listened, {
+              {fill(running ? voice.scanner.listening : voice.scanner.listened, {
                 device: capture.device,
                 door: capture.door,
               })}
             </p>
           )}
-          {capture && captured.length === 0 && running && <p className="panel-note">{voice.slate.nothingHeard}</p>}
-          {captured.length > 0 && <pre className="cmd-output slate-capture">{captured.slice(-14).join("\n")}</pre>}
+          {capture && captured.length === 0 && running && <p className="panel-note">{voice.scanner.nothingHeard}</p>}
+          {captured.length > 0 && <pre className="cmd-output scanner-capture">{captured.slice(-14).join("\n")}</pre>}
         </div>
       )}
       <div className="panel-actions">

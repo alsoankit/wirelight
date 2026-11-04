@@ -155,7 +155,7 @@ export const voice = {
     wrapSend: "Wrap it in a new frame to",
   },
   /** The Scanner (0043): catches tagged and peeled; Capture (tcpdump), Trace and Compare later. */
-  slate: {
+  scanner: {
     name: "Scanner",
     title: "The Scanner",
     catchNext: "Catch the next message",
@@ -233,7 +233,7 @@ export const voice = {
     hide: "hide",
     reset: "— room reset —",
     /** The Scanner's Capture runs in the background: its lines show on the Scanner, not here. */
-    onSlate: "(listening on the Scanner: its lines show there)",
+    onScanner: "(listening on the Scanner: its lines show there)",
   },
   debrief: {
     title: "Restored",

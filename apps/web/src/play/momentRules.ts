@@ -15,7 +15,7 @@ import type { Panel } from "../engine/store";
  * Things that can have happened in this visit. From the trace: `caught`, `caught-announcement`,
  * `opened-catch`, `broadcast-sent`, `sent-frame`, `plugged`, `trace-armed`, `remembered`, and each
  * detector that fired, by its id. From the interface: `own-plate`, `switch-seen`, `board-open`,
- * `slate-open`, `walked`, `near-doorway`, `near-cable`, `hover-message`, `glass-open`,
+ * `scanner-open`, `walked`, `near-doorway`, `near-cable`, `hover-message`, `glass-open`,
  * `workbench-message`, `history-up`, `voice-given`, `speed-fast`, `speed-back`.
  */
 export type Happened = ReadonlySet<string>;
@@ -50,19 +50,19 @@ export function readEvents(
       case "link.enter":
         if (toEveryone(e.bytes)) everyone.add(e.frameId);
         break;
-      case "slate.catch":
+      case "scanner.catch":
         out.add("caught");
         if (everyone.has(e.frameId)) out.add("caught-announcement");
         break;
-      case "slate.open":
+      case "scanner.open":
         out.add("opened-catch");
         if (e.layer !== "frame" && e.reached) out.add("opened-inside");
         break;
-      case "slate.compare":
+      case "scanner.compare":
         // Two catches of one packet from different streets: the frame changed, the packet didn't (9.1).
         if (e.samePacket && !e.sameStreet) out.add("compared-streets");
         break;
-      case "slate.arm":
+      case "scanner.arm":
         if (e.what === "trace") out.add("trace-armed");
         break;
       case "keeper.step":
@@ -94,7 +94,7 @@ export function readView(
     if (room.controls.plateSwitches?.[`${p.device}:${p.iface}`]) out.add("switch-seen");
   }
   if (p?.kind === "board") out.add("board-open");
-  if (p?.kind === "slate") out.add("slate-open");
+  if (p?.kind === "scanner") out.add("scanner-open");
   if (p?.kind === "jar" && p.open !== undefined) out.add("opened-catch");
   if (v.here && v.here !== room.playerDevice) out.add("walked");
   if (v.voiceGiven) out.add("voice-given");
@@ -147,10 +147,10 @@ export const MEMORY_RULES: Record<string, Rule> = {
   // 4.1: first time the time control is needed (reading the hall's memory, or a while in the room);
   // action: set time to fast, then back to normal.
   "F4-MEM-01": { when: (c) => c.happened.has("board-open") || c.elapsedMs > 45_000, done: has("speed-back") },
-  // 6.1: when the Slate is picked up (first opened); action: catch one message with the Slate.
-  "F6-MEM-01": { when: has("slate-open"), done: has("caught") },
-  // 9.1: first use of the Slate's tracer (the Slate opened where it has one); action: press Trace.
-  "F9-MEM-01": { when: has("slate-open"), done: has("trace-armed") },
+  // 6.1: when the Scanner is picked up (first opened); action: catch one message with the Scanner.
+  "F6-MEM-01": { when: has("scanner-open"), done: has("caught") },
+  // 9.1: first use of the Scanner's tracer (the Scanner opened where it has one); action: press Trace.
+  "F9-MEM-01": { when: has("scanner-open"), done: has("trace-armed") },
 };
 
 /**

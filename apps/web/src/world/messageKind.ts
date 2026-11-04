@@ -31,7 +31,7 @@ export function messageSummary(bytes: Uint8Array, floor: number): string {
     return head;
   }
   if (inner?.layer !== "packet") return head;
-  // The packet inside stays sealed until the Slate opens it (Floor 6, 0043).
+  // The packet inside stays sealed until the Scanner opens it (Floor 6, 0043).
   if (floor < 6) return `${head}: (sealed)`;
   const ip = `${inner.from} > ${inner.to}`;
   if (message?.layer === "message" && message.kind === "icmp") {

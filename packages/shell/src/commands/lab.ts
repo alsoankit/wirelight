@@ -11,7 +11,7 @@ import {
   lookupRoute,
   parseMac,
   peel,
-  type SlateLayer,
+  type ScannerLayer,
 } from "@wirelight/sim";
 import type { CommandContext, ToolId } from "../types";
 
@@ -20,7 +20,7 @@ const SUB: { name: string; tool: ToolId }[] = [
   { name: "card", tool: "lab card" },
   { name: "cable", tool: "lab cable" },
   { name: "keeper", tool: "lab keeper" },
-  { name: "slate", tool: "lab slate" },
+  { name: "scanner", tool: "lab scanner" },
 ];
 
 export function lab(ctx: CommandContext, args: string[]): number {
@@ -43,27 +43,27 @@ export function lab(ctx: CommandContext, args: string[]): number {
   if (found.name === "send-frame") return sendFrame(ctx, rest);
   if (found.name === "card") return card(ctx, rest);
   if (found.name === "cable") return cable(ctx, rest);
-  if (found.name === "slate") return slate(ctx, rest);
+  if (found.name === "scanner") return scanner(ctx, rest);
   return keeper(ctx, rest);
 }
 
-/** `lab slate …`: the Knight's capture tablet (0043). It only catches and reads. */
-function slate(ctx: CommandContext, args: string[]): number {
+/** `lab scanner …`: the Scanner (0043), which keeps the messages you catch. It only catches and reads. */
+function scanner(ctx: CommandContext, args: string[]): number {
   const say = (key: string, vars?: Record<string, string>) => ctx.out(ctx.content.lab(key, vars));
   const usage = () => {
-    ctx.err(ctx.content.lab("slate.usage"));
+    ctx.err(ctx.content.lab("scanner.usage"));
     return 2;
   };
   const [action, ...rest] = args;
   if (action === undefined || action === "list") {
     if (rest.length) return usage();
-    const all = ctx.sim.slateCatches();
-    if (all.length === 0) say("slate.empty");
+    const all = ctx.sim.scannerCatches();
+    if (all.length === 0) say("scanner.empty");
     for (const c of all) {
       const [frame, inner] = peel(fromHex(c.hex));
       if (frame?.layer !== "frame") continue;
       const ip = inner?.layer === "packet" ? inner : null;
-      say("slate.row", {
+      say("scanner.row", {
         n: String(c.n),
         time: (c.t / 1000).toFixed(3),
         device: c.device,
@@ -71,8 +71,8 @@ function slate(ctx: CommandContext, args: string[]): number {
         dir: c.dir,
         from: ip ? ip.from : frame.from,
         to: ip ? ip.to : frame.to,
-        what: ctx.content.lab(`slate.what-${carrying(frame.type)}`, { type: frame.type.toString(16) }),
-        traced: c.traced ? ctx.content.lab("slate.traced") : "",
+        what: ctx.content.lab(`scanner.what-${carrying(frame.type)}`, { type: frame.type.toString(16) }),
+        traced: c.traced ? ctx.content.lab("scanner.traced") : "",
       });
     }
     return 0;
@@ -80,14 +80,14 @@ function slate(ctx: CommandContext, args: string[]): number {
   if (action === "catch") {
     if (rest[0] !== "--next") return usage();
     if (rest.length === 1) {
-      ctx.sim.slateCatchNext(ctx.device);
-      say("slate.armed", { device: ctx.device });
+      ctx.sim.scannerCatchNext(ctx.device);
+      say("scanner.armed", { device: ctx.device });
       return 0;
     }
     if (rest[1] !== "--from" || rest[2] === undefined || rest.length > 3) return usage();
     const from = parseMac(rest[2]) ?? rest[2];
-    ctx.sim.slateCatchNext(ctx.device, from);
-    say("slate.armed-from", { device: ctx.device, from });
+    ctx.sim.scannerCatchNext(ctx.device, from);
+    say("scanner.armed-from", { device: ctx.device, from });
     return 0;
   }
   if (action === "open") {
@@ -96,32 +96,32 @@ function slate(ctx: CommandContext, args: string[]): number {
     if (!Number.isInteger(n) || n < 1 || (layer !== "frame" && layer !== "packet" && layer !== "message"))
       return usage();
     if (rest.length !== 1 && rest.length !== 3) return usage();
-    const r = ctx.sim.slateOpen(ctx.device, n, layer);
+    const r = ctx.sim.scannerOpen(ctx.device, n, layer);
     if (!r.ok) {
-      ctx.err(ctx.content.lab("slate.no-catch", { n: String(n) }));
+      ctx.err(ctx.content.lab("scanner.no-catch", { n: String(n) }));
       return 1;
     }
     for (const l of r.layers) say(...layerLine(ctx, l));
-    if (!r.reached && layer === "packet") say("slate.no-packet");
+    if (!r.reached && layer === "packet") say("scanner.no-packet");
     return 0;
   }
   if (action === "trace" || action === "compare") {
-    if (!ctx.tools.has("lab slate trace")) {
+    if (!ctx.tools.has("lab scanner trace")) {
       ctx.note(ctx.content.notes.locked);
       return 127;
     }
     if (action === "trace") {
       if (rest.length !== 1 || rest[0] !== "--next") return usage();
-      ctx.sim.slateTraceNext(ctx.device);
-      say("slate.tracing", { device: ctx.device });
+      ctx.sim.scannerTraceNext(ctx.device);
+      say("scanner.tracing", { device: ctx.device });
       return 0;
     }
     const [a, b] = rest.map(Number);
     if (rest.length !== 2 || !Number.isInteger(a) || !Number.isInteger(b)) return usage();
-    const r = ctx.sim.slateCompare(a as number, b as number);
+    const r = ctx.sim.scannerCompare(a as number, b as number);
     if (!r) {
-      const missing = ctx.sim.slateCatches()[(a as number) - 1] ? b : a;
-      ctx.err(ctx.content.lab("slate.no-catch", { n: String(missing) }));
+      const missing = ctx.sim.scannerCatches()[(a as number) - 1] ? b : a;
+      ctx.err(ctx.content.lab("scanner.no-catch", { n: String(missing) }));
       return 1;
     }
     for (const x of r.a) {
@@ -129,11 +129,11 @@ function slate(ctx: CommandContext, args: string[]): number {
       for (const [key, v] of Object.entries(x)) {
         if (key === "layer" || key === "kind") continue;
         const w = y ? (y as Record<string, unknown>)[key] : undefined;
-        say("slate.compare", {
+        say("scanner.compare", {
           field: `${x.layer}.${key}`.padEnd(16),
           a: String(v).padEnd(18),
           b: String(w ?? "-").padEnd(18),
-          mark: ctx.content.lab(r.changed.includes(`${x.layer}.${key}`) ? "slate.changed" : "slate.same"),
+          mark: ctx.content.lab(r.changed.includes(`${x.layer}.${key}`) ? "scanner.changed" : "scanner.same"),
         });
       }
     }
@@ -142,7 +142,7 @@ function slate(ctx: CommandContext, args: string[]): number {
   return usage();
 }
 
-/** What a frame carries, by its EtherType: the key of its name in the Slate's text. */
+/** What a frame carries, by its EtherType: the key of its name in the Scanner's text. */
 function carrying(type: number): string {
   if (type === 0x0800) return "packet";
   if (type === 0x0806) return "arp";
@@ -151,20 +151,20 @@ function carrying(type: number): string {
   return "other";
 }
 
-/** One layer of a catch as a line of the Slate's text. */
-function layerLine(ctx: CommandContext, l: SlateLayer): [string, Record<string, string>] {
+/** One layer of a catch as a line of the Scanner's text. */
+function layerLine(ctx: CommandContext, l: ScannerLayer): [string, Record<string, string>] {
   if (l.layer === "frame")
     return [
-      "slate.frame",
+      "scanner.frame",
       {
         to: l.to,
         from: l.from,
-        what: ctx.content.lab(`slate.what-${carrying(l.type)}`, { type: l.type.toString(16) }),
+        what: ctx.content.lab(`scanner.what-${carrying(l.type)}`, { type: l.type.toString(16) }),
       },
     ];
   if (l.layer === "packet")
     return [
-      "slate.packet",
+      "scanner.packet",
       {
         to: l.to,
         from: l.from,
@@ -173,18 +173,18 @@ function layerLine(ctx: CommandContext, l: SlateLayer): [string, Record<string, 
         checksum: l.checksum.toString(16).padStart(4, "0"),
       },
     ];
-  if (l.kind === "udp") return ["slate.message-udp", { text: l.text, port: String(l.toPort) }];
+  if (l.kind === "udp") return ["scanner.message-udp", { text: l.text, port: String(l.toPort) }];
   if (l.kind === "icmp") {
-    if (l.type === 8) return ["slate.message-echo-request", { seq: String(l.seq) }];
-    if (l.type === 0) return ["slate.message-echo-reply", { seq: String(l.seq) }];
-    return ["slate.message-icmp", { type: String(l.type), code: String(l.code) }];
+    if (l.type === 8) return ["scanner.message-echo-request", { seq: String(l.seq) }];
+    if (l.type === 0) return ["scanner.message-echo-reply", { seq: String(l.seq) }];
+    return ["scanner.message-icmp", { type: String(l.type), code: String(l.code) }];
   }
-  if (l.kind === "lab") return ["slate.message-lab", { text: l.text }];
+  if (l.kind === "lab") return ["scanner.message-lab", { text: l.text }];
   if (l.kind === "arp")
     return l.op === 1
-      ? ["slate.message-arp-request", { target: l.targetIp, sender: l.senderIp }]
-      : ["slate.message-arp-reply", { sender: l.senderIp, mac: l.senderMac }];
-  return ["slate.message-other", { bytes: String(l.bytes) }];
+      ? ["scanner.message-arp-request", { target: l.targetIp, sender: l.senderIp }]
+      : ["scanner.message-arp-reply", { sender: l.senderIp, mac: l.senderMac }];
+  return ["scanner.message-other", { bytes: String(l.bytes) }];
 }
 
 /** `lab cable plug|unplug <door>`: the cable end at one of this machine's doors (Floor 1). */

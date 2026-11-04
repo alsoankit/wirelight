@@ -1,4 +1,4 @@
-/** floors/floor-6.md · Envelopes. The Slate replaces the capture jar (0043); the house's keeper by hand (0042). */
+/** floors/floor-6.md · Envelopes. The Scanner replaces the capture jar (0043); the house's keeper by hand (0042). */
 import { keyFor, lanternLampsRemember } from "@wirelight/content";
 import type { Fault } from "@wirelight/sim";
 import { all, not, ran } from "../predicates";
@@ -38,7 +38,7 @@ const access = (houses: string[], open: string[] = []) => ({
   square: OPEN,
   ...Object.fromEntries(houses.map((h) => [h, open.includes(h) ? OPEN : LOCKED])),
 });
-const SLATE = { catch: true } as const;
+const SCANNER = { catch: true } as const;
 
 // ── 6.1 · Inside the Envelope ──────────────────────────────────────────────────────────────
 
@@ -60,8 +60,8 @@ export const insideTheEnvelope = defineRoom({
   faults: [],
   playerDevice: "observatory",
   access: access(["kitchen", "library", "forge"]),
-  controls: { console: "typing", slate: SLATE },
-  tools: { unlock: ["lab slate"] },
+  controls: { console: "typing", scanner: SCANNER },
+  tools: { unlock: ["lab scanner"] },
   glow: "symptoms",
   winCondition: openedLantern,
   key: { word: keyFor(envelopeId), via: "mark" },
@@ -71,24 +71,24 @@ export const insideTheEnvelope = defineRoom({
   ],
   teaches: ["packet", "encapsulation"],
   uses: ["frame", "mac-address", "broadcast", "ip-address"],
-  cards: ["slate", "packet"],
+  cards: ["scanner", "packet"],
   misconceptions: [{ id: "frame-is-everything", detect: openedFramesOnly(3) }],
   detectorTests: [
     {
       misconception: "frame-is-everything",
       steps: [
-        click("observatory", "lab slate catch --next", 7000),
-        click("observatory", "lab slate catch --next", 7000),
-        click("observatory", "lab slate catch --next", 7000),
-        click("observatory", "lab slate open 1"),
-        click("observatory", "lab slate open 2"),
-        click("observatory", "lab slate open 3"),
+        click("observatory", "lab scanner catch --next", 7000),
+        click("observatory", "lab scanner catch --next", 7000),
+        click("observatory", "lab scanner catch --next", 7000),
+        click("observatory", "lab scanner open 1"),
+        click("observatory", "lab scanner open 2"),
+        click("observatory", "lab scanner open 3"),
       ],
     },
   ],
   solution: [
-    click("observatory", `lab slate catch --next --from ${IP.kitchen}`, 8000),
-    click("observatory", "lab slate open 1 --layer message"),
+    click("observatory", `lab scanner catch --next --from ${IP.kitchen}`, 8000),
+    click("observatory", "lab scanner open 1 --layer message"),
   ],
 });
 
@@ -108,7 +108,7 @@ export const whoHasThisAddress = defineRoom({
   faults: [{ kind: "keeper-asleep", device: "observatory", desk: "host" }],
   playerDevice: "observatory",
   access: access(["kitchen", "library", "forge"]),
-  controls: { console: "typing", desk: "observatory", ledgers: { observatory: "works" }, slate: SLATE },
+  controls: { console: "typing", desk: "observatory", ledgers: { observatory: "works" }, scanner: SCANNER },
   tools: { unlock: ["ip neigh"] },
   glow: "symptoms",
   winCondition: answeredBy("observatory", IP.kitchen, KITCHEN),
@@ -208,7 +208,7 @@ export const twoOfMe = defineRoom({
   access: access(["kitchen", "library", "forge"], ["kitchen", "library"]),
   controls: {
     console: "typing",
-    slate: SLATE,
+    scanner: SCANNER,
     ledgers: { observatory: "works" },
     addressSlots: { "library:eth0": "broken" },
   },
@@ -276,7 +276,7 @@ export const mixedUpLetters = defineRoom({
   access: access(["kitchen", "library", "forge", "chapel"], ["kitchen", "chapel"]),
   controls: {
     console: "typing",
-    slate: SLATE,
+    scanner: SCANNER,
     ledgers: { observatory: "works" },
     addressSlots: { "observatory:eth0": "broken", "chapel:eth0": "broken" },
   },

@@ -120,11 +120,11 @@ export function Console({ device, subtitles: byRoom }: { device: string; subtitl
         return;
       }
       if (!("device" in e) || e.device !== device) return;
-      // The Slate's Capture listens in the background (its lines show on the Slate): one dim line
+      // The Scanner's Capture listens in the background (its lines show on the Scanner): one dim line
       // here, and the prompt stays free.
       if (e.kind === "cmd.exec" && useSession.getState().capture?.execId === e.execId) {
         st.background.add(e.execId);
-        out += `${DIM}↳ ${e.line}  ${voice.console.onSlate}${RESET}\r\n`;
+        out += `${DIM}↳ ${e.line}  ${voice.console.onScanner}${RESET}\r\n`;
         needPrompt = true;
         return;
       }

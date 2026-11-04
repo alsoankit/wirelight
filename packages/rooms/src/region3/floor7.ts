@@ -26,7 +26,7 @@ const access = (houses: string[], open: string[] = []) => ({
   square: OPEN,
   ...Object.fromEntries(houses.map((h) => [h, open.includes(h) ? OPEN : LOCKED])),
 });
-const SLATE = { catch: true } as const;
+const SCANNER = { catch: true } as const;
 const OWN = "10.0.1.5/24";
 
 /**
@@ -84,7 +84,7 @@ export const sameStreet = defineRoom({
   ],
   playerDevice: "observatory",
   access: access(["kitchen", "library", "forge"]),
-  controls: { console: "typing", slate: SLATE, addressSlots: { "observatory:eth0": "works" } },
+  controls: { console: "typing", scanner: SCANNER, addressSlots: { "observatory:eth0": "works" } },
   tools: {},
   glow: "symptoms",
   winCondition: answeredBy("observatory", IP.kitchen, KITCHEN),
@@ -136,7 +136,7 @@ export const askForAnAddress = defineRoom({
   playerDevice: "observatory",
   // The registry's room is open: journal page 7 is there.
   access: access(["kitchen", "library", "forge", "chapel", "registry"], ["registry"]),
-  controls: { console: "typing", slate: SLATE, addressSlots: { "observatory:eth0": "broken" } },
+  controls: { console: "typing", scanner: SCANNER, addressSlots: { "observatory:eth0": "broken" } },
   tools: { unlock: ["dhclient"] },
   glow: "symptoms",
   winCondition: all(holdsLease, answeredBy("observatory", IP.kitchen, KITCHEN)),
@@ -214,7 +214,7 @@ export const census = defineRoom({
   access: access(["kitchen", "library", "forge", "chapel", "cellar", "registry"], ["chapel", "cellar"]),
   controls: {
     console: "typing",
-    slate: SLATE,
+    scanner: SCANNER,
     ledgers: { observatory: "works" },
     addressSlots: { "observatory:eth0": "broken", "chapel:eth0": "broken", "cellar:eth0": "broken" },
   },
@@ -305,7 +305,7 @@ export const binaryBehind24 = defineRoom({
   playerDevice: "observatory",
   // Chapel's door is open: moving chapel instead is a detector.
   access: access(["kitchen", "chapel"], ["chapel"]),
-  controls: { console: "typing", slate: SLATE, addressSlots: { "observatory:eth0": "broken" } },
+  controls: { console: "typing", scanner: SCANNER, addressSlots: { "observatory:eth0": "broken" } },
   tools: {},
   glow: "none",
   winCondition: answeredBy("observatory", BELL_HOUSE, CHAPEL),

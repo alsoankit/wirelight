@@ -1,5 +1,5 @@
 /**
- * The Slate (0043) through the shell: catching (6.1), peeling layers, tracing one packet across
+ * The Scanner (0043) through the shell: catching (6.1), peeling layers, tracing one packet across
  * streets and comparing two catches (9.1).
  */
 import type { SimEvent, Topology } from "@wirelight/sim";
@@ -105,49 +105,49 @@ function run(b: SimBackend, device: string, line: string): string[] {
 const events = <K extends SimEvent["kind"]>(b: SimBackend, kind: K) =>
   b.trace().filter((e): e is Extract<SimEvent, { kind: K }> => e.kind === kind);
 
-describe("lab slate: catching and opening (6.1)", () => {
+describe("lab scanner: catching and opening (6.1)", () => {
   it("catches the next announcement and peels it down to the message", () => {
-    const b = town(["lab slate"]);
-    expect(run(b, "observatory", "lab slate catch --next --from 10.0.1.7")).toContain(
-      "slate.armed-from observatory 10.0.1.7",
+    const b = town(["lab scanner"]);
+    expect(run(b, "observatory", "lab scanner catch --next --from 10.0.1.7")).toContain(
+      "scanner.armed-from observatory 10.0.1.7",
     );
     b.advance(8000);
-    expect(events(b, "slate.catch")).toEqual([expect.objectContaining({ n: 1, device: "observatory", dir: "in" })]);
-    const out = run(b, "observatory", "lab slate open 1 --layer message");
+    expect(events(b, "scanner.catch")).toEqual([expect.objectContaining({ n: 1, device: "observatory", dir: "in" })]);
+    const out = run(b, "observatory", "lab scanner open 1 --layer message");
     expect(out).toHaveLength(3);
     expect(out[1]).toContain("10.0.1.255");
     expect(out[2]).toContain("the lamps remember: amber-chapel");
-    expect(events(b, "slate.open").at(-1)).toMatchObject({ n: 1, layer: "message", reached: true });
+    expect(events(b, "scanner.open").at(-1)).toMatchObject({ n: 1, layer: "message", reached: true });
   });
 
   it("opens only the frame by default, and says when there's no catch", () => {
-    const b = town(["lab slate"]);
-    run(b, "observatory", "lab slate catch --next");
+    const b = town(["lab scanner"]);
+    run(b, "observatory", "lab scanner catch --next");
     b.advance(8000);
-    expect(run(b, "observatory", "lab slate open 1")).toHaveLength(1);
-    expect(run(b, "observatory", "lab slate open 9")).toEqual(["slate.no-catch 9"]);
-    expect(run(b, "observatory", "lab slate")).toHaveLength(1);
+    expect(run(b, "observatory", "lab scanner open 1")).toHaveLength(1);
+    expect(run(b, "observatory", "lab scanner open 9")).toEqual(["scanner.no-catch 9"]);
+    expect(run(b, "observatory", "lab scanner")).toHaveLength(1);
   });
 
   it("can't trace before the tracer is found", () => {
-    const b = town(["lab slate"]);
-    b.exec("observatory", "lab slate trace --next", "typed");
+    const b = town(["lab scanner"]);
+    b.exec("observatory", "lab scanner trace --next", "typed");
     expect(events(b, "cmd.exec").at(-1)?.exitCode).toBe(127);
   });
 });
 
-describe("lab slate: tracing and comparing (9.1)", () => {
+describe("lab scanner: tracing and comparing (9.1)", () => {
   it("catches the traced ping once per street, and compare shows a new frame around the same packet", () => {
-    const b = town(["lab slate", "lab slate trace", "ping"]);
-    run(b, "observatory", "lab slate trace --next");
+    const b = town(["lab scanner", "lab scanner trace", "ping"]);
+    run(b, "observatory", "lab scanner trace --next");
     b.exec("observatory", "ping -c 1 10.0.3.7", "typed");
     b.advance(3000);
-    const caught = events(b, "slate.catch");
+    const caught = events(b, "scanner.catch");
     // Three streets: the observatory's, crossing → arch, arch → belfry. The switch's copy isn't a new street.
     expect(caught.map((c) => `${c.device} ${c.iface}`)).toEqual(["observatory eth0", "crossing eth1", "arch eth1"]);
     expect(caught.every((c) => c.traced)).toBe(true);
-    run(b, "observatory", "lab slate compare 1 3");
-    expect(events(b, "slate.compare").at(-1)).toMatchObject({
+    run(b, "observatory", "lab scanner compare 1 3");
+    expect(events(b, "scanner.compare").at(-1)).toMatchObject({
       samePacket: true,
       sameStreet: false,
       changed: ["frame.to", "frame.from", "packet.ttl", "packet.checksum"],
@@ -155,13 +155,13 @@ describe("lab slate: tracing and comparing (9.1)", () => {
   });
 
   it("two catches of different packets aren't the same packet", () => {
-    const b = town(["lab slate", "lab slate trace", "ping"]);
-    run(b, "observatory", "lab slate catch --next --from 10.0.1.7");
+    const b = town(["lab scanner", "lab scanner trace", "ping"]);
+    run(b, "observatory", "lab scanner catch --next --from 10.0.1.7");
     b.advance(8000);
-    run(b, "observatory", "lab slate trace --next");
+    run(b, "observatory", "lab scanner trace --next");
     b.exec("observatory", "ping -c 1 10.0.3.7", "typed");
     b.advance(12_000);
-    run(b, "observatory", "lab slate compare 1 2");
-    expect(events(b, "slate.compare").at(-1)).toMatchObject({ samePacket: false });
+    run(b, "observatory", "lab scanner compare 1 2");
+    expect(events(b, "scanner.compare").at(-1)).toMatchObject({ samePacket: false });
   });
 });

@@ -63,18 +63,18 @@ import { encodeIPv4, encodeUDP, IPPROTO, parseIp } from "./proto/ipv4";
 import { decodeLab, encodeLab } from "./proto/lab";
 import { heapPop, heapPush } from "./queue";
 import {
-  type SlateCatch,
-  type SlateCompare,
-  type SlateLayerName,
-  type SlateOpen,
-  slateCatches,
-  slateCatchNext,
-  slateCompare,
-  slateKeep,
-  slateOpen,
-  slateSees,
-  slateTraceNext,
-} from "./slate";
+  type ScannerCatch,
+  type ScannerCompare,
+  type ScannerLayerName,
+  type ScannerOpen,
+  scannerCatches,
+  scannerCatchNext,
+  scannerCompare,
+  scannerKeep,
+  scannerOpen,
+  scannerSees,
+  scannerTraceNext,
+} from "./scanner";
 import {
   newBridgeStp,
   type StpTimes,
@@ -214,40 +214,40 @@ export class Simulator implements WorldView {
     if (this.muted) return;
     this.trace.push(e);
     for (const fn of this.listeners) fn(e);
-    if (e.kind === "frame.tx" || e.kind === "frame.rx") slateSees(this.k, e);
+    if (e.kind === "frame.tx" || e.kind === "frame.rx") scannerSees(this.k, e);
   }
 
-  // ── The Slate (0043) ──────────────────────────────────────────────────────────────────
+  // ── The Scanner (0043) ────────────────────────────────────────────────────────────────
 
-  slateCatchNext(device: DeviceId, from?: string): void {
-    slateCatchNext(this.k, device, from);
+  scannerCatchNext(device: DeviceId, from?: string): void {
+    scannerCatchNext(this.k, device, from);
   }
   /**
-   * Catching by hand (CORE-18): a copy of a message in flight goes into the jar (the Slate's catches,
+   * Catching by hand (CORE-18): a copy of a message in flight goes into the jar (the Scanner's catches,
    * 0043); the message itself goes on. Returns the catch's number, or null if there's no such frame.
    */
   catchFrame(frameId: number): number | null {
     for (let i = this.trace.length - 1; i >= 0; i--) {
       const e = this.trace[i];
       if (e?.kind === "frame.tx" && e.frameId === frameId) {
-        slateKeep(this.k, e, false);
-        return this.slateCatches().length;
+        scannerKeep(this.k, e, false);
+        return this.scannerCatches().length;
       }
     }
     return null;
   }
 
-  slateTraceNext(device: DeviceId): void {
-    slateTraceNext(this.k, device);
+  scannerTraceNext(device: DeviceId): void {
+    scannerTraceNext(this.k, device);
   }
-  slateCatches(): readonly SlateCatch[] {
-    return slateCatches(this.k);
+  scannerCatches(): readonly ScannerCatch[] {
+    return scannerCatches(this.k);
   }
-  slateOpen(device: DeviceId, n: number, layer: SlateLayerName): SlateOpen {
-    return slateOpen(this.k, device, n, layer);
+  scannerOpen(device: DeviceId, n: number, layer: ScannerLayerName): ScannerOpen {
+    return scannerOpen(this.k, device, n, layer);
   }
-  slateCompare(a: number, b: number): SlateCompare | null {
-    return slateCompare(this.k, a, b);
+  scannerCompare(a: number, b: number): ScannerCompare | null {
+    return scannerCompare(this.k, a, b);
   }
 
   // ── Snapshots (SIM-39) ────────────────────────────────────────────────────────────────

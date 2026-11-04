@@ -191,7 +191,7 @@ synth "$TMP/s-chime.wav" "aevalsrc='(0.5*sin(2*PI*1318.5*t)*exp(-6*t)+0.16*sin(2
 verb "$TMP/s-chime.wav" "$TMP/s-chime-v.wav" "$TMP/ir-room-m.wav" 1 0.15
 sfx broadcast-chime "$TMP/s-chime-v.wav"
 
-# The Slate's capture chime: two notes, E5 then B5.
+# The Scanner's capture chime: two notes, E5 then B5.
 synth "$TMP/s-capture.wav" "aevalsrc='(0.45*sin(2*PI*659.3*t)*exp(-4*t)+0.1*sin(2*PI*1318.5*t)*exp(-7*t))*(1-exp(-t/0.004))+gte(t,0.13)*(0.45*sin(2*PI*987.8*(t-0.13))*exp(-4*(t-0.13))+0.1*sin(2*PI*1975.5*(t-0.13))*exp(-7*(t-0.13)))*(1-exp(-(t-0.13)/0.004))':d=1.4:s=$SR[out]"
 verb "$TMP/s-capture.wav" "$TMP/s-capture-v.wav" "$TMP/ir-room-m.wav" 1 0.2
 sfx slate-capture "$TMP/s-capture-v.wav"
@@ -226,7 +226,7 @@ synth "$TMP/s-land.wav" "aevalsrc='0.25*(sin(2*PI*440*t)+0.5*sin(2*PI*660*t))*ex
 ff -i "$TMP/s-rev.wav" -i "$TMP/s-breath.wav" -i "$TMP/s-land.wav" -filter_complex "[2]adelay=$(awk -v d="$revlen" 'BEGIN{printf "%d", (d-0.05)*1000}')[l];[0][1][l]amix=inputs=3:normalize=0:duration=longest:weights='1 0.5 0.6'[out]" -map "[out]" -ar $SR -c:a pcm_f32le "$TMP/s-memory.wav"
 sfx memory-rewind "$TMP/s-memory.wav"
 
-# Swooshes: catching a message with the Slate, and a message passing close to the camera.
+# Swooshes: catching a message with the Scanner, and a message passing close to the camera.
 # whoosh <out> <seconds> <seed> <low Hz> <high Hz>: a low band then a high band, so it seems to sweep.
 whoosh() {
   synth "$1" "anoisesrc=d=$2:c=pink:r=$SR:seed=$3,asplit[a][b];[a]bandpass=f=$4:width_type=q:w=1.2,volume='pow(sin(PI*min(t/($2*0.8),1)),2)':eval=frame[x];[b]bandpass=f=$5:width_type=q:w=1.2,volume='pow(sin(PI*max(t-$2*0.2,0)/($2*0.8)),2)':eval=frame[y];[x][y]amix=inputs=2:normalize=0,lowpass=f=6000[out]"

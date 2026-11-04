@@ -16,7 +16,7 @@ export * from "./proto/icmp";
 export * from "./proto/ipv4";
 export * from "./proto/lab";
 export * from "./proto/stp";
-export * from "./slate";
+export * from "./scanner";
 export * from "./stp";
 export * from "./sysctl";
 export * from "./tcpdump";

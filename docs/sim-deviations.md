@@ -16,7 +16,7 @@ Wirelight's simulator and shell treat real Linux as the reference (SRS P-11, SIM
 - `lab send-frame` sends a raw Ethernet II frame with EtherType `0x88B5` (IEEE local experimental) whose payload is UTF-8 text. On an administratively down interface it fails with `Network is down`, as a packet socket would (ENETDOWN). With the interface up but no carrier, the frame is accepted and lost at the door, as on Linux.
 - Hosts run a "lab responder" that answers lab frames. Real hosts would ignore this EtherType. Answers go out on EtherType `0x88B6` (the second IEEE local experimental type) and are never answered, so two responders can't echo each other forever (decision 0058).
 - The messenger is a game service: every few seconds it sends a lab frame to the door name on its card, or, given a house address, one ICMP echo request built like `ping`'s (decision 0059).
-- `lab slate` (the Slate) only reads the trace: it catches frames as they're sent or taken in, peels them and compares them. It never changes the network (decision 0059).
+- `lab scanner` (the Scanner) only reads the trace: it catches frames as they're sent or taken in, peels them and compares them. It never changes the network (decision 0059).
 
 ## Machines (how every room's machines are set up)
 - **IPv4 only.** Real Linux sends IPv6 (router solicitations, MLD) as soon as a door comes up; the game's machines have IPv6 off, and every golden capture and difftest run disables it. `sysctl -a` still lists net.ipv6 keys, as real Linux does with IPv6 disabled.

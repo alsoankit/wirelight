@@ -36,7 +36,7 @@ export const region3Floors: FloorDef[] = [
     content: "6",
     rooms: ["f6.inside-the-envelope", "f6.who-has-this-address", "f6.two-of-me", "f6.boss-mixed-up-letters"],
     boss: "f6.boss-mixed-up-letters",
-    // Journal page 6 is tucked into the Slate's cover in 6.2.
+    // Journal page 6 is tucked into the Scanner's cover in 6.2.
     journalRoom: "f6.who-has-this-address",
   }),
   defineFloor({

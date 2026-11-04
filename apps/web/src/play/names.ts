@@ -24,8 +24,8 @@ export function sayDoor(mac: string, room: Room | undefined): string {
 }
 
 /**
- * What a message is, in plain words, before the Slate (Floor 6): only who it's to and who it's from,
- * read from its frame. No tcpdump text, no ethertypes: those come with the Slate.
+ * What a message is, in plain words, before the Scanner (Floor 6): only who it's to and who it's from,
+ * read from its frame. No tcpdump text, no ethertypes: those come with the Scanner.
  */
 export function plainSummary(bytes: Uint8Array | undefined, room: Room | undefined): string {
   if (!bytes) return "";

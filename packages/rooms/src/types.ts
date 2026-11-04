@@ -72,8 +72,8 @@ export type ControlState = "works" | "broken";
  * - cable end: `lab cable plug|unplug <door>` · workbench: `lab send-frame …` · card: `lab card …`
  * - MAC board: `bridge fdb show` · ledger: `ip neigh show` · routing board: `ip route …`
  * - address slot: `ip addr add|del <cidr> dev <door>` · desk: `lab keeper …`
- * - the Slate: `lab slate catch|open|list` (6.1), Capture = `tcpdump -n -i <door>` (8.4),
- *   Trace and Compare = `lab slate trace|compare` (9.1)
+ * - the Scanner: `lab scanner catch|open|list` (6.1), Capture = `tcpdump -n -i <door>` (8.4),
+ *   Trace and Compare = `lab scanner trace|compare` (9.1)
  */
 export interface Controls {
   /** hidden before the gift of the voice (2.4); echo-only: shows the commands clicks run; typing. */
@@ -86,7 +86,7 @@ export interface Controls {
   workbench?: ControlState;
   /** The messenger's address card (lab card --to). */
   card?: ControlState;
-  /** Catching passing messages (the capture jar, then the Slate). */
+  /** Catching passing messages (the capture jar, then the Scanner). */
   catching?: boolean;
   /** Plate reading (ip link show) is always possible where plates are; their switches by "device:iface". */
   plateSwitches?: Record<string, ControlState>;
@@ -102,8 +102,8 @@ export interface Controls {
   routingBoards?: Record<DeviceId, ControlState>;
   /** A keeper's desk for hand work (0042): the device whose keeper has forgotten. */
   desk?: DeviceId;
-  /** The Slate's abilities (0043): catch and open (6.1), Capture (8.4), Trace and Compare (9.1). */
-  slate?: { catch?: boolean; capture?: boolean; trace?: boolean };
+  /** The Scanner's abilities (0043): catch and open (6.1), Capture (8.4), Trace and Compare (9.1). */
+  scanner?: { catch?: boolean; capture?: boolean; trace?: boolean };
   /** Time control as a puzzle tool (4.1): slow, fast, pause. */
   timeControl?: boolean;
 }

@@ -22,10 +22,10 @@ import {
   decodeEth,
   decodeIPv4,
   fromHex,
+  type ScannerCatch,
+  type ScannerLayerName,
+  type ScannerOpen,
   type SimEvent,
-  type SlateCatch,
-  type SlateLayerName,
-  type SlateOpen,
   type WorldState,
 } from "@wirelight/sim";
 
@@ -69,9 +69,9 @@ const MEANINGFUL = new Set<SimEvent["kind"]>([
   "echo.heard",
   "control.touch",
   "keeper.step",
-  "slate.catch",
-  "slate.open",
-  "slate.compare",
+  "scanner.catch",
+  "scanner.open",
+  "scanner.compare",
   "world.reset",
 ]);
 
@@ -137,15 +137,15 @@ export class Session {
     return { ...this.batch(), n };
   }
 
-  /** Opens a catch down to a layer (CORE-20; the Slate peels it, 0043). */
-  openCatch(device: DeviceId, n: number, layer: SlateLayerName): Batch & { open: SlateOpen } {
-    const open = this.live().world.slateOpen(device, n, layer);
+  /** Opens a catch down to a layer (CORE-20; the Scanner peels it, 0043). */
+  openCatch(device: DeviceId, n: number, layer: ScannerLayerName): Batch & { open: ScannerOpen } {
+    const open = this.live().world.scannerOpen(device, n, layer);
     return { ...this.batch(), open };
   }
 
   /** Every catch so far: number, when, where, and its bytes as hex. */
-  catches(): SlateCatch[] {
-    return [...this.live().world.slateCatches()];
+  catches(): ScannerCatch[] {
+    return [...this.live().world.scannerCatches()];
   }
 
   /** Touches a worn-out control (0040): nothing runs, but the room notices. */

@@ -234,7 +234,7 @@ export const noWayBack = defineRoom({
   faults: [{ kind: "route-remove", device: "gallery", dst: "default" }],
   playerDevice: "observatory",
   access: openRooms(noWayTopo),
-  controls: { console: "typing", routingBoards: crackedBoards(noWayTopo), slate: { catch: true, capture: true } },
+  controls: { console: "typing", routingBoards: crackedBoards(noWayTopo), scanner: { catch: true, capture: true } },
   tools: { unlock: ["tcpdump"] },
   glow: "symptoms",
   winCondition: pingAnswered("observatory", IP.gallery),
@@ -266,7 +266,7 @@ export const noWayBack = defineRoom({
   ],
   solution: [
     typed("observatory", "ping -c 4 10.0.2.7", 1000),
-    // The Slate's Capture, in gallery's room: requests arrive, nothing leaves. It keeps listening.
+    // The Scanner's Capture, in gallery's room: requests arrive, nothing leaves. It keeps listening.
     click("gallery", "tcpdump -n -i eth0", 4000),
     typed("gallery", "ip route add default via 10.0.2.1"),
     typed("observatory", "ping -c 3 10.0.2.7"),
@@ -300,7 +300,7 @@ export const sleepingKeeper = defineRoom({
     console: "typing",
     routingBoards: crackedBoards(sleepingTopo),
     desk: "crossing",
-    slate: { catch: true, capture: true },
+    scanner: { catch: true, capture: true },
   },
   tools: { unlock: ["sysctl"] },
   glow: "symptoms",
@@ -371,7 +371,7 @@ export const closedCrossing = defineRoom({
   ],
   playerDevice: "observatory",
   access: openRooms(closedTopo),
-  controls: { console: "typing", routingBoards: crackedBoards(closedTopo), slate: { catch: true, capture: true } },
+  controls: { console: "typing", routingBoards: crackedBoards(closedTopo), scanner: { catch: true, capture: true } },
   tools: {},
   glow: "none",
   winCondition: pingAnswered("observatory", IP.belfry),

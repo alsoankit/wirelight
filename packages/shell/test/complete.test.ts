@@ -32,8 +32,8 @@ describe("tab completion", () => {
     expect(tab("ip l", ["ip link"]).line).toBe("ip link ");
     expect(tab("ip a", ["ip link"]).candidates).toEqual([]);
     expect(tab("ip link s", ["ip link"])).toEqual({ candidates: ["set", "show"], line: "ip link s" });
-    expect(tab("lab slate ", ["lab slate"]).candidates).toEqual(["catch", "list", "open"]);
-    expect(tab("lab slate ", ["lab slate", "lab slate trace"]).candidates).toContain("trace");
+    expect(tab("lab scanner ", ["lab scanner"]).candidates).toEqual(["catch", "list", "open"]);
+    expect(tab("lab scanner ", ["lab scanner", "lab scanner trace"]).candidates).toContain("trace");
   });
 
   it("knows this machine's doors, and up or down after a door", () => {

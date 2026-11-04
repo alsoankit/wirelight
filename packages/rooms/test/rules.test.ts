@@ -50,9 +50,9 @@ function controlFor(r: RoomDef, s: CommandStep): "works" | "broken" | null {
   if (slot) return c.addressSlots?.[`${s.device}:${slot[1]}`] ?? null;
   if (/^ip route (?:add|del|replace) /.test(s.line)) return c.routingBoards?.[s.device] ?? null;
   if (/^lab keeper /.test(s.line)) return c.desk === s.device ? "works" : null;
-  if (/^tcpdump -n -i \S+$/.test(s.line)) return c.slate?.capture ? "works" : null;
-  if (/^lab slate (?:catch|open|list)\b/.test(s.line)) return c.slate?.catch ? "works" : null;
-  if (/^lab slate (?:trace|compare)\b/.test(s.line)) return c.slate?.trace ? "works" : null;
+  if (/^tcpdump -n -i \S+$/.test(s.line)) return c.scanner?.capture ? "works" : null;
+  if (/^lab scanner (?:catch|open|list)\b/.test(s.line)) return c.scanner?.catch ? "works" : null;
+  if (/^lab scanner (?:trace|compare)\b/.test(s.line)) return c.scanner?.trace ? "works" : null;
   return null;
 }
 

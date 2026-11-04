@@ -3,6 +3,7 @@ import { del, get, set } from "idb-keyval";
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+import { renameCards } from "./renamedCards";
 
 // The player's progress, saved in this browser (ONB-22, idb-keyval): what's been seen (the gifts,
 // the path, the tour), rooms cleared, keys, discovery cards, memories, notes and hints. If storage
@@ -138,7 +139,16 @@ export const useProgress = create<Progress>()(
         }),
       replayIntro: () => setState({ sightGiven: false, tourDone: false }),
     }),
-    { name: "wirelight-progress", version: 1, storage: createJSONStorage(() => idb) },
+    {
+      name: "wirelight-progress",
+      version: 1,
+      storage: createJSONStorage(() => idb),
+      // As the default merge, with cards found under an old id kept under their new one.
+      merge: (saved, current) => {
+        const s = (saved ?? {}) as Partial<Progress>;
+        return { ...current, ...s, ...(Array.isArray(s.cardsSeen) ? { cardsSeen: renameCards(s.cardsSeen) } : {}) };
+      },
+    },
   ),
 );
 

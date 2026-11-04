@@ -9,7 +9,7 @@ import { useProgress } from "../progress/progress";
 // (12 in bosses). On the New path: the first after 60 s, then every 90 s. A room may override.
 
 const READ_ONLY =
-  /^(ip (link|addr|address|route|neigh)( show\b.*)?$|bridge fdb( show)?$|lab (card|slate|keeper)( show| list)?$|lab slate (open|list)\b|tcpdump\b|man\b|help\b|history\b|clear$|hostname$|sysctl [^-])/;
+  /^(ip (link|addr|address|route|neigh)( show\b.*)?$|bridge fdb( show)?$|lab (card|scanner|keeper)( show| list)?$|lab scanner (open|list)\b|tcpdump\b|man\b|help\b|history\b|clear$|hostname$|sysctl [^-])/;
 
 /** Commands that changed something or sent something (HELP-09's attempts). */
 export function attempts(events: readonly SimEvent[]): number {

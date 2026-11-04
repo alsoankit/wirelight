@@ -37,7 +37,7 @@ describe("moments read from the trace", () => {
     const letter = trace.find((e) => e.kind === "link.enter" && e.bytes[0] !== 0xff);
     if (everyone?.kind !== "link.enter" || letter?.kind !== "link.enter") throw new Error("no frames");
     const caught = (frameId: number): SimEvent => ({
-      kind: "slate.catch",
+      kind: "scanner.catch",
       t: 0,
       n: 1,
       device: "observatory",

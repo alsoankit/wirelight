@@ -25,7 +25,7 @@ const giveAddress = async (cidr) => {
   await p.click(".addr-form button");
   await p.waitForTimeout(500);
 };
-const slate = async () => {
+const scanner = async () => {
   await tidy(p);
   await p.click(".jar-button");
   await p.waitForTimeout(300);
@@ -59,16 +59,16 @@ await walk("observatory");
 await card(p, "10.0.1.7");
 await check("5.B");
 
-// 6.1: the Slate catches kitchen's announcement and opens it to the message.
+// 6.1: the Scanner catches kitchen's announcement and opens it to the message.
 await open(p, base, "f6.inside-the-envelope");
-await slate();
+await scanner();
 await p.fill(".addr-form input", "10.0.1.7");
 await p.click(".addr-form button");
 await p.waitForSelector(".catch-list li", { timeout: 15000 });
 await p.click(".catch-list li >> nth=0 >> text=Message");
 await p.waitForTimeout(500);
 await p.screenshot({
-  path: "/tmp/r3-slate.png",
+  path: "/tmp/r3-scanner.png",
 });
 await check("6.1");
 
