@@ -4,9 +4,9 @@ import { useSession } from "../../engine/store";
 import { useBarred } from "../observatory/ObservatoryScene";
 import { useRegion } from "../region";
 import { Board, Desk } from "../room/Furniture";
-import { Guardian } from "../room/Guardian";
 import { doorGeometry } from "../room/layout";
 import { MachineScene } from "../room/MachineScene";
+import { RegionStatue } from "../room/RegionStatue";
 import { SIDE_PLACE } from "../room/standing";
 import { TownSquare } from "../town/TownSquare";
 import { HALL_SLOTS, hallLayout } from "./layout";
@@ -93,7 +93,7 @@ export function HallScene({ device }: { device: string }) {
       />
       {crossing && <Locks device={device} at={[-1.1, 0, -0.3]} />}
       {region === 3 && <TownSquare device={device} />}
-      <Guardian region={region} place={SIDE_PLACE(region)} />
+      <RegionStatue region={region} place={SIDE_PLACE(region)} />
     </MachineScene>
   );
 }

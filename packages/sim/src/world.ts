@@ -223,7 +223,7 @@ export class Simulator implements WorldView {
     scannerCatchNext(this.k, device, from);
   }
   /**
-   * Catching by hand (CORE-18): a copy of a message in flight goes into the jar (the Scanner's catches,
+   * Catching by hand (CORE-18): a copy of a message in flight goes into Captures (the Scanner's catches,
    * 0043); the message itself goes on. Returns the catch's number, or null if there's no such frame.
    */
   catchFrame(frameId: number): number | null {

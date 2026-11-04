@@ -30,7 +30,7 @@ export const firstMessage: RoomText = {
       action: "hover the moving message",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "What is this place?",
       a: "The room I shut down in. It's a machine, like every room here. The palace calls it the observatory, so that's its name.",

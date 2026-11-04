@@ -6,7 +6,7 @@ import { CommandMemory } from "./CommandMemory";
 import { type Line, Lines } from "./Lines";
 
 // The gift of the voice (0032, floors/floor-2.md 2.4): the first click on the worn-out switch (or 20 s
-// in the room) brings the Knight's note and the Guardian's four lines; then the command memory
+// in the room) brings the robot's note and four spoken lines; then the command memory
 // (CMD-01, automatic the first time); then the console wakes. Before that, the room has no console.
 
 const WAIT_MS = 20_000;

@@ -2,7 +2,7 @@
 export interface RegionInfo {
   n: number;
   name: string;
-  guardian: string;
+  speaker: string;
 }
 
 export interface FloorInfo {
@@ -14,10 +14,10 @@ export interface FloorInfo {
 }
 
 export const regions: Record<number, RegionInfo> = {
-  1: { n: 1, name: "The Overgrown Halls", guardian: "you" },
-  2: { n: 2, name: "The Sorting Works", guardian: "you" },
-  3: { n: 3, name: "The Lantern Town", guardian: "you" },
-  4: { n: 4, name: "The Cathedral of Crossings", guardian: "you" },
+  1: { n: 1, name: "The Overgrown Halls", speaker: "you" },
+  2: { n: 2, name: "The Sorting Works", speaker: "you" },
+  3: { n: 3, name: "The Lantern Town", speaker: "you" },
+  4: { n: 4, name: "The Cathedral of Crossings", speaker: "you" },
 };
 
 export const floors: Record<number, FloorInfo> = {

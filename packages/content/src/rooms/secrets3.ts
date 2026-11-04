@@ -41,7 +41,7 @@ export const binaryBehind24: RoomText = {
       "An address is 32 bits: four numbers of 8 bits each, and a bit is a light that's on or off. `/24` is the prefix length: the first 24 bits, the first three numbers, are the subnet. That leaves 8 bits for the machines on it: 256 numbers, `.0` to `.255`. `.0` names the subnet itself and `.255` reaches everyone on it, so 254 machines fit. Your plate said `/25`: one more bit of subnet, one fewer for machines. That cut the square into two halves, `.0` to `.127` and `.128` to `.255`, and chapel, at `.200`, was on the other half. With `/24` again, the subnet was whole. A `/16` goes the other way: only two numbers of subnet, and 65,536 addresses in it.",
     terms: [],
   },
-  guardian: [
+  questions: [
     {
       q: "Why 24?",
       a: "Count the bits. Each of the four numbers is 8 bits: that's 8, 16, 24. Three numbers' worth is the subnet.",

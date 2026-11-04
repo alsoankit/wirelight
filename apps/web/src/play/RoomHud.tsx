@@ -16,7 +16,7 @@ const NONE: never[] = [];
 // The HTML layer over the room (gameplay/interface.md): all readable text is HTML, crisp at every
 // tier. The floor and room title with the mission (top left), the room's own controls (bottom), and
 // after the win the debrief (HELP-13): what happened, new words, what you tried, the key, then the
-// Guardian's memories (building, floor), and on to the next room on your path.
+// memories (building, floor), and on to the next room on your path.
 
 const DEBRIEF_AFTER_MS = 2600; // let the restoration wave finish first
 
@@ -95,10 +95,10 @@ export function RoomHud() {
   const next = nextOnPath(rooms, room.id, path);
   const floor = floorDefs.find((f) => f.floor === room.floor);
   const floorText = floorTexts[room.floor];
-  const guardian = regions[room.region]?.guardian ?? "";
+  const speaker = regions[room.region]?.speaker ?? "";
   const isBoss = floor?.boss === room.id;
   const tried = fired.map((id) => text.detectors[id]?.tried).filter((t): t is string => !!t);
-  const capital = guardian.charAt(0).toUpperCase() + guardian.slice(1);
+  const capital = speaker.charAt(0).toUpperCase() + speaker.slice(1);
 
   return (
     <>
@@ -119,7 +119,7 @@ export function RoomHud() {
               data-pulse={heard === null && !won ? "yes" : "no"}
               onClick={() => {
                 exec(send.device, send.line, "click");
-                // The Prologue: the Glass opens so the first message can be watched there (ONB-19).
+                // The Prologue: the Map opens so the first message can be watched there (ONB-19).
                 if (room.kind === "prologue") openGlass();
               }}
             >
@@ -133,7 +133,7 @@ export function RoomHud() {
           )}
         </footer>
       </div>
-      {/* The debrief sits outside the room's layer, above the Glass and the world's labels. */}
+      {/* The debrief sits outside the room's layer, above the Map and the world's labels. */}
       {showDebrief && !finale && !memoryShowing && (
         <section ref={takeFocusPolitely} className="debrief" aria-live="polite" aria-labelledby="debrief-title">
           <h2 id="debrief-title">{voice.debrief.title}</h2>
@@ -180,7 +180,7 @@ export function RoomHud() {
             )}
             {isBoss && floorText && (
               <button type="button" className="quiet" onClick={() => openMemory({ kind: "floor", floor: room.floor })}>
-                {fill(voice.after.floorMemory, { guardian: capital })}
+                {fill(voice.after.floorMemory, { speaker: capital })}
               </button>
             )}
             <button

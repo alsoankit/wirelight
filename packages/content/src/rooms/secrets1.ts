@@ -32,7 +32,7 @@ export const why48Bits: RoomText = {
       "A MAC address is 48 bits long. A bit is one tiny light, on or off: each pair in the address is 8 of them, and six pairs make 48, enough addresses for every door ever made. The first three pairs say who made the door (00:1b:21 is one maker's mark); the last three are that door's own number. Addresses starting with 02 were set by hand.",
     terms: [],
   },
-  guardian: [
+  questions: [
     {
       q: "Who made this door?",
       a: "A factory. Factories burn a name into every door they make, and part of it says which factory.",

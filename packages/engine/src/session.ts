@@ -131,7 +131,7 @@ export class Session {
     return complete(this.live().world, device, line, toolsIn(this.current(), rooms) as Set<ToolId>);
   }
 
-  /** Catches a copy of a message in flight into the jar (CORE-18); it goes on its way. */
+  /** Catches a copy of a message in flight into Captures (CORE-18); it goes on its way. */
   catchFrame(frameId: number): Batch & { n: number | null } {
     const n = this.live().world.catchFrame(frameId);
     return { ...this.batch(), n };

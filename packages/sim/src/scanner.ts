@@ -102,7 +102,7 @@ function packetKey(bytes: Uint8Array): string | null {
   return `${ip.src}>${ip.dst}/${ip.proto}#${ip.id}`;
 }
 
-/** Keeps a copy of a frame that was sent or taken in (the Scanner, or catching by hand into the jar). */
+/** Keeps a copy of a frame that was sent or taken in (the Scanner, or catching by hand into Captures). */
 export function scannerKeep(k: Kernel, e: FrameEvent, traced: boolean): void {
   keep(k, e, traced);
 }

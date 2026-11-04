@@ -382,7 +382,7 @@ function farPalace(bag: Bag, seed: number, start = 2.4, scale = 0.42): KitPlacem
 }
 
 // ---------------------------------------------------------------------------------------------------
-// The Observatory (the Knight's lodging in the quarter) and the other residences: plaster rooms over a
+// The Observatory (the robot's lodging in the quarter) and the other residences: plaster rooms over a
 // carved plinth, stone pilasters and cornice, dressed paving, lanterns and a tall window or two.
 
 /** A carved stone frame round a round-headed doorway (the doors read first in every room). */
@@ -436,7 +436,7 @@ function interiorStone(bag: Bag) {
 
 const OBSERVATORY_KIT: KitPlacement[] = [
   ...interiorWalls([3], [-1]),
-  // A crate left by the wall, a broken pot, loose bricks (one weighs down the Knight's letter). No
+  // A crate left by the wall, a broken pot, loose bricks (one weighs down the old letter). No
   // whole pots (0052).
   prop("Vase_Rubble_Medium", 3.0, -3.2, 2.2),
   prop("Crate_Wooden", 3.0, -1.9, 0.5, 0.6),

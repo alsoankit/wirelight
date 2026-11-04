@@ -15,10 +15,10 @@ import { arrivalText, machineNamer } from "./names";
 import { useMachineLabel } from "./roles";
 import { WorldMap } from "./WorldMap";
 
-// The Scrying Glass (CORE-31..33, 0064): a live map of the whole floor, view-only. Machines are
+// The Map (CORE-31..33, 0064): a live map of the whole floor, view-only. Machines are
 // nodes, cables lines between doors; a corridor's state shows by shape and colour (dark: thin,
 // lit: bright, broken: dashed); messages move along the lines from the same trace and presentation
-// clock as the room. G opens it full screen; the mini Glass sits in the corner. A second view is the
+// clock as the room. G opens it full screen; the mini map sits in the corner. A second view is the
 // world map (0039): every region and floor, cleared floors glowing, the next one in mist.
 
 export type Node = { id: string; x: number; y: number; kind: "you" | "switch" | "router" | "house" };
@@ -319,11 +319,11 @@ export function Glass() {
   const corridorLinkDef = corridorLink ? room?.topology.links.find((x) => x.id === corridorLink) : undefined;
   const corridorEnds = corridorLinkDef ? ([corridorLinkDef.a.device, corridorLinkDef.b.device] as const) : null;
   const setReplay = useSession((s) => s.setReplay);
-  // A replay opens the Glass on it; closing the Glass ends it.
+  // A replay opens the Map on it; closing the Map ends it.
   useEffect(() => {
     if (replay !== null) setOpen(true);
   }, [replay]);
-  // The Glass opening is a moment (P-MEM-01 plays the first time).
+  // The Map opening is a moment (P-MEM-01 plays the first time).
   useEffect(() => {
     if (open) noteMoment("glass-open");
   }, [open]);
@@ -336,7 +336,7 @@ export function Glass() {
       if (e.key === "g" || e.key === "G") setOpen((o) => !o);
       if (e.key === "Escape") setOpen(false);
     };
-    // Agent A hook: something else opens the Glass (the Prologue's Send, ONB-19).
+    // Agent A hook: something else opens the Map (the Prologue's Send, ONB-19).
     const onOpen = () => setOpen(true);
     const onClose = () => setOpen(false); // the debrief arrives: the restored room is the thing to see
     window.addEventListener("keydown", onKey);

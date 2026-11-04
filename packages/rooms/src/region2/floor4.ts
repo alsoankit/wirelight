@@ -239,7 +239,7 @@ export const spareCable = defineRoom({
       machine("forge", FORGE, "hall-b", "eth1", 10, anvilSpareReply),
       machine("chapel", CHAPEL, "hall-b", "eth2", 18),
     ],
-    // The Knight's spare: plugged in at hall-a, its other end lying by hall-b's eth4.
+    // A spare: plugged in at hall-a, its other end lying by hall-b's eth4.
     spans: [
       { ...span, ...STORM_LINK },
       { ...span2, ...STORM_LINK },

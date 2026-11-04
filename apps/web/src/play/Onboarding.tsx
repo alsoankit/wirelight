@@ -109,7 +109,7 @@ function useTarget(target: string | undefined) {
   return box;
 }
 
-/** Keys the tour keeps for itself: the room, the menu and the Glass wait until it's over (ONB-14). */
+/** Keys the tour keeps for itself: the room, the menu and the Map wait until it's over (ONB-14). */
 const TOUR_KEYS = new Set(["Tab", "Enter", " ", "ArrowLeft", "ArrowRight", "Escape"]);
 
 /** After the tour, focus goes to the room's first thing to do (the Send button, ONB-19). */

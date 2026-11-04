@@ -22,7 +22,7 @@ import { type RootRun, rootRuns } from "./roots";
 //
 // Rooms are 8 × 8 m around the origin, seen from the front right (only the back wall at z = −4 and
 // the left wall at x = −4 are built). Nothing may stand in front of a gameplay object (plates, boards,
-// the desk, the Glass, the keeper) as the game camera sees it.
+// the desk, the planning table, the keeper) as the game camera sees it.
 
 const QUARTER = Math.PI / 2;
 
@@ -62,7 +62,7 @@ function nature(
 //
 // The doorway is a round arch in the back wall at x = 0, leading to the corridor (−z); on Floor 2 a
 // second arch in the left wall at z = 2. Broken stone, a fallen column, rubble, grass in the cracks,
-// and the Knight's cloak on its peg.
+// and an old cloak on its peg.
 
 // Back wall: the overgrown arch is broken at the top; the right end has collapsed to a holed stub.
 function backWall(): Placement[] {
@@ -107,11 +107,11 @@ function rubble(): Placement[] {
     { piece: "Bricks", position: [-3.2, 0, 3.4], rotationY: 2.1 },
     { piece: "Brick", position: [1.9, 0, 2.2], rotationY: 0.7 },
     { piece: "Brick", position: [-2.6, 0, -0.2], rotationY: 0.3 },
-    { piece: "Brick", position: [1.75, 0, 2.55], rotationY: 2.0 }, // weighs down the Knight's letter
+    { piece: "Brick", position: [1.75, 0, 2.55], rotationY: 2.0 }, // weighs down the old letter
   ];
 }
 
-// An old statue of the weavers' beasts, broken: a stag that has toppled onto its side. (A standing
+// An old statue of the builders' beasts, broken: a stag that has toppled onto its side. (A standing
 // fox statue behind the keeper read as the keeper itself, a cat on a plinth: playtest.)
 function statues(): Placement[] {
   return [
@@ -121,8 +121,8 @@ function statues(): Placement[] {
   ];
 }
 
-// The Knight's traces (0052): his cloak, left on its peg.
-function knight(): Placement[] {
+// An old cloak, left on its peg (0052).
+function cloak(): Placement[] {
   return [{ piece: "Flag_Wall", position: [-3.95, 0.45, 1.3], rotationY: QUARTER }];
 }
 
@@ -134,7 +134,7 @@ export function hallsObservatoryPieces(secondDoor: boolean): Placement[] {
     ...pillars(),
     ...rubble(),
     ...statues(),
-    ...(secondDoor ? [] : knight()),
+    ...(secondDoor ? [] : cloak()),
   ];
 }
 
@@ -209,7 +209,7 @@ function observatoryRoots(secondDoor: boolean): BufferGeometry[] {
       strands: 2,
       seed: 15,
     },
-    // Over the broken top of the left wall's middle, then trained round the top of the weavers'
+    // Over the broken top of the left wall's middle, then trained round the top of the builders'
     // emblem (0091) and down its far side, clear of the rune below it.
     {
       path: [
@@ -248,7 +248,7 @@ function observatoryRoots(secondDoor: boolean): BufferGeometry[] {
 
 // Moss and growth reclaiming the hall (layers 2 and 4): ferns, mushrooms and a bracket fungus where
 // the great root comes down, growth pouring in where the corner collapsed, clover where the
-// moonlight pools, loose chips of stone by the rubble. Low along the walls and in the corners, so the boards, the desk, the Glass,
+// moonlight pools, loose chips of stone by the rubble. Low along the walls and in the corners, so the boards, the desk, the planning table,
 // the keeper and the plates stay clear.
 // With two doors, the strip from the second (sealed) arch across the floor stays bare: 2.B's great
 // channel and its wall of roots run there (room/BossPiece.tsx).
@@ -291,14 +291,14 @@ function observatoryGrowth(secondDoor: boolean): KitPlacement[] {
   // A fallen block by the rubble at the front of the left wall.
   out.push(carvedPiece("rock-moss-a", [-3.45, -0.08, 3.05], { turn: 1.1, scale: 0.62 }));
   if (!secondDoor) {
-    // Under the Knight's cloak.
+    // Under the old cloak.
     out.push(nature("Grass_Wispy_Short", [-3.6, 0, 1.75], 0.4, 0.8));
   }
   return out;
 }
 
-// The Knight's tower stands by the outer gate (0088): the gate beyond its collapsed corner, a rune
-// stone of the wire-weavers beyond the broken left wall. Both far outside, behind nothing.
+// An old tower stands by the outer gate (0088): the gate beyond its collapsed corner, a rune
+// stone of the first builders beyond the broken left wall. Both far outside, behind nothing.
 const OBSERVATORY_VIEW: StatuePlace[] = [
   { slug: "stone-gate", position: [5.6, 0, -5.7], turn: -0.6, scale: 0.72 },
   { slug: "rune-monolith", position: [-6.3, 0, 2.2], turn: 0.8, scale: 0.9 },
@@ -345,7 +345,7 @@ export function hallsObservatory(secondDoor: boolean): HallsRoom {
 // Another computer's room (lantern; quill's is sealed)
 // ---------------------------------------------------------------------------------------------------
 //
-// A walled garden court of the same weavers (0088), one arch in the back wall where the corridor
+// A walled garden court of the same builders (0088), one arch in the back wall where the corridor
 // comes in: clipped hedges gone shaggy, a topiary in the far corner, a lion's head on the wall where a
 // fountain ran, and the next court's ruined arch beyond the fallen corner.
 

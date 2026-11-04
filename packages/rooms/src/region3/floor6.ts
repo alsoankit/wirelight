@@ -1,4 +1,4 @@
-/** floors/floor-6.md · Envelopes. The Scanner replaces the capture jar (0043); the house's keeper by hand (0042). */
+/** floors/floor-6.md · Envelopes. The Scanner replaces Captures (0043); the house's keeper by hand (0042). */
 import { keyFor, lanternLampsRemember } from "@wirelight/content";
 import type { Fault } from "@wirelight/sim";
 import { all, not, ran } from "../predicates";
@@ -188,7 +188,7 @@ export const twoOfMe = defineRoom({
   pathTag: "core",
   content: twoId,
   seed: 63,
-  // The Knight's messenger keeps pinging kitchen, so the answers (and who sends them) keep coming.
+  // The messenger keeps pinging kitchen, so the answers (and who sends them) keep coming.
   // Kitchen and library each call on the observatory now and then; on real Linux the ledger keeps the
   // first answer and switches only when the other house asks the observatory something itself
   // (decision 0061), so these calls are what make the stranger answer "sometimes".

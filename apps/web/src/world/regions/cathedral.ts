@@ -38,7 +38,7 @@ type Wall = Exclude<DoorWall, "front">;
 // (coloured in regions/Haze.tsx), the doorways (the kit's doors are 2 × 3.4 m only at the 8 m-tall
 // scale; the chapels keep the Ruins kit's gothic arch, the crossing halls a pointed doorway for every
 // town, its bay laid in courses like the kit's: the Ashlar swatch), slender shafts on the bays'
-// joints, the cornice, the warden's statue, the coloured shafts and pools, the haze.
+// joints, the cornice, the region's statue, the coloured shafts and pools, the haze.
 // Restored, the trim sheet's red brick and grey ashlar turn to pale sandstone (`LOOKS[4].kitStone`),
 // the floor keeping more of its grey.
 // Ruin: cold grey stone, dark glass, grey-blue shafts. Restored: the windows lit, golden and coloured
@@ -213,7 +213,7 @@ function finish(room: Room) {
 
 // ---------------------------------------------------------------------------------------------------
 // The Observatory: a side chapel of the Cathedral. A lancet in the back wall, a tall window in the
-// left, the gothic arch to the nave (and a second to the left with two doors), the warden's statue in
+// left, the gothic arch to the nave (and a second to the left with two doors), the region's statue in
 // the far corner, a column fallen along the left wall, candles in the back corner. A stone plinth
 // under the bays, shafts on their joints, a cornice along the top.
 
@@ -223,7 +223,7 @@ export function cathedralObservatoryPieces(secondDoor: boolean): Placement[] {
     ...(secondDoor ? [{ piece: "Wall_ArchGothic", position: [-4, 0, 2], rotationY: QUARTER } as Placement] : []),
     { piece: "Bricks", position: [-2.9, 0, 3.5], rotationY: 2.1, scale: 0.7 },
     { piece: "Brick", position: [-2.2, 0, 2.6], rotationY: 0.7 },
-    { piece: "Brick", position: [1.75, 0, 2.55], rotationY: 2.0 }, // weighs down the Knight's letter
+    { piece: "Brick", position: [1.75, 0, 2.55], rotationY: 2.0 }, // weighs down the old letter
   ];
 }
 
@@ -255,7 +255,7 @@ export function cathedralObservatory(secondDoor: boolean) {
   );
   room.kit.push(...floor("floor_01"), ...piers(), fallenColumn([-3.25, 0.4]));
   candles(room, [-3.1, -3.15]);
-  // The warden herself stands here now, a statue of her own (room/Guardian.tsx, 0094).
+  // The region's statue stands here now (room/RegionStatue.tsx, 0094).
   return { placements: cathedralObservatoryPieces(secondDoor), ...finish(room) };
 }
 

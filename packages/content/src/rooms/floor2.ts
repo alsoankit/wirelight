@@ -46,7 +46,7 @@ export const firstLight: RoomText = {
       action: "drag a word into the Message slot",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "Who is the message for?",
       a: "Every door has a name. Write the name of the door you want it to reach.",
@@ -109,7 +109,7 @@ export const wrongName: RoomText = {
     {
       id: "F2-MEM-02",
       title: "Catching",
-      trigger: "first time a message moves while the jar is ready",
+      trigger: "first time a message moves while Captures is ready",
       text: "I can catch a copy of a message without stopping it. Pointing at it slows time down.",
       action: "catch one message",
     },
@@ -121,7 +121,7 @@ export const wrongName: RoomText = {
       action: "open the catch",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "What are those marks at kitchen's door?",
       a: "Messages that got there and went no further. Kitchen decided they weren't meant for it.",
@@ -179,7 +179,7 @@ export const whoAreYou: RoomText = {
       { id: "source-address", term: "source address", meaning: "the from on a frame: who sent it" },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "How can I learn its name?",
       a: "If you can't read its plate, call out to everyone and it may answer.",
@@ -243,7 +243,7 @@ export const lightsOut: RoomText = {
       action: "press the up arrow once",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "Why did the switch break?",
       a: "Everything here was left alone too long. The further in, the more broken controls there will be.",

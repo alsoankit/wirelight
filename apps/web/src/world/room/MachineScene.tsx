@@ -75,7 +75,7 @@ type Props = {
   barred: (peer: string) => string | undefined;
   glows: Glow[];
   arriving?: boolean;
-  /** What only this room has (the Observatory's Glass, runes, the Knight's letter…). */
+  /** What only this room has (the Observatory's planning table, runes, the old letter…). */
   children?: ReactNode;
 };
 
@@ -182,7 +182,7 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
               data-tab={TAB.keeper}
               onClick={() => openPanel({ kind: "keeper", device })}
             >
-              {region === 4 ? voice.keeper.navigator : voice.keeper.name}
+              {voice.keeper.name}
             </button>
           </Html>
           {doors.map((info, i) => {

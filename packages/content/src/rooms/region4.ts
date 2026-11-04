@@ -23,11 +23,11 @@ export const region4FloorTexts: Record<number, FloorText> = { 8: floor8, 9: floo
 type Line = { id: string; speaker: string; text: string };
 
 /**
- * Arriving in Region 4 (floors/floor-8.md): a vast, quiet cathedral of pale stone; the stone warden,
- * a tall winged statue, turns its head as you enter. Short, calm sentences, never unkind.
+ * Arriving in Region 4 (floors/floor-8.md): a vast, quiet cathedral of pale stone; a tall winged
+ * statue turns its head as you enter. Short, calm sentences, never unkind.
  */
-export const region4Arrival: { guardian: string; lines: Line[] } = {
-  guardian: "you",
+export const region4Arrival: { speaker: string; lines: Line[] } = {
+  speaker: "you",
   lines: [
     { id: "R4-ARRIVE-01", speaker: "You", text: "Up through the town, and into the cathedral." },
     {

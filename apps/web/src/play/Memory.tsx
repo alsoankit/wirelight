@@ -12,7 +12,7 @@ import { useMoments } from "./momentRules";
 import { RideAlong } from "./RideAlong";
 import { floorStates, WorldMapView } from "./WorldMap";
 
-// Guardian memories in the Scrying Glass (0036, 0037, tech/rendering.md "Memories and
+// Floor memories on the Map (0036, 0037, tech/rendering.md "Memories and
 // ride-alongs"): the floor as it was, in a warm sepia-gold grade with a soft vignette ("back in
 // time"). A floor memory comes in chapters (the problem, what they built, a ride-along, what's next),
 // each line spoken from its audio slot (0047) and always written out; Next and Back move between
@@ -51,7 +51,7 @@ function chaptersOf(
     const text = floorTexts[show.floor];
     const def = floorDefs.find((f) => f.floor === show.floor);
     if (!text || !def) return null;
-    const guardian = capitalise(regions[def.region]?.guardian ?? "");
+    const speaker = capitalise(regions[def.region]?.speaker ?? "");
     const chapters: Chapter[] = text.memory.map((c) => ({
       id: c.id,
       title: c.title,
@@ -60,15 +60,15 @@ function chaptersOf(
     }));
     if (text.farewell)
       chapters.push({ id: text.farewell.id, title: voice.memory.farewell, text: text.farewell.text, ride: false });
-    return { speaker: guardian, heading: fill(voice.memory.floor, { guardian }), mapRoom: def.boss, chapters };
+    return { speaker, heading: fill(voice.memory.floor, { speaker }), mapRoom: def.boss, chapters };
   }
   const room = roomById(show.roomId);
   const building = room ? roomTexts[room.content]?.building : undefined;
   if (!room || !building) return null;
-  const speaker = capitalise(regions[room.region]?.guardian ?? "");
+  const speaker = capitalise(regions[room.region]?.speaker ?? "");
   return {
     speaker,
-    heading: fill(voice.memory.floor, { guardian: speaker }),
+    heading: fill(voice.memory.floor, { speaker }),
     mapRoom: room.id,
     chapters: [{ id: building.id, title: voice.memory.building, text: fill(building.text, room.vars), ride: false }],
   };
@@ -165,7 +165,7 @@ function afterFloorMemory(floor: number): void {
   useMoments.getState().setEnding(true);
 }
 
-/** The memory being shown, if any; mounted once beside the Glass. */
+/** The memory being shown, if any; mounted once beside the Map. */
 export function Memory() {
   const show = useMemory((s) => s.show);
   const close = useMemory((s) => s.close);

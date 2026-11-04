@@ -37,7 +37,7 @@ import { Keyboard } from "./Keyboard";
 import { isTyping, withModifier } from "./keys";
 import { LoadingScreen } from "./LoadingScreen";
 import { Menu } from "./Menu";
-import { Ending, KnightMoments, MomentsDriver, WayBack } from "./Moments";
+import { Ending, MomentsDriver, TipMoments, WayBack } from "./Moments";
 import { Onboarding } from "./Onboarding";
 import { PlatePanel } from "./PlatePanel";
 import { AskPanel, DiscoveryCards, NotesPanel, Reaction, TopBar } from "./RoomHelp";
@@ -275,7 +275,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <Reaction />
         {hydrated && <Onboarding skipTour={skipIntro} />}
         {hydrated && tourDone && <DiscoveryCards />}
-        {hydrated && tourDone && <KnightMoments />}
+        {hydrated && tourDone && <TipMoments />}
         <MomentsDriver />
         <WayBack />
         <Ending />

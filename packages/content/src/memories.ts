@@ -1,4 +1,4 @@
-// Guardian memories and ride-alongs (0036, 0037, 0066): the words drawn inside the memory's
+// Floor memories and ride-alongs (0036, 0037, 0066): the words drawn inside the memory's
 // pictures, the ride-along's leg titles, notes and header cards, and the world map (0039).
 // Plain modern English; nothing named before the floor that teaches it.
 

@@ -885,7 +885,7 @@ body:has(.console[data-open="yes"]) .panel {
 }
 
 /* Large text (UI-22 at 150%): the top bar keeps to one line with its icons, the mission card stays
-   clear of it, panels start higher (above), and the mini Glass steps aside while a panel is open. */
+   clear of it, panels start higher (above), and the mini map steps aside while a panel is open. */
 :root[data-text-size="1.5"] .top-bar .bar-word {
   display: none;
 }
@@ -1232,7 +1232,7 @@ button.link {
   margin: 4px 0;
 }
 
-/* Choosing your path (ONB-11): in-world, the Guardian asking. */
+/* Choosing your path (ONB-11), in the world. */
 .path-choice {
   position: fixed;
   left: 50%;
@@ -1487,7 +1487,7 @@ button.link.inline {
   bottom: calc(38vh / var(--ui-zoom, 1) + 12px);
 }
 
-/* The Scrying Glass (0064): the mini Glass bottom right (CORE-33), the full map on G. */
+/* The Map (0064): the mini map bottom right (CORE-33), the full map on G. */
 .mini-glass {
   position: fixed;
   right: 16px;
@@ -1807,9 +1807,9 @@ button.link.inline {
   color: var(--text-dim);
 }
 
-/* Guardian memories, ride-alongs and the world map (agent E): see play/memory.css. */
+/* Floor memories, ride-alongs and the world map (agent E): see play/memory.css. */
 
-/* Game-feel moments (play/Moments.tsx): Knight's memory offers and their actions (0008), the way
+/* Game-feel moments (play/Moments.tsx): tip offers and their actions (0008), the way
    back (HELP-12), and the first release's ending card (END1). */
 /* A memory offered, or its action, top centre: small, never in the way (only its buttons take clicks). */
 .moment-card {
@@ -2207,7 +2207,7 @@ button.link.inline {
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* The debrief: beside the room, so the restored room stays in view; above the Glass and the labels,
+/* The debrief: beside the room, so the restored room stays in view; above the Map and the labels,
    below the menu; it ends above the console bar (UI-02). Narrow screens: centred. */
 .debrief {
   position: fixed;
@@ -2238,7 +2238,7 @@ body:has(.debrief, .glass, .cmd-memory, .path-choice, .gift-stage, .ending-stage
   visibility: hidden;
 }
 
-/* Spoken lines are always readable: above the Glass and a debrief, below a memory and the menu. */
+/* Spoken lines are always readable: above the Map and a debrief, below a memory and the menu. */
 .lines {
   z-index: 57;
 }
@@ -2489,7 +2489,7 @@ body:has(.menu, .gift-stage, .tour) .dev-toggle {
   }
 }
 
-/* ── Agent B · panels and teaching: where you are, arrivals, desk, boards, Scanner, Glass ───────── */
+/* ── Agent B · panels and teaching: where you are, arrivals, desk, boards, Scanner, Map ─────────── */
 .mini-glass {
   overflow: hidden;
 }

@@ -50,7 +50,7 @@ export const sameStreet: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "Why doesn't my machine even try?",
       a: "It only talks directly to its own street. For anywhere else, it needs directions. And it has none, yet.",
@@ -110,7 +110,7 @@ export const askForAnAddress: RoomText = {
       { id: "lease", term: "lease", meaning: "an address on loan for a while" },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "How do I call out without an address?",
       a: "You send a broadcast, from no address at all. The registry is used to it.",

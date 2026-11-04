@@ -45,7 +45,7 @@ export const otherStreet: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     { q: "What is this room?", a: "A machine with one foot on each subnet." },
     { q: "Why two addresses?", a: "One door on each subnet. Each door's address belongs to the subnet it stands on." },
     { q: "Can I reach gallery now?", a: "Not yet. Your house doesn't know the crossing is here." },
@@ -100,7 +100,7 @@ export const acrossTheStreet: RoomText = {
     ],
   },
   memories: [],
-  guardian: [
+  questions: [
     { q: "Why the near door?", a: "You can only hand a packet to a machine on your own subnet." },
     {
       q: "Does gallery need this too?",
@@ -146,7 +146,7 @@ export const directions: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "Who sent that message back?",
       a: "The router, crossing. It had nowhere to send your packet, so it told you.",
@@ -188,7 +188,7 @@ export const noWayBack: RoomText = {
       "Your pings reached gallery, but gallery had no route back to your subnet, so its replies were never sent. Every conversation needs a way there and a way back: the return path. Listening at each door showed you exactly where it stopped.",
     terms: [{ id: "return-path", term: "return path", meaning: "the way the answers come back; it needs routes too" }],
   },
-  guardian: [
+  questions: [
     { q: "Why no error this time?", a: "The road was fine. The packet arrived. The reply was never sent." },
     {
       q: "How do I know where it stops?",
@@ -237,7 +237,7 @@ export const sleepingKeeper: RoomText = {
     ],
   },
   memories: [],
-  guardian: [
+  questions: [
     {
       q: "Why would a router refuse?",
       a: "Most machines must not pass along packets that aren't theirs. A router has to be told it may.",

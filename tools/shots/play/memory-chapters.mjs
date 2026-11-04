@@ -1,4 +1,4 @@
-// Every Guardian memory, chapter by chapter, and every building memory (0036, 0037, 0066, 0071):
+// Every floor memory, chapter by chapter, and every building memory (0036, 0037, 0066, 0071):
 // screenshots of each chapter's picture as it builds and when it's finished, and of each ride-along's
 // steps. Usage: node memory-chapters.mjs http://127.0.0.1:5173/play <screenshot folder> [floors] [WxH]
 import { launch, tidy } from "./lib.mjs";

@@ -80,13 +80,13 @@ export interface Controls {
   console: "hidden" | "echo-only" | "typing";
   /** The Prologue's Send button: the command it runs. */
   sendButton?: CommandStep;
-  /** Open the Scrying Glass when the Send button is pressed (ONB-19). */
+  /** Open the Map when the Send button is pressed (ONB-19). */
   glassOnSend?: boolean;
-  /** The Knight's workbench (lab send-frame), on `observatory`. */
+  /** The workbench (lab send-frame), on `observatory`. */
   workbench?: ControlState;
   /** The messenger's address card (lab card --to). */
   card?: ControlState;
-  /** Catching passing messages (the capture jar, then the Scanner). */
+  /** Catching passing messages (Captures, then the Scanner). */
   catching?: boolean;
   /** Plate reading (ip link show) is always possible where plates are; their switches by "device:iface". */
   plateSwitches?: Record<string, ControlState>;
@@ -135,7 +135,7 @@ export interface RoomDef {
   tools: { unlock?: ToolId[]; restrict?: ToolId[] };
   glow: "causes" | "symptoms" | "none";
   subtitles?: boolean;
-  /** The Glass is open when the room starts. */
+  /** The Map is open when the room starts. */
   glassOpen?: boolean;
 
   winCondition: Predicate;
@@ -174,7 +174,7 @@ export function defineRoom(def: RoomDef): RoomDef {
 export interface FloorDef {
   floor: number;
   region: number;
-  /** Content id of the floor's text (floor memory chapters, journal page, Guardian farewell). */
+  /** Content id of the floor's text (floor memory chapters, journal page, farewell). */
   content: string;
   rooms: string[];
   boss: string;

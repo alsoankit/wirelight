@@ -47,7 +47,7 @@ export const insideYourHomeRouter: RoomText = {
       "Home was three things you already know, in one box. Its doors joined into one subnet, `br0`: a switch. On that subnet it handed you an address by DHCP, a lease that came with a default gateway, `{home}`. And once IP forwarding was on, it passed your ping to the world and the answer back: a router. The box on a shelf at home does exactly this, and most of them use the subnet `192.168.1.0/24`. Real ones do one more trick: the world never sees your house's address, because the box writes its own on everything going out and sorts the answers when they come back. Here, the world was simply told the way back to your subnet. That trick comes later, in the Frontier.",
     terms: [],
   },
-  guardian: [
+  questions: [
     { q: "Is this a router?", a: "A small one. A router, a DHCP server and a switch, in one box." },
     { q: "Who is the world?", a: "Everyone outside your door. Here, one machine plays them all." },
     {

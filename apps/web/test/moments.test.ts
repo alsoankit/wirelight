@@ -68,7 +68,7 @@ describe("moments read from the interface", () => {
   });
 });
 
-describe("Knight's Memories (0008): every one has a moment to play", () => {
+describe("Tips (0008): every one has a moment to play", () => {
   it("plays each memory by a rule, and each action can be seen done", () => {
     for (const r of rooms)
       for (const m of roomTexts[r.content]?.memories ?? []) {
@@ -94,10 +94,10 @@ describe("Knight's Memories (0008): every one has a moment to play", () => {
   });
 });
 
-describe("Guardian questions that open later (CORE-43, CORE-44)", () => {
+describe("Questions that open later (CORE-43, CORE-44)", () => {
   it("names only things that can happen: a room's detector, or a moment read from the trace", () => {
     for (const r of rooms)
-      for (const g of roomTexts[r.content]?.guardian ?? [])
+      for (const g of roomTexts[r.content]?.questions ?? [])
         if (g.after) {
           const detector = !!roomTexts[r.content]?.detectors[g.after];
           expect(detector || MOMENTS.has(g.after), `${r.id}: ${g.after}`).toBe(true);

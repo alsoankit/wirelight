@@ -22,7 +22,7 @@ import {
 } from "./street";
 
 // The Lantern Town's readable things, in the square (Region 3; floors/floor-5.md, floor-7.md):
-// - the Lamplighter's register on its board: every house on the street and its own address (5.1 on);
+// - the register on its board: every house on the street and its own address (5.1 on);
 // - the street sign on the corner post: which street this is (Floor 7 on, when streets are taught);
 // - the census board (7.B): the houses that must answer, a lamp for each lit as it answers;
 // - each house's number on the balustrade above its door.

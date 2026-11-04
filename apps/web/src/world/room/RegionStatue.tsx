@@ -4,14 +4,14 @@ import type { PointLight } from "three";
 import type { RegionId } from "../region";
 import { ruin } from "../ruin";
 import { Statue } from "./Statue";
-import { GUARDIANS, type GuardianPlace } from "./standing";
+import { STATUES, type StatueSpot } from "./standing";
 
-// The region's Guardian (decision 0094): a statue of its part of the palace, standing in the room.
+// The region's statue (decision 0094): a figure of its part of the palace, standing in the room.
 // Static (one mesh, one draw); it comes alive only through light. Silent decoration since 0108:
 // questions live behind the top bar's Ask.
 
 /**
- * The Lamplighter's lantern, held out at his side: a faint ember while his town is in ruin, lit as it
+ * The town statue's lantern, held out at its side: a faint ember while the town is in ruin, lit as it
  * is restored (the town's own gold).
  */
 function HeldLantern() {
@@ -34,8 +34,8 @@ function HeldLantern() {
   );
 }
 
-export function Guardian({ region, place }: { region: RegionId; place: GuardianPlace }) {
-  const look = GUARDIANS[region];
+export function RegionStatue({ region, place }: { region: RegionId; place: StatueSpot }) {
+  const look = STATUES[region];
   return (
     <Statue {...look} position={place.at} turn={place.turn}>
       {region === 3 && <HeldLantern />}

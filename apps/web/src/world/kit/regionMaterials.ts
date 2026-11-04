@@ -76,7 +76,7 @@ const REGION_1: Record<string, Swatch> = {
   DarkWood: { ruined: "#33302d", restored: "#46301f", roughness: 0.85 },
   Pot_Main: { ruined: "#524d48", restored: "#94583a", roughness: 0.9 },
   Pot_Detail: { ruined: "#403c39", restored: "#5e432e", roughness: 0.9 },
-  // The Knight's cloak: old, faded cloth (a saturated red read as a slab on the wall).
+  // The old cloak: faded cloth (a saturated red read as a slab on the wall).
   Flag: { ruined: "#3f4249", restored: "#4f3d35", roughness: 0.95 },
   Candle: { ruined: "#97938a", restored: "#c9bea6", roughness: 0.7 },
   Parchment: { ruined: "#8d887b", restored: "#cbbd9c", roughness: 0.95 },

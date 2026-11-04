@@ -230,7 +230,7 @@ export const CHECKS: Check[] = [
   { id: "gltf", label: "drei useGLTF (Ruins arch)", usedFor: "every room", Scene: Gltf },
   { id: "html", label: "drei Html", usedFor: "plates, labels", Scene: HtmlPlate },
   { id: "float", label: "drei Float", usedFor: "idle life", Scene: FloatCheck },
-  { id: "animations", label: "drei useAnimations", usedFor: "keeper, Guardians", Scene: Animations },
+  { id: "animations", label: "drei useAnimations", usedFor: "keeper, statues", Scene: Animations },
   { id: "sparkles", label: "drei Sparkles", usedFor: "fireflies, dust", Scene: SparklesCheck },
   { id: "trail", label: "drei Trail", usedFor: "message trails", Scene: TrailCheck },
   { id: "outlines", label: "drei Outlines", usedFor: "gameplay-object outlines", Scene: OutlinesCheck },

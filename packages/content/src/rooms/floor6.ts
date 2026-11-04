@@ -10,7 +10,7 @@ export const insideTheEnvelope: RoomText = {
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: ["Found this in the post office. Try it on kitchen's messages."],
   hints: [
-    // The Scanner is the button at the bottom left (it replaced the jar), not an object on the table.
+    // The Scanner is the button at the bottom left (it replaced Captures), not an object on the table.
     { text: "A new tool is online: the Scanner, at the bottom left. Open it." },
     { text: "Catch one of kitchen's sealed letters with the Scanner." },
     { text: "A frame can carry another envelope inside it: a packet.", codex: "packet" },
@@ -42,7 +42,7 @@ export const insideTheEnvelope: RoomText = {
       action: "catch one message with the Scanner",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "Why two envelopes?",
       a: "The frame gets it from door to door. The packet says which house it's really for. Different jobs, so different envelopes.",
@@ -109,7 +109,7 @@ export const whoHasThisAddress: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "Why not just remember everyone's door?",
       a: "They do: that's the neighbour ledger. But doors change, so its lines go stale, and the machine asks again.",
@@ -173,7 +173,7 @@ export const twoOfMe: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     { q: "Who is answering for kitchen?", a: "Ask the Scanner. Every answer carries the door it came from." },
     { q: "Can two houses share an address?", a: "Two houses, one number? Nobody would know where to deliver." },
   ],

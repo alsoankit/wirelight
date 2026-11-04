@@ -20,8 +20,8 @@ import { goToRoom } from "./RoomHud";
 import { WorldBackdrop } from "./WorldMap";
 
 // The game-feel moments around a room (HELP-12, 0008, END1): region arrivals and boss introductions,
-// Knight's Memories when their moment comes (with the one small thing to do after), the Knight's
-// gentle way back in a boss, and the first release's ending. The rules are in moments.ts.
+// tips when their moment comes (with the one small thing to do after), the gentle way back in a
+// boss, and the first release's ending. The rules are in moments.ts.
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
@@ -117,11 +117,11 @@ function startLines(room: RoomDef, seen: readonly string[], inHall: boolean): Li
 }
 
 /**
- * Knight's Memories (0008) and the lines that open a room. A memory plays when its moment comes: on
- * the New path by itself; on the others it's offered as a small "Knight's memory" chip, never
- * forced. After it, its action shows as a small prompt that completes when the player does it.
+ * Tips (0008) and the lines that open a room. A tip plays when its moment comes: on the New path by
+ * itself; on the others it's offered as a small "Tip" chip, never forced. After it, its action shows
+ * as a small prompt that completes when the player does it.
  */
-export function KnightMoments() {
+export function TipMoments() {
   const roomId = useSession((s) => s.roomId);
   const room = roomId ? roomById(roomId) : undefined;
   const newPath = useNewPath();
@@ -191,9 +191,7 @@ export function KnightMoments() {
       <>
         <Lines
           key={next.id}
-          lines={[
-            { id: next.id, speaker: voice.knightMemory.speaker, title: next.title, text: fill(next.text, room.vars) },
-          ]}
+          lines={[{ id: next.id, speaker: voice.tips.speaker, title: next.title, text: fill(next.text, room.vars) }]}
           onDone={() => finish(next)}
         />
         {prompt}
@@ -203,14 +201,14 @@ export function KnightMoments() {
     return (
       <>
         <aside className="moment-card" aria-live="polite" data-moment="offer">
-          <span className="note-label">{voice.knightMemory.offer}</span> <strong>{next.title}</strong>
+          <span className="note-label">{voice.tips.offer}</span> <strong>{next.title}</strong>
           <span className="moment-actions">
             <button type="button" onClick={() => setWatching(next.id)}>
-              {voice.knightMemory.watch}
+              {voice.tips.watch}
             </button>
-            {/* Not now: it counts as seen, so it's in the Knight's notes to play later (0008). */}
+            {/* Not now: it counts as seen, so it's in the notes to play later (0008). */}
             <button type="button" className="quiet" onClick={() => seeMemory(next.id)}>
-              {voice.knightMemory.later}
+              {voice.tips.later}
             </button>
           </span>
         </aside>
@@ -233,9 +231,9 @@ function ActionPrompt({ text, done, onClose }: { text: string; done: boolean; on
   return (
     <aside className="moment-card" aria-live="polite" data-moment="action" data-done={done ? "yes" : "no"}>
       <span aria-hidden="true">{done ? "✓ " : "✦ "}</span>
-      {fill(done ? voice.knightMemory.done : voice.knightMemory.yourTurn, { action: text })}
+      {fill(done ? voice.tips.done : voice.tips.yourTurn, { action: text })}
       {!done && (
-        <button type="button" className="quiet moment-close" onClick={onClose} aria-label={voice.knightMemory.dismiss}>
+        <button type="button" className="quiet moment-close" onClick={onClose} aria-label={voice.tips.dismiss}>
           ×
         </button>
       )}

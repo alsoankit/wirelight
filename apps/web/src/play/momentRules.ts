@@ -6,10 +6,9 @@ import type { Panel } from "../engine/store";
 
 // Game-feel moments (core-loop.md CORE-43, CORE-44; failure-and-hints.md HELP-12; 0008): what has
 // happened in this visit to a room, read from the trace and from the interface, and the rules that
-// turn it into a Knight's memory starting, its action being done, a Guardian question opening, or
-// the Knight offering a gentle way back. Everything here is derived: the
-// trace says what the network did; the interface notes only what the trace can't see (a hover, the
-// up arrow in the console, the Glass opening).
+// turn it into a tip starting, its action being done, a question opening, or the offer of a gentle
+// way back. Everything here is derived: the trace says what the network did; the interface notes
+// only what the trace can't see (a hover, the up arrow in the console, the Map opening).
 
 /**
  * Things that can have happened in this visit. From the trace: `caught`, `caught-announcement`,
@@ -120,11 +119,11 @@ const has =
 const entering = () => true;
 
 /**
- * Each Knight's Memory (0008), by id: its trigger and its action, as the floor specs give them.
+ * Each tip (0008), by id: its trigger and its action, as the floor specs give them.
  * A memory not listed here plays on entering when its trigger says so ("on entering", "first visit").
  */
 export const MEMORY_RULES: Record<string, Rule> = {
-  // Prologue: the first time the Glass opens; action: hover the moving message.
+  // Prologue: the first time the Map opens; action: hover the moving message.
   "P-MEM-01": { when: has("glass-open"), done: has("hover-message") },
   // 1.1: on entering; action: click your own plate.
   "F1-MEM-01": { when: entering, done: has("own-plate") },
@@ -136,7 +135,7 @@ export const MEMORY_RULES: Record<string, Rule> = {
   "F1-MEM-04": { when: has("switch-seen") },
   // 2.1: first visit; action: drag a word into the Message slot.
   "F2-MEM-01": { when: entering, done: has("workbench-message", "sent-frame") },
-  // 2.2: first time a message moves while the jar is ready; action: catch one message.
+  // 2.2: first time a message moves while Captures is ready; action: catch one message.
   "F2-MEM-02": { when: (c) => !!c.room.controls.catching && c.moving > 0, done: has("caught") },
   // 2.2: after the first catch; action: open the catch.
   "F2-MEM-03": { when: has("caught"), done: has("opened-catch") },
@@ -160,7 +159,7 @@ export const MEMORY_RULES: Record<string, Rule> = {
 export const LINE_RULES: Record<string, (c: MemoryContext) => boolean> = {
   // 3.1: the keeper wakes and says what it does (floor-3.md, step 4).
   "F3-KEEP-01": has("keeper-woke"),
-  // 5.2: the Knight, after the first ping that can't leave (no address yet).
+  // 5.2: the robot's note, after the first ping that can't leave (no address yet).
   "F5-NOTE-01": has("ping-no-address", "ping-unreachable"),
   // 6.1: the first time a catch is opened past its frame (the seal breaks).
   "F6-SEAL-01": has("opened-inside"),
@@ -194,10 +193,10 @@ export function memoriesDue(room: RoomDef, seen: readonly string[], c: MemoryCon
 }
 
 /**
- * A Guardian question that opens later (CORE-43) is shown once its `after` has happened in this
+ * A question that opens later (CORE-43) is shown once its `after` has happened in this
  * visit (a detector by its id, or a moment read from the trace), or once the floor is cleared
  * (CORE-44: after the floor memory, the whole floor's questions open). The `after` values in the
- * content: `own-name` (2.1's detector), `caught-announcement` (2.2: a broadcast caught in the jar),
+ * content: `own-name` (2.1's detector), `caught-announcement` (2.2: a broadcast caught in Captures),
  * `broadcast-sent` (2.3: the player sent a frame to everyone).
  */
 export function questionOpen(after: string | undefined, happened: Happened, floorCleared: boolean): boolean {

@@ -73,7 +73,7 @@ type Session = {
    */
   capture: { device: string; door: string; execId: number; running: boolean } | null;
   startCapture(device: string, door: string): Promise<void>;
-  /** A message whose journey is being replayed in the Glass (CORE-23), or null. */
+  /** A message whose journey is being replayed on the Map (CORE-23), or null. */
   replay: number | null;
   setReplay(frameId: number | null): void;
   paused: boolean;
@@ -93,7 +93,7 @@ type Session = {
   interrupt(device: string, execId: number): Promise<void>;
   /** Touches a worn-out control (0040). */
   touch(device: string, control: string): Promise<void>;
-  /** The jar (CORE-19): every catch so far, newest last. */
+  /** Captures (CORE-19): every catch so far, newest last. */
   jar: ScannerCatch[];
   /** Catches a copy of a message in flight (CORE-18). */
   catchFrame(frameId: number): Promise<void>;
@@ -159,7 +159,7 @@ export const ask = {
   setSubtitles: (on: boolean | null) => engine.setSubtitles(on),
 };
 
-/** A batch caught something (the Scanner by command, 0043): the jar's list is fetched again. */
+/** A batch caught something (the Scanner by command, 0043): the list of catches is fetched again. */
 function refreshJarIfCaught(batch: Batch): void {
   if (!batch.events.some((e) => e.kind === "scanner.catch")) return;
   void engine.catches().then((jar) => useSession.setState({ jar }));

@@ -8,20 +8,20 @@ export interface RoomText {
   title: string;
   /** Two sentences at most (ROOM-04). */
   mission: string;
-  /** The Knight's notes found in the room. */
+  /** The robot's notes found in the room. */
   notes: string[];
   /** Exactly five; the third (the idea) links to a Notebook entry. */
   hints: [Hint, Hint, Hint, Hint, Hint];
-  /** For each of the room's detectors, by id: the Knight's note when it fires, and one line for the debrief. */
+  /** For each of the room's detectors, by id: the robot's note when it fires, and one line for the debrief. */
   detectors: Record<string, { note: string; tried: string }>;
   /** What happened, and the new words: each with its term id (the room's `teaches`). */
   debrief: { happened: string; terms: { id: string; term: string; meaning: string }[] };
   /** Why a machine can't be entered, by device id (sealed or not yet). */
   access?: Record<string, string>;
-  /** Knight's Memories (0008): when they play, what he says, what the player then does. */
+  /** Tips (0008): when they play, what is said, what the player then does. */
   memories?: { id: string; title: string; trigger: string; text: string; action?: string }[];
-  /** The Guardian's fragments (0036): question and answer; `after` when it opens later. */
-  guardian?: { q: string; a: string; after?: string }[];
+  /** Questions the player can ask in the room (0036): question and answer; `after` when it opens later. */
+  questions?: { q: string; a: string; after?: string }[];
   /** Building memory (0037, Regions 1–2): what's said, and what's shown. */
   building?: { id: string; text: string; shown: string };
   /** Field Guide topics this room opens. */
@@ -35,7 +35,7 @@ export interface Hint {
   codex?: CardId;
 }
 
-/** A floor's own text: its memory, its journal page, its Guardian's farewell. */
+/** A floor's own text: its memory, its journal page, its farewell. */
 export interface FloorText {
   name: string;
   memory: { id: string; title: string; text: string; shown?: string }[];
