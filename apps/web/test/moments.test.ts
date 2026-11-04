@@ -2,7 +2,15 @@ import { floorTexts, roomTexts } from "@wirelight/content";
 import { floorDefs, loadRoom, play, roomById, rooms } from "@wirelight/rooms";
 import type { SimEvent } from "@wirelight/sim";
 import { describe, expect, it } from "vitest";
-import { MEMORY_RULES, matchingRoom, memoriesDue, questionOpen, readEvents, readView } from "../src/play/momentRules";
+import {
+  MEMORY_RULES,
+  matchingRoom,
+  memoriesDue,
+  memoryNow,
+  questionOpen,
+  readEvents,
+  readView,
+} from "../src/play/momentRules";
 
 const room = (id: string) => {
   const r = roomById(id);
@@ -91,6 +99,18 @@ describe("Tips (0008): every one has a moment to play", () => {
     expect(memoriesDue(r, [], ctx([], 0))).toEqual([]);
     expect(memoriesDue(r, [], ctx([], 1)).map((m) => m.id)).toEqual(["F2-MEM-02"]);
     expect(memoriesDue(r, ["F2-MEM-02"], ctx(["caught"], 0)).map((m) => m.id)).toEqual(["F2-MEM-03"]);
+  });
+
+  it("keeps 2.2's catching once a message has moved, until it's been seen (it never flickers)", () => {
+    const r = room("f2.wrong-name");
+    const ctx = (moving: number) => ({ happened: new Set<string>(), room: r, elapsedMs: 0, moving });
+    const none = { watching: null, cameUp: null, won: false };
+    expect(memoryNow(r, [], ctx(1), none)?.id).toBe("F2-MEM-02");
+    // The message has arrived: nothing moves now, but the memory that came up stays.
+    expect(memoryNow(r, [], ctx(0), { ...none, cameUp: "F2-MEM-02" })?.id).toBe("F2-MEM-02");
+    // Once it's been seen (played, or put off), it's gone; and nothing new comes up after the win.
+    expect(memoryNow(r, ["F2-MEM-02"], ctx(0), { ...none, cameUp: "F2-MEM-02" })).toBeUndefined();
+    expect(memoryNow(r, [], ctx(1), { ...none, won: true })).toBeUndefined();
   });
 });
 

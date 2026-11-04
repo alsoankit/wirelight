@@ -193,6 +193,26 @@ export function memoriesDue(room: RoomDef, seen: readonly string[], c: MemoryCon
 }
 
 /**
+ * The memory to play or offer now: the one being watched; else the one whose moment has already
+ * come (`cameUp`), until it's been seen; else the first that's due. A moment can be brief (2.2's is a
+ * message crossing the room): once a memory has come up it stays, so it never flickers in and out.
+ * Nothing new comes up once the room is won.
+ */
+export function memoryNow(
+  room: RoomDef,
+  seen: readonly string[],
+  c: MemoryContext,
+  { watching, cameUp, won }: { watching: string | null; cameUp: string | null; won: boolean },
+) {
+  const memories = roomTexts[room.content]?.memories ?? [];
+  const find = (id: string | null) => (id === null ? undefined : memories.find((m) => m.id === id));
+  const playing = find(watching);
+  if (playing || won) return playing;
+  const held = cameUp !== null && !seen.includes(cameUp) ? find(cameUp) : undefined;
+  return held ?? memoriesDue(room, seen, c)[0];
+}
+
+/**
  * A question that opens later (CORE-43) is shown once its `after` has happened in this
  * visit (a detector by its id, or a moment read from the trace), or once the floor is cleared
  * (CORE-44: after the floor memory, the whole floor's questions open). The `after` values in the
