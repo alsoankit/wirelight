@@ -228,12 +228,13 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
   const chosen = useProgress((s) => s.settings.quality);
   const forced = tierFromUrl() ?? (chosen === "auto" ? undefined : chosen);
   const [tier, setTier] = useState<Tier>(forced ?? (backend === "webgpu" ? "high" : "medium"));
-  // A quality chosen in Settings applies at once and sticks (0020).
+  // A quality chosen in Settings applies at once and sticks (0020); choosing Automatic again hands it
+  // back to the game's own judgement at once too (unless ?tier= pins it).
   useEffect(() => {
     if (chosen !== "auto") {
       setTier(chosen);
       setAuto(false);
-    }
+    } else if (!tierFromUrl()) setAuto(true);
   }, [chosen]);
   const [auto, setAuto] = useState(!forced);
   const quality = QUALITY[tier];
