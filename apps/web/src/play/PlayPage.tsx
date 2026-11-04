@@ -3,12 +3,10 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { roomById } from "@wirelight/rooms";
 import {
   type Dispatch,
-  lazy,
   memo,
   type ReactNode,
   type SetStateAction,
   StrictMode,
-  Suspense,
   useEffect,
   useRef,
   useState,
@@ -50,7 +48,35 @@ import { JarButton, ToolPanels } from "./ToolPanels";
 
 // The console's terminal (xterm, ~80 kB gzipped) loads when a room first needs it, or a few seconds
 // after the game opens (render/preload.ts), never on the way in.
-const Console = lazy(() => loadConsole().then((m) => ({ default: m.Console })));
+type ConsoleModule = typeof import("./Console");
+
+/**
+ * The terminal's code, once it has loaded: then it's drawn at once. Not React.lazy: a component that
+ * suspends is drawn only on React's retry, and on a slow machine a room's steady updates can hold that
+ * retry off for as long as they keep coming (2.4's terminal never appeared after the gift). A plain
+ * state update can't be held off like that. A load that fails reaches the error boundary, as before.
+ */
+function useConsoleModule(needed: boolean): ConsoleModule | null {
+  const [loaded, setLoaded] = useState<ConsoleModule | null>(null);
+  const [failed, setFailed] = useState<{ error: unknown } | null>(null);
+  useEffect(() => {
+    if (!needed || loaded) return;
+    let live = true;
+    void loadConsole().then(
+      (m) => {
+        if (live) setLoaded(m);
+      },
+      (error: unknown) => {
+        if (live) setFailed({ error });
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [needed, loaded]);
+  if (failed) throw failed.error;
+  return loaded;
+}
 
 // Dev aid for scripts and debugging: the stores on `window` (never in a production build).
 if (import.meta.env.DEV) (window as unknown as { __wirelight?: unknown }).__wirelight = { useSession, useProgress };
@@ -216,6 +242,8 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
   const here = useSession((s) => s.here);
   const voiceGiven = useSession((s) => s.voiceGiven);
   const room = roomId ? roomById(roomId) : undefined;
+  const consoleWanted = !!room && room.controls.console === "typing" && voiceGiven;
+  const terminal = useConsoleModule(consoleWanted);
 
   // Saved progress is read first, so the game opens where the player left off.
   useEffect(() => {
@@ -279,10 +307,8 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <MomentsDriver />
         <WayBack />
         <Ending />
-        {room && room.controls.console === "typing" && voiceGiven && (
-          <Suspense fallback={null}>
-            <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
-          </Suspense>
+        {room && consoleWanted && terminal && (
+          <terminal.Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
         )}
       </StrictMode>
       {arriving && <div className="arrival-veil" />}
