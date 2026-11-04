@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { winningFrame } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
+import { roomAddress } from "./address";
 import { takeFocusPolitely } from "./focus";
 import { closeGlass, openGlass } from "./keys";
 import { openMemory, useMemory } from "./Memory";
@@ -26,9 +27,7 @@ const LAST_BOSS = floorDefs.reduce((a, f) => (f.floor > a.floor ? f : a)).boss;
 /** Goes to a room: loads it, remembers it (ONB-20), and puts it in the address bar. */
 export function goToRoom(roomId: string): void {
   useProgress.getState().setCurrent(roomId);
-  const url = new URL(window.location.href);
-  url.searchParams.set("room", roomId);
-  window.history.replaceState(null, "", url);
+  window.history.replaceState(null, "", roomAddress(window.location.href, roomId));
   void useSession.getState().load(roomId);
 }
 
