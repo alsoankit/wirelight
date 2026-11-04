@@ -310,6 +310,9 @@ export const useSession = create<Session>((set, get) => ({
       events: [],
       dropped: 0,
       onCables: [],
+      // Lost messages and a replay belong to the room they happened in (door names repeat between rooms).
+      marks: [],
+      replay: null,
       arrivals: {},
       capture: null,
       voiceGiven,
