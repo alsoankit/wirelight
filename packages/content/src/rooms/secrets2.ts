@@ -48,7 +48,7 @@ export const peacekeeper: RoomText = {
       "Two halls can keep a spare cable safely. With the peacekeeper on (its real name is the spanning tree), the halls send each other a short note every two seconds, agree which hall is in charge, and hold shut any door that would close a circle. Span-2's door went to blocking, and the storm stopped. When you pulled span, the held door noticed at once: it listened for 15 seconds, learned names for 15 more, then opened, and laundry's answer came over the spare.",
     terms: [],
   },
-  guardian: [
+  questions: [
     {
       q: "How do the halls know they're in a circle?",
       a: "They talk. Every two seconds the hall in charge sends a short note out of its doors, and the others pass it on. A hall that hears the same note by two doors knows it's standing in a circle.",

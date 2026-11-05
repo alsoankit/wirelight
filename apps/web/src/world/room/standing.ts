@@ -1,14 +1,15 @@
 import type { CarvedOptions } from "../kit/carved";
 import type { RegionId } from "../region";
 
-// What stands in a room as a live model (a Statue, not room geometry): the Guardian and the set
-// dressing, as plain data. The scenes draw them; the bake (tools/bake/export.mjs) adds them to its
+// What stands in a room as a live model (a Statue, not room geometry): the region's statue and the
+// set dressing, as plain data. The scenes draw them; the bake (tools/bake/export.mjs) adds them to its
 // scene as shadow casters, so they cast baked shadows without taking any lightmap space.
 
-export type GuardianLook = CarvedOptions & { slug: string; scale: number };
+export type StatueLook = CarvedOptions & { slug: string; scale: number };
 
-export const GUARDIANS: Record<RegionId, GuardianLook> = {
-  // The outer gardens: the Gardener, a seated stone woman with roses, moss on her shoulders and lap.
+/** Each region's statue (0094): a figure of its part of the palace. */
+export const STATUES: Record<RegionId, StatueLook> = {
+  // The outer gardens: a seated stone woman with roses, moss on her shoulders and lap.
   1: { slug: "frauenfigur", scale: 0.8, tint: { restored: "#BDB6A7", ruined: "#6A6F78" }, moss: 0.85, detail: 0.3 },
   // The works: the clockwork owl, in bronze.
   2: {
@@ -19,17 +20,17 @@ export const GUARDIANS: Record<RegionId, GuardianLook> = {
     roughness: 0.55,
     detail: 0.4,
   },
-  // The town: the Lamplighter, a robed figure in warm stone.
+  // The town: a robed figure with a lantern, in warm stone.
   3: { slug: "lamplighter-mourner", scale: 1.0, tint: { restored: "#C8B89C", ruined: "#6D6F76" }, detail: 0.3 },
-  // The cathedral: the stone warden, the winged grave angel, in sandstone.
+  // The cathedral: a winged grave angel, in sandstone.
   4: { slug: "warden-grab", scale: 0.85, tint: { restored: "#D2C2A2", ruined: "#7A7B80" }, detail: 0.3 },
 };
 
 /** Where it stands in a room: on the floor (or a cabinet top), and which way it faces (radians). */
-export type GuardianPlace = { at: [number, number, number]; turn: number };
+export type StatueSpot = { at: [number, number, number]; turn: number };
 
 /**
- * Facing the camera: the Lamplighter's scan faces +z, the Gardener's, the owl's and the warden's −z.
+ * Facing the camera: the town's figure faces +z in its scan; the woman's, the owl's and the angel's face −z.
  */
 export const FACING: Record<RegionId, number> = { 1: 3.9, 2: 3.9, 3: 0.7, 4: 3.9 };
 
@@ -37,13 +38,13 @@ export const FACING: Record<RegionId, number> = { 1: 3.9, 2: 3.9, 3: 0.7, 4: 3.9
  * In a house or a hall: on the open right-hand side (no wall there: the camera's side), between the
  * routes board at the front and the back wall's furniture.
  */
-export const SIDE_PLACE = (region: RegionId): GuardianPlace => ({ at: [3.0, 0, -1.0], turn: FACING[region] });
+export const SIDE_PLACE = (region: RegionId): StatueSpot => ({ at: [3.0, 0, -1.0], turn: FACING[region] });
 
 /**
- * Where each region's Guardian stands in the Observatory (0094), clear of the doorway and the boards.
- * The scans of the Gardener, the owl and the warden face −z: turned about 3.9 they face the camera.
+ * Where each region's statue stands in the Observatory (0094), clear of the doorway and the boards.
+ * The scans of the woman, the owl and the angel face −z: turned about 3.9 they face the camera.
  */
-export const GUARDIAN_AT: Record<number, GuardianPlace> = {
+export const STATUE_AT: Record<number, StatueSpot> = {
   // The far end (0110): statues and wall art at the back, machines at the near end.
   1: { at: [2.6, 0, -3.1], turn: 3.7 },
   // Perched on the sorters' card cabinet, right of the door.
@@ -55,7 +56,7 @@ export const GUARDIAN_AT: Record<number, GuardianPlace> = {
 
 /**
  * Set dressing (0089, 0094): one carved statue per region, in the back-left corner, clear of the
- * keeper, the doors, the boards and the Guardian. Reworked models face +z: turned about 0.8 they face
+ * keeper, the doors, the boards and the region's statue. Reworked models face +z: turned about 0.8 they face
  * the camera and the room.
  */
 export const DRESSING_AT: Record<number, StatuePlace> = {
@@ -151,9 +152,9 @@ export function standing(
 ): { slug: string; position: [number, number, number]; turn: number; scale: number }[] {
   if (kind === "corridor") return [];
   const out = [];
-  const guardian = GUARDIANS[region];
-  const place = kind === "observatory" ? GUARDIAN_AT[region] : SIDE_PLACE(region);
-  if (place) out.push({ slug: guardian.slug, position: place.at, turn: place.turn, scale: guardian.scale });
+  const statue = STATUES[region];
+  const place = kind === "observatory" ? STATUE_AT[region] : SIDE_PLACE(region);
+  if (place) out.push({ slug: statue.slug, position: place.at, turn: place.turn, scale: statue.scale });
   const dressing = kind === "observatory" ? DRESSING_AT[region] : undefined;
   if (dressing)
     out.push({

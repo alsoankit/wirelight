@@ -13,8 +13,8 @@ import { RichText } from "./RichText";
 const NONE: never[] = [];
 
 // The help around a room (gameplay/failure-and-hints.md, interface.md): the top bar (time, Reset,
-// the Knight's notes, Ask, Menu), the hint ladder, the Knight's reactions when a detector fires,
-// the Guardian's questions, discovery cards and Knight's Memories. Nothing is pushed on the player
+// the robot's notes, Ask, Menu), the hint ladder, the robot's reactions when a detector fires,
+// the room's questions, discovery cards and tips. Nothing is pushed on the player
 // except new cards and, on the New path, memories (0008, 0009).
 
 function useRoom() {
@@ -199,7 +199,7 @@ export function NotesPanel() {
               className="link"
               onClick={() => {
                 close();
-                setPlaying([{ id: m.id, speaker: voice.knightMemory.speaker, title: m.title, text: m.text }]);
+                setPlaying([{ id: m.id, speaker: voice.tips.speaker, title: m.title, text: m.text }]);
               }}
             >
               {m.title} · {voice.notes.replay}
@@ -219,14 +219,14 @@ export function AskPanel() {
   const happened = useMoments((s) => s.happened);
   const cleared = useProgress((s) => s.cleared);
   if (panel?.kind !== "ask" || !room || !text) return null;
-  const guardian = regions[room.region]?.guardian ?? "";
+  const speaker = regions[room.region]?.speaker ?? "";
   // Questions that open later stay hidden until what they're about has happened (or the floor is cleared).
   const had = new Set(happened);
   const floorDone = floorCleared(room.floor, cleared);
-  const questions = (text.guardian ?? []).filter((g) => questionOpen(g.after, had, floorDone));
+  const questions = (text.questions ?? []).filter((g) => questionOpen(g.after, had, floorDone));
   return (
-    <section className="panel" aria-label={fill(voice.ask.title, { guardian })}>
-      <h2>{fill(voice.ask.title, { guardian })}</h2>
+    <section className="panel" aria-label={fill(voice.ask.title, { speaker })}>
+      <h2>{fill(voice.ask.title, { speaker })}</h2>
       <ul className="questions">
         {questions.map((g) => (
           <li key={g.q}>
@@ -250,7 +250,7 @@ export function AskPanel() {
   );
 }
 
-/** When a detector fires, the Knight reacts once (HELP-05), for a little while, on the right. */
+/** When a detector fires, the robot reacts once (HELP-05), for a little while, on the right. */
 export function Reaction() {
   const { room, text } = useRoom();
   const fired = useSession((s) => s.status?.detectors ?? NONE);
@@ -280,7 +280,7 @@ export function Reaction() {
 
 /** Overlays that hold the stage: a card waits while one is up (one thing at a time). */
 const STAGE_BUSY =
-  ".lines, .glass, .cmd-memory, .tour, .path-choice, .gift-stage, .ending-card, .menu, .journal-read, .moment-card[data-moment='offer']";
+  ".lines, .glass, .cmd-memory, .tour, .path-choice, .gift-stage, .ending-card, .menu, .moment-card[data-moment='offer']";
 
 /** A card left unanswered goes by itself after this (it's kept in the Codex), unless it's being read. */
 const CARD_STAYS_MS = 25_000;
@@ -288,7 +288,7 @@ const CARD_STAYS_MS = 25_000;
 /**
  * Discovery cards (CORE-46), on the left, one at a time, never blocking: each when its moment comes
  * (cardRules.ts: an object when it's first looked at or seen doing its thing; an idea after the
- * debrief), and only while nothing else holds the stage (spoken lines, a memory, the Glass).
+ * debrief), and only while nothing else holds the stage (spoken lines, a memory, the Map).
  */
 export function DiscoveryCards() {
   const { room } = useRoom();

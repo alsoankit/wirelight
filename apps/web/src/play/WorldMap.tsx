@@ -9,14 +9,14 @@ import type { Look } from "../world/map/palace";
 // (world/map) beside the words. Restored floors are lit, warm windows and cyan light along the
 // cables between them; the floor you're on is marked; the next one waits in thin mist, and what's
 // further on lies under fog; the keep (Regions 5–8) stands dark in the mist above. The words are a
-// list beside the model, so the map stays readable without the picture. Three uses: the Glass's
+// list beside the model, so the map stays readable without the picture. Three uses: the Map's
 // second view, a memory's "what's next" (the map as it was then: floors up to `restoredUpTo`
 // restored, the next in mist), and the ending's backdrop (`WorldBackdrop`: every built floor
 // restored, a faint light climbing the keep).
 
 export type FloorState = "restored" | "here" | "open" | "mist" | "fog";
 
-/** Each floor's state from progress (the Glass), or as it was at a memory (`restoredUpTo`). */
+/** Each floor's state from progress (the Map), or as it was at a memory (`restoredUpTo`). */
 export function floorStates(
   cleared: Record<string, unknown>,
   current: number | undefined,
@@ -117,7 +117,7 @@ export function WorldMapView({
   );
 }
 
-/** The Glass's world view: from progress, the floor you're on ringed. */
+/** The Map's world view: from progress, the floor you're on ringed. */
 export function WorldMap() {
   const cleared = useProgress((s) => s.cleared);
   const roomId = useSession((s) => s.roomId);

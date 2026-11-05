@@ -1,4 +1,4 @@
-// Guardian memories and ride-alongs (0036, 0037): opens the floor memory from a real debrief, then
+// Floor memories and ride-alongs (0036, 0037): opens the floor memory from a real debrief, then
 // replays memories from the Codex (marked seen through the dev hook) and screenshots each ride.
 // Usage: node memories.mjs http://127.0.0.1:5173/play <screenshot folder>
 import { arrived, launch, open, plateSwitch, tidy, won } from "./lib.mjs";

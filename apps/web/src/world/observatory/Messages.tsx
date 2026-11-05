@@ -165,7 +165,7 @@ export function Messages({
   return (
     <>
       {Array.from({ length: POOL }, (_, i) => (
-        // biome-ignore lint/a11y/noStaticElementInteractions: 3D messages are pointed at (raycast); the jar and the Slate are the keyboard way
+        // biome-ignore lint/a11y/noStaticElementInteractions: 3D messages are pointed at (raycast); Captures and the Scanner are the keyboard way
         <group
           // biome-ignore lint/suspicious/noArrayIndexKey: a fixed pool of messages, reused by slot
           key={i}

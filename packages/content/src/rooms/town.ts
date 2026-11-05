@@ -1,6 +1,6 @@
 /**
- * The Lantern Town's readable things (Region 3; floors/floor-5.md and floor-7.md): the Lamplighter's
- * register on the square's wall, the street sign, the census board, and the numbers on the houses'
+ * The Lantern Town's readable things (Region 3; floors/floor-5.md and floor-7.md): the register on
+ * the square's wall, the street sign, the census board, and the numbers on the houses'
  * doors. The world fills in names and addresses from the room's topology (never written here).
  * Also the secret rooms' doors in every region (decision 0065), found once a floor's boss is cleared.
  */

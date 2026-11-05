@@ -7,10 +7,10 @@ export type ToolId =
   | "lab card"
   | "lab cable"
   | "lab keeper"
-  /** The Slate (6.1): catch, list and open. */
-  | "lab slate"
-  /** The Slate's tracer and compare (9.1). */
-  | "lab slate trace"
+  /** The Scanner (6.1): catch, list and open. */
+  | "lab scanner"
+  /** The Scanner's tracer and compare (9.1). */
+  | "lab scanner trace"
   | "workbench"
   | "bridge fdb"
   /** `bridge link`: each switch door's spanning-tree state (the Peacekeeper, Region 2). */

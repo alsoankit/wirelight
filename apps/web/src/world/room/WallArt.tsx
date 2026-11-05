@@ -5,8 +5,8 @@ import { dot, float, min, mix, mx_noise_float, smoothstep, texture, uv, vec2, ve
 import { MeshStandardNodeMaterial } from "three/webgpu";
 import { ruinHere } from "../ruin";
 
-// Art the palace's builders painted on their walls (0088, 0091): a region's emblem on a shield, the
-// Knight's portrait, a fresco. Grey and dim in ruin; where the room is restored its colour comes back
+// Art the palace's builders painted on their walls (0088, 0091): a region's emblem on a shield, a
+// portrait, a fresco. Grey and dim in ruin; where the room is restored its colour comes back
 // and the painted gold glows. The gold is found in the picture itself (warm, saturated, bright), so
 // any picture works without a hand-drawn mask. A shape (a shield, an arched panel) keeps its own
 // outline with a few chips of paint missing; a fresco breaks off at its edges and loses patches of
@@ -29,10 +29,7 @@ export type WallArtMark = {
   seed?: number;
 };
 
-/**
- * The painted look as a material: faded in ruin, its gold lit where restored, worn. Shared with the
- * Knight's shield (its painted face).
- */
+/** The painted look as a material: faded in ruin, its gold lit where restored, worn. */
 export function paintedMaterial(map: Texture, { edges = "shape", aspect = 1, seed = 0 } = {}) {
   map.colorSpace = SRGBColorSpace;
   map.anisotropy = 4;

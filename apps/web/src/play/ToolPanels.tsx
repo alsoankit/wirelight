@@ -1,18 +1,18 @@
 import { fill, voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
-import type { SlateLayer, SlateOpen } from "@wirelight/sim";
+import type { ScannerLayer, ScannerOpen } from "@wirelight/sim";
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "../engine/store";
 import { KeeperPanel } from "./KeeperPanel";
 import { noteMoment } from "./momentRules";
 import { arrivalText, plainSummary, sayDoor } from "./names";
-import { SlatePanel } from "./SlatePanel";
+import { ScannerPanel } from "./ScannerPanel";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
 
-// The Knight's tools as panels (UI-03): the workbench (CORE-34), the messenger's card (CORE-35) and
-// the capture jar (CORE-19, CORE-20). Every action runs a real command or a catch through the engine;
+// The robot's tools as panels (UI-03): the workbench (CORE-34), the messenger's card (CORE-35) and
+// Captures (CORE-19, CORE-20). Every action runs a real command or a catch through the engine;
 // acting closes the panel so the player watches what happens (UI-04); drafts are kept while closed.
 
 const draft = { to: "", msg: "hello", dev: "" };
@@ -129,11 +129,11 @@ function CardPanel() {
 }
 
 /**
- * A catch, as the jar shows it before the Slate (Floor 6): the frame's *to* and *from* in plain words,
+ * A catch, as Captures shows it before the Scanner (Floor 6): the frame's *to* and *from* in plain words,
  * then its message if it's a plain lab message, or one note that there's more inside, sealed. No
- * ethertypes, no tcpdump text: those come with the Slate.
+ * ethertypes, no tcpdump text: those come with the Scanner.
  */
-function Opened({ layers }: { layers: SlateLayer[] }) {
+function Opened({ layers }: { layers: ScannerLayer[] }) {
   const room = useRoom();
   const frame = layers.find((l) => l.layer === "frame");
   const lab = layers.find((l) => l.layer === "message" && l.kind === "lab");
@@ -230,10 +230,10 @@ function JarPanel({ open }: { open?: number }) {
   const openCatch = useSession((s) => s.openCatch);
   const openPanel = useSession((s) => s.openPanel);
   const close = useSession((s) => s.closePanel);
-  const [shown, setShown] = useState<SlateOpen | null>(null);
+  const [shown, setShown] = useState<ScannerOpen | null>(null);
   useEffect(() => {
     if (!open || !here) return setShown(null);
-    // Before the Slate (Floor 6), a jar opens the frame; a lab message inside is plain to read.
+    // Before the Scanner (Floor 6), Captures opens the frame; a lab message inside is plain to read.
     void openCatch(here, open, "message").then(setShown);
   }, [open, here, openCatch]);
   if (!room) return null;
@@ -543,23 +543,23 @@ function DeskPanel({ device }: { device: string }) {
   );
 }
 
-/** The jar button (bottom left, UI layout): how many catches, and opens the jar. */
+/** The Captures button (bottom left, UI layout): how many catches, and opens Captures. */
 export function JarButton() {
   const room = useRoom();
   const count = useSession((s) => s.jar.length);
   // Never under the open console (UI-02): it rises above it.
   const raised = useSession((s) => s.consoleOpen && s.voiceGiven);
   const openPanel = useSession((s) => s.openPanel);
-  // From Floor 6 the Slate replaces the jar (0043).
-  if (room?.controls.slate)
+  // From Floor 6 the Scanner replaces Captures (0043).
+  if (room?.controls.scanner)
     return (
       <button
         type="button"
         className="jar-button"
         data-raised={raised ? "yes" : "no"}
-        onClick={() => openPanel({ kind: "slate" })}
+        onClick={() => openPanel({ kind: "scanner" })}
       >
-        {voice.slate.name} · {count}
+        {voice.scanner.name} · {count}
       </button>
     );
   if (!room?.controls.catching) return null;
@@ -584,7 +584,7 @@ export function ToolPanels() {
     return <RoutesPanel device={panel.device} execId={panel.execId} />;
   if (panel?.kind === "board") return <BoardPanel device={panel.device} board={panel.board} execId={panel.execId} />;
   if (panel?.kind === "desk") return <DeskPanel device={panel.device} />;
-  if (panel?.kind === "slate") return <SlatePanel />;
+  if (panel?.kind === "scanner") return <ScannerPanel />;
   if (panel?.kind === "keeper") return <KeeperPanel device={panel.device} />;
   return null;
 }

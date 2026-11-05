@@ -314,7 +314,7 @@ export function buildPalace(looks: Record<number, Look>, keepGlow: boolean): Pal
     let top = 1.2;
     switch (n) {
       case 0: {
-        // The outer gate: two towers and the arch between them, and the Knight's tower beside it.
+        // The outer gate: two towers and the arch between them, and the old tower beside it.
         for (const s of [-1, 1]) building(11.4, a + s * 4.4, 0.5, 0.75, 1.5, 0.8, "tower", "pyramid", 0.6);
         const [x, z] = polar(11.4, a);
         solid(BOX, mat(x, 1.35, z, outward(a), 1.0, 0.45, 0.6), "stone");

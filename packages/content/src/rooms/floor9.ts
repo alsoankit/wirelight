@@ -47,7 +47,7 @@ export const twoEnvelopes: RoomText = {
       action: "press Trace",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "Why throw the frame away?",
       a: "A frame knows one subnet. The MAC addresses on it mean nothing on the next.",
@@ -132,7 +132,7 @@ export const oneStepOnly: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     { q: "Why would anyone want a packet to die?", a: "To learn who stands at each step of the road." },
     { q: "Who writes the note?", a: "The router where it died. Always." },
     {
@@ -178,7 +178,7 @@ export const roundAndRound: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "Who's wrong, crossing or arch?",
       a: "Crossing sends it to arch, which is right. Arch has no route for the high window, so its default sends it back.",

@@ -403,7 +403,7 @@ export function MemoryScene({ room, scene, label }: { room: RoomDef; scene: Scen
 
   return (
     <MemoryMap room={room} geo={geo} state={state} label={label}>
-      {/* The weavers, at the head of the cable they're laying. */}
+      {/* The builders, at the head of the cable they're laying. */}
       {beats.map((b, i) => {
         if (!("lay" in b) || !b.weavers || t < b.at || !b.ms) return null;
         const f = (t - b.at) / b.ms;

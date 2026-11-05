@@ -226,7 +226,7 @@ export const findEveryone = defineRoom({
     observatory: { messengers: letters.map((m) => ({ to: m.mac, msg: messengerMessage })) },
     machines: letters,
   }),
-  // The Knight wrote only the doors: every card is blank.
+  // Only the doors were written down: every card is blank.
   faults: [1, 2, 3].map((n) => ({ kind: "card", device: "observatory", to: "", messenger: n }) as const),
   playerDevice: "observatory",
   access: { observatory: OPEN, hall: OPEN, ...sealed("bakery", "larder", "chapel") },

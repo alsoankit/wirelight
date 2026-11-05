@@ -3,7 +3,7 @@ import type { Panel } from "../engine/store";
 
 // When each discovery card shows (CORE-46; interface.md: left side, one at a time, never blocking).
 // A card about an OBJECT shows the first time the player looks at that object or sees the event it
-// explains (the Slate card when the Slate opens, "Ignored mark" when the first mark appears). A card
+// explains (the Scanner card when the Scanner opens, "Ignored mark" when the first mark appears). A card
 // that names an IDEA a room teaches waits until the room is won and its debrief is up, so it never
 // gives the lesson away (the owner's decision after the Region 4 playtest). A card not listed here
 // is an object in plain view: it shows on arriving, after the room's opening lines.
@@ -22,7 +22,7 @@ export const CARD_WHEN: Record<string, When> = {
   // Prologue
   cable: "arrive",
   message: any("moving"),
-  "scrying-glass": any("glass-open"),
+  map: any("glass-open"),
   // Floor 1
   door: "arrive",
   plate: any("panel:plate"),
@@ -55,7 +55,7 @@ export const CARD_WHEN: Record<string, When> = {
   register: "arrive",
   "address-slot": any("panel:plate"),
   echo: any("ping"),
-  slate: any("slate-open"),
+  scanner: any("scanner-open"),
   packet: any("packet-opened"),
   "neighbour-ledger": any("board:ledger"),
   "arp-question": "after-win",
@@ -67,13 +67,13 @@ export const CARD_WHEN: Record<string, When> = {
   "thirty-two-bits": "after-win",
   // Floors 8–9
   router: "after-win",
-  navigator: any("panel:keeper", "panel:desk"),
+  "crossing-keeper": any("panel:keeper", "panel:desk"),
   "routing-board": any("board:routes"),
   "default-gateway": "after-win",
   "specific-route": "after-win",
-  capture: any("slate-open"),
-  lectern: any("panel:desk"),
-  tracer: any("trace-armed", "slate-open"),
+  capture: any("scanner-open"),
+  "crossing-desk": any("panel:desk"),
+  tracer: any("trace-armed", "scanner-open"),
   compare: any("compared"),
   hop: "after-win",
   ttl: "after-win",
@@ -102,8 +102,8 @@ export function readForCards(
   for (const e of v.events) {
     if (e.kind === "frame.drop" && e.reason === "not-for-me") out.add("ignored");
     else if (e.kind === "cmd.exec" && /^ping\b/.test(e.line)) out.add("ping");
-    else if (e.kind === "slate.compare") out.add("compared");
-    else if (e.kind === "slate.open" && e.layer !== "frame") out.add("packet-opened");
+    else if (e.kind === "scanner.compare") out.add("compared");
+    else if (e.kind === "scanner.open" && e.layer !== "frame") out.add("packet-opened");
     else if (e.kind === "icmp.error" && e.type !== "redirect") out.add("icmp-error");
   }
 }

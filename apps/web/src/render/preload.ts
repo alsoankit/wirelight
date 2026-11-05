@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 // Code the game needs soon but not on the way in (tech/rendering.md, loading): fetched once the
-// first room is up and the browser is idle, so the descent and the first room never wait for it.
+// first room is up and the browser is idle, so the way in and the first room never wait for it.
 
 /** The console (xterm.js and its styles): its own chunk, loaded when a room first needs it. */
 export const loadConsole = () => import("../play/Console");

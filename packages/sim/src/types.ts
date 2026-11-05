@@ -1,6 +1,6 @@
 import type { Mac } from "./mac";
 import type { PrngState } from "./prng";
-import type { SlateState } from "./slate";
+import type { ScannerState } from "./scanner";
 
 export type DeviceId = string;
 export type IfaceName = string;
@@ -584,8 +584,8 @@ export interface WorldState {
   devices: Record<DeviceId, DeviceState>;
   links: Record<string, LinkState>;
   queue: Scheduled[];
-  /** The Slate's catches and what it's waiting for (0043); absent until it's first used. */
-  slate?: SlateState;
+  /** The Scanner's catches and what it's waiting for (0043); absent until it's first used. */
+  scanner?: ScannerState;
 }
 
 // ── The event trace (SIM-35) ───────────────────────────────────────────────────────────────
@@ -731,10 +731,10 @@ export type SimEvent =
     }
   /** A hand step the player took (learn, send, arp-ask, wrap, forward) or the keeper waking. */
   | { kind: "keeper.step"; t: number; device: DeviceId; action: string; args: string[]; frameId: number | null }
-  /** The Slate (0043): armed, a catch kept, a catch opened down to a layer, two catches compared. */
-  | { kind: "slate.arm"; t: number; device: DeviceId; what: "catch" | "trace" }
+  /** The Scanner (0043): armed, a catch kept, a catch opened down to a layer, two catches compared. */
+  | { kind: "scanner.arm"; t: number; device: DeviceId; what: "catch" | "trace" }
   | {
-      kind: "slate.catch";
+      kind: "scanner.catch";
       t: number;
       n: number;
       device: DeviceId;
@@ -743,9 +743,9 @@ export type SimEvent =
       frameId: number;
       traced: boolean;
     }
-  | { kind: "slate.open"; t: number; n: number; layer: "frame" | "packet" | "message"; reached: boolean }
+  | { kind: "scanner.open"; t: number; n: number; layer: "frame" | "packet" | "message"; reached: boolean }
   | {
-      kind: "slate.compare";
+      kind: "scanner.compare";
       t: number;
       a: number;
       b: number;

@@ -1,6 +1,6 @@
 import type { Batch, RoomStatus } from "@wirelight/engine";
 import { roomById, rooms } from "@wirelight/rooms";
-import type { CmdSource, SimEvent, SlateCatch, SlateLayerName, SlateOpen } from "@wirelight/sim";
+import type { CmdSource, ScannerCatch, ScannerLayerName, ScannerOpen, SimEvent } from "@wirelight/sim";
 import { create } from "zustand";
 import { useProgress } from "../progress/progress";
 import { type Crossing, nextNetworkTime } from "./clock";
@@ -18,11 +18,11 @@ export type Panel =
   | { kind: "jar"; open?: number }
   | { kind: "board"; device: string; board: "mac" | "ledger" | "routes"; execId?: number }
   | { kind: "desk"; device: string }
-  | { kind: "slate" }
+  | { kind: "scanner" }
   | { kind: "keeper"; device: string }
   | { kind: "notes" }
   | { kind: "ask" }
-  | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "keys" | "settings" };
+  | { kind: "menu"; tab?: "dungeon" | "codex" | "guide" | "settings" };
 
 /** What reached one door lately (see Session.arrivals). */
 /** A corridor the player is in (0081): which cable, from which machine, and where they're gliding to. */
@@ -68,12 +68,12 @@ type Session = {
    */
   arrivals: Record<string, Arrival>;
   /**
-   * The Slate's Capture (`tcpdump -n -i <door>`, 0043): it listens in the background, so the console
-   * stays free; `running` until it's stopped. Kept here so the Slate remembers it when reopened.
+   * The Scanner's Capture (`tcpdump -n -i <door>`, 0043): it listens in the background, so the console
+   * stays free; `running` until it's stopped. Kept here so the Scanner remembers it when reopened.
    */
   capture: { device: string; door: string; execId: number; running: boolean } | null;
   startCapture(device: string, door: string): Promise<void>;
-  /** A message whose journey is being replayed in the Glass (CORE-23), or null. */
+  /** A message whose journey is being replayed on the Map (CORE-23), or null. */
   replay: number | null;
   setReplay(frameId: number | null): void;
   paused: boolean;
@@ -93,12 +93,12 @@ type Session = {
   interrupt(device: string, execId: number): Promise<void>;
   /** Touches a worn-out control (0040). */
   touch(device: string, control: string): Promise<void>;
-  /** The jar (CORE-19): every catch so far, newest last. */
-  jar: SlateCatch[];
+  /** Captures (CORE-19): every catch so far, newest last. */
+  jar: ScannerCatch[];
   /** Catches a copy of a message in flight (CORE-18). */
   catchFrame(frameId: number): Promise<void>;
   /** Opens catch `n` down to a layer; resolves with what it shows. */
-  openCatch(device: string, n: number, layer: SlateLayerName): Promise<SlateOpen>;
+  openCatch(device: string, n: number, layer: ScannerLayerName): Promise<ScannerOpen>;
   /** Called every rendered frame with the screen time that passed. */
   tick(screenMs: number): void;
   setPaused(paused: boolean): void;
@@ -159,9 +159,9 @@ export const ask = {
   setSubtitles: (on: boolean | null) => engine.setSubtitles(on),
 };
 
-/** A batch caught something (the Slate by command, 0043): the jar's list is fetched again. */
+/** A batch caught something (the Scanner by command, 0043): the list of catches is fetched again. */
 function refreshJarIfCaught(batch: Batch): void {
-  if (!batch.events.some((e) => e.kind === "slate.catch")) return;
+  if (!batch.events.some((e) => e.kind === "scanner.catch")) return;
   void engine.catches().then((jar) => useSession.setState({ jar }));
 }
 
@@ -281,7 +281,7 @@ export const useSession = create<Session>((set, get) => ({
   capture: null,
   async startCapture(device, door) {
     const batch = await exclusive(() => engine.exec(device, `tcpdump -n -i ${door}`, "click"));
-    // One update: the console sees the command and knows it's the Slate's at the same moment.
+    // One update: the console sees the command and knows it's the Scanner's at the same moment.
     set((s) => ({
       ...apply(s, batch),
       capture: { device, door, execId: batch.execId, running: batch.exitCode === null },

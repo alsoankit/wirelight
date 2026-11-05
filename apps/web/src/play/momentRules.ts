@@ -4,18 +4,17 @@ import type { SimEvent } from "@wirelight/sim";
 import { create } from "zustand";
 import type { Panel } from "../engine/store";
 
-// Game-feel moments (core-loop.md CORE-36, CORE-43..45; failure-and-hints.md HELP-12; 0008): what
-// has happened in this visit to a room, read from the trace and from the interface, and the rules
-// that turn it into a Knight's memory starting, its action being done, a Guardian question opening,
-// a journal page glowing, or the Knight offering a gentle way back. Everything here is derived: the
-// trace says what the network did; the interface notes only what the trace can't see (a hover, the
-// up arrow in the console, the Glass opening).
+// Game-feel moments (core-loop.md CORE-43, CORE-44; failure-and-hints.md HELP-12; 0008): what has
+// happened in this visit to a room, read from the trace and from the interface, and the rules that
+// turn it into a tip starting, its action being done, a question opening, or the offer of a gentle
+// way back. Everything here is derived: the trace says what the network did; the interface notes
+// only what the trace can't see (a hover, the up arrow in the console, the Map opening).
 
 /**
  * Things that can have happened in this visit. From the trace: `caught`, `caught-announcement`,
  * `opened-catch`, `broadcast-sent`, `sent-frame`, `plugged`, `trace-armed`, `remembered`, and each
  * detector that fired, by its id. From the interface: `own-plate`, `switch-seen`, `board-open`,
- * `slate-open`, `walked`, `near-doorway`, `near-cable`, `hover-message`, `glass-open`,
+ * `scanner-open`, `walked`, `near-doorway`, `near-cable`, `hover-message`, `glass-open`,
  * `workbench-message`, `history-up`, `voice-given`, `speed-fast`, `speed-back`.
  */
 export type Happened = ReadonlySet<string>;
@@ -50,19 +49,19 @@ export function readEvents(
       case "link.enter":
         if (toEveryone(e.bytes)) everyone.add(e.frameId);
         break;
-      case "slate.catch":
+      case "scanner.catch":
         out.add("caught");
         if (everyone.has(e.frameId)) out.add("caught-announcement");
         break;
-      case "slate.open":
+      case "scanner.open":
         out.add("opened-catch");
         if (e.layer !== "frame" && e.reached) out.add("opened-inside");
         break;
-      case "slate.compare":
+      case "scanner.compare":
         // Two catches of one packet from different streets: the frame changed, the packet didn't (9.1).
         if (e.samePacket && !e.sameStreet) out.add("compared-streets");
         break;
-      case "slate.arm":
+      case "scanner.arm":
         if (e.what === "trace") out.add("trace-armed");
         break;
       case "keeper.step":
@@ -94,7 +93,7 @@ export function readView(
     if (room.controls.plateSwitches?.[`${p.device}:${p.iface}`]) out.add("switch-seen");
   }
   if (p?.kind === "board") out.add("board-open");
-  if (p?.kind === "slate") out.add("slate-open");
+  if (p?.kind === "scanner") out.add("scanner-open");
   if (p?.kind === "jar" && p.open !== undefined) out.add("opened-catch");
   if (v.here && v.here !== room.playerDevice) out.add("walked");
   if (v.voiceGiven) out.add("voice-given");
@@ -120,11 +119,11 @@ const has =
 const entering = () => true;
 
 /**
- * Each Knight's Memory (0008), by id: its trigger and its action, as the floor specs give them.
+ * Each tip (0008), by id: its trigger and its action, as the floor specs give them.
  * A memory not listed here plays on entering when its trigger says so ("on entering", "first visit").
  */
 export const MEMORY_RULES: Record<string, Rule> = {
-  // Prologue: the first time the Glass opens; action: hover the moving message.
+  // Prologue: the first time the Map opens; action: hover the moving message.
   "P-MEM-01": { when: has("glass-open"), done: has("hover-message") },
   // 1.1: on entering; action: click your own plate.
   "F1-MEM-01": { when: entering, done: has("own-plate") },
@@ -136,7 +135,7 @@ export const MEMORY_RULES: Record<string, Rule> = {
   "F1-MEM-04": { when: has("switch-seen") },
   // 2.1: first visit; action: drag a word into the Message slot.
   "F2-MEM-01": { when: entering, done: has("workbench-message", "sent-frame") },
-  // 2.2: first time a message moves while the jar is ready; action: catch one message.
+  // 2.2: first time a message moves while Captures is ready; action: catch one message.
   "F2-MEM-02": { when: (c) => !!c.room.controls.catching && c.moving > 0, done: has("caught") },
   // 2.2: after the first catch; action: open the catch.
   "F2-MEM-03": { when: has("caught"), done: has("opened-catch") },
@@ -147,10 +146,10 @@ export const MEMORY_RULES: Record<string, Rule> = {
   // 4.1: first time the time control is needed (reading the hall's memory, or a while in the room);
   // action: set time to fast, then back to normal.
   "F4-MEM-01": { when: (c) => c.happened.has("board-open") || c.elapsedMs > 45_000, done: has("speed-back") },
-  // 6.1: when the Slate is picked up (first opened); action: catch one message with the Slate.
-  "F6-MEM-01": { when: has("slate-open"), done: has("caught") },
-  // 9.1: first use of the Slate's tracer (the Slate opened where it has one); action: press Trace.
-  "F9-MEM-01": { when: has("slate-open"), done: has("trace-armed") },
+  // 6.1: when the Scanner is picked up (first opened); action: catch one message with the Scanner.
+  "F6-MEM-01": { when: has("scanner-open"), done: has("caught") },
+  // 9.1: first use of the Scanner's tracer (the Scanner opened where it has one); action: press Trace.
+  "F9-MEM-01": { when: has("scanner-open"), done: has("trace-armed") },
 };
 
 /**
@@ -160,7 +159,7 @@ export const MEMORY_RULES: Record<string, Rule> = {
 export const LINE_RULES: Record<string, (c: MemoryContext) => boolean> = {
   // 3.1: the keeper wakes and says what it does (floor-3.md, step 4).
   "F3-KEEP-01": has("keeper-woke"),
-  // 5.2: the Knight, after the first ping that can't leave (no address yet).
+  // 5.2: the robot's note, after the first ping that can't leave (no address yet).
   "F5-NOTE-01": has("ping-no-address", "ping-unreachable"),
   // 6.1: the first time a catch is opened past its frame (the seal breaks).
   "F6-SEAL-01": has("opened-inside"),
@@ -194,10 +193,10 @@ export function memoriesDue(room: RoomDef, seen: readonly string[], c: MemoryCon
 }
 
 /**
- * A Guardian question that opens later (CORE-43) is shown once its `after` has happened in this
+ * A question that opens later (CORE-43) is shown once its `after` has happened in this
  * visit (a detector by its id, or a moment read from the trace), or once the floor is cleared
  * (CORE-44: after the floor memory, the whole floor's questions open). The `after` values in the
- * content: `own-name` (2.1's detector), `caught-announcement` (2.2: a broadcast caught in the jar),
+ * content: `own-name` (2.1's detector), `caught-announcement` (2.2: a broadcast caught in Captures),
  * `broadcast-sent` (2.3: the player sent a frame to everyone).
  */
 export function questionOpen(after: string | undefined, happened: Happened, floorCleared: boolean): boolean {
@@ -228,60 +227,31 @@ export function matchingRoom(boss: RoomDef, fired: readonly string[]): RoomDef |
   return earlier[0];
 }
 
-/**
- * Where a floor's journal page lies (CORE-45, the floor specs' "where"), and when it shows: after the
- * win ("glows after the win"), when the corridor has been walked (1.2), in the registry's room (7.2),
- * or from the start (5.2's notice board).
- */
-export function journalShows(where: string, c: { won: boolean; here: string | null; player: string }): boolean {
-  if (/after the win/i.test(where)) return c.won;
-  if (/walk the corridor/i.test(where)) return c.won || (!!c.here && c.here !== c.player);
-  if (/registry's room/i.test(where)) return c.here === "registry";
-  return true;
-}
-
 type Moments = {
   roomId: string | null;
   happened: string[];
-  /** The keys on the keyring when this room was entered (so the key's flight knows if it's new). */
-  keysBefore: string[];
   /** Bosses whose way-back offer was answered (Go there or Stay): it isn't offered again this session. */
   wayBackAnswered: string[];
-  /** A new key on its way to the keyring (it's counted once it lands), or null. */
-  flight: string | null;
-  /** The keyring glows for a moment when a key lands. */
-  landed: boolean;
   /** The first release's ending is playing (after 9.B's floor memory). */
   ending: boolean;
-  enter(roomId: string, keys: string[]): void;
+  enter(roomId: string): void;
   note(...what: string[]): void;
   answerWayBack(bossId: string): void;
-  fly(word: string | null): void;
-  land(): void;
   setEnding(on: boolean): void;
 };
 
 export const useMoments = create<Moments>((set, get) => ({
   roomId: null,
   happened: [],
-  keysBefore: [],
   wayBackAnswered: [],
-  flight: null,
-  landed: false,
   ending: false,
-  enter: (roomId, keys) => set({ roomId, happened: [], keysBefore: keys, flight: null }),
+  enter: (roomId) => set({ roomId, happened: [] }),
   note: (...what) => {
     const had = get().happened;
     const fresh = what.filter((w) => !had.includes(w));
     if (fresh.length) set({ happened: [...had, ...fresh] });
   },
   answerWayBack: (bossId) => set((s) => ({ wayBackAnswered: [...s.wayBackAnswered, bossId] })),
-  fly: (flight) => set({ flight, landed: false }),
-  land: () => {
-    if (get().flight === null && get().landed) return;
-    set({ flight: null, landed: true });
-    setTimeout(() => set({ landed: false }), 1400);
-  },
   setEnding: (ending) => set({ ending }),
 }));
 

@@ -179,8 +179,8 @@ function worksByTheDoor(bag: Bag, kind: number) {
 
 /**
  * The Lantern Town's version (region-3 brief, 0052): what the townsfolk left is the town's own work,
- * never a home's furniture: the post's sack and spilled letters, the lamplighter's ladder and spare
- * lantern frames, crates and a sack, or a fallen shutter and broken roof slates; by the door a ladder
+ * never a home's furniture: the post's sack and spilled letters, a ladder and spare frames for the
+ * street lanterns, crates and a sack, or a fallen shutter and broken roof slates; by the door a ladder
  * against the wall, ledgers, an empty lantern frame or a bundle of letters.
  */
 function lettersAt(bag: Bag, x: number, z: number, n: number, seed: number) {
@@ -245,7 +245,7 @@ function townLeftBehind(bag: Bag, kind: number) {
     addTo(bag, "Cloth", rod([cx, 0.42, cz], [cx + 0.05, 0.55, cz - 0.03], 0.09, 8, 0.05));
     lettersAt(bag, cx - 0.55, cz + 0.35, 7, 3);
   } else if (kind === 1) {
-    // The lamplighter's things: a ladder laid along the floor, two spare lantern frames.
+    // For the street lanterns: a ladder laid along the floor, two spare lantern frames.
     ladder(bag, [cx + 0.2, 0.03, cz - 1.1], [cx - 0.1, 0.03, cz + 1.1]);
     lanternFrame(bag, [cx - 0.75, 0, cz - 0.4]);
     lanternFrame(bag, [cx - 0.55, 0, cz + 0.45], true);

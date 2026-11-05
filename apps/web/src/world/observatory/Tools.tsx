@@ -7,8 +7,8 @@ import { BufferGeometry, DoubleSide, Float32BufferAttribute, type Group } from "
 import { useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 
-// The Knight's tools in the Observatory (CORE-34, CORE-35), shown only in rooms that have them:
-// - the workbench, a slab of old stone where he built frames by hand (Floors 2–4);
+// The robot's tools in the Observatory (CORE-34, CORE-35), shown only in rooms that have them:
+// - the workbench, a slab of old stone where frames are built by hand (Floors 2–4);
 // - the messenger, a folded-paper bird by the door that keeps sending to the name on its card.
 // Clicking either opens its panel; the panel runs the real command (lab send-frame, lab card).
 

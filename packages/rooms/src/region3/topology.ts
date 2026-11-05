@@ -45,7 +45,7 @@ export const DOOR: Record<House, string> = {
 export interface TownOptions {
   /** The houses on the square, in the order of its doors (eth1, eth2…). Kitchen is always first. */
   houses: House[];
-  /** The Knight's messenger in the observatory (its card; a house address sends real pings). */
+  /** The messenger in the observatory (its card; a house address sends real pings). */
   messenger?: MessengerSpec;
   /** Kitchen's answer to an old-style lab frame written to its door (5.1). */
   lanternLab?: LabSpec;

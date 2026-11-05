@@ -1,11 +1,11 @@
 import type { FloorText, RoomText } from "./types";
 
-/** floors/floor-5.md, word for word. Region 3, the Lantern Town; Guardian: the Lamplighter. */
+/** floors/floor-5.md, word for word. Region 3, the Lantern Town. */
 
 /** Why a house's door is shut to the player on Floors 5–7. */
 export const HOUSE_LOCKED = "Locked. Nobody here has opened the door in years, but they still answer letters.";
 
-/** The Lamplighter greets the player as they arrive in Region 3 (R3-ARRIVE-01…03). */
+/** Arriving in Region 3 (R3-ARRIVE-01…03). */
 export const REGION_3_ARRIVAL = [
   {
     id: "R3-ARRIVE-01",
@@ -59,7 +59,7 @@ export const whereNotWho: RoomText = {
       "Kitchen's door changed, so its MAC address changed, and the messenger's frames went nowhere. Its house address didn't: that's its IP address. Writing to the IP address instead of the MAC address found kitchen, whichever door it has.",
     terms: [{ id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" }],
   },
-  guardian: [
+  questions: [
     {
       q: "Why not just use names?",
       a: "Names belong to doors, and doors get replaced. A house stays where it is.",
@@ -93,7 +93,7 @@ export const placeToLive: RoomText = {
   ],
   detectors: {
     "ping-no-address": {
-      // The same words as F5-NOTE-01 (the Knight's line after this first, failed ping).
+      // The same words as F5-NOTE-01 (the robot's line after this first, failed ping).
       note: "A house with no address can't send messages, or get answers.",
       tried:
         "You pinged before your house had an address: `Network is unreachable`. Nothing could leave without a return address.",
@@ -123,7 +123,7 @@ export const placeToLive: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "Why can't I ping without an address?",
       a: "Who would the answer go back to? Every message needs a return address.",

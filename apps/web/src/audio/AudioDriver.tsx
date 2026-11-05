@@ -7,7 +7,7 @@ import { effect, loadManifest, playAmbience, playMusic, setRuin, setTextOnly, se
 // Plays the game's sound from what happens (gameplay/audio.md): the floor's music (muffled in ruin,
 // opening as the room restores), and effects from the trace: a soft chime for each broadcast copy
 // (throttled), a click when a keeper decides, the cable plugging in and out, a plate switching (or
-// refusing), the Slate catching, the swell and the key on a win, and a soft click on any button. The
+// refusing), the Scanner catching, the swell and the key on a win, and a soft click on any button. The
 // region's ambience beds blend from ruined to restored with the room (0021).
 // Every slot may be missing: then nothing plays (0047).
 
@@ -63,7 +63,7 @@ export function AudioDriver() {
           else if (e.kind === "fwd.decision") void effect("sfx.keeper.decide", 150);
           else if (e.kind === "cmd.exec" && /^lab cable plug/.test(e.line)) void effect("sfx.cable.plug");
           else if (e.kind === "cmd.exec" && /^lab cable unplug/.test(e.line)) void effect("sfx.cable.unplug");
-          else if (e.kind === "cmd.exec" && /^lab slate catch/.test(e.line)) void effect("sfx.slate.catch");
+          else if (e.kind === "cmd.exec" && /^lab scanner catch/.test(e.line)) void effect("sfx.slate.catch");
           else if (e.kind === "cmd.exec" && e.source !== "script" && /^ip link set \S+ (up|down)$/.test(e.line))
             void effect(e.exitCode ? "sfx.plate.broken" : e.line.endsWith("up") ? "sfx.plate.on" : "sfx.plate.off", 80);
         }

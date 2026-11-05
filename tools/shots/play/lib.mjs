@@ -15,7 +15,7 @@ export async function launch() {
 
 /**
  * Takes whatever is waiting on screen: spoken lines (memories, arrivals, boss introductions),
- * discovery cards. A memory's action prompt and the key's flight never block a click.
+ * discovery cards. A memory's action prompt never blocks a click.
  */
 export async function tidy(p) {
   for (let k = 0; k < 12; k++) {

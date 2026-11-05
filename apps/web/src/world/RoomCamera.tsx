@@ -15,7 +15,7 @@ type Props = {
   target: [number, number, number];
   distance?: number;
   fov?: number;
-  /** Start this many metres further out and settle in (arriving from the descent, ONB-05). */
+  /** Start this many metres further out and settle in (arriving in the room, ONB-05). */
   settleFrom?: number;
 };
 

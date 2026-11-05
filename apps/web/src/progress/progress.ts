@@ -3,6 +3,7 @@ import { del, get, set } from "idb-keyval";
 import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+import { renameCards } from "./renamedCards";
 
 // The player's progress, saved in this browser (ONB-22, idb-keyval): what's been seen (the gifts,
 // the path, the tour), rooms cleared, keys, discovery cards, memories, notes and hints. If storage
@@ -55,7 +56,6 @@ type Progress = {
   keys: string[];
   cardsSeen: string[];
   memoriesSeen: string[];
-  journalPages: number[];
   floorMemoriesSeen: number[];
   /** Secret rooms whose door the player has found in the world (0065: shown after the floor's boss). */
   secretsFound: string[];
@@ -72,7 +72,6 @@ type Progress = {
   clear(roomId: string, record: RoomRecord): void;
   seeCard(id: string): void;
   seeMemory(id: string): void;
-  findJournalPage(page: number): void;
   seeFloorMemory(floor: number): void;
   findSecret(roomId: string): void;
   openHint(roomId: string): void;
@@ -107,7 +106,6 @@ export const useProgress = create<Progress>()(
       keys: [],
       cardsSeen: [],
       memoriesSeen: [],
-      journalPages: [],
       floorMemoriesSeen: [],
       secretsFound: [],
       hints: {},
@@ -126,7 +124,6 @@ export const useProgress = create<Progress>()(
         })),
       seeCard: (id) => setState((s) => ({ cardsSeen: add(s.cardsSeen, id) })),
       seeMemory: (id) => setState((s) => ({ memoriesSeen: add(s.memoriesSeen, id) })),
-      findJournalPage: (page) => setState((s) => ({ journalPages: add(s.journalPages, page) })),
       seeFloorMemory: (floor) => setState((s) => ({ floorMemoriesSeen: add(s.floorMemoriesSeen, floor) })),
       findSecret: (roomId) => setState((s) => ({ secretsFound: add(s.secretsFound, roomId) })),
       openHint: (roomId) =>
@@ -138,7 +135,16 @@ export const useProgress = create<Progress>()(
         }),
       replayIntro: () => setState({ sightGiven: false, tourDone: false }),
     }),
-    { name: "wirelight-progress", version: 1, storage: createJSONStorage(() => idb) },
+    {
+      name: "wirelight-progress",
+      version: 1,
+      storage: createJSONStorage(() => idb),
+      // As the default merge, with cards found under an old id kept under their new one.
+      merge: (saved, current) => {
+        const s = (saved ?? {}) as Partial<Progress>;
+        return { ...current, ...s, ...(Array.isArray(s.cardsSeen) ? { cardsSeen: renameCards(s.cardsSeen) } : {}) };
+      },
+    },
   ),
 );
 

@@ -10,7 +10,7 @@ const BUILTINS = ["clear", "exit", "help", "history", "hostname", "man"];
 /** Which tool each first word needs (any one of them). */
 const PROGRAMS: Record<string, ToolId[]> = {
   ip: ["ip link", "ip addr", "ip route", "ip neigh"],
-  lab: ["lab send-frame", "lab card", "lab cable", "lab keeper", "lab slate"],
+  lab: ["lab send-frame", "lab card", "lab cable", "lab keeper", "lab scanner"],
   bridge: ["bridge fdb", "bridge link"],
   ping: ["ping"],
   tcpdump: ["tcpdump"],
@@ -54,7 +54,7 @@ const NEXT: Record<string, [string, ToolId | null][]> = {
     ["card", "lab card"],
     ["cable", "lab cable"],
     ["keeper", "lab keeper"],
-    ["slate", "lab slate"],
+    ["scanner", "lab scanner"],
   ],
   "lab cable": [
     ["plug", null],
@@ -68,15 +68,15 @@ const NEXT: Record<string, [string, ToolId | null][]> = {
     ["wrap", null],
     ["forward", null],
   ],
-  "lab slate": [
+  "lab scanner": [
     ["list", null],
     ["catch", null],
     ["open", null],
-    ["trace", "lab slate trace"],
-    ["compare", "lab slate trace"],
+    ["trace", "lab scanner trace"],
+    ["compare", "lab scanner trace"],
   ],
-  "lab slate catch": [["--next", null]],
-  "lab slate trace": [["--next", null]],
+  "lab scanner catch": [["--next", null]],
+  "lab scanner trace": [["--next", null]],
   "lab card": [
     ["--to", null],
     ["--messenger", null],

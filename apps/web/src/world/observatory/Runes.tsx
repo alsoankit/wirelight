@@ -5,7 +5,7 @@ import { color, mix } from "three/tsl";
 import { MeshStandardNodeMaterial } from "three/webgpu";
 import { ruinHere } from "../ruin";
 
-// Runes carved into the stone by the first wire-weavers (0052): the room's own light. Two or three
+// Runes carved into the stone by the first builders (0052): the room's own light. Two or three
 // single glyphs scattered over the walls. Dark in ruin; they
 // relight one by one as the restoration wave reaches them (the material reads the ruin at its own
 // position). All strokes are one mesh (one draw call); each group also casts a warm light

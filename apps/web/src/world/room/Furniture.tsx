@@ -17,7 +17,7 @@ import type { Vec3 } from "./layout";
 
 const STONE = "#6d6a63";
 
-// Each region dresses the boards and the desk in its own materials (art briefs): weavers' stone,
+// Each region dresses the boards and the desk in its own materials (art briefs): the builders' stone,
 // the Works' walnut and brass (the MAC board's entries are brass tiles), the town's timber notice
 // boards, the Cathedral's carved stone with brass inlay (the routing board) and a lectern.
 const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Walnut", 3: "Timber", 4: "Sandstone" };

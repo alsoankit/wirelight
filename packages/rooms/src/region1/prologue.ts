@@ -30,7 +30,7 @@ export const firstMessage = defineRoom({
   healthChecks: [{ id: "wire-lit", object: { kind: "corridor", link: "wire" }, check: corridorLit("wire") }],
   teaches: [],
   uses: [],
-  cards: ["cable", "message", "scrying-glass"],
+  cards: ["cable", "message", "map"],
   misconceptions: [],
   detectorTests: [],
   solution: [send],

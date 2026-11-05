@@ -36,11 +36,11 @@ const VARS = {
   nowhere: "10.0.4.9",
 };
 
-/** Boards cracked, lecterns for watching only; the Slate with its tracer and compare (9.1 on). */
+/** Boards cracked, lecterns for watching only; the Scanner with its tracer and compare (9.1 on). */
 const controls = (t: ReturnType<typeof cathedral>) => ({
   console: "typing" as const,
   routingBoards: crackedBoards(t),
-  slate: { catch: true, capture: true, trace: true },
+  scanner: { catch: true, capture: true, trace: true },
 });
 
 // Detectors more than one room uses (9.B inherits them).
@@ -69,7 +69,7 @@ export const twoEnvelopes = defineRoom({
   playerDevice: "observatory",
   access: openRooms(envelopesTopo),
   controls: controls(envelopesTopo),
-  tools: { unlock: ["lab slate trace"] },
+  tools: { unlock: ["lab scanner trace"] },
   glow: "symptoms",
   // Arch's lock opens on a compare showing a new frame around the same packet.
   winCondition: newFrameSamePacket,
@@ -94,35 +94,35 @@ export const twoEnvelopes = defineRoom({
       // Two catches at the observatory's own door: two pings on one street.
       misconception: "compare-same-street",
       steps: [
-        click("observatory", "lab slate catch --next --from 10.0.1.5", 100),
+        click("observatory", "lab scanner catch --next --from 10.0.1.5", 100),
         typed("observatory", "ping -c 1 10.0.3.7", 2000),
-        click("observatory", "lab slate catch --next --from 10.0.1.5", 100),
+        click("observatory", "lab scanner catch --next --from 10.0.1.5", 100),
         typed("observatory", "ping -c 1 10.0.3.7", 2000),
-        click("observatory", "lab slate compare 1 2"),
+        click("observatory", "lab scanner compare 1 2"),
       ],
     },
     {
       misconception: "compare-different-packets",
       steps: [
-        click("observatory", "lab slate trace --next", 100),
+        click("observatory", "lab scanner trace --next", 100),
         typed("observatory", "ping -c 1 10.0.3.7", 2000),
-        click("observatory", "lab slate trace --next", 100),
+        click("observatory", "lab scanner trace --next", 100),
         typed("observatory", "ping -c 1 10.0.3.7", 2000),
-        click("observatory", "lab slate compare 1 4"),
+        click("observatory", "lab scanner compare 1 4"),
       ],
     },
   ],
   solution: [
-    click("observatory", "lab slate trace --next", 100),
+    click("observatory", "lab scanner trace --next", 100),
     typed("observatory", "ping -c 1 10.0.3.7", 2000),
-    click("observatory", "lab slate compare 1 3"),
+    click("observatory", "lab scanner compare 1 3"),
   ],
   // The nave catch with the cloister catch, as hint 5 says.
   altSolutions: [
     [
-      click("observatory", "lab slate trace --next", 100),
+      click("observatory", "lab scanner trace --next", 100),
       typed("observatory", "ping -c 1 10.0.3.7", 2000),
-      click("observatory", "lab slate compare 1 2"),
+      click("observatory", "lab scanner compare 1 2"),
     ],
   ],
 });
@@ -166,7 +166,7 @@ export const showTheWay = defineRoom({
   detectorTests: [{ misconception: "gateway-far", steps: [typed("laundry", "ip route add default via 10.0.2.1")] }],
   solution: [
     typed("laundry", "ip route add default via 10.0.3.1"),
-    click("laundry", "lab slate trace --next", 100),
+    click("laundry", "lab scanner trace --next", 100),
     typed("laundry", "ping -c 1 10.0.1.5"),
   ],
 });
@@ -392,7 +392,7 @@ export const insideYourHomeRouter = defineRoom({
     console: "typing",
     addressSlots: { "observatory:eth0": "broken" },
     routingBoards: { observatory: "broken", home: "broken" },
-    slate: { catch: true, capture: true, trace: true },
+    scanner: { catch: true, capture: true, trace: true },
   },
   tools: {},
   glow: "none",

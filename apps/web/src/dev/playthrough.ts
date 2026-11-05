@@ -11,7 +11,7 @@ import { useProgress } from "../progress/progress";
 // to change. Each room: arrive and read the mission, take whatever is said or shown (lines, command
 // memories, discovery cards) after a reading pause, play the room's own solution through the real
 // engine, watch it restore, read the debrief, then its building memory and, after a boss, the
-// guardian's floor memory with its ride-along; after the last boss, the ending. Nothing is faked:
+// floor memory with its ride-along; after the last boss, the ending. Nothing is faked:
 // every action is the room's solution run as real commands.
 
 /** Waits until network time has moved on by `ms` (the presentation clock decides how fast). */

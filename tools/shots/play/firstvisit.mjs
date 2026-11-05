@@ -30,7 +30,7 @@ for (let i = 0; i < 5; i++) {
   await p.waitForTimeout(250);
 }
 console.log("tour done:", !(await p.$(".tour-card")));
-// Discovery cards and the Knight's first memory may wait their turn: take them.
+// Discovery cards and the first tip may wait their turn: take them.
 const tidy = async () => {
   for (let k = 0; k < 8; k++) {
     if (await p.$(".lines")) await p.click(".lines button");

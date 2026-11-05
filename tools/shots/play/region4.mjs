@@ -38,7 +38,7 @@ const walk = async (...rooms) => {
     await tidy(p);
   }
 };
-const slate = async () => {
+const scanner = async () => {
   await tidy(p);
   await p.click(".jar-button");
   await p.waitForTimeout(300);
@@ -69,14 +69,14 @@ await walk("nave", "observatory");
 await type(p, "ping -c 3 10.0.3.7");
 await check("8.3");
 
-// 8.4: listen in gallery's room with the Slate's Capture, then give gallery a way back.
+// 8.4: listen in gallery's room with the Scanner's Capture, then give gallery a way back.
 await open(p, base, "f8.no-way-back");
 await p.click(".console-bar");
 await p.click(".console-term");
 await p.keyboard.type("ping -c 4 10.0.2.7");
 await p.keyboard.press("Enter");
 await walk("nave", "crossing", "cloister", "gallery");
-await slate();
+await scanner();
 await p.click(".panel button:has-text('Start')");
 await p.waitForTimeout(4000);
 await p.screenshot({
@@ -134,11 +134,11 @@ await check("8.B");
 
 // 9.1: trace one ping and compare two of its catches.
 await open(p, base, "f9.two-envelopes");
-await slate();
+await scanner();
 await p.click(".panel button:has-text('Trace')");
 await p.click(".panel .quiet");
 await type(p, "ping -c 1 10.0.3.7");
-await slate();
+await scanner();
 await p.waitForSelector(".catch-list li >> nth=2", { timeout: 15000 });
 await p.fill(".panel .addr-form input[type=number] >> nth=0", "1");
 await p.fill(".panel .addr-form input[type=number] >> nth=1", "3");
@@ -153,7 +153,7 @@ await check("9.1");
 await open(p, base, "f9.show-the-way");
 await walk("nave", "crossing", "cloister", "arch", "tower", "laundry");
 await type(p, "ip route add default via 10.0.3.1");
-await slate();
+await scanner();
 await p.click(".panel button:has-text('Trace')");
 await p.click(".panel .quiet");
 await type(p, "ping -c 1 10.0.1.5");

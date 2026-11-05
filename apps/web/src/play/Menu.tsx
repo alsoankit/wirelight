@@ -19,11 +19,11 @@ import { RichText } from "./RichText";
 import { goToRoom } from "./RoomHud";
 
 // The menu (M, UI-13): the dungeon (every floor and room with its status), the Codex (objects, words,
-// the Command book, journal pages), the Field Guide (topics open as their rooms are reached), the
-// keyring and Settings (path, replay intro). A drawer from the left; Esc closes it.
+// the Command book), the Field Guide (topics open as their rooms are reached) and Settings (path,
+// replay intro). A drawer from the left; Esc closes it.
 
 type Tab = NonNullable<Extract<Panel, { kind: "menu" }>["tab"]>;
-// UI-13's order: Field Guide, Codex, the dungeon, the keyring, Settings.
+// UI-13's order: Field Guide, Codex, the dungeon, Settings.
 const TABS: Tab[] = ["guide", "codex", "dungeon", "settings"];
 
 function useOpened(): Set<string> {

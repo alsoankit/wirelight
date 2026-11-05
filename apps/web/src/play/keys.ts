@@ -19,7 +19,7 @@ export function withModifier(e: KeyboardEvent): boolean {
  */
 export const TAB = { plate: 100, door: 200, cableEnd: 300, furniture: 400, keeper: 500 } as const;
 
-/** The event that opens the Scrying Glass from elsewhere (the Prologue's Send opens it, ONB-19). */
+/** The event that opens the Map from elsewhere (the Prologue's Send opens it, ONB-19). */
 export const OPEN_GLASS = "wirelight:open-glass";
 
 export function openGlass(): void {

@@ -1,4 +1,4 @@
-/** Region 4's own building blocks (routes, forwarding, pings, the Slate's tracer). Trace and state only. */
+/** Region 4's own building blocks (routes, forwarding, pings, the Scanner's tracer). Trace and state only. */
 import type { DeviceId, SimEvent } from "@wirelight/sim";
 import type { Predicate } from "../types";
 
@@ -53,9 +53,9 @@ export function hasAddrOn(device: DeviceId, streetPrefix: string): Predicate {
   return ({ world }) => world.device(device)?.addrs.some((a) => a.ip.startsWith(streetPrefix)) ?? false;
 }
 
-/** A compare on the Slate matched `test` (9.1). */
-export function compared(test: (c: Extract<SimEvent, { kind: "slate.compare" }>) => boolean): Predicate {
-  return ({ trace }) => trace.some((e) => e.kind === "slate.compare" && test(e));
+/** A compare on the Scanner matched `test` (9.1). */
+export function compared(test: (c: Extract<SimEvent, { kind: "scanner.compare" }>) => boolean): Predicate {
+  return ({ trace }) => trace.some((e) => e.kind === "scanner.compare" && test(e));
 }
 
 /** A packet `device` traced was caught on at least `n` streets (9.2: its hops). */
@@ -64,9 +64,9 @@ export function tracedHops(device: DeviceId, n: number): Predicate {
     let count = -1;
     let best = 0;
     for (const e of trace) {
-      if (e.kind === "slate.arm" && e.device === device && e.what === "trace") count = 0;
-      else if (e.kind === "slate.arm" && e.what === "trace") count = -1;
-      else if (e.kind === "slate.catch" && e.traced && count >= 0) best = Math.max(best, ++count);
+      if (e.kind === "scanner.arm" && e.device === device && e.what === "trace") count = 0;
+      else if (e.kind === "scanner.arm" && e.what === "trace") count = -1;
+      else if (e.kind === "scanner.catch" && e.traced && count >= 0) best = Math.max(best, ++count);
     }
     return best >= n;
   };
@@ -91,7 +91,7 @@ export function pingWithTtl(device: DeviceId, test: (ttl: number) => boolean, n 
 /** A change to a routing board or a setting. */
 const CHANGE = /^(?:ip route (?:add|del|delete|change|replace|append|flush)\b|sysctl\s+-w\b)/;
 /** Asking the road where a packet stops: a countdown, the tracer, or listening at a door. */
-const LOOK = /^(?:ping\b.*\s-t\s?\d+|lab slate trace\b|tcpdump\b)/;
+const LOOK = /^(?:ping\b.*\s-t\s?\d+|lab scanner trace\b|tcpdump\b)/;
 
 /**
  * `n` changes that failed in a row (the machine refused them), with no `ping -t`, trace or capture

@@ -8,7 +8,7 @@ import { isTyping, TAB, withModifier } from "./keys";
 // Playing by keyboard (CORE-47, UI-05, UI-18). Number keys go through the room's doors in order
 // (eth0 = 1, eth1 = 2…), only into rooms that can be entered; Shift and a number steps into that door's
 // corridor (0081), where ← and → go on and Esc steps back; Esc steps back (closes the open panel;
-// the Glass closes itself); Space pauses time; G, M and ` live with what they open. No key fires
+// the Map closes itself); Space pauses time; G, M and ` live with what they open. No key fires
 // while typing.
 // Panels take focus when they open and hand it back when they close; the room's objects are in a
 // sensible Tab order (plates, doorways, cable ends, furniture, the keeper), then the bars.
@@ -91,7 +91,7 @@ function useKeys() {
       if (e.key !== "Escape") return;
       const target = e.target instanceof HTMLElement ? e.target : null;
       if (target?.closest(".console")) return; // the terminal keeps its own keys
-      if (document.querySelector(".glass")) return; // the Glass is on top; it closes itself
+      if (document.querySelector(".glass")) return; // the Map is on top; it closes itself
       const s = useSession.getState();
       if (!s.panel) return;
       e.stopPropagation();

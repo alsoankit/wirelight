@@ -6,19 +6,19 @@ import { useSession } from "../../engine/store";
 import { useRegion } from "../region";
 import { EMBLEM_ASPECT, emblemUrl } from "../room/emblems";
 import { Board, Desk } from "../room/Furniture";
-import { Guardian } from "../room/Guardian";
 import { MachineScene } from "../room/MachineScene";
+import { RegionStatue } from "../room/RegionStatue";
 import { Statue } from "../room/Statue";
-import { DRESSING_AT, GUARDIAN_AT, type GuardianPlace, MACHINES_AT } from "../room/standing";
+import { DRESSING_AT, MACHINES_AT, STATUE_AT, type StatueSpot } from "../room/standing";
 import { WallArt, type WallArtMark } from "../room/WallArt";
 import { WarTable } from "../room/WarTable";
 import { observatoryLayout } from "./layout";
 import { RUNE_GLOWS, Runes } from "./Runes";
 import { ObservatoryTools } from "./Tools";
 
-// The Observatory, the player's own machine on every floor (CORE-07): the Knight's old base, with the
-// planning table, his unfinished letter and the runes. An old fantasy ruin explored with modern tools
-// (0051): only the Glass is modern here. A left world (0052). Its doors and everything that changes
+// The Observatory, the player's own machine on every floor (CORE-07): the robot's old base, with the
+// planning table, an unfinished letter and the runes. An old ruin explored with modern tools (0051).
+// A left world (0052). Its doors and everything that changes
 // come from the room (MachineScene); this adds what only the Observatory has.
 
 /** Why a machine beyond a door can't be entered, from the room's text. */
@@ -64,9 +64,9 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
       glows={layout.glows ?? RUNE_GLOWS}
       arriving={arriving}
     >
-      {/* The weavers' runes are Region 1's light; other regions bring their own (layout.glows). */}
+      {/* The builders' runes are Region 1's light; other regions bring their own (layout.glows). */}
       {region === 1 && <Runes />}
-      {/* The region's emblem, painted by its people (0091); machines where the Knight's corner stood (0110). */}
+      {/* The region's emblem, painted by its people (0091); machines where the old corner stood (0110). */}
       {EMBLEM_AT[region] && room && (
         <WallArt
           {...(EMBLEM_AT[region] as WallArtMark)}
@@ -77,7 +77,7 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
       {(MACHINES_AT[region] ?? []).map((m) => (
         <Statue key={m.slug} {...(m as Parameters<typeof Statue>[0])} />
       ))}
-      {GUARDIAN_AT[region] && <Guardian region={region} place={GUARDIAN_AT[region] as GuardianPlace} />}
+      {STATUE_AT[region] && <RegionStatue region={region} place={STATUE_AT[region] as StatueSpot} />}
       {DRESSING_AT[region] && <Statue {...(DRESSING_AT[region] as Parameters<typeof Statue>[0])} />}
       {region === 4 && <Runes set="chapel" />}
       <WarTable position={[2.4, 0, 1.6]} region={region} />

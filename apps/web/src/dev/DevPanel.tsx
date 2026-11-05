@@ -82,7 +82,7 @@ function Sheet({ room }: { room: RoomDef }) {
         ))}
       </details>
       <details>
-        <summary>Notes, memories, Guardian, cards</summary>
+        <summary>Notes, memories, questions, cards</summary>
         {t.notes.map((n) => (
           <p key={n}>Note: {say(n)}</p>
         ))}
@@ -97,7 +97,7 @@ function Sheet({ room }: { room: RoomDef }) {
             <code>{v.id}</code> {v.speaker}: {v.text}
           </p>
         ))}
-        {(t.guardian ?? []).map((g) => (
+        {(t.questions ?? []).map((g) => (
           <p key={g.q}>
             Q: {g.q} — {g.a}
             {g.after ? ` (after ${g.after})` : ""}

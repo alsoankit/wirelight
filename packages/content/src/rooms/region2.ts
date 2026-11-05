@@ -84,7 +84,7 @@ const manyDoors: RoomText = {
       action: "press Remember on the waiting frame",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "What is this hall?",
       a: "A sorting hall: many doors, one keeper. Every frame comes in one door and leaves by another. Choosing which one is the clever part.",
@@ -157,7 +157,7 @@ const keepersMemory: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "Why isn't gate in the MAC table?",
       a: "The keeper only writes down names it has seen. Has gate ever sent anything?",
@@ -353,7 +353,7 @@ const pinnedMemory: RoomText = {
       action: "set time to fast, then back to normal",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "Why do memories fade?",
       a: "Machines move. If the keeper never forgot, it would keep sending to doors where nobody is anymore. Forgetting the quiet ones keeps its list true.",
@@ -407,7 +407,7 @@ const whoHasTheKey: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "Does a broadcast stop at the hall?",
       a: "Not at all. A switch sends it out every other door, and one of those doors leads to another switch, which does the same.",
@@ -468,7 +468,7 @@ const spareCable: RoomText = {
       },
     ],
   },
-  guardian: [
+  questions: [
     {
       q: "Why did the same message keep coming back?",
       a: "Each hall sends a broadcast out of every other door. With two cables between them, what goes over one comes back over the other. Then round it goes again.",

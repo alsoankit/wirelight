@@ -16,7 +16,7 @@ export interface HallsOptions {
   lanternReply?: string;
   /** Kitchen's background announcement every 6 s (from Floor 2). */
   announcements?: boolean;
-  /** The Knight's messenger in the observatory: its card and the door it sends from. */
+  /** The messenger in the observatory: its card and the door it sends from. */
   messenger?: { to: string; dev?: string; msg: string };
   /** A machine behind the observatory's second door, in a sealed room (2.3, 2.B). */
   second?: {

@@ -6,11 +6,11 @@ import { useDialogFocus } from "./focus";
 import { isTyping } from "./keys";
 import { RichText } from "./RichText";
 
-// Spoken lines (the Guardian, the Knight): one at a time, always written out with the speaker
+// Spoken lines: one at a time, always written out with the speaker
 // (UI-20), whatever the voice setting. Enter or a click goes on; Esc closes them all (the last one's
 // `onDone` runs either way). Audio plays from slots later (0047); a missing file plays nothing.
 
-/** A spoken line. `title`: what it's about, shown under the speaker (a Knight's memory's topic). */
+/** A spoken line. `title`: what it's about, shown under the speaker (a tip's topic). */
 export type Line = { id: string; speaker: string; text: string; title?: string };
 
 export function Lines({

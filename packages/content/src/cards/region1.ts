@@ -17,7 +17,7 @@ export const REGION_1_CARDS: Card[] = [
     more: "Everything a network does comes down to messages like this one, moving from machine to machine.",
   },
   {
-    id: "scrying-glass",
+    id: "map",
     floor: 0,
     title: "Map",
     text: "The Map shows the whole floor at once: every room, every corridor, every message moving. Press G to open it from anywhere.",

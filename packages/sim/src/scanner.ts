@@ -1,5 +1,5 @@
 /**
- * The Slate (0043): the Knight's capture tablet, a game-only lab tool (`lab slate …`). It only
+ * The Scanner (0043): a game-only lab tool (`lab scanner …`) for catching messages. It only
  * captures and reads; it changes nothing on the network.
  *
  * - `catch --next [--from X]` (6.1): the next message through a door of this machine is caught,
@@ -23,7 +23,7 @@ import { decodeIPv4, decodeUDP, IPPROTO } from "./proto/ipv4";
 import { decodeLab } from "./proto/lab";
 import type { DeviceId, IfaceName, Ip, SimEvent } from "./types";
 
-export interface SlateCatch {
+export interface ScannerCatch {
   n: number;
   t: number;
   device: DeviceId;
@@ -35,17 +35,17 @@ export interface SlateCatch {
   traced: boolean;
 }
 
-export interface SlateState {
-  catches: SlateCatch[];
+export interface ScannerState {
+  catches: ScannerCatch[];
   /** `catch --next`: waiting at this machine's doors. */
   armed: { device: DeviceId; from?: string } | null;
   /** `trace --next`: the packet's identity once sent, and the door names of its last catch. */
   tracer: { device: DeviceId; key: string | null; lastMacs: string | null } | null;
 }
 
-export type SlateLayerName = "frame" | "packet" | "message";
+export type ScannerLayerName = "frame" | "packet" | "message";
 
-export type SlateLayer =
+export type ScannerLayer =
   | { layer: "frame"; to: Mac; from: Mac; type: number }
   | { layer: "packet"; from: Ip; to: Ip; ttl: number; proto: number; id: number; checksum: number }
   | { layer: "message"; kind: "udp"; fromPort: number; toPort: number; text: string }
@@ -56,15 +56,15 @@ export type SlateLayer =
 
 type FrameEvent = Extract<SimEvent, { kind: "frame.tx" | "frame.rx" }>;
 
-function slate(k: Kernel): SlateState {
-  k.s.slate ??= { catches: [], armed: null, tracer: null };
-  return k.s.slate;
+function scanner(k: Kernel): ScannerState {
+  k.s.scanner ??= { catches: [], armed: null, tracer: null };
+  return k.s.scanner;
 }
 
 /** Every envelope in a frame, outermost first. */
-export function peel(bytes: Uint8Array): SlateLayer[] {
+export function peel(bytes: Uint8Array): ScannerLayer[] {
   const f = decodeEth(bytes);
-  const out: SlateLayer[] = [{ layer: "frame", to: f.dst, from: f.src, type: f.type }];
+  const out: ScannerLayer[] = [{ layer: "frame", to: f.dst, from: f.src, type: f.type }];
   if (f.type === ETHERTYPE.lab || f.type === ETHERTYPE.labAnswer) {
     out.push({ layer: "message", kind: "lab", text: decodeLab(f.payload), answer: f.type === ETHERTYPE.labAnswer });
   } else if (f.type === ETHERTYPE.arp) {
@@ -102,13 +102,13 @@ function packetKey(bytes: Uint8Array): string | null {
   return `${ip.src}>${ip.dst}/${ip.proto}#${ip.id}`;
 }
 
-/** Keeps a copy of a frame that was sent or taken in (the Slate, or catching by hand into the jar). */
-export function slateKeep(k: Kernel, e: FrameEvent, traced: boolean): void {
+/** Keeps a copy of a frame that was sent or taken in (the Scanner, or catching by hand into Captures). */
+export function scannerKeep(k: Kernel, e: FrameEvent, traced: boolean): void {
   keep(k, e, traced);
 }
 
 function keep(k: Kernel, e: FrameEvent, traced: boolean): void {
-  const s = slate(k);
+  const s = scanner(k);
   const n = s.catches.length + 1;
   const dir = e.kind === "frame.tx" ? "out" : "in";
   s.catches.push({
@@ -121,7 +121,7 @@ function keep(k: Kernel, e: FrameEvent, traced: boolean): void {
     hex: toHex(e.bytes),
     traced,
   });
-  k.emit({ kind: "slate.catch", t: k.s.t, n, device: e.device, iface: e.iface, dir, frameId: e.frameId, traced });
+  k.emit({ kind: "scanner.catch", t: k.s.t, n, device: e.device, iface: e.iface, dir, frameId: e.frameId, traced });
 }
 
 function matches(bytes: Uint8Array, from: string | undefined): boolean {
@@ -132,8 +132,8 @@ function matches(bytes: Uint8Array, from: string | undefined): boolean {
 }
 
 /** Every frame sent or taken in passes here: an armed catch or a running trace may keep it. */
-export function slateSees(k: Kernel, e: FrameEvent): void {
-  const s = k.s.slate;
+export function scannerSees(k: Kernel, e: FrameEvent): void {
+  const s = k.s.scanner;
   if (!s) return;
   if (s.armed && e.device === s.armed.device && matches(e.bytes, s.armed.from)) {
     s.armed = null;
@@ -156,40 +156,40 @@ export function slateSees(k: Kernel, e: FrameEvent): void {
   }
 }
 
-export function slateCatchNext(k: Kernel, device: DeviceId, from?: string): void {
-  slate(k).armed = { device, ...(from ? { from } : {}) };
-  k.emit({ kind: "slate.arm", t: k.s.t, device, what: "catch" });
+export function scannerCatchNext(k: Kernel, device: DeviceId, from?: string): void {
+  scanner(k).armed = { device, ...(from ? { from } : {}) };
+  k.emit({ kind: "scanner.arm", t: k.s.t, device, what: "catch" });
 }
 
-export function slateTraceNext(k: Kernel, device: DeviceId): void {
-  slate(k).tracer = { device, key: null, lastMacs: null };
-  k.emit({ kind: "slate.arm", t: k.s.t, device, what: "trace" });
+export function scannerTraceNext(k: Kernel, device: DeviceId): void {
+  scanner(k).tracer = { device, key: null, lastMacs: null };
+  k.emit({ kind: "scanner.arm", t: k.s.t, device, what: "trace" });
 }
 
-export function slateCatches(k: Kernel): readonly SlateCatch[] {
-  return k.s.slate?.catches ?? [];
+export function scannerCatches(k: Kernel): readonly ScannerCatch[] {
+  return k.s.scanner?.catches ?? [];
 }
 
-export type SlateOpen =
-  | { ok: true; layers: SlateLayer[]; reached: boolean }
+export type ScannerOpen =
+  | { ok: true; layers: ScannerLayer[]; reached: boolean }
   | { ok: false; error: "no-catch" | "no-device" };
 
 /** Opens catch `n` down to `layer`: the layers it has up to there, and whether that layer exists. */
-export function slateOpen(k: Kernel, device: DeviceId, n: number, layer: SlateLayerName): SlateOpen {
+export function scannerOpen(k: Kernel, device: DeviceId, n: number, layer: ScannerLayerName): ScannerOpen {
   if (!deviceOf(k, device)) return { ok: false, error: "no-device" };
-  const c = k.s.slate?.catches[n - 1];
+  const c = k.s.scanner?.catches[n - 1];
   if (!c) return { ok: false, error: "no-catch" };
   const all = peel(fromHex(c.hex));
   const depth = layer === "frame" ? 1 : layer === "packet" ? 2 : 3;
   const has = all.some((l) => l.layer === layer);
   const shown = has ? all.slice(0, all.findIndex((l) => l.layer === layer) + 1) : all.slice(0, depth);
-  k.emit({ kind: "slate.open", t: k.s.t, n, layer, reached: has });
+  k.emit({ kind: "scanner.open", t: k.s.t, n, layer, reached: has });
   return { ok: true, layers: shown, reached: has };
 }
 
-export interface SlateCompare {
-  a: SlateLayer[];
-  b: SlateLayer[];
+export interface ScannerCompare {
+  a: ScannerLayer[];
+  b: ScannerLayer[];
   /** Fields that differ: "frame.to", "frame.from", "packet.ttl", "packet.checksum", … */
   changed: string[];
   /** Both catches are the same packet (same from, to, protocol and IP id). */
@@ -198,9 +198,9 @@ export interface SlateCompare {
   sameStreet: boolean;
 }
 
-export function slateCompare(k: Kernel, a: number, b: number): SlateCompare | null {
-  const ca = k.s.slate?.catches[a - 1];
-  const cb = k.s.slate?.catches[b - 1];
+export function scannerCompare(k: Kernel, a: number, b: number): ScannerCompare | null {
+  const ca = k.s.scanner?.catches[a - 1];
+  const cb = k.s.scanner?.catches[b - 1];
   if (!ca || !cb) return null;
   const la = peel(fromHex(ca.hex));
   const lb = peel(fromHex(cb.hex));
@@ -215,6 +215,6 @@ export function slateCompare(k: Kernel, a: number, b: number): SlateCompare | nu
   const ka = packetKey(fromHex(ca.hex));
   const samePacket = ka !== null && ka === packetKey(fromHex(cb.hex));
   const sameStreet = !changed.includes("frame.to") && !changed.includes("frame.from");
-  k.emit({ kind: "slate.compare", t: k.s.t, a, b, changed, samePacket, sameStreet });
+  k.emit({ kind: "scanner.compare", t: k.s.t, a, b, changed, samePacket, sameStreet });
   return { a: la, b: lb, changed, samePacket, sameStreet };
 }

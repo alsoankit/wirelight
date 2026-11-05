@@ -20,7 +20,7 @@ try {
   await page.getByRole("button", { name: "Skip intro" }).click();
   await page.getByRole("button", { name: "Switch on message view" }).click();
   await page.getByRole("button", { name: "Send", exact: true }).click();
-  await page.keyboard.press("Escape"); // the Glass opens on Send; close it to see the room
+  await page.keyboard.press("Escape"); // the Map opens on Send; close it to see the room
   await wait(1200);
   await shot("p2-sending");
   await wait(2600);

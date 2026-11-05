@@ -2,15 +2,7 @@ import { floorTexts, roomTexts } from "@wirelight/content";
 import { floorDefs, loadRoom, play, roomById, rooms } from "@wirelight/rooms";
 import type { SimEvent } from "@wirelight/sim";
 import { describe, expect, it } from "vitest";
-import {
-  journalShows,
-  MEMORY_RULES,
-  matchingRoom,
-  memoriesDue,
-  questionOpen,
-  readEvents,
-  readView,
-} from "../src/play/momentRules";
+import { MEMORY_RULES, matchingRoom, memoriesDue, questionOpen, readEvents, readView } from "../src/play/momentRules";
 
 const room = (id: string) => {
   const r = roomById(id);
@@ -37,7 +29,7 @@ describe("moments read from the trace", () => {
     const letter = trace.find((e) => e.kind === "link.enter" && e.bytes[0] !== 0xff);
     if (everyone?.kind !== "link.enter" || letter?.kind !== "link.enter") throw new Error("no frames");
     const caught = (frameId: number): SimEvent => ({
-      kind: "slate.catch",
+      kind: "scanner.catch",
       t: 0,
       n: 1,
       device: "observatory",
@@ -76,7 +68,7 @@ describe("moments read from the interface", () => {
   });
 });
 
-describe("Knight's Memories (0008): every one has a moment to play", () => {
+describe("Tips (0008): every one has a moment to play", () => {
   it("plays each memory by a rule, and each action can be seen done", () => {
     for (const r of rooms)
       for (const m of roomTexts[r.content]?.memories ?? []) {
@@ -102,10 +94,10 @@ describe("Knight's Memories (0008): every one has a moment to play", () => {
   });
 });
 
-describe("Guardian questions that open later (CORE-43, CORE-44)", () => {
+describe("Questions that open later (CORE-43, CORE-44)", () => {
   it("names only things that can happen: a room's detector, or a moment read from the trace", () => {
     for (const r of rooms)
-      for (const g of roomTexts[r.content]?.guardian ?? [])
+      for (const g of roomTexts[r.content]?.questions ?? [])
         if (g.after) {
           const detector = !!roomTexts[r.content]?.detectors[g.after];
           expect(detector || MOMENTS.has(g.after), `${r.id}: ${g.after}`).toBe(true);
@@ -138,19 +130,7 @@ describe("the gentle way back (HELP-12)", () => {
   });
 });
 
-describe("journal pages (CORE-45): where each lies and when it shows", () => {
-  it("shows each floor's page by its spec", () => {
-    const at = (floor: number) => floorTexts[floor]?.journal.where ?? "";
-    const player = "observatory";
-    expect(journalShows(at(1), { won: false, here: player, player })).toBe(false);
-    expect(journalShows(at(1), { won: false, here: "kitchen", player })).toBe(true);
-    expect(journalShows(at(2), { won: false, here: player, player })).toBe(false);
-    expect(journalShows(at(2), { won: true, here: player, player })).toBe(true);
-    expect(journalShows(at(5), { won: false, here: player, player })).toBe(true);
-    expect(journalShows(at(7), { won: false, here: player, player })).toBe(false);
-    expect(journalShows(at(7), { won: false, here: "registry", player })).toBe(true);
-  });
-
+describe("journal pages (CORE-45): where each lies", () => {
   it("can be reached in every journal room (the registry's room is open in 7.2)", () => {
     for (const f of floorDefs) {
       const where = floorTexts[f.floor]?.journal.where ?? "";

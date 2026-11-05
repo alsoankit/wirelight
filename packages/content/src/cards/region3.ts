@@ -17,7 +17,7 @@ export const REGION_3_CARDS: Card[] = [
   },
   { id: "echo", floor: 5, title: "Echo", text: "A ping is a question; the echo is the answer." },
   {
-    id: "slate",
+    id: "scanner",
     floor: 6,
     title: "The Scanner",
     text: "Your scanner. It keeps every message you catch, labelled, and opens them one layer at a time.",

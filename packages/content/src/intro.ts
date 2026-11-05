@@ -119,5 +119,5 @@ export const pathChoice = {
   note: "You can change this anytime in Settings.",
 } as const;
 
-/** The gift of sight (ONB-08..10): the Guardian's lines are the Prologue's voice lines P-GIFT-01…04. */
+/** The gift of sight (ONB-08..10): its spoken lines are the Prologue's voice lines P-GIFT-01…04. */
 export const sightGift = { accept: "Switch on message view" };

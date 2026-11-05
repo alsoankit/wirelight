@@ -53,8 +53,6 @@ export function keeperSays(d: Decision, reason?: DropReason, name?: (mac: string
 export const voice = {
   keeper: {
     name: "Keeper",
-    /** In the Cathedral (Region 4) the keeper is the keeper, at its desk (region-4 brief). */
-    navigator: "Keeper",
     title: "The keeper",
     about: "Ask it about something it handled. It tells you exactly what it did, and why.",
     idle: "Nothing has arrived yet.",
@@ -155,7 +153,7 @@ export const voice = {
     wrapSend: "Wrap it in a new frame to",
   },
   /** The Scanner (0043): catches tagged and peeled; Capture (tcpdump), Trace and Compare later. */
-  slate: {
+  scanner: {
     name: "Scanner",
     title: "The Scanner",
     catchNext: "Catch the next message",
@@ -202,7 +200,7 @@ export const voice = {
     sealedRow: "sealed",
     catchN: "Catch {n}",
   },
-  /** The capture jar (CORE-19, CORE-20): catches, opened one layer at a time. */
+  /** Captures (CORE-19, CORE-20): catches, opened one layer at a time. */
   jar: {
     name: "Captures",
     title: "Captures",
@@ -233,7 +231,7 @@ export const voice = {
     hide: "hide",
     reset: "— room reset —",
     /** The Scanner's Capture runs in the background: its lines show on the Scanner, not here. */
-    onSlate: "(listening on the Scanner: its lines show there)",
+    onScanner: "(listening on the Scanner: its lines show there)",
   },
   debrief: {
     title: "Restored",
@@ -300,7 +298,7 @@ export const voice = {
     next: "Next",
     done: "Close",
   },
-  /** The Map, once the Scrying Glass (CORE-31..33, 0064, 0105): the live map of the floor, and the world map. */
+  /** The Map (CORE-31..33, 0064, 0105): the live map of the floor, and the world map. */
   glass: {
     title: "The Map",
     open: "Open the Map (G)",
@@ -321,7 +319,7 @@ export const voice = {
     again: "Again",
     close: "Close",
   },
-  /** Guardian memories in the Glass (0036, 0037): back in time, chaptered, voiced, always captioned. */
+  /** Floor memories on the Map (0036, 0037): back in time, chaptered, voiced, always captioned. */
   memory: {
     floor: "Memory restored",
     building: "Why it's built this way",
@@ -384,7 +382,7 @@ export const voice = {
     /** Shown for a moment after Reset room (HELP-03). */
     resetDone: "The room is back as it was.",
   },
-  /** The Knight's notes (HELP-08..10): his notes in the room, reactions, hints. */
+  /** The robot's notes (HELP-08..10): its notes in the room, reactions, hints. */
   notes: {
     title: "Memory fragments",
     /** Under the title: what the fragments are (0112). */
@@ -399,7 +397,7 @@ export const voice = {
     memories: "Tips",
     replay: "Play again",
   },
-  /** The Guardian's questions (CORE-43). */
+  /** The room's questions (CORE-43). */
   ask: { title: "Questions", close: "Close" },
   /** A discovery card (CORE-46). */
   discovery: { new: "New", more: "Tell me more", ok: "Got it" },
@@ -408,7 +406,6 @@ export const voice = {
     key: "Key",
     building: "Why it's built this way",
     floorMemory: "Memory restored",
-    journal: "A log page",
     next: "Continue",
     nextRoom: "Next: {room}",
     end: "That's the end of the first release. Thank you for playing.",
@@ -419,7 +416,7 @@ export const voice = {
     sections: "Menu sections",
     back: "Back to the topics",
     here: "you are here",
-    tabs: { dungeon: "The palace", codex: "Memory", guide: "Guide", keys: "Keyring", settings: "Settings" },
+    tabs: { dungeon: "The palace", codex: "Memory", guide: "Guide", settings: "Settings" },
     status: {
       cleared: "cleared",
       next: "next",
@@ -432,12 +429,6 @@ export const voice = {
     objects: "Things you know",
     words: "Words you've learned",
     commands: "Command book",
-    journal: "Log pages",
-    /** Guardian memories seen (CORE-46), each replayable. */
-    guardianMemories: "Memories restored",
-    floorMemory: "Memory restored: {floor}",
-    buildingMemory: "Why it's built this way: {room}",
-    noKeys: "No keys yet. Keys come back with answers.",
     path: "Your path",
     sound: "Sound",
     volume: { master: "Everything", music: "Music", effects: "Effects", voices: "Voices" },
@@ -454,22 +445,11 @@ export const voice = {
       title: "Privacy",
       text: "Your progress and settings are saved only in this browser, so you can pick up where you left off. Nothing is sent anywhere: no account, no analytics, no tracking.",
     },
-    /** In the keyring: the room a key came from. */
-    keyFrom: "from {room}",
     empty: "Nothing here yet.",
     close: "Close",
   },
-  /** The keyring (CORE-36): in the top bar, and the key flying to it when a room is won. */
-  keyring: {
-    name: "Keyring",
-    /** For screen readers: the button, and the key arriving. */
-    count: "Keyring: {n} keys",
-    /** The same, for exactly one key. */
-    countOne: "Keyring: 1 key",
-    arrived: "The key: {word}",
-  },
-  /** Knight's Memories (0008): offered on other paths, then the one small thing to do after. */
-  knightMemory: {
+  /** Tips (0008): offered on other paths, then the one small thing to do after. */
+  tips: {
     offer: "Tip",
     watch: "Watch",
     later: "Not now",
@@ -477,22 +457,14 @@ export const voice = {
     /** The memory's action, done: it names what was done (never a word that sounds like a win). */
     done: "Done: {action}.",
     dismiss: "Close",
-    /** Who speaks a Knight's memory (the memory's topic shows under it). */
+    /** Who speaks a tip (its topic shows under it). */
     speaker: "You",
   },
-  /** The gentle way back (HELP-12): the Knight's offer in a boss, on the Know a little and Know networking paths. */
+  /** The gentle way back (HELP-12): an offer in a boss, on the Know a little and Know networking paths. */
   wayBack: {
     text: "This one puts several things together at once. When I got stuck here, I went back to {room} and looked at one piece on its own. Want to?",
     go: "Go there",
     stay: "Stay",
-  },
-  /** A journal page lying in its room (CORE-45). */
-  journalPage: {
-    glow: "A page, glowing faintly",
-    label: "Pick up the log page",
-    title: "A log page",
-    kept: "Kept with your log pages, in the Notebook.",
-    close: "Close",
   },
   /** The first release's ending card (END1): what "What's next" says. */
   ending: {
@@ -507,7 +479,7 @@ export const voice = {
     everyone: "everyone",
     toFrom: "to {to} · from {from}",
   },
-  /** What reached a machine's doors lately (the jar, a plate): readable without catching it in flight. */
+  /** What reached a machine's doors lately (Captures, a plate): readable without catching it in flight. */
   arrived: {
     title: "Arrived at {machine}'s doors lately",
     plate: "Last arrived here",

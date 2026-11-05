@@ -435,7 +435,7 @@ export const guide: GuideTopic[] = [
     ],
   },
   {
-    id: "slate",
+    id: "scanner",
     title: "The Scanner",
     blurb: "Your tool for catching messages",
     from: "f6.inside-the-envelope",
@@ -499,7 +499,7 @@ export const guide: GuideTopic[] = [
     ],
   },
   {
-    id: "slate-capture",
+    id: "scanner-capture",
     title: "The Scanner: Capture at a door",
     blurb: "Listening to everything that crosses a door",
     from: "f8.no-way-back",
@@ -509,7 +509,7 @@ export const guide: GuideTopic[] = [
     ],
   },
   {
-    id: "slate-trace",
+    id: "scanner-trace",
     title: "The Scanner: Trace and Compare",
     blurb: "Following one message, and comparing two catches",
     from: "f9.two-envelopes",

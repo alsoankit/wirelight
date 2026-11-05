@@ -40,7 +40,7 @@ export const twoRooms: RoomText = {
       action: "step into the corridor",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "What is a door?",
       a: "Where a cable meets a machine. Every door has its own name.",
@@ -92,7 +92,7 @@ export const looseCable: RoomText = {
       action: "look at the cable where it meets your door",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "Why is the corridor broken?",
       a: "It isn't carrying anything. Something between the two doors is wrong.",
@@ -145,7 +145,7 @@ export const bothEnds: RoomText = {
       text: "Plates have a little switch. A door that's switched off can't send or receive anything.",
     },
   ],
-  guardian: [
+  questions: [
     {
       q: "The cable is fine. Why doesn't it work?",
       a: "A cable has two doors, and both have to be switched on.",

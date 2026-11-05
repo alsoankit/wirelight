@@ -7,7 +7,7 @@ import { useDialogFocus } from "./focus";
 import { RichText } from "./RichText";
 
 // A command memory (0041): how a command is built word by word, its common forms, how to read its
-// output, then one action. Shown over the dimmed room; the Knight's voice later (0047).
+// output, then one action. Shown over the dimmed room; the robot's voice later (0047).
 
 /** The output, with each marked piece highlighted, and what each one means listed below it. */
 function Marked({ text, marks }: { text: string; marks: Memory["output"]["marks"] }) {
