@@ -25,10 +25,10 @@ function LayerView({ l }: { l: ScannerLayer }) {
       <dl className="catch-layer">
         <dt>{voice.scanner.layers.frame}</dt>
         <dd>
-          {voice.jar.to} <code>{l.to}</code> · {voice.jar.from} <code>{l.from}</code>
+          {voice.captures.to} <code>{l.to}</code> · {voice.captures.from} <code>{l.from}</code>
         </dd>
         <dd>
-          {voice.jar.carrying} <code>{ETHERTYPE[l.type] ?? `0x${l.type.toString(16)}`}</code>
+          {voice.captures.carrying} <code>{ETHERTYPE[l.type] ?? `0x${l.type.toString(16)}`}</code>
         </dd>
       </dl>
     );
@@ -37,7 +37,7 @@ function LayerView({ l }: { l: ScannerLayer }) {
       <dl className="catch-layer">
         <dt>{voice.scanner.layers.packet}</dt>
         <dd>
-          {voice.jar.to} <code>{l.to}</code> · {voice.jar.from} <code>{l.from}</code>
+          {voice.captures.to} <code>{l.to}</code> · {voice.captures.from} <code>{l.from}</code>
         </dd>
         <dd>
           {voice.scanner.ttl} <code>{l.ttl}</code> · {voice.scanner.protocol}{" "}
@@ -95,25 +95,32 @@ type Row =
  * The strip (9.4): a run of traced catches of one packet going back and forth between the same two
  * machines is folded into one row ("crossing ⇄ arch ×31, countdown 62 → 1"), so a loop reads as a loop.
  */
-export function foldRows(jar: ScannerCatch[]): Row[] {
+export function foldRows(catches: ScannerCatch[]): Row[] {
   const key = (c: ScannerCatch) => `${c.device}|${c.iface}|${c.dir}|${c.traced}`;
   const rows: Row[] = [];
   let i = 0;
-  while (i < jar.length) {
+  while (i < catches.length) {
     let j = i + 2;
-    const ci = jar[i] as ScannerCatch;
-    const cj = jar[i + 1];
+    const ci = catches[i] as ScannerCatch;
+    const cj = catches[i + 1];
     // A period-two run: catch k is like catch k-2, for traced catches at two different machines.
     while (
       ci.traced &&
       cj &&
       cj.device !== ci.device &&
-      j < jar.length &&
-      key(jar[j] as ScannerCatch) === key(jar[j - 2] as ScannerCatch)
+      j < catches.length &&
+      key(catches[j] as ScannerCatch) === key(catches[j - 2] as ScannerCatch)
     )
       j++;
     if (cj && j - i >= 4) {
-      rows.push({ kind: "fold", first: ci, last: jar[j - 1] as ScannerCatch, a: ci.device, b: cj.device, n: j - i });
+      rows.push({
+        kind: "fold",
+        first: ci,
+        last: catches[j - 1] as ScannerCatch,
+        a: ci.device,
+        b: cj.device,
+        n: j - i,
+      });
       i = j;
     } else {
       rows.push({ kind: "one", c: ci });
@@ -195,7 +202,7 @@ function useOutput(execId: number | null) {
 export function ScannerPanel() {
   const roomId = useSession((s) => s.roomId);
   const here = useSession((s) => s.here) ?? "observatory";
-  const jar = useSession((s) => s.jar);
+  const catches = useSession((s) => s.captures);
   const exec = useSession((s) => s.exec);
   const interrupt = useSession((s) => s.interrupt);
   const openCatch = useSession((s) => s.openCatch);
@@ -212,7 +219,7 @@ export function ScannerPanel() {
   const room = roomId ? roomById(roomId) : undefined;
   const doors = room?.topology.devices.find((d) => d.id === here)?.interfaces.map((i) => i.name) ?? [];
   const running = capture?.running ?? false;
-  const rows = useMemo(() => foldRows(jar), [jar]);
+  const rows = useMemo(() => foldRows(catches), [catches]);
   const firstDoor = doors[0] ?? "eth0";
   useEffect(() => setDoor(firstDoor), [firstDoor]);
   if (!room?.controls.scanner) return null;
@@ -248,7 +255,7 @@ export function ScannerPanel() {
           </button>
         </div>
       )}
-      {jar.length === 0 && captured.length === 0 && <p className="panel-note">{voice.scanner.empty}</p>}
+      {catches.length === 0 && captured.length === 0 && <p className="panel-note">{voice.scanner.empty}</p>}
       <ol className="catch-list scanner-strip">
         {rows.map((r) => {
           const c = r.kind === "one" ? r.c : r.last;
@@ -299,10 +306,10 @@ export function ScannerPanel() {
           {open.shown.layers.map((l) => (
             <LayerView key={l.layer} l={l} />
           ))}
-          {!open.shown.reached && <p className="panel-note">{voice.jar.sealed}</p>}
+          {!open.shown.reached && <p className="panel-note">{voice.captures.sealed}</p>}
         </div>
       )}
-      {scanner.trace && jar.length >= 2 && (
+      {scanner.trace && catches.length >= 2 && (
         <form
           className="addr-form"
           onSubmit={async (e) => {
@@ -315,7 +322,7 @@ export function ScannerPanel() {
             type="number"
             aria-label={voice.scanner.compareA}
             min={1}
-            max={jar.length}
+            max={catches.length}
             value={a}
             onChange={(e) => setA(Number(e.target.value))}
           />
@@ -323,15 +330,19 @@ export function ScannerPanel() {
             type="number"
             aria-label={voice.scanner.compareB}
             min={1}
-            max={jar.length}
+            max={catches.length}
             value={b}
             onChange={(e) => setB(Number(e.target.value))}
           />
           <button type="submit">{voice.scanner.compare}</button>
         </form>
       )}
-      {compared && room && jar[compared[0] - 1] && jar[compared[1] - 1] && (
-        <CompareTable a={jar[compared[0] - 1] as ScannerCatch} b={jar[compared[1] - 1] as ScannerCatch} room={room} />
+      {compared && room && catches[compared[0] - 1] && catches[compared[1] - 1] && (
+        <CompareTable
+          a={catches[compared[0] - 1] as ScannerCatch}
+          b={catches[compared[1] - 1] as ScannerCatch}
+          room={room}
+        />
       )}
       {scanner.capture && (
         <div className="field">
@@ -366,7 +377,7 @@ export function ScannerPanel() {
       )}
       <div className="panel-actions">
         <button type="button" className="quiet" onClick={close}>
-          {voice.jar.close}
+          {voice.captures.close}
         </button>
       </div>
     </section>

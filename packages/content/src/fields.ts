@@ -27,7 +27,7 @@ export const fields = {
     title: "Sealed",
     text: "There's more in here. You'll learn to open it later.",
   },
-  jar: {
+  captures: {
     title: "Captures",
     empty: "Nothing caught yet. Click a message as it passes to catch a copy.",
     hint: "Catches stay here while you're in this room, even after a reset.",

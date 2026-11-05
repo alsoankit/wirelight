@@ -185,7 +185,7 @@ export function NotesPanel() {
           </button>
         )}
         <button type="button" className="quiet" onClick={close}>
-          {voice.jar.close}
+          {voice.captures.close}
         </button>
       </div>
       {opened === 5 && <p className="panel-note">{voice.notes.allRead}</p>}

@@ -1006,7 +1006,7 @@ body:has(.console[data-open="yes"]) .panel {
   font-size: 13px;
 }
 
-.jar-button {
+.captures-button {
   position: fixed;
   left: 16px;
   bottom: 60px;
@@ -1483,7 +1483,7 @@ button.link.inline {
   padding: 0 4px;
 }
 
-.jar-button[data-raised="yes"] {
+.captures-button[data-raised="yes"] {
   bottom: calc(38vh / var(--ui-zoom, 1) + 12px);
 }
 
@@ -1672,7 +1672,7 @@ button.link.inline {
 .console,
 .glass,
 .mini-glass,
-.jar-button,
+.captures-button,
 .reaction,
 .discovery,
 .cmd-memory,
@@ -2286,7 +2286,7 @@ body:has(.debrief, .glass, .cmd-memory, .path-choice, .gift-stage, .ending-stage
   background: radial-gradient(ellipse at 50% 38%, rgba(20, 30, 20, 0.1), rgba(4, 6, 8, 0.55) 70%);
 }
 
-body:has(.gift-stage) :is(.top-bar, .mini-glass, .controls, .jar-button, .mission-card, .dev-toggle, .dev-badge) {
+body:has(.gift-stage) :is(.top-bar, .mini-glass, .controls, .captures-button, .mission-card, .dev-toggle, .dev-badge) {
   visibility: hidden;
 }
 

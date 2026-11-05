@@ -40,7 +40,7 @@ import { Onboarding } from "./Onboarding";
 import { PlatePanel } from "./PlatePanel";
 import { AskPanel, DiscoveryCards, NotesPanel, Reaction, TopBar } from "./RoomHelp";
 import { RoomHud } from "./RoomHud";
-import { JarButton, ToolPanels } from "./ToolPanels";
+import { CapturesButton, ToolPanels } from "./ToolPanels";
 
 // B1 walking skeleton: the Prologue, played in the Observatory, driven by the engine in a worker.
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
@@ -287,7 +287,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <RoomHud />
         <PlatePanel />
         <ToolPanels />
-        <JarButton />
+        <CapturesButton />
         <Gift />
         <TopBar />
         <Glass />

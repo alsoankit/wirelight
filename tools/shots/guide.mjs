@@ -46,7 +46,7 @@ async function open(room, extra = "") {
     else if (await p.$(".discovery")) await p.click(".discovery .panel-actions button:not(.quiet)");
     else break;
   }
-  await p.addStyleTag({ content: ".mission-card,.dev-badge,.jar-button{visibility:hidden}" });
+  await p.addStyleTag({ content: ".mission-card,.dev-badge,.captures-button{visibility:hidden}" });
   await p.waitForTimeout(800);
 }
 

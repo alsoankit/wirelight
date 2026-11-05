@@ -34,7 +34,7 @@ export const CARD_WHEN: Record<string, When> = {
   "mac-address": any("panel:plate", "panel:workbench"),
   workbench: any("panel:workbench"),
   messenger: "arrive",
-  "capture-jar": any("moving", "panel:jar", "caught"),
+  captures: any("moving", "panel:captures", "caught"),
   "ignored-mark": any("ignored"),
   "everyone-address": (s) => s.has("caught-announcement") && s.has("opened-catch"),
   "sealed-room": "arrive",

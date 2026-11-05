@@ -201,7 +201,7 @@ export const voice = {
     catchN: "Catch {n}",
   },
   /** Captures (CORE-19, CORE-20): catches, opened one layer at a time. */
-  jar: {
+  captures: {
     name: "Captures",
     title: "Captures",
     empty: "Nothing caught yet. Point at a moving message: time slows down. Click it to keep a copy.",

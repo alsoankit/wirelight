@@ -15,7 +15,7 @@ export type Panel =
   | { kind: "plate"; device: string; iface: string }
   | { kind: "workbench" }
   | { kind: "card" }
-  | { kind: "jar"; open?: number }
+  | { kind: "captures"; open?: number }
   | { kind: "board"; device: string; board: "mac" | "ledger" | "routes"; execId?: number }
   | { kind: "desk"; device: string }
   | { kind: "scanner" }
@@ -94,7 +94,7 @@ type Session = {
   /** Touches a worn-out control (0040). */
   touch(device: string, control: string): Promise<void>;
   /** Captures (CORE-19): every catch so far, newest last. */
-  jar: ScannerCatch[];
+  captures: ScannerCatch[];
   /** Catches a copy of a message in flight (CORE-18). */
   catchFrame(frameId: number): Promise<void>;
   /** Opens catch `n` down to a layer; resolves with what it shows. */
@@ -163,9 +163,9 @@ export const ask = {
  * A batch caught something (the Scanner by command, 0043), or reset the room (the network is back as
  * it was, with nothing caught): the list of catches is fetched again.
  */
-function refreshJarIfChanged(batch: Batch): void {
+function refreshCapturesIfChanged(batch: Batch): void {
   if (!batch.events.some((e) => e.kind === "scanner.catch" || e.kind === "world.reset")) return;
-  void engine.catches().then((jar) => useSession.setState({ jar }));
+  void engine.catches().then((captures) => useSession.setState({ captures }));
 }
 
 /** A packet's identity (IPv4 from, to, protocol and id: unchanged hop to hop), or null for other frames. */
@@ -180,7 +180,7 @@ const hopsOf = new Map<string, number>();
 const heading = new Map<string, { door: string; bytes: Uint8Array }>();
 
 function apply(state: Session, batch: Batch): Partial<Session> {
-  refreshJarIfChanged(batch);
+  refreshCapturesIfChanged(batch);
   let onCables = state.onCables;
   let arrivals = state.arrivals;
   const arrive = (door: string, change: (a: Arrival | undefined) => Arrival) => {
@@ -306,7 +306,7 @@ export const useSession = create<Session>((set, get) => ({
       here: roomById(roomId)?.playerDevice ?? null,
       corridor: null,
       panel: null,
-      jar: [],
+      captures: [],
       events: [],
       dropped: 0,
       onCables: [],
@@ -338,12 +338,12 @@ export const useSession = create<Session>((set, get) => ({
     set((s) => apply(s, batch));
   },
 
-  jar: [],
+  captures: [],
 
   async catchFrame(frameId) {
     const batch = await exclusive(() => engine.catchFrame(frameId));
-    const jar = await exclusive(() => engine.catches());
-    set((s) => ({ ...apply(s, batch), jar }));
+    const captures = await exclusive(() => engine.catches());
+    set((s) => ({ ...apply(s, batch), captures }));
   },
 
   async openCatch(device, n, layer) {

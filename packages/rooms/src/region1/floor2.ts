@@ -138,7 +138,7 @@ export const wrongName = defineRoom({
   ],
   teaches: ["destination-address"],
   uses: ["frame", "mac-address"],
-  cards: ["messenger", "capture-jar", "ignored-mark", "everyone-address"],
+  cards: ["messenger", "captures", "ignored-mark", "everyone-address"],
   misconceptions: [linkBlame, cardToSelf],
   detectorTests: [
     {

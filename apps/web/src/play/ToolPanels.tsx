@@ -75,7 +75,7 @@ function WorkbenchPanel() {
           {voice.workbench.send}
         </button>
         <button type="button" className="quiet" onClick={close}>
-          {voice.jar.close}
+          {voice.captures.close}
         </button>
       </div>
     </section>
@@ -121,7 +121,7 @@ function CardPanel() {
       ))}
       <div className="panel-actions">
         <button type="button" className="quiet" onClick={close}>
-          {voice.jar.close}
+          {voice.captures.close}
         </button>
       </div>
     </section>
@@ -142,22 +142,22 @@ function Opened({ layers }: { layers: ScannerLayer[] }) {
     <>
       {frame?.layer === "frame" && (
         <dl className="catch-layer">
-          <dt>{voice.jar.frame}</dt>
+          <dt>{voice.captures.frame}</dt>
           <dd>
-            {voice.jar.to} <code>{sayDoor(frame.to, room)}</code>
+            {voice.captures.to} <code>{sayDoor(frame.to, room)}</code>
           </dd>
           <dd>
-            {voice.jar.from} <code>{sayDoor(frame.from, room)}</code>
+            {voice.captures.from} <code>{sayDoor(frame.from, room)}</code>
           </dd>
         </dl>
       )}
       {lab?.layer === "message" && lab.kind === "lab" && (
         <dl className="catch-layer">
-          <dt>{voice.jar.message}</dt>
+          <dt>{voice.captures.message}</dt>
           <dd>{lab.text}</dd>
         </dl>
       )}
-      {sealed && <p className="panel-note">{voice.jar.sealed}</p>}
+      {sealed && <p className="panel-note">{voice.captures.sealed}</p>}
     </>
   );
 }
@@ -209,12 +209,12 @@ function Moving() {
   if (moving.length === 0) return null;
   return (
     <>
-      <h3 className="panel-sub">{voice.jar.moving}</h3>
+      <h3 className="panel-sub">{voice.captures.moving}</h3>
       <ul className="catch-list">
         {moving.map((c) => (
           <li key={c.frameId}>
             <button type="button" onClick={() => void catchFrame(c.frameId)}>
-              {voice.jar.catchThis}: {plainSummary(c.bytes, room)}
+              {voice.captures.catchThis}: {plainSummary(c.bytes, room)}
             </button>
           </li>
         ))}
@@ -223,10 +223,10 @@ function Moving() {
   );
 }
 
-function JarPanel({ open }: { open?: number }) {
+function CapturesPanel({ open }: { open?: number }) {
   const room = useRoom();
   const here = useSession((s) => s.here);
-  const jar = useSession((s) => s.jar);
+  const captures = useSession((s) => s.captures);
   const openCatch = useSession((s) => s.openCatch);
   const openPanel = useSession((s) => s.openPanel);
   const close = useSession((s) => s.closePanel);
@@ -238,19 +238,19 @@ function JarPanel({ open }: { open?: number }) {
   }, [open, here, openCatch]);
   if (!room) return null;
   return (
-    <section className="panel" aria-label={voice.jar.title}>
-      <h2>{voice.jar.title}</h2>
-      {jar.length === 0 && <p>{voice.jar.empty}</p>}
+    <section className="panel" aria-label={voice.captures.title}>
+      <h2>{voice.captures.title}</h2>
+      {captures.length === 0 && <p>{voice.captures.empty}</p>}
       {room.controls.catching && <Moving />}
       <Arrived />
       <ol className="catch-list">
-        {jar.map((c) => (
+        {captures.map((c) => (
           <li key={c.n}>
             <button
               type="button"
               data-open={c.n === open ? "yes" : "no"}
               aria-pressed={c.n === open}
-              onClick={() => openPanel({ kind: "jar", open: c.n })}
+              onClick={() => openPanel({ kind: "captures", open: c.n })}
             >
               {c.n}. {(c.t / 1000).toFixed(1)} s · {c.device} {c.iface}
             </button>
@@ -260,7 +260,7 @@ function JarPanel({ open }: { open?: number }) {
       {shown?.ok && <Opened layers={shown.layers} />}
       <div className="panel-actions">
         <button type="button" className="quiet" onClick={close}>
-          {voice.jar.close}
+          {voice.captures.close}
         </button>
       </div>
     </section>
@@ -380,7 +380,7 @@ function RoutesPanel({ device, execId }: { device: string; execId?: number }) {
       )}
       <div className="panel-actions">
         <button type="button" className="quiet" onClick={close}>
-          {voice.jar.close}
+          {voice.captures.close}
         </button>
       </div>
     </section>
@@ -544,9 +544,9 @@ function DeskPanel({ device }: { device: string }) {
 }
 
 /** The Captures button (bottom left, UI layout): how many catches, and opens Captures. */
-export function JarButton() {
+export function CapturesButton() {
   const room = useRoom();
-  const count = useSession((s) => s.jar.length);
+  const count = useSession((s) => s.captures.length);
   // Never under the open console (UI-02): it rises above it.
   const raised = useSession((s) => s.consoleOpen && s.voiceGiven);
   const openPanel = useSession((s) => s.openPanel);
@@ -555,7 +555,7 @@ export function JarButton() {
     return (
       <button
         type="button"
-        className="jar-button"
+        className="captures-button"
         data-raised={raised ? "yes" : "no"}
         onClick={() => openPanel({ kind: "scanner" })}
       >
@@ -566,11 +566,11 @@ export function JarButton() {
   return (
     <button
       type="button"
-      className="jar-button"
+      className="captures-button"
       data-raised={raised ? "yes" : "no"}
-      onClick={() => openPanel({ kind: "jar" })}
+      onClick={() => openPanel({ kind: "captures" })}
     >
-      {voice.jar.name} · {count}
+      {voice.captures.name} · {count}
     </button>
   );
 }
@@ -579,7 +579,7 @@ export function ToolPanels() {
   const panel = useSession((s) => s.panel);
   if (panel?.kind === "workbench") return <WorkbenchPanel />;
   if (panel?.kind === "card") return <CardPanel />;
-  if (panel?.kind === "jar") return <JarPanel open={panel.open} />;
+  if (panel?.kind === "captures") return <CapturesPanel open={panel.open} />;
   if (panel?.kind === "board" && panel.board === "routes")
     return <RoutesPanel device={panel.device} execId={panel.execId} />;
   if (panel?.kind === "board") return <BoardPanel device={panel.device} board={panel.board} execId={panel.execId} />;

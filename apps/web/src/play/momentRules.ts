@@ -94,7 +94,7 @@ export function readView(
   }
   if (p?.kind === "board") out.add("board-open");
   if (p?.kind === "scanner") out.add("scanner-open");
-  if (p?.kind === "jar" && p.open !== undefined) out.add("opened-catch");
+  if (p?.kind === "captures" && p.open !== undefined) out.add("opened-catch");
   if (v.here && v.here !== room.playerDevice) out.add("walked");
   if (v.voiceGiven) out.add("voice-given");
   if (v.speed > 1) out.add("speed-fast");
