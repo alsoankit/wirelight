@@ -14,6 +14,7 @@ import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { useRegion } from "../region";
 import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
+import { addToPile, type Scrap } from "./lostPile";
 import { Sealed } from "./Sealed";
 import { FRAME } from "./SecretDoor";
 
@@ -128,16 +129,14 @@ const PILE_MAX = 10;
 function LostPile({ door, at, onReplay }: { door: string; at: Vec3; onReplay: (frameId: number) => void }) {
   const marks = useSession((s) => s.marks);
   // The store forgets a mark after MARK_MS; the pile remembers what fell here a little longer.
-  const pile = useRef<{ frameId: number; at: number }[]>([]);
+  const pile = useRef<Scrap[]>([]);
+  const taken = useRef<ReadonlySet<number>>(new Set());
   const [, redraw] = useState(0);
   useEffect(() => {
-    const now = performance.now();
-    const known = new Set(pile.current.map((m) => m.frameId));
-    const fresh = marks.filter((m) => m.door === door && !known.has(m.frameId));
-    if (fresh.length === 0) return;
-    pile.current = [...pile.current, ...fresh.map((m) => ({ frameId: m.frameId, at: m.at }))]
-      .filter((m) => now - m.at < PILE_MS)
-      .slice(-PILE_MAX);
+    const next = addToPile(pile.current, taken.current, marks, door, performance.now(), PILE_MAX, PILE_MS);
+    if (!next) return;
+    pile.current = next.pile;
+    taken.current = next.taken;
     redraw((n) => n + 1);
   }, [marks, door]);
   const groups = useRef<(Group | null)[]>([]);

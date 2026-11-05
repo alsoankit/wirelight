@@ -8,13 +8,42 @@ import { useProgress } from "../progress/progress";
 // 2 attempts; each next after 2 more minutes or 2 more attempts; the reveal no earlier than 8 minutes
 // (12 in bosses). On the New path: the first after 60 s, then every 90 s. A room may override.
 
-const READ_ONLY =
-  /^(ip (link|addr|address|route|neigh)( show\b.*)?$|bridge fdb( show)?$|lab (card|scanner|keeper)( show| list)?$|lab scanner (open|list)\b|tcpdump\b|man\b|help\b|history\b|clear$|hostname$|sysctl [^-])/;
+/** Commands that never change anything: they show, listen or tidy the terminal. */
+const LOOKING = new Set(["tcpdump", "man", "help", "history", "clear", "exit", "hostname"]);
+
+/** A word as ip and bridge read it (iproute2): any start of a name stands for the name. */
+const startOf = (word: string, ...names: string[]) => word.length > 0 && names.some((n) => n.startsWith(word));
+
+/**
+ * Whether a command line only looks (it's never an attempt), read as the shell reads it: `sudo` and
+ * `| grep` change nothing; ip and bridge take any start of a word (`ip a`, `bridge link`) and try
+ * set before show (`ip link s` sets); a tool or its object alone shows its table or its usage;
+ * sysctl writes with -w or key=value.
+ */
+export function readOnly(line: string): boolean {
+  let words = (line.split("|")[0] ?? "").trim().split(/\s+/);
+  if (words[0] === "sudo") words = words.slice(1);
+  const [tool = "", what, verb = ""] = words;
+  if (LOOKING.has(tool)) return true;
+  if (tool === "sysctl")
+    return !words.some((w) => w === "-w" || w === "--write" || (!w.startsWith("-") && w.includes("=")));
+  if (tool === "ip" || tool === "bridge") {
+    if (what === undefined || words.length === 2 || startOf(what, "help")) return true;
+    if (startOf(what, "link") && startOf(verb, "set", "change")) return false;
+    return startOf(verb, "show", "list", "help") || verb === "lst" || (startOf(what, "route") && verb === "get");
+  }
+  if (tool === "lab") {
+    if (what === undefined || words.length === 2) return true;
+    if (verb === "show" || verb === "list") return what === "card" || what === "scanner" || what === "keeper";
+    return what === "scanner" && (verb === "open" || verb === "compare");
+  }
+  return false;
+}
 
 /** Commands that changed something or sent something (HELP-09's attempts). */
 export function attempts(events: readonly SimEvent[]): number {
   return events.filter(
-    (e) => e.kind === "cmd.exec" && (e.source === "typed" || e.source === "click") && !READ_ONLY.test(e.line),
+    (e) => e.kind === "cmd.exec" && (e.source === "typed" || e.source === "click") && !readOnly(e.line),
   ).length;
 }
 

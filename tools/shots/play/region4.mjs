@@ -16,13 +16,14 @@ const walk = async (...rooms) => {
     await tidy(p);
     await closeConsole(p);
     for (let tries = 1; ; tries++) {
+      // Drawing in software, a click can take seconds to go through (8 s at under two frames a second).
       const clicked = await p
-        .click(`text=→ ${to} >> nth=0`, { timeout: 4000 })
+        .click(`text=→ ${to} >> nth=0`, { timeout: 15000 })
         .then(() => true)
         .catch(() => false);
       if (clicked) break;
       if (await isWon()) return;
-      if (tries === 15) {
+      if (tries === 8) {
         // Say what stood in the way, and keep a picture of it.
         const why = await p.click(`text=→ ${to} >> nth=0`, { timeout: 3000 }).catch((e) =>
           e.message
@@ -31,7 +32,7 @@ const walk = async (...rooms) => {
             .join(" | "),
         );
         await p.screenshot({ path: `/tmp/walk-${to}.png` }).catch(() => {});
-        throw new Error(`walk: no way through to ${to} after a minute: ${why}`);
+        throw new Error(`walk: no way through to ${to} after two minutes: ${why}`);
       }
     }
     await arrived(p, to);

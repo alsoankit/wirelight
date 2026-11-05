@@ -14,7 +14,7 @@ import { useProgress } from "../progress/progress";
 import { useDialogFocus } from "./focus";
 import { useElapsed, useNewPath } from "./hints";
 import { type Line, Lines } from "./Lines";
-import { linesDue, matchingRoom, memoriesDue, readEvents, readView, ruleFor, useMoments } from "./momentRules";
+import { linesDue, matchingRoom, memoryNow, readEvents, readView, ruleFor, useMoments } from "./momentRules";
 import { RichText } from "./RichText";
 import { goToRoom } from "./RoomHud";
 import { WorldBackdrop } from "./WorldMap";
@@ -135,6 +135,8 @@ export function TipMoments() {
   const list = useMoments((s) => s.happened);
   const happened = useMemo(() => new Set(list), [list]);
   const [watching, setWatching] = useState<string | null>(null);
+  /** The memory whose moment has come: it stays until it's been seen (momentRules.ts `memoryNow`). */
+  const [cameUp, setCameUp] = useState<string | null>(null);
   const [action, setAction] = useState<{ id: string; text: string; here: string | null } | null>(null);
   const here = useSession((s) => s.here);
 
@@ -142,12 +144,19 @@ export function TipMoments() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: startedAt marks a new visit
   useEffect(() => {
     setWatching(null);
+    setCameUp(null);
     setAction(null);
   }, [startedAt]);
 
-  if (!room) return null;
+  const ctx = room ? { happened, room, elapsedMs, moving } : undefined;
+  const next = room && ctx ? memoryNow(room, seen, ctx, { watching, cameUp, won }) : undefined;
+  // Held from the moment it comes up, even if that moment passes (the message arrives) before it's read.
+  useEffect(() => {
+    if (next && next.id !== watching) setCameUp(next.id);
+  }, [next, watching]);
+
+  if (!room || !ctx) return null;
   const text = roomTexts[room.content];
-  const ctx = { happened, room, elapsedMs, moving };
   const actionRule = action ? ruleFor(action.id, "") : null;
   const actionDone = !!actionRule?.done?.(ctx);
   // Once the room is won, the prompt has had its moment; and it belongs to the machine's room where
@@ -184,8 +193,6 @@ export function TipMoments() {
   };
   const memories = text?.memories ?? [];
   const playing = watching ? memories.find((m) => m.id === watching) : undefined;
-  const due = won ? [] : memoriesDue(room, seen, ctx);
-  const next = playing ?? due[0];
   if (next && (newPath || playing))
     return (
       <>

@@ -1,14 +1,12 @@
 // A first visit, as a new player: the gift of sight, the path, the tour, the Prologue, then on
 // through the debrief's Continue into Floor 1. Then a reload: the game resumes where it was (ONB-20).
 import { chromium } from "playwright-core";
+import { browserOptions } from "./lib.mjs";
 
 // Screenshots go to the given prefix, or the system temp folder (never "undefined-*.png" in the repo).
 const [base, outArg] = process.argv.slice(2);
 const out = outArg ?? `${(await import("node:os")).tmpdir()}/wirelight-firstvisit`;
-const b = await chromium.launch({
-  executablePath: "/usr/bin/google-chrome",
-  args: ["--enable-unsafe-webgpu", "--enable-features=Vulkan", "--use-angle=vulkan", "--ignore-gpu-blocklist"],
-});
+const b = await chromium.launch(browserOptions());
 const p = await b.newPage({ viewport: { width: 1600, height: 900 } });
 const errs = [];
 p.on("pageerror", (e) => errs.push(`pageerror: ${e}`));

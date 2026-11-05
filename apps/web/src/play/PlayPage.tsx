@@ -1,14 +1,12 @@
 import { useGLTF } from "@react-three/drei";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { roomById } from "@wirelight/rooms";
 import {
   type Dispatch,
-  lazy,
   memo,
   type ReactNode,
   type SetStateAction,
   StrictMode,
-  Suspense,
   useEffect,
   useRef,
   useState,
@@ -50,7 +48,35 @@ import { JarButton, ToolPanels } from "./ToolPanels";
 
 // The console's terminal (xterm, ~80 kB gzipped) loads when a room first needs it, or a few seconds
 // after the game opens (render/preload.ts), never on the way in.
-const Console = lazy(() => loadConsole().then((m) => ({ default: m.Console })));
+type ConsoleModule = typeof import("./Console");
+
+/**
+ * The terminal's code, once it has loaded: then it's drawn at once. Not React.lazy: a component that
+ * suspends is drawn only on React's retry, and on a slow machine a room's steady updates can hold that
+ * retry off for as long as they keep coming (2.4's terminal never appeared after the gift). A plain
+ * state update can't be held off like that. A load that fails reaches the error boundary, as before.
+ */
+function useConsoleModule(needed: boolean): ConsoleModule | null {
+  const [loaded, setLoaded] = useState<ConsoleModule | null>(null);
+  const [failed, setFailed] = useState<{ error: unknown } | null>(null);
+  useEffect(() => {
+    if (!needed || loaded) return;
+    let live = true;
+    void loadConsole().then(
+      (m) => {
+        if (live) setLoaded(m);
+      },
+      (error: unknown) => {
+        if (live) setFailed({ error });
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [needed, loaded]);
+  if (failed) throw failed.error;
+  return loaded;
+}
 
 // Dev aid for scripts and debugging: the stores on `window` (never in a production build).
 if (import.meta.env.DEV) (window as unknown as { __wirelight?: unknown }).__wirelight = { useSession, useProgress };
@@ -76,15 +102,6 @@ function startingRoom(): string {
 export function preloadRoom(): void {
   for (const name of new Set([...OBSERVATORY, ...HOUSE_PIECES, ...HALL_PIECES].map((p) => p.piece)))
     useGLTF.preload(pieceUrl(name));
-}
-
-// Resolution follows the tier, capped at twice the CSS pixels.
-function Resolution({ scale }: { scale: number }) {
-  const setDpr = useThree((s) => s.setDpr);
-  useEffect(() => {
-    setDpr(Math.min(window.devicePixelRatio * scale, 2));
-  }, [scale, setDpr]);
-  return null;
 }
 
 /** `arriving`: coming down from the landing; the room fades in from dark and the camera settles. */
@@ -172,13 +189,15 @@ const WorldCanvas = memo(function WorldCanvas({
         if (e.type === "click" && e.target instanceof HTMLCanvasElement) useSession.getState().closePanel();
       }}
       gl={nodeRendererFactory(backend)}
+      // Resolution follows the tier, capped at twice the CSS pixels. Given to the canvas itself: each
+      // time it renders again (a new tier does that), the canvas sets its resolution from this.
+      dpr={Math.min(window.devicePixelRatio * dpr, 2)}
       frameloop={FPS ? "demand" : "always"}
       // Dev aid: the renderer, for reading draw calls and triangles from scripts.
       onCreated={(state) => {
         (window as unknown as { __renderer?: unknown }).__renderer = state.gl;
       }}
     >
-      <Resolution scale={dpr} />
       <FrameCap />
       {/* Steps down when frames stay slow and back up when they recover (agent C: render/AutoQuality). */}
       <AutoQuality auto={auto} setTier={setTier} ceiling={backend === "webgpu" ? "high" : "medium"} />
@@ -202,12 +221,13 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
   const chosen = useProgress((s) => s.settings.quality);
   const forced = tierFromUrl() ?? (chosen === "auto" ? undefined : chosen);
   const [tier, setTier] = useState<Tier>(forced ?? (backend === "webgpu" ? "high" : "medium"));
-  // A quality chosen in Settings applies at once and sticks (0020).
+  // A quality chosen in Settings applies at once and sticks (0020); choosing Automatic again hands it
+  // back to the game's own judgement at once too (unless ?tier= pins it).
   useEffect(() => {
     if (chosen !== "auto") {
       setTier(chosen);
       setAuto(false);
-    }
+    } else if (!tierFromUrl()) setAuto(true);
   }, [chosen]);
   const [auto, setAuto] = useState(!forced);
   const quality = QUALITY[tier];
@@ -216,6 +236,8 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
   const here = useSession((s) => s.here);
   const voiceGiven = useSession((s) => s.voiceGiven);
   const room = roomId ? roomById(roomId) : undefined;
+  const consoleWanted = !!room && room.controls.console === "typing" && voiceGiven;
+  const terminal = useConsoleModule(consoleWanted);
 
   // Saved progress is read first, so the game opens where the player left off.
   useEffect(() => {
@@ -279,10 +301,8 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <MomentsDriver />
         <WayBack />
         <Ending />
-        {room && room.controls.console === "typing" && voiceGiven && (
-          <Suspense fallback={null}>
-            <Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
-          </Suspense>
+        {room && consoleWanted && terminal && (
+          <terminal.Console device={here ?? room.playerDevice} subtitles={room.subtitles ?? room.floor <= 7} />
         )}
       </StrictMode>
       {arriving && <div className="arrival-veil" />}

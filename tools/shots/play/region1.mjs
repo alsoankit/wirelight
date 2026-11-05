@@ -60,7 +60,8 @@ await p.waitForSelector(".lines", { timeout: 5000 });
 while (await p.$(".lines")) await p.click(".lines button");
 await p.waitForSelector(".cmd-memory");
 while (await p.$(".cmd-memory")) await p.click(".cmd-memory button");
-await p.waitForSelector(".console .xterm", { timeout: 5000 });
+// The terminal's code loads when it's first needed: about 5 s from the dev server on a slow machine.
+await p.waitForSelector(".console .xterm", { timeout: 30000 });
 await type(p, "ip link set eth0 up");
 await check("2.4");
 

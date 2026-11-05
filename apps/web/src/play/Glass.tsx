@@ -319,10 +319,16 @@ export function Glass() {
   const corridorLinkDef = corridorLink ? room?.topology.links.find((x) => x.id === corridorLink) : undefined;
   const corridorEnds = corridorLinkDef ? ([corridorLinkDef.a.device, corridorLinkDef.b.device] as const) : null;
   const setReplay = useSession((s) => s.setReplay);
-  // A replay opens the Map on it; closing the Map ends it.
+  // A replay opens the Map on it; closing the Map ends it, however it's closed (its own button, G, Esc,
+  // or the debrief arriving), so the Map opens as the Map next time.
   useEffect(() => {
     if (replay !== null) setOpen(true);
   }, [replay]);
+  const wasOpen = useRef(open);
+  useEffect(() => {
+    if (wasOpen.current && !open && useSession.getState().replay !== null) setReplay(null);
+    wasOpen.current = open;
+  }, [open, setReplay]);
   // The Map opening is a moment (P-MEM-01 plays the first time).
   useEffect(() => {
     if (open) noteMoment("glass-open");
