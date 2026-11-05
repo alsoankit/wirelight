@@ -96,9 +96,9 @@ const retry = async (name, run) => {
 for (const f of floors)
   await retry(`floor ${f}`, async () => {
     await openMem({ kind: "floor", floor: f });
-    await p.waitForSelector(".glass.memory");
+    await p.waitForSelector(".map.memory");
     for (let c = 1; c < 8; c++) {
-      if (!(await p.$(".glass.memory"))) break;
+      if (!(await p.$(".map.memory"))) break;
       const ride = await p.$(".ride, .memory-wait");
       if (ride) {
         await p.waitForSelector(".ride", { timeout: 15000 });
@@ -121,7 +121,7 @@ if (!only)
   for (const roomId of buildings)
     await retry(roomId, async () => {
       await openMem({ kind: "building", roomId });
-      await p.waitForSelector(".glass.memory");
+      await p.waitForSelector(".map.memory");
       await p.waitForTimeout(1500);
       await shot(`bld-${roomId}-a`);
       await p.waitForTimeout(6000);

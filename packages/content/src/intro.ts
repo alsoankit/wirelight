@@ -73,7 +73,7 @@ export const boot = {
 } as const;
 
 /** What a tour card spotlights on the real screen. */
-export type TourTarget = "door" | "notes" | "plate" | "glass" | "menu";
+export type TourTarget = "door" | "notes" | "plate" | "map" | "menu";
 
 export interface TourCard {
   title: string;
@@ -97,7 +97,7 @@ export const tour = {
     {
       title: "The Map",
       body: "This is the Map, a live view of the whole floor. Open it any time with [[G]] or a click.",
-      target: "glass",
+      target: "map",
     },
   ] satisfies TourCard[],
   next: "Next",

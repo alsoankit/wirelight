@@ -30,10 +30,10 @@ import { OBSERVATORY } from "../world/observatory/layout";
 import { Declutter } from "../world/room/Declutter";
 import { World } from "../world/room/World";
 import { Gift } from "./Gift";
-import { Glass } from "./Glass";
 import { Keyboard } from "./Keyboard";
 import { isTyping, withModifier } from "./keys";
 import { LoadingScreen } from "./LoadingScreen";
+import { MapView } from "./MapView";
 import { Menu } from "./Menu";
 import { Ending, MomentsDriver, TipMoments, WayBack } from "./Moments";
 import { Onboarding } from "./Onboarding";
@@ -290,7 +290,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <CapturesButton />
         <Gift />
         <TopBar />
-        <Glass />
+        <MapView />
         <Menu />
         <NotesPanel />
         <AskPanel />

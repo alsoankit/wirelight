@@ -39,7 +39,7 @@ export function Lines({
       if (isTyping(e)) return;
       if (e.key === "Escape") {
         // Only the topmost thing closes: a dialog over the lines (the menu, a memory) takes its own Esc.
-        if (document.querySelector(".menu, .glass.memory, .cmd-memory")) return;
+        if (document.querySelector(".menu, .map.memory, .cmd-memory")) return;
         e.preventDefault();
         done.current();
         return;

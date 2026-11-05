@@ -6,7 +6,7 @@ import { useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { roomAddress } from "./address";
 import { takeFocusPolitely } from "./focus";
-import { closeGlass, openGlass } from "./keys";
+import { closeMap, openMap } from "./keys";
 import { openMemory, useMemory } from "./Memory";
 import { useMoments } from "./momentRules";
 import { RichText } from "./RichText";
@@ -63,7 +63,7 @@ export function RoomHud() {
     if (!won) return setShowDebrief(false);
     const timer = setTimeout(() => {
       setShowDebrief(true);
-      closeGlass();
+      closeMap();
       const s = useSession.getState();
       const r = s.roomId ? roomById(s.roomId) : undefined;
       const seen = useProgress.getState().memoriesSeen.includes(firstReleaseEnding.lines[0]?.id ?? "");
@@ -119,7 +119,7 @@ export function RoomHud() {
               onClick={() => {
                 exec(send.device, send.line, "click");
                 // The Prologue: the Map opens so the first message can be watched there (ONB-19).
-                if (room.kind === "prologue") openGlass();
+                if (room.kind === "prologue") openMap();
               }}
             >
               {voice.send}

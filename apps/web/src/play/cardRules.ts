@@ -22,7 +22,7 @@ export const CARD_WHEN: Record<string, When> = {
   // Prologue
   cable: "arrive",
   message: any("moving"),
-  map: any("glass-open"),
+  map: any("map-open"),
   // Floor 1
   door: "arrive",
   plate: any("panel:plate"),

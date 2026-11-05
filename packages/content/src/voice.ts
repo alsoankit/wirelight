@@ -299,7 +299,7 @@ export const voice = {
     done: "Close",
   },
   /** The Map (CORE-31..33, 0064, 0105): the live map of the floor, and the world map. */
-  glass: {
+  map: {
     title: "The Map",
     open: "Open the Map (G)",
     floorMap: "A live map of this floor: every machine, every cable and the messages on them.",

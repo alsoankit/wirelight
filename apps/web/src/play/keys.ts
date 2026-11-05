@@ -20,15 +20,15 @@ export function withModifier(e: KeyboardEvent): boolean {
 export const TAB = { plate: 100, door: 200, cableEnd: 300, furniture: 400, keeper: 500 } as const;
 
 /** The event that opens the Map from elsewhere (the Prologue's Send opens it, ONB-19). */
-export const OPEN_GLASS = "wirelight:open-glass";
+export const OPEN_MAP = "wirelight:open-map";
 
-export function openGlass(): void {
-  window.dispatchEvent(new Event(OPEN_GLASS));
+export function openMap(): void {
+  window.dispatchEvent(new Event(OPEN_MAP));
 }
 
 /** The event that closes it (the debrief arrives: the restored room is the thing to see). */
-export const CLOSE_GLASS = "wirelight:close-glass";
+export const CLOSE_MAP = "wirelight:close-map";
 
-export function closeGlass(): void {
-  window.dispatchEvent(new Event(CLOSE_GLASS));
+export function closeMap(): void {
+  window.dispatchEvent(new Event(CLOSE_MAP));
 }

@@ -91,7 +91,7 @@ function useKeys() {
       if (e.key !== "Escape") return;
       const target = e.target instanceof HTMLElement ? e.target : null;
       if (target?.closest(".console")) return; // the terminal keeps its own keys
-      if (document.querySelector(".glass")) return; // the Map is on top; it closes itself
+      if (document.querySelector(".map")) return; // the Map is on top; it closes itself
       const s = useSession.getState();
       if (!s.panel) return;
       e.stopPropagation();
@@ -100,7 +100,7 @@ function useKeys() {
     const onKey = (e: KeyboardEvent) => {
       if (isTyping(e) || withModifier(e) || e.repeat) return;
       const digit = /^Digit([1-9])$/.exec(e.code)?.[1];
-      if (digit && !modalOpen() && !document.querySelector(".glass")) {
+      if (digit && !modalOpen() && !document.querySelector(".map")) {
         if (e.shiftKey ? stepIntoDoorCorridor(Number(digit)) : goThroughDoor(Number(digit))) e.preventDefault();
       }
       // Space pauses and resumes time, unless it's pressing a button or going on with spoken lines.

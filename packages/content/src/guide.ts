@@ -6,7 +6,10 @@
  * the same moment their discovery card would. Keep adding topics as new rooms, objects and tools arrive.
  */
 
-/** Things a room picture can point at. */
+/**
+ * Things a room picture can point at. `glass` is the planning table and the Map: it keeps the Map's old
+ * name, the one its callouts are saved under (apps/web/public/guide/marks.json).
+ */
 export type GuideTarget = "door" | "plate" | "keeper" | "glass" | "gate" | "workbench" | "cable";
 
 export interface Mark<T extends string> {
@@ -14,7 +17,10 @@ export interface Mark<T extends string> {
   label: string;
 }
 
-/** The picture shown above a topic's text. The web app draws each kind from the real game art. */
+/**
+ * The picture shown above a topic's text. The web app draws each kind from the real game art. The Map's
+ * picture keeps its old name, `glass`, the name of its files (apps/web/public/guide/glass.jpg, marks.json).
+ */
 export type GuideVisual =
   | { kind: "room"; marks: Mark<GuideTarget>[] /** Animate a pointer clicking this target. */; click?: GuideTarget }
   | { kind: "corridor"; marks: Mark<"back" | "on" | "message" | "cable">[] }
@@ -134,7 +140,7 @@ export const guide: GuideTopic[] = [
     ],
   },
   {
-    id: "glass",
+    id: "map",
     title: "The Map",
     blurb: "A live map of the floor, and of the whole palace",
     visual: {

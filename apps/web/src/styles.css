@@ -894,7 +894,7 @@ body:has(.console[data-open="yes"]) .panel {
   max-width: 360px;
 }
 
-:root:not([data-text-size="1"]) body:has(.panel) .mini-glass {
+:root:not([data-text-size="1"]) body:has(.panel) .mini-map {
   visibility: hidden;
 }
 
@@ -1488,7 +1488,7 @@ button.link.inline {
 }
 
 /* The Map (0064): the mini map bottom right (CORE-33), the full map on G. */
-.mini-glass {
+.mini-map {
   position: fixed;
   right: 16px;
   bottom: 60px;
@@ -1502,7 +1502,7 @@ button.link.inline {
   z-index: 15;
 }
 
-.glass {
+.map {
   position: fixed;
   inset: 70px 16px 60px;
   display: flex;
@@ -1513,67 +1513,67 @@ button.link.inline {
   z-index: 52;
 }
 
-.glass .glass-map {
+.map .floor-map {
   flex: 1;
   width: 100%;
   height: 100%;
 }
 
-.glass-map {
+.floor-map {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.glass-link {
+.map-link {
   stroke: #5b6470;
   stroke-width: 2;
 }
 
-.glass-link.lit {
+.map-link.lit {
   stroke: #cfe3ff;
   stroke-width: 3;
 }
 
-.glass-link.broken {
+.map-link.broken {
   stroke: #7a6a6a;
   stroke-dasharray: 6 6;
 }
 
-.glass-msg {
+.map-msg {
   fill: var(--cyan);
 }
 
-.glass-node circle,
-.glass-node rect,
-.glass-node polygon {
+.map-node circle,
+.map-node rect,
+.map-node polygon {
   fill: #2a3240;
   stroke: #cfe3ff;
   stroke-width: 1.5;
 }
 
-.glass-node.you circle {
+.map-node.you circle {
   fill: #3a4458;
 }
 
-.glass-node .glass-here {
+.map-node .map-here {
   fill: none;
   stroke: var(--amber);
   stroke-width: 2;
 }
 
-.glass-name,
-.glass-door {
+.map-name,
+.map-door {
   fill: #cfe3ff;
   font: 13px var(--mono);
 }
 
-.glass-door {
+.map-door {
   fill: #8a98ac;
   font-size: 11px;
 }
 
-.glass-world {
+.map-world {
   flex: 1;
   overflow: auto;
   padding: 12px 20px;
@@ -1581,39 +1581,39 @@ button.link.inline {
   font: 14px / 1.5 var(--sans);
 }
 
-.glass-region h3 {
+.map-region h3 {
   margin: 12px 0 4px;
 }
 
-.glass-region li[data-state="restored"] {
+.map-region li[data-state="restored"] {
   color: #cfe3ff;
   text-shadow: 0 0 10px rgba(207, 227, 255, 0.5);
 }
 
-.glass-region li[data-state="here"] {
+.map-region li[data-state="here"] {
   color: var(--text);
   font-weight: 600;
 }
 
-.glass-region li[data-state="mist"] {
+.map-region li[data-state="mist"] {
   opacity: 0.55;
 }
 
-.glass-region li[data-state="fog"] {
+.map-region li[data-state="fog"] {
   opacity: 0.25;
 }
 
-.mini-glass[data-raised="yes"] {
+.mini-map[data-raised="yes"] {
   bottom: calc(38vh / var(--ui-zoom, 1) + 12px);
 }
 
-.glass-region ul {
+.map-region ul {
   list-style: none;
   margin: 0;
   padding: 0 0 0 4px;
 }
 
-.glass-region li[data-state="open"] {
+.map-region li[data-state="open"] {
   color: var(--text);
 }
 
@@ -1630,13 +1630,13 @@ button.link.inline {
 }
 
 /* A replay (CORE-23): the journey on the map, and each keeper's word. */
-.glass-replay {
+.map-replay {
   fill: none;
   stroke: var(--amber);
   stroke-width: 2;
 }
 
-.glass-replay-view {
+.map-replay-view {
   flex: 1;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto auto;
@@ -1657,7 +1657,7 @@ button.link.inline {
   margin: 4px 0;
 }
 
-.glass-label {
+.map-label {
   padding: 6px 10px;
   color: var(--text);
   font: 600 13px / 1 var(--sans);
@@ -1670,8 +1670,8 @@ button.link.inline {
 .lines,
 .top-bar,
 .console,
-.glass,
-.mini-glass,
+.map,
+.mini-map,
 .captures-button,
 .reaction,
 .discovery,
@@ -2234,7 +2234,7 @@ body:has(.console[data-open="yes"]) .debrief {
 }
 
 /* While something holds the centre of the screen, the room's floating labels step out of the way. */
-body:has(.debrief, .glass, .cmd-memory, .path-choice, .gift-stage, .ending-stage) .world > div:not(:first-child) {
+body:has(.debrief, .map, .cmd-memory, .path-choice, .gift-stage, .ending-stage) .world > div:not(:first-child) {
   visibility: hidden;
 }
 
@@ -2286,7 +2286,7 @@ body:has(.debrief, .glass, .cmd-memory, .path-choice, .gift-stage, .ending-stage
   background: radial-gradient(ellipse at 50% 38%, rgba(20, 30, 20, 0.1), rgba(4, 6, 8, 0.55) 70%);
 }
 
-body:has(.gift-stage) :is(.top-bar, .mini-glass, .controls, .captures-button, .mission-card, .dev-toggle, .dev-badge) {
+body:has(.gift-stage) :is(.top-bar, .mini-map, .controls, .captures-button, .mission-card, .dev-toggle, .dev-badge) {
   visibility: hidden;
 }
 
@@ -2490,11 +2490,11 @@ body:has(.menu, .gift-stage, .tour) .dev-toggle {
 }
 
 /* ── Agent B · panels and teaching: where you are, arrivals, desk, boards, Scanner, Map ─────────── */
-.mini-glass {
+.mini-map {
   overflow: hidden;
 }
 
-.mini-glass-here {
+.mini-map-here {
   position: absolute;
   left: 8px;
   bottom: 6px;
@@ -2628,7 +2628,7 @@ body:has(.menu, .gift-stage, .tour) .dev-toggle {
   color: var(--text-dim);
 }
 
-.glass-street {
+.map-street {
   fill: #f2a93b;
   font-family: var(--mono);
 }
@@ -2715,7 +2715,7 @@ body:has(.tour) .dev-badge {
 
 /* Agent A: while a memory (floor, building, ride), a command memory or the ending holds the screen,
    the room's own overlays wait behind it (prompts, cards, the mission card, notes) and come back after. */
-body:has(.glass.memory, .ending-stage, .cmd-memory)
+body:has(.map.memory, .ending-stage, .cmd-memory)
 :is(.moment-card, .mission-card, .discovery, .reaction, .controls, .bar-status, .dev-badge) {
   visibility: hidden;
 }
@@ -2746,7 +2746,7 @@ body:has(.glass.memory, .ending-stage, .cmd-memory)
 }
 
 /* Where the player stands when it's a corridor (0081): a soft amber halo along that cable. */
-.glass-here-link {
+.map-here-link {
   stroke: var(--amber);
   stroke-opacity: 0.35;
   stroke-width: 10;
