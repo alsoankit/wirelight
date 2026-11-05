@@ -9,8 +9,6 @@ export interface FloorInfo {
   n: number;
   region: number;
   name: string;
-  /** Planned but not built yet: listed in the menu as closed. */
-  planned?: boolean;
 }
 
 export const regions: Record<number, RegionInfo> = {
@@ -24,13 +22,13 @@ export const floors: Record<number, FloorInfo> = {
   0: { n: 0, region: 1, name: "Prologue" },
   1: { n: 1, region: 1, name: "The Wire" },
   2: { n: 2, region: 1, name: "Names on the Wire" },
-  3: { n: 3, region: 2, name: "The Switch", planned: true },
-  4: { n: 4, region: 2, name: "Memory and Loops", planned: true },
-  5: { n: 5, region: 3, name: "Addresses", planned: true },
-  6: { n: 6, region: 3, name: "Envelopes", planned: true },
-  7: { n: 7, region: 3, name: "Neighbourhoods", planned: true },
-  8: { n: 8, region: 4, name: "Crossings", planned: true },
-  9: { n: 9, region: 4, name: "The Journey", planned: true },
+  3: { n: 3, region: 2, name: "The Switch" },
+  4: { n: 4, region: 2, name: "Memory and Loops" },
+  5: { n: 5, region: 3, name: "Addresses" },
+  6: { n: 6, region: 3, name: "Envelopes" },
+  7: { n: 7, region: 3, name: "Neighbourhoods" },
+  8: { n: 8, region: 4, name: "Crossings" },
+  9: { n: 9, region: 4, name: "The Journey" },
 };
 
 export const lore = {

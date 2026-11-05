@@ -2,7 +2,7 @@
  * The room format's rules across rooms and floors (tech/room-format.md ROOM-01..09): solutions and
  * alternatives, terms in order, controls before and after the gift of the voice, pacing, floors.
  */
-import { cards, commandMemories, floorTexts, roomTexts, shellContent, terms } from "@wirelight/content";
+import { cards, commandMemories, floors, floorTexts, roomTexts, shellContent, terms } from "@wirelight/content";
 import { describe, expect, it } from "vitest";
 import {
   type CommandStep,
@@ -298,6 +298,15 @@ describe.each(floorDefs.map((f) => [f.floor, f] as const))("floor %i", (_n, floo
   it("ROOM-09: every room is in the same region", () => {
     for (const r of mine) expect(r.region).toBe(floor.region);
   });
+});
+
+it("ROOM-09: every floor the menu lists has its rooms, in the floor's own region", () => {
+  // The palace tab says "coming later" for a floor with no rooms: no listed floor is unbuilt.
+  for (const f of Object.values(floors)) {
+    const mine = rooms.filter((r) => r.floor === f.n);
+    expect(mine.length, `floor ${f.n}`).toBeGreaterThan(0);
+    for (const r of mine) expect(r.region, r.id).toBe(f.region);
+  }
 });
 
 it("ROOM-09: every secret room belongs to a floor of its region, which names it", () => {
