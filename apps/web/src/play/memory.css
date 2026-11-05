@@ -322,11 +322,11 @@ section.map.memory::after {
   stroke-width: 1.5;
 }
 
-.mem-weaver {
+.mem-builder {
   fill: #fff1c9;
 }
 
-.mem-weaver-glow {
+.mem-builder-glow {
   fill: rgba(255, 228, 160, 0.3);
 }
 
