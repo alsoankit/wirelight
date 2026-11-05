@@ -3,25 +3,24 @@
 // they have typed it themselves in a few more rooms. Then it fades; the Command book keeps it for good.
 // Pure functions: the terminal records uses, the panel asks what to show.
 
-/** `ip` accepts short words for its objects (`ip a`, `ip r`): the same command as the long form. */
-const IP_OBJECTS: Record<string, string> = {
-  a: "addr",
-  addr: "addr",
-  address: "addr",
-  l: "link",
-  link: "link",
-  r: "route",
-  ro: "route",
-  route: "route",
-  n: "neigh",
-  neigh: "neigh",
-  neighbour: "neigh",
-  neighbor: "neigh",
-};
+/**
+ * `ip` takes any start of an object's name (`ip a`, `ip ad`, `ip rou`, `ip nei`), trying its objects in
+ * this order, as the shell does (iproute2): the same command as the long form, as the book writes it.
+ */
+const IP_OBJECTS: { book: string; names: string[] }[] = [
+  { book: "addr", names: ["address", "addr"] },
+  { book: "route", names: ["route"] },
+  { book: "link", names: ["link"] },
+  { book: "neigh", names: ["neighbor", "neighbour", "neigh"] },
+];
+
+function ipObject(word: string): string {
+  return IP_OBJECTS.find((o) => o.names.some((n) => n.startsWith(word)))?.book ?? word;
+}
 
 function words(line: string): string[] {
   const w = line.trim().split(/\s+/);
-  if (w[0] === "ip" && w[1]) w[1] = IP_OBJECTS[w[1]] ?? w[1];
+  if (w[0] === "ip" && w[1]) w[1] = ipObject(w[1]);
   return w;
 }
 

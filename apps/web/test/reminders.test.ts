@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { commandOf, LEARNED_AFTER, remindersFor } from "../src/play/reminders";
 
-const BOOK = ["ip link", "bridge fdb", "bridge fdb del", "ping", "ping -t", "ip addr", "ip route"];
+const BOOK = ["ip link", "bridge fdb", "bridge fdb del", "ping", "ping -t", "ip addr", "ip route", "ip neigh"];
 
 describe("commandOf", () => {
   it("finds the entry a typed line uses", () => {
@@ -12,6 +12,20 @@ describe("commandOf", () => {
     expect(commandOf("bridge fdb del 02:00:00:00:00:07 dev eth1 master", BOOK)).toBe("bridge fdb del");
     expect(commandOf("ping -c 1 -t 2 10.0.3.9", BOOK)).toBe("ping -t");
     expect(commandOf("ping -c 1 10.0.1.7", BOOK)).toBe("ping");
+  });
+  it("reads ip's objects from any start of their names, as the shell does", () => {
+    const forms: [string, string[]][] = [
+      ["ip addr", ["a", "ad", "add", "addr", "addre", "address"]],
+      ["ip route", ["r", "ro", "rou", "rout", "route"]],
+      ["ip link", ["l", "li", "lin", "link"]],
+      ["ip neigh", ["n", "ne", "nei", "neig", "neigh", "neighb", "neighbor", "neighbour"]],
+    ];
+    for (const [entry, short] of forms) for (const w of short) expect(commandOf(`ip ${w} show`, BOOK), w).toBe(entry);
+    expect(commandOf("ip ad add 10.0.1.5/24 dev eth0", BOOK)).toBe("ip addr");
+    expect(commandOf("ip nei del 10.0.1.7 dev eth0", BOOK)).toBe("ip neigh");
+    // Not a start of any object's name: no entry, as the shell answers "Object … is unknown".
+    expect(commandOf("ip lnk set eth0 up", BOOK)).toBeUndefined();
+    expect(commandOf("ip addresses", BOOK)).toBeUndefined();
   });
   it("ignores lines that use no entry", () => {
     expect(commandOf("man ip", BOOK)).toBeUndefined();
