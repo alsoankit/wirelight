@@ -440,10 +440,48 @@ export const voice = {
     replayIntro: "Replay intro",
     /** Captions (UI-17): every spoken line is always written out; this sets how large. */
     captions: { title: "Captions", standard: "Standard", large: "Large" },
-    /** The privacy note (UI-17, tech/quality.md): what is saved and why. */
+    /** Signing in (Settings, account/AccountSettings.tsx): optional, by an emailed link, only for play logs. */
+    account: {
+      title: "Account",
+      about:
+        "Signing in is optional: the game plays the same without it, and it's only needed to send your play logs. There's no password: you get a sign-in link by email.",
+      email: "Email address",
+      send: "Email me a sign-in link",
+      sending: "Sending…",
+      sent: "Sent. Open the link in the email to {email}, in this browser, to sign in.",
+      invalid: "That doesn't look like an email address.",
+      busy: "Too many links were asked for just now. Wait a few minutes, then try again.",
+      failed: "The link couldn't be sent. Check your connection, then try again.",
+      expired: "That sign-in link has expired or was already used. Ask for a new one here.",
+      broken: "Signing in didn't work. Ask for a new link and try again.",
+      signedIn: "Signed in as {email}.",
+      signOut: "Sign out",
+      unavailable: "Signing in isn't set up in this copy of the game, so nothing can be sent from it.",
+      /** The play-log switch: off at first, and only there to switch on once signed in. */
+      logs: "Send my play logs to help improve Wirelight",
+      logsSignIn: "Sign in first to switch this on.",
+      logsOn: "Thank you. What is sent is listed under Privacy, below.",
+      /** Logs waiting in this browser (offline, or the service didn't answer): they're sent later. */
+      waitingOne: "1 room's log is waiting to be sent.",
+      waiting: "{n} rooms' logs are waiting to be sent.",
+    },
+    /** The privacy note (UI-17, tech/quality.md): what is saved, what is sent (only when switched on), and why. */
     privacy: {
       title: "Privacy",
-      text: "Your progress and settings are saved only in this browser, so you can pick up where you left off. Nothing is sent anywhere: no account, no analytics, no tracking.",
+      text: 'Your progress and settings are saved only in this browser, so you can pick up where you left off. Nothing is sent anywhere unless you sign in and switch on "Send my play logs".',
+      sentTitle:
+        "When it's on, the game sends this about each room, when you restore it or leave it. It's kept with your account:",
+      sent: [
+        "which room it was, and how long you spent in it",
+        "whether you restored it",
+        "how many hints you opened",
+        "the mistakes the room noticed",
+        "the commands you typed (nothing else you type is ever sent)",
+        "how fast your device draws the palace: the graphics setting in use, and how long a frame takes",
+      ],
+      email:
+        "Signing in sends your email address to Supabase, the service that runs Wirelight's accounts, so it can email you the link.",
+      off: "Switch it off or sign out, and nothing more is sent; anything still waiting in this browser is deleted. Nothing else is collected: no other analytics, no tracking.",
     },
     empty: "Nothing here yet.",
     close: "Close",

@@ -37,6 +37,7 @@ More regions are planned, climbing on to the top of the hill: ports and connecti
 | `packages/rooms` | Every room as data: topology, win conditions, hints, plus a validator. |
 | `packages/engine` | Runs the simulator in a Web Worker and turns its event trace into what the game shows. |
 | `packages/content` | All player-facing text, in plain modern English, kept out of the code. |
+| `supabase/` | The optional sign-in's table for opt-in play logs, with its access rules (`migrations/`). |
 | `apps/web` | The game: React, React Three Fiber on three.js (WebGPU with a WebGL2 fallback, node materials), Zustand, xterm.js, Vite. |
 | `tools/` | Golden-output capture from real Linux, the difference test against real network namespaces, the Blender light bake, the model rework (`tools/rework`), room captures and browser play-throughs (`tools/shots`). |
 
@@ -62,6 +63,8 @@ pnpm rooms:validate    # every room against the room rules
 pnpm build             # production build
 pnpm e2e               # browser test of a first visit
 ```
+
+**Optional sign-in and play logs:** players can sign in from Settings with a link sent by email, and switch on sending their play logs (off unless they do). To build that in, copy `.env.example` to `.env` and fill in the Supabase project's public key; the table and its rules are in `supabase/migrations/0001_play_logs.sql`. Without a `.env` the game builds and plays exactly the same, and sends nothing anywhere.
 
 Dev aids: `/play?room=<id>&onboarded=1` opens a room directly, and **Shift+D** opens the dev panel (jump to any room, auto-play it, try mistakes).
 

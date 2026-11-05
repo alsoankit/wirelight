@@ -2,12 +2,13 @@ import { useFrame } from "@react-three/fiber";
 import { type Dispatch, type SetStateAction, useRef } from "react";
 import { useSession } from "../engine/store";
 import { ruin } from "../world/ruin";
+import { frameTimes } from "./frameTimes";
 import { TIERS, type Tier } from "./quality";
 import { qualityJudge } from "./qualityJudge";
 
 // Automatic quality (0020): steps down when frames stay slow and back up when they recover; the
 // judging is in qualityJudge.ts. ?tier= and a choice in Settings pin the tier (the caller passes
-// auto = false).
+// auto = false). It also times every frame for the play logs (frameTimes.ts).
 
 export function AutoQuality({
   auto,
@@ -23,6 +24,8 @@ export function AutoQuality({
   const lastRuin = useRef(ruin.value);
 
   useFrame((_, delta) => {
+    // Before the check: the play logs time every frame, whether the tier is automatic or chosen by hand.
+    frameTimes.add(delta);
     if (!auto) return;
     const s = useSession.getState();
     const ruinMoving = Math.abs(ruin.value - lastRuin.current) > 1e-4;

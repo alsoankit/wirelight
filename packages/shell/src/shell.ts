@@ -12,13 +12,21 @@ import { lab } from "./commands/lab";
 import { ping } from "./commands/ping";
 import { sysctl } from "./commands/sysctl";
 import { tcpdump } from "./commands/tcpdump";
+import { type BUILTIN_COMMANDS, LATER_COMMANDS, type PROGRAM_COMMANDS } from "./names";
 import { tokenize } from "./tokenize";
 import type { CommandContext, CommandFn, ShellContent, ToolId } from "./types";
 
-const BUILTINS: Record<string, CommandFn> = { help, man, history, clear, exit, hostname };
-const PROGRAMS: Record<string, CommandFn> = { ip, lab, bridge, ping, sysctl, tcpdump, dhclient };
+// The tables match the names in names.ts exactly (`satisfies`: a name missing or extra won't compile).
+const BUILTINS: Record<string, CommandFn> = { help, man, history, clear, exit, hostname } satisfies Record<
+  (typeof BUILTIN_COMMANDS)[number],
+  CommandFn
+>;
+const PROGRAMS: Record<string, CommandFn> = { ip, lab, bridge, ping, sysctl, tcpdump, dhclient } satisfies Record<
+  (typeof PROGRAM_COMMANDS)[number],
+  CommandFn
+>;
 /** Real Linux programs the player meets later; until unlocked they answer FR-CON-11. */
-const LATER = new Set(["tcpdump", "sysctl", "traceroute", "ssh", "ss", "nc", "dig", "curl", "iptables"]);
+const LATER = new Set<string>(LATER_COMMANDS);
 
 export interface ExecOptions {
   tools: ReadonlySet<ToolId>;

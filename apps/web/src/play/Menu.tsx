@@ -11,6 +11,7 @@ import {
 } from "@wirelight/content";
 import { onPath, type Path, rooms } from "@wirelight/rooms";
 import { type CSSProperties, useEffect, useState } from "react";
+import { AccountSettings } from "../account/AccountSettings";
 import { type Panel, useSession } from "../engine/store";
 import { useProgress } from "../progress/progress";
 import { CommandMemory } from "./CommandMemory";
@@ -239,7 +240,7 @@ function Choice<T extends string | number>({
 }
 
 /** Settings in UI-17's order: path, graphics, volumes and voices, captions, error subtitles, motion,
- * text size, replay intro, and the privacy note. */
+ * text size, replay intro, then the account (optional sign-in, the play-log switch) and the privacy note. */
 function Settings() {
   const path = useProgress((s) => s.path ?? "new");
   const choosePath = useProgress((s) => s.choosePath);
@@ -333,8 +334,17 @@ function Settings() {
           {voice.menu.replayIntro}
         </button>
       </div>
+      <AccountSettings />
       <h3>{m.privacy.title}</h3>
       <p className="panel-note">{m.privacy.text}</p>
+      <p className="panel-note">{m.privacy.sentTitle}</p>
+      <ul className="panel-note privacy-sent">
+        {m.privacy.sent.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
+      <p className="panel-note">{m.privacy.email}</p>
+      <p className="panel-note">{m.privacy.off}</p>
     </div>
   );
 }
