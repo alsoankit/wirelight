@@ -42,7 +42,7 @@ const walk = async (...rooms) => {
 /** Reads, in Captures, who sent what last arrived at one of the player's doors (no catch needed). */
 const lastFrom = async (door) => {
   await tidy(p);
-  await p.click(".jar-button");
+  await p.click(".captures-button");
   const from = await p.waitForFunction(
     (d) =>
       [...document.querySelectorAll(".arrived-list li")]
