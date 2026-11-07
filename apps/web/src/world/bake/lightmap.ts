@@ -15,6 +15,8 @@ import { BAKES, type BakeEntry } from "./manifest";
 //
 // The maps hold sRGB(E / RANGE): the GPU decodes sRGB for free, and the darks keep their precision.
 export const RANGE = 4;
+// Blender's contact map includes broad surface shading; keep only a light contact cue at runtime.
+const AO_STRENGTH = 0.2;
 
 export type Lightmaps = { id: string; ruin: Texture; lit: Texture; ao: Texture; entry: BakeEntry };
 
@@ -111,6 +113,7 @@ export function applyLightmapUv(maps: Lightmaps | null, geometries: BufferGeomet
 export function bakedLightNodes(maps: Lightmaps) {
   const at = uv(1);
   const light = mix(texture(maps.lit, at).rgb, texture(maps.ruin, at).rgb, ruinHere).mul(RANGE);
-  const ao = texture(maps.ao, at).r.max(float(0.25));
+  const bakedAo = texture(maps.ao, at).r.max(float(0.25));
+  const ao = mix(float(1), bakedAo, AO_STRENGTH);
   return { light, ao };
 }
