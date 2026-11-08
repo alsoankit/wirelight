@@ -101,7 +101,7 @@ export function HallScene({ device }: { device: string }) {
       />
       {crossing && <Locks device={device} at={[-1.1, 0, -0.3]} />}
       {region === 3 && <TownSquare device={device} />}
-      <RegionStatue region={region} place={SIDE_PLACE(region)} />
+      {region !== 1 && region !== 3 && <RegionStatue region={region} place={SIDE_PLACE(region)} />}
     </MachineScene>
   );
 }
