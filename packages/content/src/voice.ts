@@ -283,6 +283,7 @@ export const voice = {
     /** Where the player stands: the two machines the cable joins. */
     title: "The corridor between {a} and {b}",
     hint: "Every message on this cable passes here. Point at one to slow it down.",
+    enter: "Enter corridor",
     /** The way out at each end. */
     toEnd: "{name}'s room",
     toEndLabel: "Go on to {name}'s room",
