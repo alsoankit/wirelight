@@ -303,6 +303,10 @@ export const voice = {
   map: {
     title: "The Map",
     open: "Open the Map (G)",
+    birdsEye: "Bird's-eye view",
+    closeBirdsEye: "Back to the room",
+    youAreHere: "you are here",
+    legend: "Machines · cables · moving messages",
     floorMap: "A live map of this floor: every machine, every cable and the messages on them.",
     thisFloor: "This floor",
     world: "The palace",

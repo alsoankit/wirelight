@@ -6,10 +6,10 @@ import { progress } from "../engine/clock";
 import { journey } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { messageSummary } from "../world/messageKind";
-import { depthsFrom } from "../world/room/doorSides";
 import { RoomCommandMemory } from "./CommandMemory";
 import { CLOSE_MAP, OPEN_MAP } from "./keys";
 import { Memory } from "./Memory";
+import { layout, MAP_H, MAP_W, type Node } from "./mapLayout";
 import { noteMoment } from "./momentRules";
 import { arrivalText, machineNamer } from "./names";
 import { useMachineLabel } from "./roles";
@@ -21,34 +21,8 @@ import { WorldMap } from "./WorldMap";
 // clock as the room. G opens it full screen; the mini map sits in the corner. A second view is the
 // world map (0039): every region and floor, cleared floors glowing, the next one in mist.
 
-export type Node = { id: string; x: number; y: number; kind: "you" | "switch" | "router" | "house" };
-
-/** The full map's size, in its own units (the SVG scales to fit). */
-export const MAP_W = 900;
-export const MAP_H = 520;
-
-/** Lays the floor out in columns by distance from the player's machine (a breadth-first walk). */
-export function layout(t: Topology, start: string, w: number, h: number): Map<string, Node> {
-  const depth = depthsFrom(t, start);
-  const columns = Math.max(...depth.values()) + 1;
-  const byColumn = new Map<number, string[]>();
-  for (const d of t.devices) byColumn.set(depth.get(d.id) ?? 0, [...(byColumn.get(depth.get(d.id) ?? 0) ?? []), d.id]);
-  const out = new Map<string, Node>();
-  for (const [c, ids] of byColumn)
-    ids.forEach((id, i) => {
-      const spec = t.devices.find((d) => d.id === id);
-      const kind =
-        id === start
-          ? "you"
-          : spec?.bridges?.length
-            ? "switch"
-            : (spec?.interfaces.length ?? 0) > 1
-              ? "router"
-              : "house";
-      out.set(id, { id, kind, x: ((c + 0.5) / columns) * w, y: ((i + 1) / (ids.length + 1)) * h });
-    });
-  return out;
-}
+export type { Node } from "./mapLayout";
+export { layout, MAP_H, MAP_W } from "./mapLayout";
 
 type Pt = { x: number; y: number };
 /** A cable on the map: from its `a` end to its `b` end, bent when it shares its two machines with others. */
@@ -340,6 +314,9 @@ export function MapView() {
       const t = e.target as HTMLElement | null;
       if (t && (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || t.closest(".console"))) return;
       if (e.key === "g" || e.key === "G") setOpen((o) => !o);
+      if (e.key === "b" || e.key === "B") {
+        setOpen(false);
+      }
       if (e.key === "Escape") setOpen(false);
     };
     // Agent A hook: something else opens the Map (the Prologue's Send, ONB-19).
@@ -399,6 +376,15 @@ export function MapView() {
           <nav className="menu-tabs">
             <button type="button" aria-pressed={view === "floor"} onClick={() => setView("floor")}>
               {voice.map.thisFloor}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                window.dispatchEvent(new Event("wirelight:toggle-birds-eye"));
+              }}
+            >
+              {voice.map.birdsEye}
             </button>
             <button type="button" aria-pressed={view === "world"} onClick={() => setView("world")}>
               {voice.map.world}
