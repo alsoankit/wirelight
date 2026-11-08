@@ -102,8 +102,9 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
   const layout = useMemo(() => {
     if (!room) return given;
     const sides = doorSides(room.topology, room.playerDevice, device);
-    // Only among the slots the room's walls open for this many doors (they are cut for the first N), so
-    // walls and bakes stay right; new openings on the near edge come with the layouts (0111).
+    // Unplugged interfaces still take wall slots in a hall; keep the near-edge slot for a real return link.
+    for (const iface of empty) if (!sides.has(iface)) sides.set(iface, "left");
+    // Only among slots with openings: hall layouts put near-edge slots first and cut wall arches for the rest.
     const used = doors.length + empty.length;
     const { placed, rest } = slotsFor([...doors.map((d) => d.iface), ...empty], sides, given.doorSlots.slice(0, used));
     const doorSlots = [...placed, ...rest, ...given.doorSlots.slice(used)];

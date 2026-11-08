@@ -28,9 +28,14 @@ export const HALL_SLOTS: (DoorSlot & { wall: "back" | "left" })[] = [
   { wall: "left", at: 1, plate: "above" },
 ];
 
+// Return doors open on the near-left edge. The rest of the near edge stays clear for machines and statues.
+export const HALL_FRONT_SLOTS: DoorSlot[] = [
+  { wall: "front", at: -2.6, plate: "above" },
+  { wall: "front", at: -0.5, plate: "above" },
+];
+
 /** The walls, with a gap wherever a door is. */
-function walls(doors: number, plain?: string): Placement[] {
-  const used = HALL_SLOTS.slice(0, doors);
+function walls(used: readonly (typeof HALL_SLOTS)[number][], plain?: string): Placement[] {
   const gap = (wall: "back" | "left", at: number) => used.some((s) => s.wall === wall && s.at === at);
   const out: Placement[] = [];
   for (const at of [-3, -1, 1, 3]) {
@@ -43,7 +48,7 @@ function walls(doors: number, plain?: string): Placement[] {
 
 /** Every piece a hall can use (for preloading). */
 export const HALL_PIECES: Placement[] = [
-  ...walls(0),
+  ...walls([]),
   ...HALLS_HALL_DRESSING,
   ...TOWN_SQUARE_PIECES,
   ...CATHEDRAL_HALL_PIECES,
@@ -64,21 +69,22 @@ const ANGELS: Partial<Record<RegionId, StatuePlace[]>> = {
   3: [angel({ restored: "#CFC2A6", ruined: "#6D6F76" }, 0.75)],
 };
 
-export function hallLayout(doors: number, region: RegionId = 1): RoomLayout {
+export function hallLayout(doors: number, region: RegionId = 1, frontDoors = 0): RoomLayout {
+  const front = HALL_FRONT_SLOTS.slice(0, frontDoors);
+  const wallDoors = HALL_SLOTS.slice(0, Math.max(0, doors - front.length));
   const frame = {
-    doorSlots: HALL_SLOTS,
+    doorSlots: [...front, ...HALL_SLOTS],
     keeper: [0.4, 0, 0.2] as RoomLayout["keeper"],
     air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
   };
-  const used = HALL_SLOTS.slice(0, doors);
   const withAngels = (l: RoomLayout): RoomLayout => ({
     ...l,
     statues: [...(l.statues ?? []), ...(ANGELS[region] ?? [])],
   });
   // The Works builds its halls from its own kits (regions/works.ts): village walls, its doorways.
-  if (region === 2) return { ...frame, ...worksHall(used) };
-  if (region === 3) return withAngels({ ...frame, placements: TOWN_SQUARE_PIECES, ...townSquare(used) });
-  if (region === 4) return withAngels({ ...frame, placements: CATHEDRAL_HALL_PIECES, ...cathedralHall(used) });
+  if (region === 2) return { ...frame, ...worksHall(wallDoors) };
+  if (region === 3) return withAngels({ ...frame, placements: TOWN_SQUARE_PIECES, ...townSquare(wallDoors) });
+  if (region === 4) return withAngels({ ...frame, placements: CATHEDRAL_HALL_PIECES, ...cathedralHall(wallDoors) });
   const halls = hallsHall();
-  return withAngels({ ...frame, ...halls, placements: [...walls(doors), ...halls.placements] });
+  return withAngels({ ...frame, ...halls, placements: [...walls(wallDoors), ...halls.placements] });
 }
