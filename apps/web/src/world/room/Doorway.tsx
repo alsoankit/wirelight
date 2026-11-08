@@ -382,11 +382,7 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
           </span>
         )}
       </Html>
-      <Html
-        center
-        position={[g.doorway[0] + g.out[0] * 0.08, 1.55, g.doorway[2] + g.out[2] * 0.08]}
-        zIndexRange={[9, 0]}
-      >
+      <Html center position={[g.doorway[0], 1.55, g.doorway[2]]} zIndexRange={[9, 0]}>
         <div ref={entryRef} className="corridor-entry">
           <button
             ref={entryButton}

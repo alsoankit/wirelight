@@ -6,6 +6,7 @@ import { useMemo, useRef } from "react";
 import {
   AdditiveBlending,
   BoxGeometry,
+  CircleGeometry,
   ExtrudeGeometry,
   type Mesh,
   MeshBasicMaterial,
@@ -32,15 +33,31 @@ const LIFT = 0.35;
 const matte = (color: string) => new MeshBasicMaterial({ color });
 
 const BODY = matte("#303846");
-const TOP = matte("#414b5c");
-const RIM = matte("#6b7688");
 const CORE = matte("#8792a4");
+const REGIONS = [
+  { body: "#303d37", top: "#425448", rim: "#8c9b72", here: "#f0c47c" },
+  { body: "#303846", top: "#414b5c", rim: "#8293a7", here: "#ffd58c" },
+  { body: "#3b3430", top: "#51433b", rim: "#a98568", here: "#ffc985" },
+  { body: "#353441", top: "#49475b", rim: "#9c91b3", here: "#e6c993" },
+].map((colors) => ({
+  body: matte(colors.body),
+  top: matte(colors.top),
+  rim: matte(colors.rim),
+  here: matte(colors.here),
+}));
 const CABLE = {
   dark: matte("#727c8d"),
   lit: matte("#FFC98A"),
   broken: matte("#a95f48"),
 };
-const HERE = matte("#FFD58C");
+const FLOW = new MeshBasicMaterial({
+  color: "#7de6e8",
+  transparent: true,
+  opacity: 0.3,
+  depthWrite: false,
+  blending: AdditiveBlending,
+  toneMapped: false,
+});
 const DOT = new MeshBasicMaterial({ color: "#6befff", toneMapped: false });
 const HALO = new MeshBasicMaterial({
   color: "#40d9e4",
@@ -83,6 +100,12 @@ const PORT = new BoxGeometry(0.5, 0.16, 0.5);
 const UNIT = new BoxGeometry(1, 1, 1);
 const BALL = new SphereGeometry(0.17, 12, 8);
 const GLOW = new SphereGeometry(0.42, 12, 8);
+const BACKDROP = new CircleGeometry(90, 48);
+const AMBIENT_POOL = new CircleGeometry(42, 48);
+const BACKDROP_MAT = new MeshBasicMaterial({ color: "#171722", depthWrite: false });
+const POOL_MATS = ["#263a32", "#292d3b", "#3a2e29", "#302b3c"].map(
+  (color) => new MeshBasicMaterial({ color, transparent: true, opacity: 0.36, depthWrite: false }),
+);
 
 /** The machine's own shape, so no two kinds look alike: a core, a single block, a row, a tower. */
 function Machine({ kind }: { kind: string }) {
@@ -122,16 +145,17 @@ function Platform({ spot, room, here }: { spot: Spot; room: RoomDef; here: boole
   const openPanel = useSession((s) => s.openPanel);
   const open = spot.id === room.playerDevice || room.access[spot.id]?.state === "enterable";
   const label = useMachineLabel();
+  const colors = REGIONS[Math.max(0, Math.min(REGIONS.length - 1, room.region - 1))] ?? REGIONS[0]!;
   return (
     <group position={[spot.at[0], 0, spot.at[1]]}>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); the chip is the keyboard way */}
       <group onClick={() => open && goTo(spot.id)}>
-        <mesh geometry={SLAB} material={BODY} />
-        <mesh geometry={RIM_INLAY} material={here ? HERE : RIM} />
-        <mesh geometry={INLAY} material={TOP} />
+        <mesh geometry={SLAB} material={colors.body} />
+        <mesh geometry={RIM_INLAY} material={here ? colors.here : colors.rim} />
+        <mesh geometry={INLAY} material={colors.top} />
         <Machine kind={spot.kind} />
       </group>
-      <Html center position={[0, 2.6, 0]} zIndexRange={[10, 0]}>
+      <Html center position={[0, 3.35, 0]} zIndexRange={[10, 0]}>
         <button
           type="button"
           className="world-chip"
@@ -156,6 +180,7 @@ function Cable({
   room: RoomDef;
 }) {
   const state = useSession((s) => s.status?.corridors[link.id] ?? "dark");
+  const carrying = useSession((s) => s.onCables.some((message) => message.link === link.id));
   const a = where.get(link.a.device)?.at ?? [0, 0];
   const b = where.get(link.b.device)?.at ?? [0, 0];
   const dx = b[0] - a[0];
@@ -178,6 +203,15 @@ function Cable({
         rotation={[0, -Math.atan2(dz, dx), 0]}
         scale={[span, 0.08, 0.14]}
       />
+      {carrying && (
+        <mesh
+          geometry={UNIT}
+          material={FLOW}
+          position={[(a[0] + b[0]) / 2, -0.06, (a[1] + b[1]) / 2]}
+          rotation={[0, -Math.atan2(dz, dx), 0]}
+          scale={[span, 0.035, 0.32]}
+        />
+      )}
       {ends.map(([device, iface, x, z]) => (
         <group key={`${device}:${iface}`} position={[x, 0, z]}>
           <mesh geometry={PORT} material={CORE} position={[0, -0.02, 0]} />
@@ -287,7 +321,20 @@ export function NetworkScene() {
   );
   return (
     <>
-      <color attach="background" args={["#0a0c12"]} />
+      <color attach="background" args={["#100f17"]} />
+      <fog attach="fog" args={["#100f17", reach * 1.25, reach * 3.2]} />
+      <mesh
+        geometry={BACKDROP}
+        material={BACKDROP_MAT}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[middle[0], -0.28, middle[1]]}
+      />
+      <mesh
+        geometry={AMBIENT_POOL}
+        material={POOL_MATS[Math.max(0, Math.min(POOL_MATS.length - 1, room.region - 1))] ?? BACKDROP_MAT}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[middle[0], -0.26, middle[1]]}
+      />
       <View focus={middle} reach={reach} />
       <group dispose={null}>
         {[...where.values()].map((s) => (
