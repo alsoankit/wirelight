@@ -1546,6 +1546,63 @@ button.link.inline {
   z-index: 52;
 }
 
+.birds-eye-controls {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: rgba(8, 11, 16, 0.94);
+  color: var(--text);
+  font: 14px / 1.35 var(--sans);
+}
+
+.birds-eye-controls p {
+  margin: 0;
+}
+
+.birds-eye-controls button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  background: rgba(242, 165, 74, 0.14);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.birds-eye-controls button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+body:has(.birds-eye-controls)
+  :is(
+    .hud,
+    .debrief,
+    .dev-panel,
+    .top-bar,
+    .mini-map,
+    .map,
+    .panel,
+    .console,
+    .captures-button,
+    .controls,
+    .cmd-memory,
+    .reaction,
+    .discovery,
+    .lines,
+    .dev-toggle,
+    .dev-badge
+  ) {
+  display: none;
+}
+
 .map .floor-map {
   flex: 1;
   width: 100%;

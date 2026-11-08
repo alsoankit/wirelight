@@ -1,5 +1,6 @@
 import { useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
+import { voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import {
   type Dispatch,
@@ -27,6 +28,7 @@ import { QUALITY, QualityContext, scaleFromUrl, TIERS, type Tier, tierFromUrl } 
 import { HALL_PIECES } from "../world/hall/layout";
 import { HOUSE_PIECES } from "../world/house/layout";
 import { pieceUrl } from "../world/kit/Piece";
+import { NetworkScene } from "../world/network/NetworkScene";
 import { OBSERVATORY } from "../world/observatory/layout";
 import { Declutter } from "../world/room/Declutter";
 import { World } from "../world/room/World";
@@ -174,12 +176,14 @@ const WorldCanvas = memo(function WorldCanvas({
   auto,
   setTier,
   arriving,
+  birdsEye,
 }: {
   backend: "webgpu" | "webgl2";
   dpr: number;
   auto: boolean;
   setTier: Dispatch<SetStateAction<Tier>>;
   arriving: boolean;
+  birdsEye: boolean;
 }) {
   return (
     <Canvas
@@ -206,9 +210,7 @@ const WorldCanvas = memo(function WorldCanvas({
       <EngineDriver />
       {/* Door plates step aside from the labels they would cover (7.B's eight doors). */}
       <Declutter />
-      <AfterFirstFrame>
-        <World arriving={arriving} />
-      </AfterFirstFrame>
+      <AfterFirstFrame>{birdsEye ? <NetworkScene /> : <World arriving={arriving} />}</AfterFirstFrame>
     </Canvas>
   );
 });
@@ -231,6 +233,7 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
     } else if (!tierFromUrl()) setAuto(true);
   }, [chosen]);
   const [auto, setAuto] = useState(!forced);
+  const [birdsEye, setBirdsEye] = useState(false);
   const quality = QUALITY[tier];
   const load = useSession((s) => s.load);
   const roomId = useSession((s) => s.roomId);
@@ -267,6 +270,26 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    const toggle = () => setBirdsEye((open) => !open);
+    const close = () => setBirdsEye(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (isTyping(e) || withModifier(e) || e.repeat) return;
+      if (e.key === "b" || e.key === "B") {
+        e.preventDefault();
+        setBirdsEye((open) => !open);
+      } else if (e.key === "Escape") setBirdsEye(false);
+    };
+    window.addEventListener("wirelight:toggle-birds-eye", toggle);
+    window.addEventListener("wirelight:close-birds-eye", close);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("wirelight:toggle-birds-eye", toggle);
+      window.removeEventListener("wirelight:close-birds-eye", close);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
   return (
     <QualityContext.Provider value={quality}>
       <WorldCanvas
@@ -276,7 +299,16 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         auto={auto}
         setTier={setTier}
         arriving={arriving}
+        birdsEye={birdsEye}
       />
+      {birdsEye && (
+        <aside className="birds-eye-controls" aria-label={voice.map.birdsEye}>
+          <p>{voice.map.legend}</p>
+          <button type="button" onClick={() => setBirdsEye(false)}>
+            {voice.map.closeBirdsEye}
+          </button>
+        </aside>
+      )}
       {/* Dev aid only: which quality tier is showing, for a moment when it changes. */}
       {import.meta.env.DEV && <QualityNote tier={tier} auto={auto} />}
       <StrictMode>
