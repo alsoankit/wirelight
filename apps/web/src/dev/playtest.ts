@@ -6,7 +6,9 @@ import { useProgress } from "../progress/progress";
 // Playtest log (not part of the game): with `?playtest=1` in the address, each room visit is recorded
 // for a human playtest: how long it took, whether it was won, the commands that failed, hints opened,
 // Ask and keeper "why?" uses, and the mistakes the room caught. It stays in memory and in this browser
-// (no server) and downloads as JSON from the button (PlaytestButton.tsx).
+// (no server) and downloads as JSON from the button (PlaytestButton.tsx). The recorder itself
+// (recordVisits) also serves the play logs (account/logs.ts, account/PlayLogs.tsx), which run it only
+// while a signed-in player has switched them on.
 
 export type FailedCommand = { at: string; device: string; line: string; exitCode: number };
 
@@ -19,6 +21,8 @@ export type RoomVisit = {
   won: boolean;
   wonAt: string | null;
   commands: number;
+  /** Lines typed in the terminal (not clicked), in order. */
+  typed: string[];
   failed: FailedCommand[];
   hints: number;
   asks: number;
@@ -38,7 +42,8 @@ export function emptyLog(now: Date): PlaytestLog {
   return { version: 1, began: now.toISOString(), visits: [] };
 }
 
-function touch(v: RoomVisit, now: Date): void {
+/** Moves a visit's end to `now`; its seconds follow. */
+export function touch(v: RoomVisit, now: Date): void {
   v.end = now.toISOString();
   v.seconds = Math.round((now.getTime() - Date.parse(v.start)) / 1000);
 }
@@ -58,6 +63,7 @@ export function startVisit(log: PlaytestLog, roomId: string, now: Date): RoomVis
     won: false,
     wonAt: null,
     commands: 0,
+    typed: [],
     failed: [],
     hints: 0,
     asks: 0,
@@ -71,9 +77,9 @@ export function startVisit(log: PlaytestLog, roomId: string, now: Date): RoomVis
 }
 
 /**
- * Reads new trace events into a visit: every typed or clicked command counts, and one that ended with
- * a non-zero exit code is kept (at once from `cmd.exec`, or at its `proc.exit` for a streaming one).
- * `running` holds commands still running (execId → line), across calls.
+ * Reads new trace events into a visit: every typed or clicked command counts, a typed one's line is kept,
+ * and one that ended with a non-zero exit code is kept (at once from `cmd.exec`, or at its `proc.exit`
+ * for a streaming one). `running` holds commands still running (execId → line), across calls.
  */
 export function readEvents(
   v: RoomVisit,
@@ -84,6 +90,7 @@ export function readEvents(
   for (const e of events) {
     if (e.kind === "cmd.exec") {
       v.commands++;
+      if (e.source === "typed") v.typed.push(e.line);
       if (e.exitCode === null) running.set(e.execId, { device: e.device, line: e.line });
       else if (e.exitCode !== 0)
         v.failed.push({ at: now.toISOString(), device: e.device, line: e.line, exitCode: e.exitCode });
@@ -102,6 +109,106 @@ export function readEvents(
 /** Adds detectors not yet recorded for this visit (the room's list restarts on reset, so keep the union). */
 export function readMistakes(v: RoomVisit, detectors: readonly string[]): void {
   for (const d of detectors) if (!v.mistakes.includes(d)) v.mistakes.push(d);
+}
+
+/** What a recording is told. All optional. */
+export type Recording = {
+  /** After each change to the log (where installPlaytest commits it). */
+  changed?: () => void;
+  /** A visit began: a new room loaded. */
+  started?: (v: RoomVisit) => void;
+  /** The visit's room was won (restored), once per visit. */
+  won?: (v: RoomVisit) => void;
+  /** A visit ended: the player went on to another room. */
+  ended?: (v: RoomVisit) => void;
+};
+
+/**
+ * Records each room visit into `log` from the session and progress stores, telling `on` as it goes, until
+ * stopped. A room already open is picked up at once, unless `skipOpenRoom`: then that room isn't recorded
+ * at all (its visit began before the recording did), and recording begins with the next room.
+ */
+export function recordVisits(
+  log: PlaytestLog,
+  on: Recording = {},
+  opts: { skipOpenRoom?: boolean } = {},
+): { stop(): void; visit(): RoomVisit | null } {
+  let visit: RoomVisit | null = null;
+  let seen = 0;
+  let hintBase = 0;
+  const running = new Map<number, { device: string; line: string }>();
+  // The room left out (skipOpenRoom) while it stays open; null once the player has gone on.
+  let skipping = opts.skipOpenRoom ? useSession.getState().roomId : null;
+
+  const onSession = (s: ReturnType<typeof useSession.getState>, prev: ReturnType<typeof useSession.getState>) => {
+    if (skipping !== null) {
+      if (s.roomId === skipping) return;
+      // Another room: from here every room counts, that one too if the player comes back to it.
+      skipping = null;
+    }
+    const now = new Date();
+    let changed = false;
+    if (s.roomId && s.roomId !== visit?.roomId) {
+      const last = visit;
+      visit = startVisit(log, s.roomId, now);
+      seen = 0;
+      running.clear();
+      hintBase = useProgress.getState().hints[s.roomId] ?? 0;
+      changed = true;
+      // startVisit has closed the last one (left, its seconds final), so it's told whole.
+      if (last) on.ended?.(last);
+      on.started?.(visit);
+    }
+    if (!visit) return;
+    // Events are counted across the whole trace (`dropped` + kept), so a trimmed trace isn't re-read.
+    const total = s.dropped + s.events.length;
+    if (total < seen) seen = 0; // the trace was cleared (room reloaded)
+    if (total > seen) {
+      const fresh = s.events.slice(Math.max(0, s.events.length - (total - seen)));
+      readEvents(visit, fresh, running, now);
+      seen = total;
+      changed = true;
+    }
+    if (s.status?.roomId === visit.roomId) {
+      const before = visit.mistakes.length;
+      readMistakes(visit, s.status.detectors);
+      if (visit.mistakes.length !== before) changed = true;
+      // After the mistakes, so the visit told of its win holds any this same update caught.
+      if (s.status.won && !visit.won) {
+        visit.won = true;
+        visit.wonAt = now.toISOString();
+        changed = true;
+        on.won?.(visit);
+      }
+    }
+    if (s.panel !== prev.panel) {
+      if (s.panel?.kind === "ask" && prev.panel?.kind !== "ask") visit.asks++;
+      if (s.panel?.kind === "keeper" && prev.panel?.kind !== "keeper") visit.whys++;
+      changed = true;
+    }
+    if (changed) on.changed?.();
+  };
+
+  const onProgress = (p: ReturnType<typeof useProgress.getState>) => {
+    if (!visit) return;
+    const hints = Math.max(0, (p.hints[visit.roomId] ?? 0) - hintBase);
+    if (hints !== visit.hints) {
+      visit.hints = hints;
+      touch(visit, new Date());
+      on.changed?.();
+    }
+  };
+
+  const offSession = useSession.subscribe(onSession);
+  const offProgress = useProgress.subscribe(onProgress);
+  onSession(useSession.getState(), useSession.getState());
+  return {
+    stop() {
+      offSession();
+      offProgress();
+    },
+    visit: () => visit,
+  };
 }
 
 export function exportName(now: Date): string {
@@ -157,77 +264,23 @@ let installed: (() => void) | null = null;
 export function installPlaytest(): () => void {
   if (installed) return installed;
   const log = loadLog();
-  let visit: RoomVisit | null = null;
-  let seen = 0;
-  let hintBase = 0;
-  const running = new Map<number, { device: string; line: string }>();
 
   const commit = () => {
     saveLog(log);
     usePlaytest.setState({ log: { ...log, visits: [...log.visits] } });
   };
 
-  const onSession = (s: ReturnType<typeof useSession.getState>, prev: ReturnType<typeof useSession.getState>) => {
-    const now = new Date();
-    let changed = false;
-    if (s.roomId && s.roomId !== visit?.roomId) {
-      visit = startVisit(log, s.roomId, now);
-      seen = 0;
-      running.clear();
-      hintBase = useProgress.getState().hints[s.roomId] ?? 0;
-      changed = true;
-    }
-    if (!visit) return;
-    // Events are counted across the whole trace (`dropped` + kept), so a trimmed trace isn't re-read.
-    const total = s.dropped + s.events.length;
-    if (total < seen) seen = 0; // the trace was cleared (room reloaded)
-    if (total > seen) {
-      const fresh = s.events.slice(Math.max(0, s.events.length - (total - seen)));
-      readEvents(visit, fresh, running, now);
-      seen = total;
-      changed = true;
-    }
-    if (s.status?.roomId === visit.roomId) {
-      if (s.status.won && !visit.won) {
-        visit.won = true;
-        visit.wonAt = now.toISOString();
-        changed = true;
-      }
-      const before = visit.mistakes.length;
-      readMistakes(visit, s.status.detectors);
-      if (visit.mistakes.length !== before) changed = true;
-    }
-    if (s.panel !== prev.panel) {
-      if (s.panel?.kind === "ask" && prev.panel?.kind !== "ask") visit.asks++;
-      if (s.panel?.kind === "keeper" && prev.panel?.kind !== "keeper") visit.whys++;
-      changed = true;
-    }
-    if (changed) commit();
-  };
-
-  const onProgress = (p: ReturnType<typeof useProgress.getState>) => {
-    if (!visit) return;
-    const hints = Math.max(0, (p.hints[visit.roomId] ?? 0) - hintBase);
-    if (hints !== visit.hints) {
-      visit.hints = hints;
-      touch(visit, new Date());
-      commit();
-    }
-  };
-
-  const offSession = useSession.subscribe(onSession);
-  const offProgress = useProgress.subscribe(onProgress);
+  const recording = recordVisits(log, { changed: commit });
   const onHide = () => {
+    const visit = recording.visit();
     if (visit) touch(visit, new Date());
     saveLog(log);
   };
   window.addEventListener("pagehide", onHide);
-  onSession(useSession.getState(), useSession.getState());
   commit();
 
   installed = () => {
-    offSession();
-    offProgress();
+    recording.stop();
     window.removeEventListener("pagehide", onHide);
     installed = null;
   };

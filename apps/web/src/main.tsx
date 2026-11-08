@@ -1,6 +1,7 @@
 import { lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { takeLinkAnswer } from "./account/link";
 import { CannotDraw, canDraw3D, GameErrorBoundary } from "./CannotDraw";
 // Fonts are bundled (Fontsource, OFL), never fetched from a font server: the game must work offline.
 import "@fontsource-variable/inter";
@@ -14,6 +15,16 @@ const RendererCheck = lazy(() =>
   import("./dev/renderer-check/RendererCheck").then((m) => ({ default: m.RendererCheck })),
 );
 const EngineCheck = lazy(() => import("./dev/engine-check/EngineCheck").then((m) => ({ default: m.EngineCheck })));
+
+// A sign-in link (Settings, optional) opens the game with the sign-in service's answer in the address.
+// It's taken out of the address first, before anything else can change it, and finished once the
+// service has loaded (account/supabase.ts, loaded only now, only for this).
+const linkAnswer = takeLinkAnswer(window.location, window.history);
+if (linkAnswer)
+  void import("./account/supabase").then(
+    (m) => m.finishSignIn(linkAnswer),
+    () => undefined, // offline: the link can't be finished here; Settings sends a new one
+  );
 
 const root = document.getElementById("root");
 if (!root) throw new Error("#root is missing from index.html");

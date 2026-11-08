@@ -52,4 +52,4 @@ From [game-icons.net](https://game-icons.net), licensed under CC BY 3.0. Each ic
 All three are bundled from [Fontsource](https://fontsource.org) (`@fontsource-variable/*` 5.3.0). The favicon is Wirelight's own.
 
 ## Libraries
-React, Vite, Tailwind CSS, Zustand, Motion, xterm.js, Fontsource, Biome, TypeScript, Vitest, Playwright (more added as the 3D stack lands: three.js, React Three Fiber, drei, three-mesh-bvh, Theatre.js, Howler.js, Comlink, Radix UI) — each under its own open-source license (MIT or Apache-2.0).
+React, Vite, Tailwind CSS, Zustand, Motion, xterm.js, Fontsource, Biome, TypeScript, Vitest, Playwright (more added as the 3D stack lands: three.js, React Three Fiber, drei, three-mesh-bvh, Theatre.js, Howler.js, Comlink, Radix UI; supabase-js for the optional sign-in) — each under its own open-source license (MIT or Apache-2.0).

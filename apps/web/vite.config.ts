@@ -14,6 +14,8 @@ const VENDOR: { name: string; test: RegExp; priority: number }[] = [
     priority: 50,
   },
   { name: "xterm", test: /node_modules[\\/]@xterm[\\/]/, priority: 50 },
+  // The sign-in service's client (account/supabase.ts) loads only for a player who signs in.
+  { name: "supabase", test: /node_modules[\\/]@supabase[\\/]/, priority: 50 },
   { name: "three-core", test: /node_modules[\\/]three[\\/]build[\\/]three\.core\.js/, priority: 45 },
   { name: "three-gpu", test: /node_modules[\\/]three[\\/]build[\\/]three\.(webgpu|tsl)\.js/, priority: 45 },
   { name: "three-gl", test: /node_modules[\\/]three[\\/]build[\\/]three\.module\.js/, priority: 45 },
@@ -31,6 +33,8 @@ const VENDOR: { name: string; test: RegExp; priority: number }[] = [
 
 export default defineConfig({
   plugins: [react()],
+  // .env sits at the repo root, beside .env.example (the optional sign-in service's address and key).
+  envDir: "../..",
   build: {
     target: "es2023",
     // Built files carry a content hash and live apart from the unhashed models and audio in

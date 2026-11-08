@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { PlayLogs } from "../account/PlayLogs";
 import { AudioDriver } from "../audio/AudioDriver";
 import { DevPanel } from "../dev/DevPanel";
 import { PlaytestButton } from "../dev/PlaytestButton";
@@ -283,6 +284,8 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <AudioDriver />
         <DevPanel />
         <PlaytestButton />
+        {/* Opt-in play logs (account/PlayLogs.tsx): nothing at all unless a signed-in player switched them on. */}
+        <PlayLogs tier={tier} auto={auto} />
         <SettingsApplied />
         <RoomHud />
         <PlatePanel />
