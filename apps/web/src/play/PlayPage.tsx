@@ -30,17 +30,17 @@ import { OBSERVATORY } from "../world/observatory/layout";
 import { Declutter } from "../world/room/Declutter";
 import { World } from "../world/room/World";
 import { Gift } from "./Gift";
-import { Glass } from "./Glass";
 import { Keyboard } from "./Keyboard";
 import { isTyping, withModifier } from "./keys";
 import { LoadingScreen } from "./LoadingScreen";
+import { MapView } from "./MapView";
 import { Menu } from "./Menu";
 import { Ending, MomentsDriver, TipMoments, WayBack } from "./Moments";
 import { Onboarding } from "./Onboarding";
 import { PlatePanel } from "./PlatePanel";
 import { AskPanel, DiscoveryCards, NotesPanel, Reaction, TopBar } from "./RoomHelp";
 import { RoomHud } from "./RoomHud";
-import { JarButton, ToolPanels } from "./ToolPanels";
+import { CapturesButton, ToolPanels } from "./ToolPanels";
 
 // B1 walking skeleton: the Prologue, played in the Observatory, driven by the engine in a worker.
 // The world always uses the node renderer (0049): ?backend=webgpu (default) or ?backend=webgl2.
@@ -287,10 +287,10 @@ export function PlayPage({ arriving = false, skipIntro = false }: { arriving?: b
         <RoomHud />
         <PlatePanel />
         <ToolPanels />
-        <JarButton />
+        <CapturesButton />
         <Gift />
         <TopBar />
-        <Glass />
+        <MapView />
         <Menu />
         <NotesPanel />
         <AskPanel />

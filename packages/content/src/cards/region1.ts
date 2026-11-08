@@ -73,7 +73,7 @@ export const REGION_1_CARDS: Card[] = [
     text: "A small machine that sends the same message over and over, to the name on its card.",
   },
   {
-    id: "capture-jar",
+    id: "captures",
     floor: 2,
     title: "Captures",
     text: "Catch a message in flight and you keep a copy to open and read. The message still goes on its way.",

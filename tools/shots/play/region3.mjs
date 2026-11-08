@@ -27,7 +27,7 @@ const giveAddress = async (cidr) => {
 };
 const scanner = async () => {
   await tidy(p);
-  await p.click(".jar-button");
+  await p.click(".captures-button");
   await p.waitForTimeout(300);
 };
 

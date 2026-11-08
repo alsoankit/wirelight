@@ -18,7 +18,7 @@ export type Glyph = "plate" | "light" | "switch" | "ledger" | "console" | "addre
 
 export type Beat =
   | { at: number; show: string[] }
-  | { at: number; lay: string[]; ms?: number; weavers?: boolean; drawn?: boolean }
+  | { at: number; lay: string[]; ms?: number; builders?: boolean; drawn?: boolean }
   | {
       at: number;
       send: Way[];
@@ -57,7 +57,7 @@ export const scenes: Record<string, Scene> = {
     beats: [
       { at: 0, show: ["observatory", "kitchen"] },
       { at: 0, dim: ["observatory", "kitchen"] },
-      { at: 600, lay: ["wire"], ms: 3200, weavers: true },
+      { at: 600, lay: ["wire"], ms: 3200, builders: true },
       { at: 4000, glow: ["observatory", "kitchen"] },
       { at: 4600, send: [["observatory", "kitchen"]], look: "dot", fate: "in", repeat: 3200 },
     ],
@@ -98,7 +98,7 @@ export const scenes: Record<string, Scene> = {
   },
   "F1-FM-02": {
     beats: [
-      { at: 300, lay: ["wire"], ms: 2600, weavers: true },
+      { at: 300, lay: ["wire"], ms: 2600, builders: true },
       { at: 3100, mark: "observatory", glyph: "plate", label: "name" },
       { at: 3100, mark: "kitchen", glyph: "plate" },
       { at: 4200, mark: "observatory", glyph: "light", label: "light" },
@@ -349,7 +349,7 @@ export const scenes: Record<string, Scene> = {
   },
   "F4-BLD-02": {
     beats: [
-      { at: 400, lay: ["span"], ms: 1600, weavers: true },
+      { at: 400, lay: ["span"], ms: 1600, builders: true },
       { at: 2000, tag: "hall-b", label: "span" },
       {
         at: 2600,

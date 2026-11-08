@@ -405,7 +405,7 @@ export function MemoryScene({ room, scene, label }: { room: RoomDef; scene: Scen
     <MemoryMap room={room} geo={geo} state={state} label={label}>
       {/* The builders, at the head of the cable they're laying. */}
       {beats.map((b, i) => {
-        if (!("lay" in b) || !b.weavers || t < b.at || !b.ms) return null;
+        if (!("lay" in b) || !b.builders || t < b.at || !b.ms) return null;
         const f = (t - b.at) / b.ms;
         if (f >= 1.15) return null;
         return b.lay.map((id) => {
@@ -414,12 +414,12 @@ export function MemoryScene({ room, scene, label }: { room: RoomDef; scene: Scen
           const p = geo.along(id, l.a, Math.min(1, ease(f)));
           return (
             // biome-ignore lint/suspicious/noArrayIndexKey: beats are fixed
-            <g key={`w${i}${id}`} transform={`translate(${p.x},${p.y})`} opacity={1 - ease((f - 1) / 0.15)}>
-              <circle r={14} className="mem-weaver-glow" />
-              <circle cx={-6} cy={-8} r={3} className="mem-weaver" />
-              <circle cx={6} cy={-8} r={3} className="mem-weaver" />
+            <g key={`b${i}${id}`} transform={`translate(${p.x},${p.y})`} opacity={1 - ease((f - 1) / 0.15)}>
+              <circle r={14} className="mem-builder-glow" />
+              <circle cx={-6} cy={-8} r={3} className="mem-builder" />
+              <circle cx={6} cy={-8} r={3} className="mem-builder" />
               <MapText at={{ x: 0, y: -18 }} kind="glyph-label" opacity={1 - ease((f - 0.7) / 0.25)}>
-                {memoryText.scene.weavers}
+                {memoryText.scene.builders}
               </MapText>
             </g>
           );

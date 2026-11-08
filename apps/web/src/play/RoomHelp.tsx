@@ -185,7 +185,7 @@ export function NotesPanel() {
           </button>
         )}
         <button type="button" className="quiet" onClick={close}>
-          {voice.jar.close}
+          {voice.captures.close}
         </button>
       </div>
       {opened === 5 && <p className="panel-note">{voice.notes.allRead}</p>}
@@ -280,7 +280,7 @@ export function Reaction() {
 
 /** Overlays that hold the stage: a card waits while one is up (one thing at a time). */
 const STAGE_BUSY =
-  ".lines, .glass, .cmd-memory, .tour, .path-choice, .gift-stage, .ending-card, .menu, .moment-card[data-moment='offer']";
+  ".lines, .map, .cmd-memory, .tour, .path-choice, .gift-stage, .ending-card, .menu, .moment-card[data-moment='offer']";
 
 /** A card left unanswered goes by itself after this (it's kept in the Codex), unless it's being read. */
 const CARD_STAYS_MS = 25_000;

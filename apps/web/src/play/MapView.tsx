@@ -8,7 +8,7 @@ import { useSession } from "../engine/store";
 import { messageSummary } from "../world/messageKind";
 import { depthsFrom } from "../world/room/doorSides";
 import { RoomCommandMemory } from "./CommandMemory";
-import { CLOSE_GLASS, OPEN_GLASS } from "./keys";
+import { CLOSE_MAP, OPEN_MAP } from "./keys";
 import { Memory } from "./Memory";
 import { noteMoment } from "./momentRules";
 import { arrivalText, machineNamer } from "./names";
@@ -166,7 +166,7 @@ export function FloorMap({
             if (!k) return "";
             const t = progress(c, now);
             const { x, y } = along(k, c.from === k.aDevice ? t : 1 - t);
-            return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${mini ? 2.5 : 5}" class="glass-msg" />`;
+            return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${mini ? 2.5 : 5}" class="map-msg" />`;
           })
           .join("");
         if (g.innerHTML !== circles) g.innerHTML = circles;
@@ -179,9 +179,9 @@ export function FloorMap({
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      className="glass-map"
+      className="floor-map"
       role="img"
-      aria-label={memory ? voice.memory.map : voice.glass.floorMap}
+      aria-label={memory ? voice.memory.map : voice.map.floorMap}
     >
       {room.topology.links.map((l) => {
         const k = bends.get(l.id);
@@ -194,21 +194,21 @@ export function FloorMap({
             {!memory && inCorridor === l.id && (
               <path
                 d={`M${k.a.x},${k.a.y} Q${k.c.x},${k.c.y} ${k.b.x},${k.b.y}`}
-                className="glass-here-link"
+                className="map-here-link"
                 fill="none"
               />
             )}
             <path
               d={`M${k.a.x},${k.a.y} Q${k.c.x},${k.c.y} ${k.b.x},${k.b.y}`}
-              className={`glass-link ${state}`}
+              className={`map-link ${state}`}
               fill="none"
             />
             {!mini && (
               <>
-                <text x={near.x} y={near.y - 8} textAnchor="middle" className="glass-door">
+                <text x={near.x} y={near.y - 8} textAnchor="middle" className="map-door">
                   {l.a.iface}
                 </text>
-                <text x={far.x} y={far.y - 8} textAnchor="middle" className="glass-door">
+                <text x={far.x} y={far.y - 8} textAnchor="middle" className="map-door">
                   {l.b.iface}
                 </text>
               </>
@@ -228,14 +228,14 @@ export function FloorMap({
             : { x: a.x + (b.x - a.x) * replaying.t, y: a.y + (b.y - a.y) * replaying.t };
           return (
             <g transform={`translate(${x},${y})`}>
-              <circle r={7} className="glass-msg" />
-              <circle r={12} className="glass-replay" />
+              <circle r={7} className="map-msg" />
+              <circle r={12} className="map-replay" />
             </g>
           );
         })()}
       {[...nodes.values()].map((n) => (
-        <g key={n.id} transform={`translate(${n.x},${n.y})`} className={`glass-node ${n.kind}`}>
-          {!memory && !inCorridor && n.id === here && <circle r={mini ? 9 : 22} className="glass-here" />}
+        <g key={n.id} transform={`translate(${n.x},${n.y})`} className={`map-node ${n.kind}`}>
+          {!memory && !inCorridor && n.id === here && <circle r={mini ? 9 : 22} className="map-here" />}
           {n.kind === "switch" ? (
             <rect x={mini ? -6 : -14} y={mini ? -4 : -9} width={mini ? 12 : 28} height={mini ? 8 : 18} rx={2} />
           ) : n.kind === "router" ? (
@@ -244,9 +244,9 @@ export function FloorMap({
             <circle r={mini ? 5 : 11} />
           )}
           {!mini && (
-            <text y={30} textAnchor="middle" className="glass-name">
+            <text y={30} textAnchor="middle" className="map-name">
               {label(n.id)}
-              {streets.get(n.id) && <tspan className="glass-street"> {streets.get(n.id)}</tspan>}
+              {streets.get(n.id) && <tspan className="map-street"> {streets.get(n.id)}</tspan>}
             </text>
           )}
         </g>
@@ -278,7 +278,7 @@ function Replay({ room, frameId }: { room: RoomDef; frameId: number }) {
   const hop = hops[step];
   const last = hops.at(-1);
   return (
-    <div className="glass-replay-view">
+    <div className="map-replay-view">
       <FloorMap
         room={room}
         mini={false}
@@ -307,7 +307,7 @@ function Replay({ room, frameId }: { room: RoomDef; frameId: number }) {
   );
 }
 
-export function Glass() {
+export function MapView() {
   const roomId = useSession((s) => s.roomId);
   const room = roomId ? roomById(roomId) : undefined;
   const [open, setOpen] = useState(false);
@@ -331,7 +331,7 @@ export function Glass() {
   }, [open, setReplay]);
   // The Map opening is a moment (P-MEM-01 plays the first time).
   useEffect(() => {
-    if (open) noteMoment("glass-open");
+    if (open) noteMoment("map-open");
   }, [open]);
   // Never under the open console (UI-02).
   const raised = useSession((s) => s.consoleOpen && s.voiceGiven);
@@ -346,12 +346,12 @@ export function Glass() {
     const onOpen = () => setOpen(true);
     const onClose = () => setOpen(false); // the debrief arrives: the restored room is the thing to see
     window.addEventListener("keydown", onKey);
-    window.addEventListener(OPEN_GLASS, onOpen);
-    window.addEventListener(CLOSE_GLASS, onClose);
+    window.addEventListener(OPEN_MAP, onOpen);
+    window.addEventListener(CLOSE_MAP, onClose);
     return () => {
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener(OPEN_GLASS, onOpen);
-      window.removeEventListener(CLOSE_GLASS, onClose);
+      window.removeEventListener(OPEN_MAP, onOpen);
+      window.removeEventListener(CLOSE_MAP, onClose);
     };
   }, []);
   if (!room) return <Memory />;
@@ -361,15 +361,15 @@ export function Glass() {
       <RoomCommandMemory />
       <button
         type="button"
-        className="mini-glass"
+        className="mini-map"
         data-raised={raised ? "yes" : "no"}
-        data-tour="glass"
+        data-tour="map"
         onClick={() => setOpen(true)}
-        aria-label={voice.glass.open}
+        aria-label={voice.map.open}
       >
         <FloorMap room={room} mini />
         {here && (
-          <span className="mini-glass-here">
+          <span className="mini-map-here">
             {corridorEnds
               ? fill(voice.hereCorridor, { a: label(corridorEnds[0]), b: label(corridorEnds[1]) })
               : fill(voice.here, { machine: label(here) })}
@@ -377,9 +377,9 @@ export function Glass() {
         )}
       </button>
       {open && replay !== null && (
-        <section className="glass" aria-label={voice.replay.title}>
+        <section className="map" aria-label={voice.replay.title}>
           <nav className="menu-tabs">
-            <span className="glass-label">{voice.replay.title}</span>
+            <span className="map-label">{voice.replay.title}</span>
             <button
               type="button"
               className="quiet"
@@ -395,16 +395,16 @@ export function Glass() {
         </section>
       )}
       {open && replay === null && (
-        <section className="glass" aria-label={voice.glass.title}>
+        <section className="map" aria-label={voice.map.title}>
           <nav className="menu-tabs">
             <button type="button" aria-pressed={view === "floor"} onClick={() => setView("floor")}>
-              {voice.glass.thisFloor}
+              {voice.map.thisFloor}
             </button>
             <button type="button" aria-pressed={view === "world"} onClick={() => setView("world")}>
-              {voice.glass.world}
+              {voice.map.world}
             </button>
             <button type="button" className="quiet" onClick={() => setOpen(false)}>
-              {voice.glass.close}
+              {voice.map.close}
             </button>
           </nav>
           {view === "floor" ? <FloorMap room={room} mini={false} /> : <WorldMap />}

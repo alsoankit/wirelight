@@ -5,6 +5,7 @@ export const RENAMED_CARDS: ReadonlyMap<string, string> = new Map([
   ["scrying-glass", "map"],
   ["navigator", "crossing-keeper"],
   ["lectern", "crossing-desk"],
+  ["capture-jar", "captures"],
 ]);
 
 /** Saved card ids, each renamed card under its new id (in the same order, once each). */

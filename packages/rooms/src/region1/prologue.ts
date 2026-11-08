@@ -22,7 +22,7 @@ export const firstMessage = defineRoom({
   faults: [],
   playerDevice: "observatory",
   access: { observatory: { state: "enterable" }, kitchen: { state: "locked-for-now" } },
-  controls: { console: "hidden", sendButton: send, glassOnSend: true },
+  controls: { console: "hidden", sendButton: send, mapOnSend: true },
   tools: { unlock: ["lab send-frame"] },
   glow: "causes",
   winCondition: labDelivered("observatory", reply),

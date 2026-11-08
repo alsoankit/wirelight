@@ -201,7 +201,7 @@ export const voice = {
     catchN: "Catch {n}",
   },
   /** Captures (CORE-19, CORE-20): catches, opened one layer at a time. */
-  jar: {
+  captures: {
     name: "Captures",
     title: "Captures",
     empty: "Nothing caught yet. Point at a moving message: time slows down. Click it to keep a copy.",
@@ -299,7 +299,7 @@ export const voice = {
     done: "Close",
   },
   /** The Map (CORE-31..33, 0064, 0105): the live map of the floor, and the world map. */
-  glass: {
+  map: {
     title: "The Map",
     open: "Open the Map (G)",
     floorMap: "A live map of this floor: every machine, every cable and the messages on them.",

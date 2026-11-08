@@ -5,7 +5,7 @@
 export const memoryText = {
   /** Small labels drawn in a memory's picture. `{door}` and the like are filled by the scene. */
   scene: {
-    weavers: "the builders",
+    builders: "the builders",
     nothing: "nothing between them",
     thread: "a copper thread",
     name: "a name",

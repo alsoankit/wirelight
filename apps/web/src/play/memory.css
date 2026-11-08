@@ -1,7 +1,7 @@
 /* Agent E: floor memories, ride-alongs (0036, 0037, 0066) and the world map (0039).
    Back in time: a warm sepia-gold grade and a soft vignette; the panel is sized to its picture. */
 
-section.glass.memory {
+section.map.memory {
   inset: auto;
   left: 50%;
   top: 50%;
@@ -16,7 +16,7 @@ section.glass.memory {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
-section.glass.memory::after {
+section.map.memory::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -322,11 +322,11 @@ section.glass.memory::after {
   stroke-width: 1.5;
 }
 
-.mem-weaver {
+.mem-builder {
   fill: #fff1c9;
 }
 
-.mem-weaver-glow {
+.mem-builder-glow {
   fill: rgba(255, 228, 160, 0.3);
 }
 
@@ -522,7 +522,7 @@ section.glass.memory::after {
 }
 
 /* The world map (0039, 0088): the palace model beside the list of regions and floors. */
-.glass-world {
+.map-world {
   flex: 1;
   min-height: 0;
   display: flex;

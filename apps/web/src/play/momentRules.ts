@@ -14,7 +14,7 @@ import type { Panel } from "../engine/store";
  * Things that can have happened in this visit. From the trace: `caught`, `caught-announcement`,
  * `opened-catch`, `broadcast-sent`, `sent-frame`, `plugged`, `trace-armed`, `remembered`, and each
  * detector that fired, by its id. From the interface: `own-plate`, `switch-seen`, `board-open`,
- * `scanner-open`, `walked`, `near-doorway`, `near-cable`, `hover-message`, `glass-open`,
+ * `scanner-open`, `walked`, `near-doorway`, `near-cable`, `hover-message`, `map-open`,
  * `workbench-message`, `history-up`, `voice-given`, `speed-fast`, `speed-back`.
  */
 export type Happened = ReadonlySet<string>;
@@ -94,7 +94,7 @@ export function readView(
   }
   if (p?.kind === "board") out.add("board-open");
   if (p?.kind === "scanner") out.add("scanner-open");
-  if (p?.kind === "jar" && p.open !== undefined) out.add("opened-catch");
+  if (p?.kind === "captures" && p.open !== undefined) out.add("opened-catch");
   if (v.here && v.here !== room.playerDevice) out.add("walked");
   if (v.voiceGiven) out.add("voice-given");
   if (v.speed > 1) out.add("speed-fast");
@@ -124,7 +124,7 @@ const entering = () => true;
  */
 export const MEMORY_RULES: Record<string, Rule> = {
   // Prologue: the first time the Map opens; action: hover the moving message.
-  "P-MEM-01": { when: has("glass-open"), done: has("hover-message") },
+  "P-MEM-01": { when: has("map-open"), done: has("hover-message") },
   // 1.1: on entering; action: click your own plate.
   "F1-MEM-01": { when: entering, done: has("own-plate") },
   // 1.1: first time near the doorway (pointing at it, or once the plate is read); action: step into the corridor.

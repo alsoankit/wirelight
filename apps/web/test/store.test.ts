@@ -23,11 +23,11 @@ describe("Reset room", () => {
       hex: "",
       traced: false,
     };
-    useSession.setState({ jar: [caught] as never, status });
+    useSession.setState({ captures: [caught] as never, status });
     engine.reset.mockResolvedValue(batch([{ kind: "world.reset", t: 3000 }]));
     engine.catches.mockResolvedValue([]);
     await useSession.getState().reset();
-    await vi.waitFor(() => expect(useSession.getState().jar).toEqual([]));
+    await vi.waitFor(() => expect(useSession.getState().captures).toEqual([]));
   });
 });
 

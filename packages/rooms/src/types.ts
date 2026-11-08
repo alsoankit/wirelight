@@ -81,7 +81,7 @@ export interface Controls {
   /** The Prologue's Send button: the command it runs. */
   sendButton?: CommandStep;
   /** Open the Map when the Send button is pressed (ONB-19). */
-  glassOnSend?: boolean;
+  mapOnSend?: boolean;
   /** The workbench (lab send-frame), on `observatory`. */
   workbench?: ControlState;
   /** The messenger's address card (lab card --to). */
@@ -136,7 +136,7 @@ export interface RoomDef {
   glow: "causes" | "symptoms" | "none";
   subtitles?: boolean;
   /** The Map is open when the room starts. */
-  glassOpen?: boolean;
+  mapOpen?: boolean;
 
   winCondition: Predicate;
   /** Floors 1–4: the key is real text in an answer; from Floor 5, a mark on the winning answer; 1.1: a lock that opens. */

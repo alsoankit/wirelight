@@ -189,11 +189,11 @@ async function watchMemory(id: number) {
       if (!(await wait(2500, id))) return;
     }
     const caption = document.querySelector(".memory-caption .lines-text")?.textContent ?? "";
-    const chapter = document.querySelector(".glass.memory")?.getAttribute("data-memory");
+    const chapter = document.querySelector(".map.memory")?.getAttribute("data-memory");
     say("reading the memory");
     if (!(await wait(readMs(caption, 6000), id))) return;
     // Only if the same chapter is still showing (the player may have moved it on by hand).
-    if (document.querySelector(".glass.memory")?.getAttribute("data-memory") === chapter)
+    if (document.querySelector(".map.memory")?.getAttribute("data-memory") === chapter)
       document.querySelector<HTMLElement>(".memory-caption .panel-actions button:not(.quiet)")?.click();
     await sleep(400);
   }

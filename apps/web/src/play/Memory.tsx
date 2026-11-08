@@ -113,7 +113,7 @@ function MemoryView({ show, onClose }: { show: MemoryShow; onClose: () => void }
   if (!memory || !chapter || !room) return null;
   const scene = scenes[chapter.id];
   return (
-    <section className="glass memory" aria-label={memory.heading} data-memory={chapter.id}>
+    <section className="map memory" aria-label={memory.heading} data-memory={chapter.id}>
       <header className="memory-head">
         <span className="memory-speaker">{memory.heading}</span>
         <span className="memory-title">{chapter.title}</span>

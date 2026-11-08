@@ -55,7 +55,7 @@ export function WorldMapView({
   variant,
 }: {
   states: Record<number, FloorState>;
-  variant: "glass" | "memory" | "ending";
+  variant: "map" | "memory" | "ending";
 }) {
   const t = memoryText.world;
   const restored = Object.values(states).filter((s) => s === "restored" || s === "here").length;
@@ -110,7 +110,7 @@ export function WorldMapView({
             </section>
           ))}
           <p className="world-deeper-name">{t.deeper}</p>
-          {variant === "glass" && <p className="world-turn">{t.turn}</p>}
+          {variant === "map" && <p className="world-turn">{t.turn}</p>}
         </aside>
       )}
     </div>
@@ -123,8 +123,8 @@ export function WorldMap() {
   const roomId = useSession((s) => s.roomId);
   const current = roomId ? roomById(roomId)?.floor : undefined;
   return (
-    <div className="glass-world">
-      <WorldMapView states={floorStates(cleared, current)} variant="glass" />
+    <div className="map-world">
+      <WorldMapView states={floorStates(cleared, current)} variant="map" />
     </div>
   );
 }
