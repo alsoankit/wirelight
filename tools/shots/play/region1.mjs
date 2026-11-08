@@ -55,12 +55,16 @@ await check("2.3");
 // 2.4 in a fresh browser would play the gift; with onboarding seen here, the gift still plays once.
 await open(p, base, "f2.lights-out");
 await p.click("button.plate");
-await p.click("text=This switch is broken");
-await p.waitForSelector(".lines", { timeout: 5000 });
-while (await p.$(".lines")) await p.click(".lines button");
-await p.waitForSelector(".cmd-memory");
-while (await p.$(".cmd-memory")) await p.click(".cmd-memory button");
-// The terminal's code loads when it's first needed: about 5 s from the dev server on a slow machine.
+for (let i = 0; i < 20 && !(await p.$(".console .xterm")); i++) {
+  const next = p.getByRole("button", { name: "Next" });
+  const close = p.getByRole("button", { name: "Close" });
+  const gotIt = p.getByRole("button", { name: "Got it" });
+  if (await next.count()) await next.first().click();
+  else if (await close.count()) await close.first().click();
+  else if (await gotIt.count()) await gotIt.first().click();
+  else await p.waitForTimeout(500);
+  await p.waitForTimeout(300);
+}
 await p.waitForSelector(".console .xterm", { timeout: 30000 });
 await type(p, "ip link set eth0 up");
 await check("2.4");

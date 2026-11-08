@@ -1,7 +1,7 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
-import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { BoxGeometry, type Group, MeshBasicMaterial, type Object3D } from "three";
 import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
@@ -236,6 +236,10 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
   const region = useRegion();
   const exec = useSession((s) => s.exec);
   const openPanel = useSession((s) => s.openPanel);
+  const [entryOpen, setEntryOpen] = useState(false);
+  const entryRef = useRef<HTMLDivElement>(null);
+  const entryButton = useRef<HTMLButtonElement>(null);
+  const enterButton = useRef<HTMLButtonElement>(null);
 
   const readPlate = () => {
     openPanel({ kind: "plate", device: info.device, iface: info.iface });
@@ -246,10 +250,65 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
   const label = fill(voice.doorway.go, { door: info.iface, name: peer });
   // Number keys 1–9 go through the doors in order (CORE-47).
   const shortcut = index < 9 ? String(index + 1) : undefined;
+  const enter = () => {
+    setEntryOpen(false);
+    void exec(info.device, `ip link show ${info.iface}`, "click");
+    stepIntoCorridor(info.link, info.device);
+  };
+
+  useEffect(() => {
+    if (!entryOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      setEntryOpen(false);
+      entryButton.current?.focus({ preventScroll: true });
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (!entryRef.current?.contains(e.target as Node)) setEntryOpen(false);
+    };
+    window.addEventListener("keydown", onKey, true);
+    document.addEventListener("pointerdown", onPointerDown, true);
+    requestAnimationFrame(() => enterButton.current?.focus({ preventScroll: true }));
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("pointerdown", onPointerDown, true);
+    };
+  }, [entryOpen]);
+
+  const floorMaterial = regionMaterial("Floor", region);
+  const brassMaterial = regionMaterial("Brass", region);
+  const preview = {
+    center: [g.doorway[0] + g.out[0] * 1.1, 0, g.doorway[2] + g.out[2] * 1.1] as Vec3,
+    lamp: [
+      g.doorway[0] + g.out[0] * 0.12 + (slot.wall === "left" ? 0 : 0.72),
+      1.72,
+      g.doorway[2] + g.out[2] * 0.12 + (slot.wall === "left" ? 0.72 : 0),
+    ] as Vec3,
+  };
+  const horizontal = slot.wall === "left";
+  const enterHitDown = (e: ReactPointerEvent<HTMLButtonElement>) => e.stopPropagation();
 
   return (
     <>
       {slot.wall === "front" && <NearFrame slot={slot} />}
+      <group>
+        <mesh position={preview.center} material={floorMaterial}>
+          <boxGeometry args={horizontal ? [2.2, 0.07, 1.35] : [1.35, 0.07, 2.2]} />
+        </mesh>
+        <mesh position={[preview.center[0], 0.07, preview.center[2]]} rotation={[0, horizontal ? Math.PI / 2 : 0, 0]}>
+          <boxGeometry args={[0.07, 0.025, 1.85]} />
+          <meshBasicMaterial color="#3a969e" toneMapped={false} />
+        </mesh>
+        <mesh position={preview.lamp} material={brassMaterial}>
+          <boxGeometry args={[0.18, 0.09, 0.18]} />
+        </mesh>
+        <mesh position={preview.lamp}>
+          <sphereGeometry args={[0.09, 12, 8]} />
+          <meshBasicMaterial color="#ffcb79" toneMapped={false} />
+        </mesh>
+        <pointLight position={preview.lamp} color="#ffc16e" intensity={1.2} distance={4.5} decay={2} />
+      </group>
       <Cable slot={slot} state={corridor} />
       <CableStep slot={slot} name={info.peer} onStep={() => stepIntoCorridor(info.link, info.device)} />
       <Messages
@@ -322,6 +381,31 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
             {info.barred && <span className="chip-why">{info.barred}</span>}
           </span>
         )}
+      </Html>
+      <Html
+        center
+        position={[g.doorway[0] + g.out[0] * 0.08, 1.55, g.doorway[2] + g.out[2] * 0.08]}
+        zIndexRange={[9, 0]}
+      >
+        <div ref={entryRef} className="corridor-entry">
+          <button
+            ref={entryButton}
+            type="button"
+            className="corridor-gate-hit"
+            data-tab={TAB.door + index}
+            aria-label={fill(voice.corridor.step, { name: peer })}
+            aria-haspopup="dialog"
+            onPointerDown={enterHitDown}
+            onClick={() => setEntryOpen(true)}
+          />
+          {entryOpen && (
+            <div className="corridor-entry-popup" role="dialog" aria-label={voice.corridor.enter}>
+              <button ref={enterButton} type="button" className="world-chip" onClick={enter}>
+                {voice.corridor.enter}
+              </button>
+            </div>
+          )}
+        </div>
       </Html>
     </>
   );

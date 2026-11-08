@@ -214,6 +214,16 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
         region={region}
         baked={lampsBaked(placements, dressing.extras, dressing.kitPieces, region)}
       />
+      {dressing.glows.slice(0, 3).map((glow) => (
+        <pointLight
+          key={`corridor-fill-${glow.position.join(",")}`}
+          position={glow.position}
+          color={glow.colour}
+          intensity={glow.strength * 0.28}
+          distance={7}
+          decay={2}
+        />
+      ))}
       <Suspense fallback={null}>
         <StaticRoom region={region} placements={placements} extras={dressing.extras} toCamera={VIEW_DIRECTION} />
       </Suspense>
