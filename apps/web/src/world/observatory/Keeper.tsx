@@ -15,7 +15,6 @@ import { color, float, floor, fract, mix, positionLocal, sin, smoothstep, step, 
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { regionMaterial } from "../kit/regionMaterials";
 import type { RegionId } from "../region";
-import { WOOD } from "../room/WarTable";
 import type { KeeperCue } from "./Messages";
 
 // The keeper (0107): the machine in the middle of every room, the thing that really handles each
@@ -35,8 +34,6 @@ type Props = {
 
 const ARRIVAL_SECONDS = 1.0;
 const BEAM_SECONDS = 1.1;
-/** Its screen faces the fixed camera. */
-const FACING = Math.PI / 4;
 const SCREEN_AT: [number, number, number] = [0, 1.12, 0.222];
 
 // One keeper per room: one beam level and one screen level.
@@ -99,7 +96,7 @@ function Beam() {
 }
 
 export function Keeper({ position, rest, cue, region = 1, asleep = false }: Props) {
-  const wood = regionMaterial(WOOD[region], region);
+  const stone = regionMaterial("Stone", region);
   const iron = regionMaterial("Iron", region);
   const brass = regionMaterial("AgedBrass", region);
   const screen = useMemo(screenMaterial, []);
@@ -108,6 +105,7 @@ export function Keeper({ position, rest, cue, region = 1, asleep = false }: Prop
   const beamRef = useRef<Group>(null);
 
   const door = useMemo(() => new Vector3(...rest), [rest]);
+  const facing = Math.atan2(rest[0] - position[0], rest[2] - position[2]);
   const screenAt = useMemo(() => new Vector3(), []);
   const DOWN = useMemo(() => new Vector3(0, -1, 0), []);
 
@@ -144,16 +142,16 @@ export function Keeper({ position, rest, cue, region = 1, asleep = false }: Prop
 
   return (
     <group position={position}>
-      <group ref={machine} rotation={[0, FACING, 0]}>
+      <group ref={machine} rotation={[0, facing, 0]}>
         <mesh geometry={PLINTH} material={iron} position={[0, 0.05, 0]} />
-        <mesh geometry={BODY} material={wood} position={[0, 0.41, 0]} />
+        <mesh geometry={BODY} material={stone} position={[0, 0.41, 0]} />
         <mesh geometry={PANEL} material={iron} position={[0, 0.42, 0.315]} />
         {SLATS.map((y) => (
           <mesh key={y} geometry={SLAT} material={brass} position={[0, y, 0.33]} />
         ))}
-        <mesh geometry={SHELF} material={wood} position={[0, 0.76, 0.12]} rotation={[0.2, 0, 0]} />
+        <mesh geometry={SHELF} material={stone} position={[0, 0.76, 0.12]} rotation={[0.2, 0, 0]} />
         <mesh geometry={KEYS} material={iron} position={[0, 0.795, 0.2]} rotation={[0.2, 0, 0]} />
-        <mesh geometry={HEAD} material={wood} position={[0, 1.1, -0.06]} />
+        <mesh geometry={HEAD} material={stone} position={[0, 1.1, -0.06]} />
         <mesh geometry={BEZEL} material={iron} position={[0, 1.12, 0.2]} />
         <mesh geometry={SCREEN} material={screen} position={SCREEN_AT} />
         {LAMPS.map((x) => (
