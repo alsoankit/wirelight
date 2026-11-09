@@ -9,7 +9,7 @@ import { Board, Desk } from "../room/Furniture";
 import { MachineScene } from "../room/MachineScene";
 import { RegionStatue } from "../room/RegionStatue";
 import { Statue } from "../room/Statue";
-import { DRESSING_AT, MACHINES_AT, STATUE_AT, type StatueSpot } from "../room/standing";
+import { DRESSING_AT, STATUE_AT, type StatueSpot } from "../room/standing";
 import { WallArt, type WallArtMark } from "../room/WallArt";
 import { WarTable } from "../room/WarTable";
 import { observatoryLayout } from "./layout";
@@ -74,9 +74,6 @@ export function ObservatoryScene({ arriving = false }: { arriving?: boolean }) {
           aspect={EMBLEM_ASPECT}
         />
       )}
-      {(MACHINES_AT[region] ?? []).map((m) => (
-        <Statue key={m.slug} {...(m as Parameters<typeof Statue>[0])} />
-      ))}
       {STATUE_AT[region] && <RegionStatue region={region} place={STATUE_AT[region] as StatueSpot} />}
       {DRESSING_AT[region] && <Statue {...(DRESSING_AT[region] as Parameters<typeof Statue>[0])} />}
       {region === 4 && <Runes set="chapel" />}

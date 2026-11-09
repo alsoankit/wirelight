@@ -110,54 +110,6 @@ export type StatuePlace = Partial<CarvedOptions> & {
   scale?: number;
 };
 
-const TABLE_TOP = 0.845;
-
-/**
- * The machines in the player's room (0110): real network hardware, still and silent, at the near end
- * of the room (the robot's workspace); statues and wall art keep the far end. A server cabinet and a
- * control panel on the near-right edge, a cable spool by the front, and one thing per region on the
- * planning table or the near corner. The near-left stays low: it is in front of the left door.
- * Reworked models face +z: a quarter turn faces +x, toward the camera's side.
- */
-/** Each machine's paint: worn and greyed in ruin, its own colour restored. */
-const MACHINE_LOOK: Record<string, CarvedOptions> = {
-  "server-console": { tint: { restored: "#8C9096", ruined: "#5E636B" }, detail: 0.6, metalness: 0.3, roughness: 0.6 },
-  "control-panel": { tint: { restored: "#A3A8A0", ruined: "#666B72" }, detail: 0.55, metalness: 0.25, roughness: 0.65 },
-  "cable-spool": { tint: { restored: "#9A7A55", ruined: "#6B655C" }, detail: 0.5 },
-  "vintage-terminal": { tint: { restored: "#D8CDB2", ruined: "#8E8F92" }, detail: 0.6, roughness: 0.6 },
-  radio: { tint: { restored: "#CDB68C", ruined: "#8A8A88" }, detail: 0.6, roughness: 0.6 },
-  "robot-arm": { tint: { restored: "#C98A3A", ruined: "#77757A" }, detail: 0.55, metalness: 0.2, roughness: 0.6 },
-};
-
-type MachinePlace = StatuePlace & CarvedOptions;
-
-function machine(slug: string, position: [number, number, number], turn = 0): MachinePlace {
-  return { slug, position, turn, ...(MACHINE_LOOK[slug] as CarvedOptions) };
-}
-
-/** The near-right edge (x 3.3): no door can be there, and nothing tall hides a door from the camera. */
-const NEAR = 3.3;
-const NEAR_EDGE = [
-  machine("server-console", [NEAR, 0, -0.3], Math.PI / 2),
-  machine("control-panel", [NEAR, 0, 0.5], Math.PI / 2),
-];
-const TERMINAL_ON_TABLE = machine("vintage-terminal", [2.75, TABLE_TOP, 1.45], Math.PI / 4);
-
-/** Quiet network hardware at the near-right edge of houses and halls, clear of every doorway. */
-export function roomMachines(): MachinePlace[] {
-  return [
-    machine("server-console", [3.25, 0, -0.55], Math.PI / 2),
-    machine("control-panel", [3.25, 0, 0.7], Math.PI / 2),
-  ];
-}
-
-export const MACHINES_AT: Record<number, MachinePlace[]> = {
-  1: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), TERMINAL_ON_TABLE],
-  2: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), machine("robot-arm", [3.1, 0, 2.9], Math.PI / 2)],
-  3: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), machine("radio", [2.8, TABLE_TOP, 1.4], Math.PI / 4)],
-  4: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), TERMINAL_ON_TABLE],
-};
-
 /** The live models standing in a room of this kind: what the bake takes as shadow casters. */
 export function standing(
   kind: string,
@@ -178,8 +130,5 @@ export function standing(
       turn: dressing.turn ?? 0,
       scale: dressing.scale ?? 1,
     });
-  if (kind === "observatory")
-    for (const m of MACHINES_AT[region] ?? [])
-      out.push({ slug: m.slug, position: m.position, turn: m.turn ?? 0, scale: m.scale ?? 1 });
   return out;
 }

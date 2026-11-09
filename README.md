@@ -46,7 +46,7 @@ The look is carved and painted: 3D scans and art kits, reworked in Blender by `t
 ## Assets
 Only assets that allow commercial use and redistribution are used: CC0, CC BY, MIT, Apache-2.0 or OFL. Nothing share-alike or non-commercial. Every asset is credited, with links, in [`CREDITS.md`](CREDITS.md).
 
-- **3D art:** Quaternius' modular ruins, nature, village, props and turret packs, and SigilsVault's Modular Cathedral Kit (all CC0), restyled per region; statues and decoration from museum and artist scans (CC0 and CC BY); network hardware (server cabinet, control panel, terminal, radio, cable spool, robot arm) from Sketchfab artists (CC BY).
+- **3D art:** Quaternius' modular ruins, nature, village, props and turret packs, and SigilsVault's Modular Cathedral Kit (all CC0), restyled per region; statues and decoration from museum and artist scans (CC0 and CC BY).
 - **Sound:** Kenney's audio packs (CC0); other effects and ambience synthesised for Wirelight with FFmpeg.
 - **Fonts:** Inter, JetBrains Mono and Cinzel (SIL Open Font License).
 - **Libraries:** React, three.js, React Three Fiber, drei, Zustand, xterm.js, Comlink, Vite, Biome, Vitest, Playwright and others, each under its own MIT or Apache-2.0 licence.
