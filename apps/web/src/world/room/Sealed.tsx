@@ -81,7 +81,7 @@ function shutterParts(width: number, height: number): Record<string, BufferGeome
 function barredParts(width: number, height: number): Record<string, BufferGeometry[]> {
   const bag: Record<string, BufferGeometry[]> = {};
   for (const side of [-1, 1]) {
-    addTo(bag, "DarkWood", box([width / 2 - 0.02, height, 0.08], [(side * width) / 4, height / 2, -0.18]));
+    addTo(bag, "Iron", box([width / 2 - 0.02, height, 0.08], [(side * width) / 4, height / 2, -0.18]));
     for (const y of [0.4, height - 0.5])
       addTo(bag, "Iron", box([width / 2 - 0.1, 0.07, 0.03], [(side * width) / 4, y, -0.13]));
   }

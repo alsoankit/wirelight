@@ -60,13 +60,36 @@ export const HALL_PIECES: Placement[] = [
  * door, between its far end and the keeper, facing the camera. Not in the Works (machinery), nor in the
  * cathedral's halls (they keep their own statue).
  */
-function angel(tint: { restored: string; ruined: string }, scale: number, moss = 0): StatuePlace {
-  return { slug: "engel-wings", position: [3.15, 0, 2.8], turn: Math.PI / 2, scale, tint, moss, detail: 0.35 };
-}
-
 const ANGELS: Partial<Record<RegionId, StatuePlace[]>> = {
-  1: [angel({ restored: "#BDB6A7", ruined: "#6A6F78" }, 0.75, 0.6)],
-  3: [angel({ restored: "#CFC2A6", ruined: "#6D6F76" }, 0.75)],
+  1: [
+    {
+      slug: "angel-marble",
+      position: [3.15, 0, 2.8],
+      turn: Math.PI / 2,
+      scale: 0.75,
+      tint: { restored: "#BDB6A7", ruined: "#6A6F78" },
+      moss: 0.4,
+      detail: 0.35,
+    },
+  ],
+  3: [
+    {
+      slug: "angels-scanned",
+      position: [3.15, 0, 2.8],
+      turn: Math.PI / 2,
+      scale: 0.8,
+      tint: { restored: "#CFC2A6", ruined: "#6D6F76" },
+      detail: 0.35,
+    },
+    {
+      slug: "engel-seated",
+      position: [6.4, 0, -6.3],
+      turn: -0.4,
+      scale: 0.7,
+      tint: { restored: "#CFC2A6", ruined: "#6D6F76" },
+      detail: 0.35,
+    },
+  ],
 };
 
 export function hallLayout(doors: number, region: RegionId = 1, frontDoors = 0): RoomLayout {

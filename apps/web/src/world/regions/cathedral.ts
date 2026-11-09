@@ -18,6 +18,7 @@ import {
 } from "../kit/shapes";
 import type { KitPlacement } from "../kits/placement";
 import type { Beams, Wall as DoorWall, Glow } from "../room/layout";
+import type { StatuePlace } from "../room/standing";
 
 /** The two walls a room has (the near edge, 0111, has no wall to dress). */
 type Wall = Exclude<DoorWall, "front">;
@@ -256,7 +257,11 @@ export function cathedralObservatory(secondDoor: boolean) {
   room.kit.push(...floor("floor_01"), ...piers(), fallenColumn([-3.25, 0.4]));
   candles(room, [-3.1, -3.15]);
   // The region's statue stands here now (room/RegionStatue.tsx, 0094).
-  return { placements: cathedralObservatoryPieces(secondDoor), ...finish(room) };
+  const statues: StatuePlace[] = [
+    { slug: "temple-pillar", position: [6.2, 0, -6.1], turn: 0.2, scale: 0.85 },
+    { slug: "candle-altar", position: [2.8, 0, -3.15], turn: -0.3, scale: 0.7 },
+  ];
+  return { placements: cathedralObservatoryPieces(secondDoor), ...finish(room), statues };
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -280,7 +285,8 @@ export function cathedralHouse() {
   );
   room.kit.push(...floor("floor_01"), ...piers());
   candles(room, [-3.1, -3.15]);
-  return { placements: CATHEDRAL_HOUSE_PIECES, ...finish(room) };
+  const statues: StatuePlace[] = [{ slug: "temple-pillar-broken", position: [6.2, 0, -6.1], turn: 0.2, scale: 0.85 }];
+  return { placements: CATHEDRAL_HOUSE_PIECES, ...finish(room), statues };
 }
 
 // ---------------------------------------------------------------------------------------------------

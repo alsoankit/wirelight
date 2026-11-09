@@ -33,7 +33,6 @@ type Wall = Exclude<DoorWall, "front">;
 const QUARTER = Math.PI / 2;
 const LAMP = "#F5A04A";
 const HALL = "region-2/hall";
-const PROPS = "region-2/props";
 const TURRETS = "region-2/turrets";
 
 type Bag = Record<string, BufferGeometry[]>;
@@ -126,25 +125,31 @@ function wallRun(wall: Wall, from: number, to: number, doors: number[]): KitPlac
 }
 
 /** A cabinet of tiny drawers (the sorters' card index): drawer blocks stacked on a low cabinet. */
-function drawerCabinet(wall: Wall, along: number, rows = 3): KitPlacement[] {
-  const out = [onWallKit(PROPS, "Cabinet", wall, along, [0, 0, 0.19])];
-  // Workbench_Drawers is modelled sitting on the workbench: its block's centre is off its pivot.
-  const [ox, oy, oz] = [0.516, 1.0055, -0.3455];
-  const [w, h] = [0.426, 0.244];
-  for (let c = 0; c < 3; c++)
-    for (let r = 0; r < rows; r++) {
-      const centre: V3 = [(c - 1) * w, 1.0 + h / 2 + r * h, 0.165];
-      out.push(onWallKit(PROPS, "Workbench_Drawers", wall, along, [centre[0] - ox, centre[1] - oy, centre[2] - oz]));
+function drawerCabinet(bag: Bag, wall: Wall, along: number, rows = 3) {
+  const onFace = (g: BufferGeometry, y: number, out = 0.2) => onWall(g, wall, along, y, out);
+  addTo(bag, "Iron", onFace(box([1.45, 1.35, 0.3], [0, 0, 0]), 0.72));
+  for (let row = 0; row < rows; row++) {
+    const y = 0.2 + (row + 0.5) * (1.05 / rows);
+    for (let col = 0; col < 3; col++) {
+      const x = (col - 1) * 0.43;
+      addTo(bag, "DarkMetal", onFace(box([0.37, 0.23, 0.035], [x, 0, 0]), y, 0.36));
+      addTo(bag, "Brass", onFace(box([0.12, 0.018, 0.025], [x, 0, 0]), y, 0.385));
     }
-  return out;
+  }
+  addTo(bag, "Brass", onFace(box([1.48, 0.05, 0.34], [0, 0, 0]), 1.43, 0.2));
 }
 
 /**
  * The sorting bench: a workbench against the wall with its drawer block; on it a tray of blank brass
  * tiles waiting to be stamped with names (the MAC board's tiles) and a small stamping press.
  */
-function sortingBench(bag: Bag, wall: Wall, along: number): KitPlacement[] {
+function sortingBench(bag: Bag, wall: Wall, along: number) {
   const top = 0.9;
+  const onFace = (g: BufferGeometry, y: number, out: number) => onWall(g, wall, along, y, out);
+  addTo(bag, "Iron", onFace(box([1.85, 0.12, 0.78], [0, 0, 0]), 0.82, 0.52));
+  for (const x of [-0.78, 0.78])
+    for (const z of [0.24, 0.8]) addTo(bag, "Iron", onFace(box([0.08, 0.82, 0.08], [x, 0.41, z]), 0.41, 0.52));
+  addTo(bag, "Brass", onFace(box([1.88, 0.035, 0.81], [0, 0, 0]), 0.9, 0.52));
   // The tray and its tiles, toward the bench's left end.
   addTo(bag, "DarkMetal", onWall(box([0.5, 0.03, 0.32], [0, 0, 0]), wall, along - 0.45, top + 0.015, 0.62));
   for (let k = 0; k < 6; k++) {
@@ -167,10 +172,6 @@ function sortingBench(bag: Bag, wall: Wall, along: number): KitPlacement[] {
   addTo(bag, "Iron", p(box([0.12, 0.05, 0.1], [0, 0.14, 0])));
   addTo(bag, "Brass", p(ring([0, 0.6, 0], 0.11, 0.014, "y", 14)));
   addTo(bag, "Brass", p(box([0.22, 0.016, 0.016], [0, 0.6, 0])));
-  return [
-    onWallKit(PROPS, "Workbench", wall, along, [0, 0, 0.53]),
-    onWallKit(PROPS, "Workbench_Drawers", wall, along, [0, 0, 0.53]),
-  ];
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -397,11 +398,11 @@ export function worksObservatory(secondDoor: boolean) {
   const kitPieces: KitPlacement[] = [
     ...wallRun("back", -4, 4, [0]),
     ...wallRun("left", -4.4, 4, secondDoor ? [2] : []),
-    // The sorters' card index right of the door.
-    ...drawerCabinet("back", 2.95),
     // A gearbox where the riser pipe goes into the floor.
     { kit: TURRETS, piece: "Base", position: [-3.5, 0, -3.5], scale: 0.42, rotationY: 0.3 },
   ];
+  // The sorters' metal card index right of the door.
+  drawerCabinet(bag, "back", 2.95);
   doorFrame(bag, "back", 0, FLAT.half, FLAT.height);
   if (secondDoor) doorFrame(bag, "left", 2, FLAT.half, FLAT.height);
   ironDadoAround(bag, "back", [0], -3.6);
@@ -462,9 +463,9 @@ export function worksHouse() {
   const kitPieces: KitPlacement[] = [
     ...wallRun("back", -4, 4, []), // whole: the door is on the near edge (0111)
     ...wallRun("left", -4.4, 4, []),
-    ...drawerCabinet("back", -2.6, 2),
-    ...sortingBench(bag, "left", -1.75),
   ];
+  drawerCabinet(bag, "back", -2.6, 2);
+  sortingBench(bag, "left", -1.75);
   doorFrame(bag, "back", 0, FLAT.half, FLAT.height);
   ironDadoAround(bag, "back", [0], -3.95);
   ironDadoAround(bag, "left", [], -3.6);
@@ -522,12 +523,12 @@ export function worksHall(used: { wall: Wall; at: number }[]) {
   ironDadoAround(bag, "left", doorsOn("left"), -3.6);
   // Where there's wall: the card index, the great gear train, the sorting bench.
   if (!door("back", -1)) {
-    kitPieces.push(...drawerCabinet("back", -1.0));
+    drawerCabinet(bag, "back", -1.0);
     lamp(bag, glows, "back", -1.0, 2.5, 3.2);
   }
   if (!door("left", -3)) hatch(bag, "left", -2.9, 1.35, 0.32);
   if (!door("back", 3)) {
-    kitPieces.push(...sortingBench(bag, "back", 3.0));
+    sortingBench(bag, "back", 3.0);
     lamp(bag, glows, "back", 3.0, 2.3, 3.0);
   }
   if (!door("left", 1)) {

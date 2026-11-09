@@ -229,7 +229,8 @@ for (const [key, { room, kind, layout, slots }] of observations) {
   }
   for (const p of layout.statues ?? []) {
     const box = await modelBounds(join(root, "apps/web/public/assets/models", `${p.slug}.glb`));
-    if (box) blockers.push({ name: p.slug, box: placedBounds(box, p.position, p.scale ?? 1, [0, p.turn ?? 0, 0]) });
+    if (!box) failures.push(`${key}: ${p.slug} has no model bounds`);
+    else blockers.push({ name: p.slug, box: placedBounds(box, p.position, p.scale ?? 1, [0, p.turn ?? 0, 0]) });
   }
   if (kind === "observatory") {
     for (const p of standing(kind, room.region)) {

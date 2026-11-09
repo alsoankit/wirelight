@@ -301,6 +301,7 @@ function observatoryGrowth(secondDoor: boolean): KitPlacement[] {
 // stone of the first builders beyond the broken left wall. Both far outside, behind nothing.
 const OBSERVATORY_VIEW: StatuePlace[] = [
   { slug: "stone-gate", position: [5.6, 0, -5.7], turn: -0.6, scale: 0.72 },
+  { slug: "temple-arch-broken", position: [-6.4, 0, -6.1], turn: 0.3, scale: 0.82 },
   { slug: "rune-monolith", position: [-6.3, 0, -2.2], turn: 0.8, scale: 0.9 },
 ];
 
@@ -369,9 +370,6 @@ export const HALLS_HOUSE_PIECES: Placement[] = [
   { piece: "Pot3_Broken", position: [2.6, 0, -3.2], rotationY: 2.2 },
   { piece: "Bricks", position: [2.9, 0, 1.9], rotationY: 0.9 },
   { piece: "Brick", position: [-1.6, 0, 2.6], rotationY: 0.4 },
-  // What tells it from the Observatory: an old chest of the machine's own (the rest is each house's
-  // own traits: house/Traits.tsx).
-  { piece: "Chest", position: [-2.9, 0, 1.6], rotationY: 1.2 },
 ];
 
 const HOUSE_FLOOR: Extra[] = [
@@ -477,7 +475,8 @@ function houseHedges(): BufferGeometry[] {
 const HOUSE_VIEW: StatuePlace[] = [
   { slug: "topiary", position: [3.5, 0, -3.45], scale: 0.85, ...TOPIARY },
   { slug: "lion-head", position: [-3.74, 0.85, -0.1], turn: QUARTER, scale: 1.7 },
-  { slug: "fantasy-arch", position: [6.6, 0, -7.2], turn: 0.5, scale: 1.5 },
+  { slug: "temple-arch", position: [6.6, 0, -7.2], turn: 0.5, scale: 0.9 },
+  { slug: "steps-mossy", position: [-6.1, 0, -5.7], turn: -0.4, scale: 0.8 },
   { slug: "wall-bosigran", position: [-5.2, 0, 1.6], turn: QUARTER, scale: 1.15 },
 ];
 
@@ -508,7 +507,6 @@ export const HALLS_HALL_DRESSING: Placement[] = [
   { piece: "Bricks", position: [2.9, 0, 2.6], rotationY: 0.8 },
   { piece: "Brick", position: [0.9, 0, 3.1], rotationY: 0.3 },
   { piece: "Barrel", position: [3.2, 0, -2.9] },
-  { piece: "Crate", position: [2.6, 0, -3.3], rotationY: 0.4 },
   { piece: "Grass", position: [-3.4, 0, 2.2] },
   { piece: "Grass", position: [2.2, 0, 1.0] },
 ];
