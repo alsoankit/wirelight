@@ -2,23 +2,22 @@ import { Html } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { voice } from "@wirelight/content";
 import { type RoomDef, roomById } from "@wirelight/rooms";
-import { useMemo, useRef } from "react";
-import {
-  AdditiveBlending,
-  BoxGeometry,
-  CircleGeometry,
-  ExtrudeGeometry,
-  type Mesh,
-  MeshBasicMaterial,
-  Shape,
-  SphereGeometry,
-  Vector3,
-} from "three";
+import { Suspense, useMemo, useRef } from "react";
+import { AdditiveBlending, BoxGeometry, type Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from "three";
 import { progress } from "../../engine/clock";
 import { useSession } from "../../engine/store";
 import { useMachineLabel } from "../../play/roles";
 import { useReducedMotion } from "../../progress/motion";
+import { hallLayout } from "../hall/layout";
+import { houseLayout } from "../house/layout";
+import { StaticRoom } from "../kit/StaticRoom";
+import { KitRoom } from "../kits/KitRoom";
+import { Keeper } from "../observatory/Keeper";
+import { observatoryLayout } from "../observatory/layout";
+import type { KeeperCue } from "../observatory/Messages";
 import { Plate } from "../Plate";
+import { VIEW_DIRECTION } from "../RoomCamera";
+import { asRegion } from "../region";
 import { networkSpots, type Spot } from "./spots";
 
 // The network world (prototype, 0103): the whole network in one calm view. A machine is a matte
@@ -35,29 +34,66 @@ const matte = (color: string) => new MeshBasicMaterial({ color });
 const BODY = matte("#303846");
 const CORE = matte("#8792a4");
 const REGIONS = [
-  { body: "#303d37", top: "#425448", rim: "#8c9b72", here: "#f0c47c" },
-  { body: "#303846", top: "#414b5c", rim: "#8293a7", here: "#ffd58c" },
-  { body: "#3b3430", top: "#51433b", rim: "#a98568", here: "#ffc985" },
-  { body: "#353441", top: "#49475b", rim: "#9c91b3", here: "#e6c993" },
+  {
+    body: "#39433a",
+    top: "#777762",
+    rim: "#71815d",
+    wall: "#777565",
+    arch: "#a29a7f",
+    here: "#f0c47c",
+    ground: "#252e27",
+    road: "#56584d",
+    roadLit: "#b9a46f",
+  },
+  {
+    body: "#373b40",
+    top: "#78756c",
+    rim: "#9b7542",
+    wall: "#68645d",
+    arch: "#b48c53",
+    here: "#ffd58c",
+    ground: "#292b2e",
+    road: "#53504a",
+    roadLit: "#c1a26a",
+  },
+  {
+    body: "#443b34",
+    top: "#9a8061",
+    rim: "#a98568",
+    wall: "#947d64",
+    arch: "#bf9b70",
+    here: "#ffc985",
+    ground: "#302822",
+    road: "#65594e",
+    roadLit: "#c6a37b",
+  },
+  {
+    body: "#383740",
+    top: "#aaa59a",
+    rim: "#9c91b3",
+    wall: "#9b978f",
+    arch: "#c2bcae",
+    here: "#e6c993",
+    ground: "#2b2a31",
+    road: "#69656a",
+    roadLit: "#d4c6a0",
+  },
 ].map((colors) => ({
   body: matte(colors.body),
   top: matte(colors.top),
   rim: matte(colors.rim),
+  wall: matte(colors.wall),
+  arch: matte(colors.arch),
   here: matte(colors.here),
+  road: matte(colors.road),
+  roadLit: matte(colors.roadLit),
+  ground: colors.ground,
 }));
 const CABLE = {
   dark: matte("#727c8d"),
   lit: matte("#FFC98A"),
   broken: matte("#a95f48"),
 };
-const FLOW = new MeshBasicMaterial({
-  color: "#7de6e8",
-  transparent: true,
-  opacity: 0.3,
-  depthWrite: false,
-  blending: AdditiveBlending,
-  toneMapped: false,
-});
 const DOT = new MeshBasicMaterial({ color: "#6befff", toneMapped: false });
 const HALO = new MeshBasicMaterial({
   color: "#40d9e4",
@@ -68,92 +104,46 @@ const HALO = new MeshBasicMaterial({
   toneMapped: false,
 });
 
-function rounded(size: number, radius: number) {
-  const h = size / 2;
-  const s = new Shape();
-  s.moveTo(-h + radius, -h);
-  s.lineTo(h - radius, -h);
-  s.quadraticCurveTo(h, -h, h, -h + radius);
-  s.lineTo(h, h - radius);
-  s.quadraticCurveTo(h, h, h - radius, h);
-  s.lineTo(-h + radius, h);
-  s.quadraticCurveTo(-h, h, -h, h - radius);
-  s.lineTo(-h, -h + radius);
-  s.quadraticCurveTo(-h, -h, -h + radius, -h);
-  return s;
-}
-
-const SLAB = new ExtrudeGeometry(rounded(PLATFORM, 0.5), { depth: LIFT, bevelEnabled: false, curveSegments: 5 })
-  .rotateX(Math.PI / 2)
-  .translate(0, 0, 0);
-const INLAY = new ExtrudeGeometry(rounded(PLATFORM - 0.5, 0.35), { depth: 0.02, bevelEnabled: false, curveSegments: 5 })
-  .rotateX(Math.PI / 2)
-  .translate(0, 0.02, 0);
-const RIM_INLAY = new ExtrudeGeometry(rounded(PLATFORM - 0.25, 0.42), {
-  depth: 0.01,
-  bevelEnabled: false,
-  curveSegments: 5,
-})
-  .rotateX(Math.PI / 2)
-  .translate(0, 0.012, 0);
+const SLAB = new BoxGeometry(PLATFORM, LIFT, PLATFORM);
 const PORT = new BoxGeometry(0.5, 0.16, 0.5);
 const UNIT = new BoxGeometry(1, 1, 1);
 const BALL = new SphereGeometry(0.17, 12, 8);
 const GLOW = new SphereGeometry(0.42, 12, 8);
-const BACKDROP = new CircleGeometry(90, 48);
-const AMBIENT_POOL = new CircleGeometry(42, 48);
-const BACKDROP_MAT = new MeshBasicMaterial({ color: "#171722", depthWrite: false });
-const POOL_MATS = ["#263a32", "#292d3b", "#3a2e29", "#302b3c"].map(
-  (color) => new MeshBasicMaterial({ color, transparent: true, opacity: 0.36, depthWrite: false }),
-);
-
-/** The machine's own shape, so no two kinds look alike: a core, a single block, a row, a tower. */
-function Machine({ kind }: { kind: string }) {
-  if (kind === "you")
-    return (
-      <>
-        <mesh geometry={UNIT} material={BODY} position={[0, 0.5, 0]} scale={[2, 1, 2]} />
-        <mesh geometry={UNIT} material={CORE} position={[0, 1.08, 0]} scale={[1.2, 0.16, 1.2]} />
-      </>
-    );
-  if (kind === "switch")
-    return (
-      <>
-        {[-1.2, 0, 1.2].map((x) => (
-          <mesh key={x} geometry={UNIT} material={BODY} position={[x, 0.35, 0]} scale={[0.9, 0.7, 2.4]} />
-        ))}
-        <mesh geometry={UNIT} material={CORE} position={[0, 0.78, 0]} scale={[3.2, 0.1, 0.2]} />
-      </>
-    );
-  if (kind === "router")
-    return (
-      <>
-        <mesh geometry={UNIT} material={BODY} position={[0, 1, 0]} scale={[1.3, 2, 1.3]} />
-        <mesh geometry={UNIT} material={CORE} position={[0, 2.08, 0]} scale={[0.8, 0.16, 0.8]} />
-      </>
-    );
-  return (
-    <>
-      <mesh geometry={UNIT} material={BODY} position={[0, 0.4, 0]} scale={[1.5, 0.8, 1.5]} />
-      <mesh geometry={UNIT} material={CORE} position={[0, 0.85, 0]} scale={[0.8, 0.1, 0.8]} />
-    </>
-  );
-}
-
+const GROUND = new BoxGeometry(1, 0.2, 1);
 function Platform({ spot, room, here }: { spot: Spot; room: RoomDef; here: boolean }) {
   const goTo = useSession((s) => s.goTo);
   const openPanel = useSession((s) => s.openPanel);
   const open = spot.id === room.playerDevice || room.access[spot.id]?.state === "enterable";
   const label = useMachineLabel();
-  const colors = REGIONS[Math.max(0, Math.min(REGIONS.length - 1, room.region - 1))] ?? REGIONS[0]!;
+  const colors = REGIONS[Math.max(0, Math.min(REGIONS.length - 1, room.region - 1))];
+  const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
+  const layout = useMemo(() => {
+    const count = room.topology.devices.find((d) => d.id === spot.id)?.interfaces.length ?? 1;
+    if (spot.id === room.playerDevice) return observatoryLayout(count, asRegion(room.region));
+    if (spot.kind === "house") return houseLayout(asRegion(room.region));
+    return hallLayout(count, asRegion(room.region));
+  }, [room, spot, room.playerDevice, room.region]);
+  if (!colors) return null;
   return (
     <group position={[spot.at[0], 0, spot.at[1]]}>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); the chip is the keyboard way */}
       <group onClick={() => open && goTo(spot.id)}>
-        <mesh geometry={SLAB} material={colors.body} />
-        <mesh geometry={RIM_INLAY} material={here ? colors.here : colors.rim} />
-        <mesh geometry={INLAY} material={colors.top} />
-        <Machine kind={spot.kind} />
+        <mesh geometry={SLAB} material={here ? colors.here : colors.body} position={[0, 0, 0]} />
+        <mesh geometry={UNIT} material={colors.top} position={[0, 0.2, 0]} scale={[4.55, 0.08, 4.55]} />
+        <Suspense fallback={null}>
+          <group position={[0, 0.25, 0]} scale={0.42}>
+            <StaticRoom
+              region={asRegion(room.region)}
+              placements={layout.placements}
+              extras={layout.extras}
+              toCamera={VIEW_DIRECTION}
+            />
+            <KitRoom pieces={layout.kitPieces} region={asRegion(room.region)} toCamera={VIEW_DIRECTION} />
+          </group>
+        </Suspense>
+        <group position={[0, 0.25, 0]} scale={0.42}>
+          <Keeper position={[0, 0, -0.55]} rest={[0, 0, -4]} cue={cue} region={asRegion(room.region)} />
+        </group>
       </group>
       <Html center position={[0, 3.35, 0]} zIndexRange={[10, 0]}>
         <button
@@ -180,9 +170,10 @@ function Cable({
   room: RoomDef;
 }) {
   const state = useSession((s) => s.status?.corridors[link.id] ?? "dark");
-  const carrying = useSession((s) => s.onCables.some((message) => message.link === link.id));
   const a = where.get(link.a.device)?.at ?? [0, 0];
   const b = where.get(link.b.device)?.at ?? [0, 0];
+  const colors = REGIONS[room.region - 1];
+  if (!colors) return null;
   const dx = b[0] - a[0];
   const dz = b[1] - a[1];
   const length = Math.hypot(dx, dz);
@@ -198,20 +189,34 @@ function Cable({
     <>
       <mesh
         geometry={UNIT}
-        material={CABLE[state as keyof typeof CABLE] ?? CABLE.dark}
-        position={[(a[0] + b[0]) / 2, -0.12, (a[1] + b[1]) / 2]}
+        material={state === "lit" ? colors.roadLit : state === "broken" ? CABLE.broken : colors.road}
+        position={[(a[0] + b[0]) / 2, -0.03, (a[1] + b[1]) / 2]}
         rotation={[0, -Math.atan2(dz, dx), 0]}
-        scale={[span, 0.08, 0.14]}
+        scale={[span + 1.1, 0.22, 1.45]}
       />
-      {carrying && (
+      {[0.55, -0.55].map((side) => (
         <mesh
+          key={side}
           geometry={UNIT}
-          material={FLOW}
-          position={[(a[0] + b[0]) / 2, -0.06, (a[1] + b[1]) / 2]}
+          material={colors.wall}
+          position={[(a[0] + b[0]) / 2 - uz * side, 0.28, (a[1] + b[1]) / 2 + ux * side]}
           rotation={[0, -Math.atan2(dz, dx), 0]}
-          scale={[span, 0.035, 0.32]}
+          scale={[span + 1.1, 0.42, 0.12]}
         />
-      )}
+      ))}
+      {Array.from({ length: Math.max(2, Math.floor(length / 3)) }, (_, index) => {
+        const count = Math.max(2, Math.floor(length / 3));
+        const t = (index + 1) / (count + 1) - 0.5;
+        return [-0.72, 0.72].map((side) => (
+          <mesh
+            key={`${t}-${side}`}
+            geometry={UNIT}
+            material={colors.arch}
+            position={[(a[0] + b[0]) / 2 + dx * t - uz * side, 0.48, (a[1] + b[1]) / 2 + dz * t + ux * side]}
+            scale={[0.34, 0.9, 0.34]}
+          />
+        ));
+      })}
       {ends.map(([device, iface, x, z]) => (
         <group key={`${device}:${iface}`} position={[x, 0, z]}>
           <mesh geometry={PORT} material={CORE} position={[0, -0.02, 0]} />
@@ -296,8 +301,8 @@ function View({ focus, reach }: { focus: [number, number]; reach: number }) {
     goal.set(focus[0], 0, focus[1]);
     if (reduced) target.copy(goal);
     else target.lerp(goal, 1 - Math.exp(-delta * 3));
-    camera.position.set(target.x, reach * 0.95, target.z + reach * 0.78);
-    camera.lookAt(target.x, 0, target.z - 0.4);
+    camera.position.set(target.x, reach * 1.2, target.z + reach * 0.65);
+    camera.lookAt(target.x, 0, target.z);
   });
   return null;
 }
@@ -321,19 +326,15 @@ export function NetworkScene() {
   );
   return (
     <>
-      <color attach="background" args={["#100f17"]} />
-      <fog attach="fog" args={["#100f17", reach * 1.25, reach * 3.2]} />
+      <color attach="background" args={[REGIONS[room.region - 1]?.ground ?? "#25252a"]} />
+      <fog attach="fog" args={[REGIONS[room.region - 1]?.ground ?? "#25252a", reach * 1.25, reach * 3.2]} />
+      <ambientLight intensity={1.4} />
+      <directionalLight position={[-8, 12, 8]} intensity={2.2} />
       <mesh
-        geometry={BACKDROP}
-        material={BACKDROP_MAT}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[middle[0], -0.28, middle[1]]}
-      />
-      <mesh
-        geometry={AMBIENT_POOL}
-        material={POOL_MATS[Math.max(0, Math.min(POOL_MATS.length - 1, room.region - 1))] ?? BACKDROP_MAT}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[middle[0], -0.26, middle[1]]}
+        geometry={GROUND}
+        material={REGIONS[room.region - 1]?.body ?? BODY}
+        position={[middle[0], -0.5, middle[1]]}
+        scale={[reach * 8, 1, reach * 8]}
       />
       <View focus={middle} reach={reach} />
       <group dispose={null}>

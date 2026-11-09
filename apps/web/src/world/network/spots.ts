@@ -2,6 +2,7 @@ import type { RoomDef } from "@wirelight/rooms";
 import { layout, MAP_H, MAP_W } from "../../play/mapLayout";
 
 const PLATFORM = 5;
+const PALACE_SCALE = 0.82;
 
 export type Spot = { id: string; at: [number, number]; kind: string };
 
@@ -18,6 +19,10 @@ export function networkSpots(room: RoomDef): Map<string, Spot> {
   const deep = (PLATFORM + 1.4) / (MAP_H / (tallest + 1));
   const out = new Map<string, Spot>();
   for (const n of nodes.values())
-    out.set(n.id, { id: n.id, kind: n.kind, at: [(n.x - MAP_W / 2) * across, (n.y - MAP_H / 2) * deep] });
+    out.set(n.id, {
+      id: n.id,
+      kind: n.kind,
+      at: [(n.x - MAP_W / 2) * across * PALACE_SCALE, (n.y - MAP_H / 2) * deep * PALACE_SCALE],
+    });
   return out;
 }
