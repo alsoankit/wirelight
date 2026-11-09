@@ -57,16 +57,14 @@ function WorkbenchPanel() {
           {voice.workbench.broadcast}
         </button>
       )}
-      {doors.length > 1 && (
-        <label className="field">
-          <span>{voice.workbench.door}</span>
-          <select value={dev || doors[0]} onChange={(e) => setDev(e.target.value)}>
-            {doors.map((d) => (
-              <option key={d}>{d}</option>
-            ))}
-          </select>
-        </label>
-      )}
+      <label className="field">
+        <span>{voice.workbench.door}</span>
+        <select value={dev || doors[0]} onChange={(e) => setDev(e.target.value)}>
+          {doors.map((d) => (
+            <option key={d}>{d}</option>
+          ))}
+        </select>
+      </label>
       <label className="field">
         <span>{voice.workbench.message}</span>
         <input

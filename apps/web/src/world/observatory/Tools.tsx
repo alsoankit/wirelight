@@ -52,9 +52,15 @@ function Workbench({ onOpen, region }: { onOpen: () => void; region: RegionId })
         <meshStandardMaterial color={materials.stone} roughness={0.88} />
       </mesh>
       <mesh position={[0, 0.92, 0]} rotation={[-0.22, 0, 0.12]}>
-        <planeGeometry args={[0.62, 0.48]} />
+        <boxGeometry args={[0.62, 0.025, 0.48]} />
         <meshStandardMaterial color={materials.parchment} roughness={1} side={2} />
       </mesh>
+      {[-0.12, -0.04, 0.04, 0.12].map((z) => (
+        <mesh key={z} position={[0, 0.94, z]} rotation={[-0.22, 0, 0.12]}>
+          <boxGeometry args={[0.34 - Math.abs(z) * 0.35, 0.006, 0.012]} />
+          <meshStandardMaterial color={materials.dark} roughness={1} />
+        </mesh>
+      ))}
       {[-0.59, 0.59].map((x) => (
         <mesh key={x} position={[x, 0.91, 0]} rotation={[-0.22, 0, 0]}>
           <boxGeometry args={[0.045, 0.19, 0.84]} />
