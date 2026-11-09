@@ -3,8 +3,6 @@ import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { type Group, MeshBasicMaterial, type Object3D, type Vector3 } from "three";
-import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
-import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { useMachineLabel } from "../../play/roles";
@@ -12,7 +10,7 @@ import { goThrough, stepIntoCorridor } from "../corridor/move";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { useRegion } from "../region";
-import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
+import { type DoorSlot, doorGeometry, type Vec3 } from "./layout";
 import { addToPile, type Scrap } from "./lostPile";
 import { Sealed } from "./Sealed";
 
@@ -44,36 +42,6 @@ export type DoorInfo = {
   farEnd: string;
   twin: boolean;
 };
-
-// The corridor's rune-line (CORE-12): dark until a message and its answer have crossed, then lit;
-// broken when the link is down (dim, slowly breathing: never a fast flicker). Broken is also a
-// shape (UI-21, rendering.md): the line breaks into dashes, cracked rather than whole.
-function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broken" }) {
-  const span = cableSpan(slot);
-  const brightness = useMemo(() => uniform(0.18), []);
-  const cracked = useMemo(() => uniform(0), []);
-  const material = useMemo(() => {
-    const m = new MeshBasicNodeMaterial({ transparent: true, toneMapped: false });
-    m.colorNode = vec3(0.21, 1, 1.05).mul(brightness);
-    // Fully visible at the doorway end, fading out into the corridor; gaps every 40 cm when cracked.
-    const fade = smoothstep(-span.length / 2, span.length / 2 - 0.3, positionLocal.z);
-    const dashes = step(0.35, fract(positionLocal.z.mul(2.5)));
-    m.opacityNode = fade.mul(mix(float(1), dashes, cracked));
-    return m;
-  }, [brightness, cracked, span.length]);
-  useFrame(({ clock }, delta) => {
-    cracked.value = state === "broken" ? 1 : 0;
-    const target = state === "lit" ? 1.6 : state === "broken" ? 0.05 + 0.04 * Math.sin(clock.elapsedTime * 0.8) : 0.18;
-    brightness.value += (target - brightness.value) * (1 - Math.exp(-delta * 2));
-  });
-  // The box's local +z points back toward the doorway.
-  const rotationY = span.along === "z" ? 0 : Math.PI / 2;
-  return (
-    <mesh position={span.centre} rotation={[0, rotationY, 0]} material={material}>
-      <boxGeometry args={[0.12, 0.02, span.length]} />
-    </mesh>
-  );
-}
 
 /** Invisible click area filling the arch opening, inset from its edges. */
 function GateStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep: () => void }) {
@@ -226,7 +194,6 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
   const g = doorGeometry(slot);
   const key = `${info.device}:${info.iface}`;
   const door = useSession((s) => s.status?.doors[key]);
-  const corridor = useSession((s) => s.status?.corridors[info.link] ?? "dark");
   const end = useSession((s) => s.status?.cableEnds[key]);
   const farEnd = useSession((s) => s.status?.cableEnds[info.farEnd]);
   // A spare way to a machine already reachable by another door can't be walked while its cable is out
@@ -253,7 +220,6 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
 
   return (
     <>
-      <Cable slot={slot} state={corridor} />
       <GateStep slot={slot} name={peer} onStep={enter} />
       <Messages
         device={info.device}
