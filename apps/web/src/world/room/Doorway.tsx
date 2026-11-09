@@ -9,7 +9,6 @@ import { MARK_MS, useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { useMachineLabel } from "../../play/roles";
 import { goThrough, stepIntoCorridor } from "../corridor/move";
-import { regionMaterial } from "../kit/regionMaterials";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { useRegion } from "../region";
@@ -76,18 +75,19 @@ function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broke
   );
 }
 
-/**
- * The cable's click area (0081): wider than the rune-line itself, unseen; pointing at it says what it
- * does, clicking steps into the corridor and stops there.
- */
-function CableStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep: () => void }) {
-  const span = cableSpan(slot);
+/** Invisible click area filling the arch opening, inset from its edges. */
+function GateStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep: () => void }) {
+  const g = doorGeometry(slot);
   const [hover, setHover] = useState(false);
-  const rotationY = span.along === "z" ? 0 : Math.PI / 2;
+  const rotationY = slot.wall === "back" ? 0 : Math.PI / 2;
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: a 3D target (raycast); Shift and the door's number is the keyboard way
     <group
-      position={span.centre}
+      position={[
+        g.doorway[0] + (slot.wall === "left" ? 0.08 : 0),
+        1.2,
+        g.doorway[2] + (slot.wall === "back" ? 0.08 : 0),
+      ]}
       rotation={[0, rotationY, 0]}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -105,7 +105,7 @@ function CableStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onSte
       }}
     >
       <mesh material={HIT_MATERIAL}>
-        <boxGeometry args={[0.7, 0.3, span.length]} />
+        <boxGeometry args={[1.45, 2.1, 0.08]} />
       </mesh>
       {hover && (
         <Html center position={[0, 0.5, 0]} zIndexRange={[20, 0]}>
@@ -118,6 +118,24 @@ function CableStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onSte
 
 /** Invisible but still hit by the pointer (a hidden mesh would be skipped by raycasting). */
 const HIT_MATERIAL = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+
+function GateArch({ slot }: { slot: DoorSlot }) {
+  const g = doorGeometry(slot);
+  return (
+    <group position={[g.doorway[0], 0, g.doorway[2]]} rotation={[0, slot.wall === "back" ? 0 : Math.PI / 2, 0]}>
+      {[-0.9, 0.9].map((x) => (
+        <mesh key={x} position={[x, 1.15, 0]}>
+          <boxGeometry args={[0.22, 2.3, 0.36]} />
+          <meshStandardMaterial color="#aaa394" roughness={0.92} />
+        </mesh>
+      ))}
+      <mesh position={[0, 2.18, 0]}>
+        <torusGeometry args={[0.9, 0.12, 8, 24, Math.PI]} />
+        <meshStandardMaterial color="#b8b0a1" roughness={0.9} />
+      </mesh>
+    </group>
+  );
+}
 
 // Where messages died at this door (CORE-17): small faded scraps on the floor just inside it. They
 // pile up while messages keep dying here (2.2's clue: ignored messages pile at lantern's door), each
@@ -276,40 +294,13 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
     };
   }, [entryOpen]);
 
-  const floorMaterial = regionMaterial("Floor", region);
-  const brassMaterial = regionMaterial("Brass", region);
-  const preview = {
-    center: [g.doorway[0] + g.out[0] * 1.1, 0, g.doorway[2] + g.out[2] * 1.1] as Vec3,
-    lamp: [
-      g.doorway[0] + g.out[0] * 0.12 + (slot.wall === "left" ? 0 : 0.72),
-      1.72,
-      g.doorway[2] + g.out[2] * 0.12 + (slot.wall === "left" ? 0.72 : 0),
-    ] as Vec3,
-  };
-  const horizontal = slot.wall === "left";
   const enterHitDown = (e: ReactPointerEvent<HTMLButtonElement>) => e.stopPropagation();
 
   return (
     <>
-      <group>
-        <mesh position={preview.center} material={floorMaterial}>
-          <boxGeometry args={horizontal ? [2.2, 0.07, 1.35] : [1.35, 0.07, 2.2]} />
-        </mesh>
-        <mesh position={[preview.center[0], 0.07, preview.center[2]]} rotation={[0, horizontal ? Math.PI / 2 : 0, 0]}>
-          <boxGeometry args={[0.07, 0.025, 1.85]} />
-          <meshBasicMaterial color="#3a969e" toneMapped={false} />
-        </mesh>
-        <mesh position={preview.lamp} material={brassMaterial}>
-          <boxGeometry args={[0.18, 0.09, 0.18]} />
-        </mesh>
-        <mesh position={preview.lamp}>
-          <sphereGeometry args={[0.09, 12, 8]} />
-          <meshBasicMaterial color="#ffcb79" toneMapped={false} />
-        </mesh>
-        <pointLight position={preview.lamp} color="#ffc16e" intensity={1.2} distance={4.5} decay={2} />
-      </group>
+      <GateArch slot={slot} />
       <Cable slot={slot} state={corridor} />
-      <CableStep slot={slot} name={info.peer} onStep={() => stepIntoCorridor(info.link, info.device)} />
+      <GateStep slot={slot} name={info.peer} onStep={() => setEntryOpen(true)} />
       <Messages
         device={info.device}
         link={info.link}
