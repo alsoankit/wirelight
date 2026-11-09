@@ -5,7 +5,7 @@ import { useMemo, useRef } from "react";
 import { type PerspectiveCamera as Camera, Vector3 } from "three";
 import { useSession } from "../engine/store";
 import { useReducedMotion } from "../progress/motion";
-import { captureMode, pictureMode } from "./prerender/RoomPicture";
+import { captureMode } from "./prerender/RoomPicture";
 
 // The fixed three-quarter view (0006, art-direction.md): a narrow lens, no orbit,
 // and a gentle parallax that follows the pointer. With reduced motion (UI-23) the camera holds still:
@@ -17,6 +17,8 @@ type Props = {
   fov?: number;
   /** Start this many metres further out and settle in (arriving in the room, ONB-05). */
   settleFrom?: number;
+  /** Lock the view only when this exact room has a picture; unsupported layouts keep live camera motion. */
+  picture?: boolean;
 };
 
 // From the room toward the camera. Fixed for every room (no orbit), so static geometry facing away
@@ -26,7 +28,7 @@ const PARALLAX = 0.5; // metres of camera drift at the screen edge
 const LIFT_DROP = 2.6; // metres the view moves down while the console is open
 const LIFT_OUT = 4; // …and how far it steps back
 
-export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0 }: Props) {
+export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0, picture = false }: Props) {
   const ref = useRef<Camera>(null);
   const lookAt = useMemo(() => new Vector3(...target), [target]);
   const home = useMemo(() => lookAt.clone().addScaledVector(VIEW_DIRECTION, distance), [lookAt, distance]);
@@ -40,7 +42,7 @@ export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0 }: 
     const camera = ref.current;
     if (!camera) return;
     // Picture rooms (prototype): the camera never moves, so the live things stay on the picture.
-    if (captureMode || pictureMode) {
+    if (captureMode || picture) {
       camera.position.copy(home);
       camera.lookAt(lookAt);
       return;

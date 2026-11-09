@@ -118,13 +118,15 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
   // Restoration spreads from the doorway (the door and its corridor are what rooms fix first).
   const origin: Vec3 = first ? [doorGeometry(first).doorway[0], 1, doorGeometry(first).doorway[2]] : [0, 1, 0];
 
-  const pictureId = `r${region}-${device === "observatory" ? "observatory" : layout.doorSlots.length > 2 ? "hall" : "house"}-d${doors.length}`;
+  const hall = device !== "observatory" && layout.doorSlots.length > 2;
+  const frontDoors = layout.doorSlots.slice(0, doors.length).filter((slot) => slot?.wall === "front").length;
+  const pictureId = `r${region}-${device === "observatory" ? "observatory" : hall ? "hall" : "house"}-d${doors.length}${hall ? `-f${frontDoors}` : ""}`;
   const picture = pictureMode && hasPicture(pictureId);
   const baked = useMemo(() => lampsBaked(layout.placements, layout.extras, layout.kitPieces, region), [layout, region]);
 
   return (
     <>
-      <RoomCamera target={[0, 1.1, -0.6]} distance={19} settleFrom={arriving ? 9 : 0} />
+      <RoomCamera target={[0, 1.1, -0.6]} distance={19} settleFrom={arriving ? 9 : 0} picture={picture} />
       <color attach="background" args={[look.background]} />
       <RuinDial level={ruinLevel} origin={origin} />
       <RoomLights glows={layout.glows ?? glows} region={region} baked={baked || picture} />
@@ -214,7 +216,7 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
         doors={doors.length}
         hall={layout.doorSlots.length > 2}
       />
-      {!picture && children}
+      {children}
       {/* The finishing pass: bloom, tone mapping, the region's grade, vignette (world/post). */}
       {!picture && <RoomPost />}
     </>
