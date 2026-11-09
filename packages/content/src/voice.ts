@@ -250,6 +250,8 @@ export const voice = {
     /** The plate's light, for screen readers (filled diamond, hollow diamond). */
     lightUp: "link up",
     lightDown: "link down",
+    copy: "Copy {value}",
+    copied: "Copied",
     linkUp: "Link up: the cable behind this door is working.",
     linkDown: "Link down: nothing can cross this door.",
     /** Switched on, but the cable behind it isn't working (1.3). */

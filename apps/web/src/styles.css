@@ -3102,3 +3102,38 @@ body:has(.map.memory, .ending-stage, .cmd-memory)
 :root[data-reduced="yes"] .boot-line {
   animation: none;
 }
+
+.plate-row {
+  gap: 7px;
+  pointer-events: auto;
+}
+
+.plate-open {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.plate-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-dim);
+  font: 11px / 1.2 var(--mono);
+}
+
+.plate-copy {
+  padding: 1px 3px;
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  font: 10px / 1.2 var(--sans);
+  cursor: pointer;
+}
