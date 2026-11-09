@@ -760,10 +760,6 @@ button.world-chip {
   cursor: pointer;
 }
 
-.corridor-entry {
-  position: relative;
-}
-
 .corridor-gate-hit {
   display: block;
   width: 110px;
@@ -771,26 +767,20 @@ button.world-chip {
   padding: 0;
   border: 0;
   background: transparent;
-  cursor: pointer;
-  pointer-events: auto;
+  cursor: default;
+  pointer-events: none;
+}
+
+.corridor-gate-hit span {
+  opacity: 0;
 }
 
 .corridor-gate-hit:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: -3px;
-  border-radius: 8px;
+  outline: none;
 }
 
-.corridor-entry-popup {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  padding: 5px;
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  background: var(--glass);
-  box-shadow: 0 5px 18px #0009;
+.corridor-gate-hit:focus-visible span {
+  opacity: 1;
 }
 
 /* Task 06: one clear hierarchy across the reading panels and controls. */
@@ -932,21 +922,6 @@ button.world-chip {
 
 .map-node :is(circle, rect, polygon) {
   stroke-width: 2.5px;
-}
-
-.corridor-gate-hit {
-  width: 76px;
-  height: 96px;
-}
-
-.corridor-entry-popup {
-  z-index: 12;
-  padding: 8px;
-}
-
-.corridor-entry-popup button {
-  min-height: 44px;
-  font-size: 14px;
 }
 
 .repeat-sends {

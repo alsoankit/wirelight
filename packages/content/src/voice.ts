@@ -285,7 +285,7 @@ export const voice = {
   /** A corridor (0081): a cable you can stand in and watch. */
   corridor: {
     /** On the cable at a doorway: stepping into its corridor and stopping there. */
-    step: "Step into the corridor to {name}",
+    step: "Enter the corridor to {name}",
     /** Where the player stands: the two machines the cable joins. */
     title: "The corridor between {a} and {b}",
     hint: "Every message on this cable passes here. Point at one to slow it down.",

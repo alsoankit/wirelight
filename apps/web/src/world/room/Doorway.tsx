@@ -1,7 +1,7 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
-import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { type Group, MeshBasicMaterial, type Object3D, type Vector3 } from "three";
 import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
@@ -254,10 +254,6 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
   const region = useRegion();
   const exec = useSession((s) => s.exec);
   const openPanel = useSession((s) => s.openPanel);
-  const [entryOpen, setEntryOpen] = useState(false);
-  const entryRef = useRef<HTMLDivElement>(null);
-  const entryButton = useRef<HTMLButtonElement>(null);
-  const enterButton = useRef<HTMLButtonElement>(null);
 
   const readPlate = () => {
     openPanel({ kind: "plate", device: info.device, iface: info.iface });
@@ -269,38 +265,15 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
   // Number keys 1–9 go through the doors in order (CORE-47).
   const shortcut = index < 9 ? String(index + 1) : undefined;
   const enter = () => {
-    setEntryOpen(false);
     void exec(info.device, `ip link show ${info.iface}`, "click");
     stepIntoCorridor(info.link, info.device);
   };
-
-  useEffect(() => {
-    if (!entryOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopPropagation();
-      setEntryOpen(false);
-      entryButton.current?.focus({ preventScroll: true });
-    };
-    const onPointerDown = (e: PointerEvent) => {
-      if (!entryRef.current?.contains(e.target as Node)) setEntryOpen(false);
-    };
-    window.addEventListener("keydown", onKey, true);
-    document.addEventListener("pointerdown", onPointerDown, true);
-    requestAnimationFrame(() => enterButton.current?.focus({ preventScroll: true }));
-    return () => {
-      window.removeEventListener("keydown", onKey, true);
-      document.removeEventListener("pointerdown", onPointerDown, true);
-    };
-  }, [entryOpen]);
-
-  const enterHitDown = (e: ReactPointerEvent<HTMLButtonElement>) => e.stopPropagation();
 
   return (
     <>
       <GateArch slot={slot} />
       <Cable slot={slot} state={corridor} />
-      <GateStep slot={slot} name={info.peer} onStep={() => setEntryOpen(true)} />
+      <GateStep slot={slot} name={peer} onStep={enter} />
       <Messages
         device={info.device}
         link={info.link}
@@ -373,26 +346,17 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
           </span>
         )}
       </Html>
-      <Html center position={[g.doorway[0], 1.55, g.doorway[2]]} zIndexRange={[9, 0]}>
-        <div ref={entryRef} className="corridor-entry">
-          <button
-            ref={entryButton}
-            type="button"
-            className="corridor-gate-hit"
-            data-tab={TAB.door + index}
-            aria-label={fill(voice.corridor.step, { name: peer })}
-            aria-haspopup="dialog"
-            onPointerDown={enterHitDown}
-            onClick={() => setEntryOpen(true)}
-          />
-          {entryOpen && (
-            <div className="corridor-entry-popup" role="dialog" aria-label={voice.corridor.enter}>
-              <button ref={enterButton} type="button" className="world-chip" onClick={enter}>
-                {voice.corridor.enter}
-              </button>
-            </div>
-          )}
-        </div>
+      <Html center position={[g.doorway[0], 1.2, g.doorway[2]]} zIndexRange={[9, 0]}>
+        <button
+          type="button"
+          className="corridor-gate-hit"
+          data-tab={TAB.door + index}
+          aria-label={fill(voice.corridor.step, { name: peer })}
+          aria-keyshortcuts="Enter"
+          onClick={enter}
+        >
+          <span>{fill(voice.corridor.step, { name: peer })}</span>
+        </button>
       </Html>
     </>
   );
