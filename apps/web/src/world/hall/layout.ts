@@ -28,12 +28,6 @@ export const HALL_SLOTS: (DoorSlot & { wall: "back" | "left" })[] = [
   { wall: "left", at: 1, plate: "above" },
 ];
 
-// Return doors open on the near-left edge. The rest of the near edge stays clear for machines and statues.
-export const HALL_FRONT_SLOTS: DoorSlot[] = [
-  { wall: "front", at: -2.6, plate: "above" },
-  { wall: "front", at: -0.5, plate: "above" },
-];
-
 /** The walls, with a gap wherever a door is. */
 function walls(used: readonly (typeof HALL_SLOTS)[number][], plain?: string): Placement[] {
   const gap = (wall: "back" | "left", at: number) => used.some((s) => s.wall === wall && s.at === at);
@@ -92,11 +86,10 @@ const ANGELS: Partial<Record<RegionId, StatuePlace[]>> = {
   ],
 };
 
-export function hallLayout(doors: number, region: RegionId = 1, frontDoors = 0): RoomLayout {
-  const front = HALL_FRONT_SLOTS.slice(0, frontDoors);
-  const wallDoors = HALL_SLOTS.slice(0, Math.max(0, doors - front.length));
+export function hallLayout(doors: number, region: RegionId = 1): RoomLayout {
+  const wallDoors = HALL_SLOTS.slice(0, doors);
   const frame = {
-    doorSlots: [...front, ...HALL_SLOTS],
+    doorSlots: [...HALL_SLOTS],
     keeper: [0.4, 0, 0.2] as RoomLayout["keeper"],
     air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
   };

@@ -141,11 +141,7 @@ function rootCanopy(seed: number): Record<string, BufferGeometry[]> {
 function channel(bag: Record<string, BufferGeometry[]>, slot: DoorSlot, length: number, width = 0.34) {
   const g = doorGeometry(slot);
   const back = slot.wall !== "left";
-  // The back wall is at z −4, the near edge (0111) at +4: the channel runs inward from either.
-  const wallZ = slot.wall === "front" ? 4 : -4;
-  const centre: V3 = back
-    ? [g.doorway[0], 0.03, wallZ - Math.sign(wallZ) * (length / 2)]
-    : [-4 + length / 2, 0.03, g.doorway[2]];
+  const centre: V3 = back ? [g.doorway[0], 0.03, -4 + length / 2] : [-4 + length / 2, 0.03, g.doorway[2]];
   const size: V3 = back ? [width, 0.02, length] : [length, 0.02, width];
   addTo(bag, "Black", box(size, centre));
   for (const side of [-1, 1]) {
@@ -476,7 +472,7 @@ function Bars({ slots, doors }: { slots: DoorSlot[]; doors: number }) {
     for (const slot of slots.slice(0, doors)) {
       const g = doorGeometry(slot);
       const back = slot.wall !== "left";
-      const at: V3 = back ? [g.doorway[0], 1.35, slot.wall === "front" ? 3.82 : -3.82] : [-3.82, 1.35, g.doorway[2]];
+      const at: V3 = back ? [g.doorway[0], 1.35, -3.82] : [-3.82, 1.35, g.doorway[2]];
       // A heavy iron bar with brass straps, resting in iron brackets either side of the door.
       addTo(b, "Iron", box(back ? [2.4, 0.24, 0.16] : [0.16, 0.24, 2.4], at));
       for (const k of [-0.7, 0, 0.7]) {
@@ -630,10 +626,7 @@ function HomeBox({ device, slots }: { device: string; slots: DoorSlot[] }) {
         const slot = slots[i];
         if (!slot) return null;
         const g = doorGeometry(slot);
-        const at: V3 =
-          slot.wall === "left"
-            ? [-3.8, 3.2, g.doorway[2] + 0.7]
-            : [g.doorway[0] - 0.7, 3.2, slot.wall === "front" ? 3.8 : -3.8];
+        const at: V3 = slot.wall === "left" ? [-3.8, 3.2, g.doorway[2] + 0.7] : [g.doorway[0] - 0.7, 3.2, -3.8];
         return (
           <mesh
             key={p.iface}

@@ -180,11 +180,10 @@ for (const room of rooms)
       (iface) => iface.name !== "lo" && !linked.some((d) => d.name === iface.name),
     );
     for (const iface of empty) if (!sides.has(iface.name)) sides.set(iface.name, "left");
-    const front = [...sides.values()].filter((side) => side === "front").length;
     const layout = isObservatory
       ? observatoryLayout(linked.length, room.region)
       : isHall
-        ? hallLayout(linked.length, room.region, front)
+        ? hallLayout(linked.length, room.region)
         : houseLayout(room.region);
     const sideDoorSlots = slotsFor(
       [...linked.map((d) => d.name), ...empty.map((d) => d.name)],
@@ -192,7 +191,7 @@ for (const room of rooms)
       layout.doorSlots,
     );
     const slots = sideDoorSlots.placed.filter(Boolean);
-    const key = `${room.region}/${kind}/d${linked.length}/f${front}`;
+    const key = `${room.region}/${kind}/d${linked.length}`;
     if (!observations.has(key)) observations.set(key, { room, device, kind, layout, slots });
   }
 

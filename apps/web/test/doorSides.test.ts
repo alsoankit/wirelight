@@ -27,22 +27,18 @@ const t = {
 } as unknown as Topology;
 
 describe("doorSides", () => {
-  it("puts further machines on the back wall, the way back on the near edge, neighbours on the left", () => {
+  it("puts further machines on the back wall, the way back and neighbours on the left (0116)", () => {
     expect([...doorSides(t, "observatory", "observatory")]).toEqual([["eth0", "back"]]);
     expect(Object.fromEntries(doorSides(t, "observatory", "hall"))).toEqual({
-      eth0: "front",
+      eth0: "left",
       eth1: "back",
       eth2: "back",
     });
-    expect(Object.fromEntries(doorSides(t, "observatory", "kitchen"))).toEqual({ eth0: "front", eth1: "left" });
+    expect(Object.fromEntries(doorSides(t, "observatory", "kitchen"))).toEqual({ eth0: "left", eth1: "left" });
   });
-  it("makes a corridor's two ends face each other", () => {
-    const opposite = { back: "front", front: "back", left: "left" } as const;
-    for (const l of t.links) {
-      const a = doorSides(t, "observatory", l.a.device).get(l.a.iface);
-      const b = doorSides(t, "observatory", l.b.device).get(l.b.iface);
-      expect(b).toBe(a && opposite[a]);
-    }
+  it("never puts a door on the near sides, which stay open to the camera (0116)", () => {
+    for (const d of t.devices)
+      for (const side of doorSides(t, "observatory", d.id).values()) expect(["back", "left"]).toContain(side);
   });
 });
 
@@ -53,13 +49,13 @@ describe("slotsFor", () => {
   ];
   it("gives each door a slot on its side, and the rest whatever is free, in door order", () => {
     const sides = new Map([
-      ["eth0", "front" as const],
+      ["eth0", "back" as const],
       ["eth1", "back" as const],
     ]);
     const { placed, rest } = slotsFor(["eth0", "eth1"], sides, slots);
     expect(placed).toEqual([
-      { wall: "left", at: 2 },
       { wall: "back", at: 0 },
+      { wall: "left", at: 2 },
     ]);
     expect(rest).toEqual([]);
   });
