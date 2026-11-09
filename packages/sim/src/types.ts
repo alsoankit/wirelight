@@ -139,6 +139,15 @@ export interface LinkSpec {
 export interface Topology {
   devices: DeviceSpec[];
   links: LinkSpec[];
+  /** Repeating frames the room starts in the background, at 1.5s and every 2s afterwards. */
+  repeatSends?: RepeatSendSpec[];
+}
+
+export interface RepeatSendSpec {
+  device: DeviceId;
+  to: string;
+  dev?: IfaceName;
+  msg?: string;
 }
 
 /** Declarative mutations applied on top of the correct network. */
@@ -587,7 +596,11 @@ export interface WorldState {
   queue: Scheduled[];
   repeatSends: Record<
     number,
-    { device: DeviceId; options: { to: string; from?: string; dev?: IfaceName; msg: string } }
+    {
+      device: DeviceId;
+      origin: "command" | "setup";
+      options: { to: string; from?: string; dev?: IfaceName; msg: string };
+    }
   >;
   nextRepeatId: number;
   /** The Scanner's catches and what it's waiting for (0043); absent until it's first used. */
@@ -802,6 +815,7 @@ export type SimEvent =
 export type SimEventKind = SimEvent["kind"];
 export type FrameOrigin =
   | "command"
+  | "setup"
   | "responder"
   | "messenger"
   | "announcer"

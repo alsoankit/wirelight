@@ -414,7 +414,11 @@ export class Simulator implements WorldView {
   }
 
   /** `lab send-frame` (SIM-09). */
-  sendLabFrame(device: DeviceId, opts: { to: string; from?: string; dev?: IfaceName; msg: string }): SendResult {
+  sendLabFrame(
+    device: DeviceId,
+    opts: { to: string; from?: string; dev?: IfaceName; msg: string },
+    origin: "command" | "setup" = "command",
+  ): SendResult {
     const d = this.s.devices[device];
     if (!d) return { ok: false, error: "no-device" };
     const iface = opts.dev ? d.ifaces.find((i) => i.name === opts.dev) : firstDoor(d);
@@ -424,15 +428,19 @@ export class Simulator implements WorldView {
     if (!to || !from) return { ok: false, error: "bad-mac" };
     const bytes = encodeEth({ dst: to, src: from, type: ETHERTYPE.lab, payload: encodeLab(opts.msg) });
     const frameId = this.s.nextFrameId;
-    this.sendFrame(device, iface.name, bytes, "command");
+    this.sendFrame(device, iface.name, bytes, origin);
     return { ok: true, frameId, length: bytes.length };
   }
 
-  startRepeatFrame(device: DeviceId, opts: { to: string; from?: string; dev?: IfaceName; msg: string }): number | null {
-    const sent = this.sendLabFrame(device, opts);
+  startRepeatFrame(
+    device: DeviceId,
+    opts: { to: string; from?: string; dev?: IfaceName; msg: string },
+    origin: "command" | "setup" = "command",
+  ): number | null {
+    const sent = this.sendLabFrame(device, opts, origin);
     if (!sent.ok) return null;
     const id = this.s.nextRepeatId++;
-    this.s.repeatSends[id] = { device, options: { ...opts } };
+    this.s.repeatSends[id] = { device, origin, options: { ...opts } };
     this.schedule({ t: this.s.t + 2000, kind: "repeat-frame", id });
     return id;
   }
@@ -882,7 +890,7 @@ export class Simulator implements WorldView {
       case "repeat-frame": {
         const job = this.s.repeatSends[ev.id];
         if (!job) return;
-        this.sendLabFrame(job.device, job.options);
+        this.sendLabFrame(job.device, job.options, job.origin);
         this.schedule({ t: this.s.t + 2000, kind: "repeat-frame", id: ev.id });
         return;
       }
@@ -1168,8 +1176,17 @@ function build(topology: Topology, seed: number): WorldState {
     links,
     queue: [],
     repeatSends: {},
-    nextRepeatId: 1,
+    nextRepeatId: (topology.repeatSends?.length ?? 0) + 1,
   };
+  topology.repeatSends?.forEach((send, index) => {
+    const id = index + 1;
+    s.repeatSends[id] = {
+      device: send.device,
+      origin: "setup",
+      options: { to: send.to, msg: send.msg ?? "hello", ...(send.dev ? { dev: send.dev } : {}) },
+    };
+    heapPush(s.queue, { t: 1500, seq: s.seq++, kind: "repeat-frame", id });
+  });
   for (const d of Object.values(devices)) {
     // First messages come early so the player sees the service working; then at its interval.
     // Several messengers start a little apart, so their letters don't all cross at once.
