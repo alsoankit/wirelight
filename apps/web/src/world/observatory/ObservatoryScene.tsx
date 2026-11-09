@@ -1,5 +1,4 @@
-import { Html } from "@react-three/drei";
-import { roomTexts, voice } from "@wirelight/content";
+import { roomTexts } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import { useCallback, useMemo } from "react";
 import { useSession } from "../../engine/store";

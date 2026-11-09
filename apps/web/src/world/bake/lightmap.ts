@@ -112,7 +112,9 @@ export function applyLightmapUv(maps: Lightmaps | null, geometries: BufferGeomet
  */
 export function bakedLightNodes(maps: Lightmaps) {
   const at = uv(1);
-  const light = mix(texture(maps.lit, at).rgb, texture(maps.ruin, at).rgb, ruinHere).mul(RANGE);
+  const light = mix(texture(maps.lit, at).rgb, texture(maps.ruin, at).rgb, ruinHere)
+    .mul(RANGE)
+    .mul(mix(float(1), float(0.62), ruinHere));
   const bakedAo = texture(maps.ao, at).r.max(float(0.25));
   const ao = mix(float(1), bakedAo, AO_STRENGTH);
   return { light, ao };

@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "pnpm --filter @wirelight/web dev",
     "build": "pnpm --filter @wirelight/web build",
-    "test": "vitest run --project sim --project shell --project rooms --project engine --project web",
+    "test": "vitest run --project sim --project shell --project rooms --project engine --project web && pnpm rooms:sightlines",
+    "rooms:sightlines": "node tools/rooms/sightlines.mjs",
     "check": "biome check . && pnpm -r typecheck",
     "rooms:validate": "vitest run --project rooms",
     "e2e": "pnpm --filter @wirelight/web e2e",

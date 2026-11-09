@@ -2,7 +2,7 @@ import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
 import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { type Group, MeshBasicMaterial, type Object3D } from "three";
+import { type Group, MeshBasicMaterial, type Object3D, type Vector3 } from "three";
 import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
@@ -14,7 +14,6 @@ import { regionMaterial } from "../kit/regionMaterials";
 import { KitRoom } from "../kits/KitRoom";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
-import { VIEW_DIRECTION } from "../RoomCamera";
 import { useRegion } from "../region";
 import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
 import { addToPile, type Scrap } from "./lostPile";
@@ -220,11 +219,12 @@ type Props = {
   index: number;
   slot: DoorSlot;
   keeper: Vec3;
+  viewDirection: Vector3;
   watch: RefObject<Object3D | null>;
   cue: RefObject<KeeperCue>;
 };
 
-export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
+export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }: Props) {
   const g = doorGeometry(slot);
   const key = `${info.device}:${info.iface}`;
   const door = useSession((s) => s.status?.doors[key]);
@@ -293,7 +293,7 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
 
   return (
     <>
-      {slot.wall === "front" && <NearFrame slot={slot} />}
+      {slot.wall === "front" && <NearFrame slot={slot} viewDirection={viewDirection} />}
       <group>
         <mesh position={preview.center} material={floorMaterial}>
           <boxGeometry args={horizontal ? [2.2, 0.07, 1.35] : [1.35, 0.07, 2.2]} />
@@ -323,6 +323,7 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
         cue={cue}
         catchable={info.catchable}
         floor={info.floor}
+        viewDirection={viewDirection}
       />
       {door && (
         <Plate
@@ -413,13 +414,13 @@ export function Doorway({ info, index, slot, keeper, watch, cue }: Props) {
  * A doorway on the near edge (0111): a regional stone arch set in a short wall stub. The opening
  * stays clear so the corridor is visible only through it.
  */
-function NearFrame({ slot }: { slot: DoorSlot }) {
+function NearFrame({ slot, viewDirection }: { slot: DoorSlot; viewDirection: Vector3 }) {
   const region = useRegion();
   const x = slot.at;
   if (region === 1) return <Piece name="Wall_ArchRound_Overgrown" position={[x, 0, 3.95]} scale={0.65} />;
   const kit = region === 2 ? "region-2/hall" : region === 3 ? "region-3/village" : "region-4/cathedral";
   const piece = region === 4 ? "doorway_01" : "Wall_UnevenBrick_Door_Round";
-  return <KitRoom pieces={[{ kit, piece, position: [x, 0, 3.8] }]} region={region} toCamera={VIEW_DIRECTION} />;
+  return <KitRoom pieces={[{ kit, piece, position: [x, 0, 3.8] }]} region={region} toCamera={viewDirection} />;
 }
 
 /** A door with no cable at all (a spare port): its plate, link down, and the dark doorway. */

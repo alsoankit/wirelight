@@ -79,9 +79,6 @@ type Props = {
   children?: ReactNode;
 };
 
-/** Where RoomCamera stands, for the picture (target and distance as below). */
-const PICTURE_HOME = new Vector3(0, 1.1, -0.6).addScaledVector(VIEW_DIRECTION, 19);
-
 export function MachineScene({ device, layout: given, barred, glows, arriving = false, children }: Props) {
   const watch = useRef<Object3D>(null);
   const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
@@ -110,6 +107,12 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
     const doorSlots = [...placed, ...rest, ...given.doorSlots.slice(used)];
     return { ...given, doorSlots: doorSlots.filter((s): s is DoorSlot => !!s) };
   }, [given, room, device, doors, empty]);
+  const leftWallView = doors.some((_, i) => layout.doorSlots[i]?.wall === "left");
+  const viewDirection = useMemo(
+    () => (leftWallView ? new Vector3(-1, 0.9, 1).normalize() : VIEW_DIRECTION),
+    [leftWallView],
+  );
+  const pictureHome = useMemo(() => new Vector3(0, 1.1, -0.6).addScaledVector(viewDirection, 19), [viewDirection]);
   // The room restores on the win, all at once (playtest 2026-10-13, amending CORE-38's share of
   // failing checks): partial progress relights only the thing that was fixed (its corridor, its
   // plate's light), never the room. A room with no health checks still restores when won.
@@ -126,13 +129,19 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
 
   return (
     <>
-      <RoomCamera target={[0, 1.1, -0.6]} distance={19} settleFrom={arriving ? 9 : 0} picture={picture} />
+      <RoomCamera
+        target={[0, 1.1, -0.6]}
+        distance={19}
+        settleFrom={arriving ? 9 : 0}
+        picture={picture}
+        direction={viewDirection}
+      />
       <color attach="background" args={[look.background]} />
       <RuinDial level={ruinLevel} origin={origin} />
       <RoomLights glows={layout.glows ?? glows} region={region} baked={baked || picture} />
       {picture && (
         <Suspense fallback={null}>
-          <RoomPicture id={pictureId} home={PICTURE_HOME} />
+          <RoomPicture id={pictureId} home={pictureHome} />
         </Suspense>
       )}
       {!picture && (
@@ -142,11 +151,11 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
               region={region}
               placements={layout.placements}
               extras={layout.extras}
-              toCamera={VIEW_DIRECTION}
+              toCamera={viewDirection}
             />
           </Suspense>
           <Suspense fallback={null}>
-            <KitRoom pieces={layout.kitPieces} region={region} toCamera={VIEW_DIRECTION} />
+            <KitRoom pieces={layout.kitPieces} region={region} toCamera={viewDirection} />
           </Suspense>
           {layout.statues?.map((s) => (
             <Statue key={`${s.slug}${s.position.join()}`} {...look.carved} {...s} />
@@ -197,6 +206,7 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
                 index={i}
                 slot={slot}
                 keeper={layout.keeper}
+                viewDirection={viewDirection}
                 watch={watch}
                 cue={cue}
               />

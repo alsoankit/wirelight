@@ -68,7 +68,7 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     sky: { ruined: "#99a1b2", restored: "#a08a70" },
     ground: { ruined: "#32343a", restored: "#3a3028" },
     fog: { ruined: "#2A3140", restored: "#3a2d22" },
-    moon: { ruined: "#9AA7C2", restored: "#B8BCCB", strengthRuined: 1.25, strengthRestored: 0.45 },
+    moon: { ruined: "#9AA7C2", restored: "#B8BCCB", strengthRuined: 0.65, strengthRestored: 0.45 },
     moss: { ruined: "#4b584c", restored: "#4f7a3c", amount: 1 },
     fireflies: "#D9F28A",
     dust: "#c8d2e6",
@@ -83,7 +83,7 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     sky: { ruined: "#b4b8be", restored: "#cbbfae" },
     ground: { ruined: "#2e3238", restored: "#33302c" },
     fog: { ruined: "#23272d", restored: "#2c2925" },
-    moon: { ruined: "#AAB2BC", restored: "#cfc0a8", strengthRuined: 1.3, strengthRestored: 0.6 },
+    moon: { ruined: "#AAB2BC", restored: "#cfc0a8", strengthRuined: 0.65, strengthRestored: 0.6 },
     moss: { ruined: "#2c2b29", restored: "#3a2a1e", amount: 0.55 },
     carved: { tint: { restored: "#A89F93", ruined: "#5F6268" } },
     // Warm motes drifting up from the machines (never sparks in the face: background only).
@@ -107,7 +107,7 @@ export const LOOKS: Record<RegionId, RegionLook> = {
     fog: { ruined: "#2a2d33", restored: "#5C4A38" },
     // Restored, pale daylight from the clerestory: the gold belongs to the windows' shafts and the
     // candles, so the stone reads as sandstone, not one orange-brown.
-    moon: { ruined: "#8e95a4", restored: "#e2dccd", strengthRuined: 1.5, strengthRestored: 0.55 },
+    moon: { ruined: "#8e95a4", restored: "#e2dccd", strengthRuined: 0.75, strengthRestored: 0.55 },
     moss: { ruined: "#45474c", restored: "#8c7a5c", amount: 0.45 },
     carved: { tint: { restored: "#D2C2A2", ruined: "#7A7B80" } },
     fireflies: null,

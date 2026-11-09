@@ -61,7 +61,7 @@ export const HALL_PIECES: Placement[] = [
  * cathedral's halls (they keep their own statue).
  */
 function angel(tint: { restored: string; ruined: string }, scale: number, moss = 0): StatuePlace {
-  return { slug: "engel-wings", position: [3.1, 0, -2.75], turn: Math.PI / 2, scale, tint, moss, detail: 0.35 };
+  return { slug: "engel-wings", position: [3.15, 0, 2.8], turn: Math.PI / 2, scale, tint, moss, detail: 0.35 };
 }
 
 const ANGELS: Partial<Record<RegionId, StatuePlace[]>> = {

@@ -45,7 +45,7 @@ export const TOWN_LOOK: RegionLook = {
   sky: { ruined: "#8d939e", restored: "#9a96a8" },
   ground: { ruined: "#26272c", restored: "#3a3026" },
   fog: { ruined: "#1B1E2A", restored: "#22304A" },
-  moon: { ruined: "#a7aebd", restored: "#9fb0d8", strengthRuined: 1.2, strengthRestored: 0.5 },
+  moon: { ruined: "#a7aebd", restored: "#9fb0d8", strengthRuined: 0.6, strengthRestored: 0.5 },
   moss: { ruined: "#55594F", restored: "#6F8F5E", amount: 0.5 },
   carved: { tint: { restored: "#C8B89C", ruined: "#6D6F76" } },
   fireflies: "#E8D890",
