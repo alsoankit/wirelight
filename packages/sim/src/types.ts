@@ -532,6 +532,7 @@ export type Scheduled =
   | { t: number; seq: number; kind: "arrive"; link: string; dir: 0 | 1; frameId: number; hex: string }
   | { t: number; seq: number; kind: "lab-reply"; device: DeviceId; iface: IfaceName; to: Mac; text: string }
   | { t: number; seq: number; kind: "timer"; device: DeviceId; service: "messenger" | "announcer"; index?: number }
+  | { t: number; seq: number; kind: "repeat-frame"; id: number }
   /** The forwarding database's clean-up work (br_fdb_cleanup). */
   | { t: number; seq: number; kind: "fdb-gc"; device: DeviceId; bridge: IfaceName; stamp: number }
   /** A spanning-tree timer (stp.ts): hello, tcn, tc, or a port's age, fwd or hold. */
@@ -584,6 +585,11 @@ export interface WorldState {
   devices: Record<DeviceId, DeviceState>;
   links: Record<string, LinkState>;
   queue: Scheduled[];
+  repeatSends: Record<
+    number,
+    { device: DeviceId; options: { to: string; from?: string; dev?: IfaceName; msg: string } }
+  >;
+  nextRepeatId: number;
   /** The Scanner's catches and what it's waiting for (0043); absent until it's first used. */
   scanner?: ScannerState;
 }

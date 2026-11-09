@@ -26,21 +26,24 @@ function WorkbenchPanel() {
   const room = useRoom();
   const exec = useSession((s) => s.exec);
   const close = useSession((s) => s.closePanel);
+  const repeating = useSession((s) => s.status?.repeatingSends ?? NONE);
   const [to, setTo] = useState(draft.to);
   const [msg, setMsg] = useState(draft.msg);
   const [dev, setDev] = useState(draft.dev);
   const [refused, setRefused] = useState(false);
   if (!room) return null;
   const doors = room.topology.devices.find((d) => d.id === room.playerDevice)?.interfaces.map((i) => i.name) ?? [];
-  const send = () => {
+  const send = (repeat = false) => {
     Object.assign(draft, { to, msg, dev });
     const text = msg.replaceAll('"', "'");
-    const line = `lab send-frame${dev ? ` --dev ${dev}` : ""}${to.trim() ? ` --to ${to.trim()}` : ""} --msg "${text}"`;
+    const line = `lab send-frame${dev ? ` --dev ${dev}` : ""}${to.trim() ? ` --to ${to.trim()}` : ""} --msg "${text}"${repeat ? " --repeat" : ""}`;
     void exec(room.playerDevice, line, "click");
     // The bench refuses a frame with no name to go to (the command fails, and says so).
     if (!to.trim()) return setRefused(true);
-    close();
+    if (!repeat) close();
   };
+  const broadcastTaught =
+    room.region > 1 || room.floor > 2 || (room.region === 1 && room.floor === 2 && room.order >= 3);
   return (
     <section className="panel" aria-label={voice.workbench.title}>
       <h2>{voice.workbench.title}</h2>
@@ -49,6 +52,11 @@ function WorkbenchPanel() {
         <span>{voice.workbench.to}</span>
         <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="02:00:00:00:00:00" spellCheck={false} />
       </label>
+      {broadcastTaught && (
+        <button type="button" className="quiet" onClick={() => setTo("ff:ff:ff:ff:ff:ff")}>
+          {voice.workbench.broadcast}
+        </button>
+      )}
       {doors.length > 1 && (
         <label className="field">
           <span>{voice.workbench.door}</span>
@@ -71,59 +79,32 @@ function WorkbenchPanel() {
       </label>
       {refused && <p className="panel-note">{voice.workbench.refused}</p>}
       <div className="panel-actions">
-        <button type="button" onClick={send}>
+        <button type="button" onClick={() => send()}>
           {voice.workbench.send}
         </button>
+        <button type="button" onClick={() => send(true)}>
+          {voice.workbench.repeat}
+        </button>
         <button type="button" className="quiet" onClick={close}>
           {voice.captures.close}
         </button>
       </div>
-    </section>
-  );
-}
-
-function CardPanel() {
-  const room = useRoom();
-  const cards = useSession((s) => (room ? (s.status?.cards[room.playerDevice] ?? NONE) : NONE));
-  const exec = useSession((s) => s.exec);
-  const close = useSession((s) => s.closePanel);
-  const [values, setValues] = useState<string[]>(cards);
-  if (!room) return null;
-  const write = (i: number) => {
-    const line =
-      cards.length > 1
-        ? `lab card --messenger ${i + 1} --to ${values[i]?.trim()}`
-        : `lab card --to ${values[i]?.trim()}`;
-    close();
-    void exec(room.playerDevice, line, "click");
-  };
-  return (
-    <section className="panel" aria-label={voice.card.title}>
-      <h2>{voice.card.title}</h2>
-      <p>{voice.card.about}</p>
-      {cards.map((c, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: the cards are numbered by their place on the desk
-        <div key={i} className="field">
-          <span>{cards.length > 1 ? fill(voice.card.numbered, { n: String(i + 1) }) : voice.card.name}</span>
-          <input
-            aria-label={cards.length > 1 ? fill(voice.card.numbered, { n: String(i + 1) }) : voice.card.name}
-            value={values[i] ?? ""}
-            placeholder={c || voice.card.blank}
-            onChange={(e) => setValues((v) => v.map((x, j) => (j === i ? e.target.value : x)))}
-            spellCheck={false}
-          />
-          <div className="panel-actions">
-            <button type="button" onClick={() => write(i)} disabled={!values[i]?.trim()}>
-              {voice.card.write}
-            </button>
-          </div>
-        </div>
-      ))}
-      <div className="panel-actions">
-        <button type="button" className="quiet" onClick={close}>
-          {voice.captures.close}
-        </button>
-      </div>
+      {repeating.length > 0 && (
+        <ul className="repeat-sends" aria-label={voice.workbench.running}>
+          {repeating.map((item) => (
+            <li key={item.id}>
+              <span>{`${item.id}: ${item.to} · ${item.dev ?? doors[0]}`}</span>
+              <button
+                type="button"
+                className="quiet"
+                onClick={() => void exec(room.playerDevice, `lab send-frame --stop ${item.id}`, "click")}
+              >
+                {voice.workbench.stop}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
@@ -578,7 +559,6 @@ export function CapturesButton() {
 export function ToolPanels() {
   const panel = useSession((s) => s.panel);
   if (panel?.kind === "workbench") return <WorkbenchPanel />;
-  if (panel?.kind === "card") return <CardPanel />;
   if (panel?.kind === "captures") return <CapturesPanel open={panel.open} />;
   if (panel?.kind === "board" && panel.board === "routes")
     return <RoutesPanel device={panel.device} execId={panel.execId} />;

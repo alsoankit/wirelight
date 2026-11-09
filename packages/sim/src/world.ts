@@ -428,6 +428,27 @@ export class Simulator implements WorldView {
     return { ok: true, frameId, length: bytes.length };
   }
 
+  startRepeatFrame(device: DeviceId, opts: { to: string; from?: string; dev?: IfaceName; msg: string }): number | null {
+    const sent = this.sendLabFrame(device, opts);
+    if (!sent.ok) return null;
+    const id = this.s.nextRepeatId++;
+    this.s.repeatSends[id] = { device, options: { ...opts } };
+    this.schedule({ t: this.s.t + 2000, kind: "repeat-frame", id });
+    return id;
+  }
+
+  stopRepeatFrame(id: number): boolean {
+    if (!this.s.repeatSends[id]) return false;
+    delete this.s.repeatSends[id];
+    return true;
+  }
+
+  runningRepeatFrames(device?: DeviceId) {
+    return Object.entries(this.s.repeatSends)
+      .filter(([, job]) => !device || job.device === device)
+      .map(([id, job]) => ({ id: Number(id), device: job.device, ...job.options }));
+  }
+
   /** `lab card --to`: change the address on a messenger's card (number `index`, from 1): a door name or a house address. */
   setCard(device: DeviceId, to: string, index = 1): boolean {
     const m = this.s.devices[device]?.messengers[index - 1];
@@ -858,6 +879,13 @@ export class Simulator implements WorldView {
         if (ev.service === "messenger") this.messengerTick(ev.device, ev.index ?? 0);
         else this.announcerTick(ev.device);
         return;
+      case "repeat-frame": {
+        const job = this.s.repeatSends[ev.id];
+        if (!job) return;
+        this.sendLabFrame(job.device, job.options);
+        this.schedule({ t: this.s.t + 2000, kind: "repeat-frame", id: ev.id });
+        return;
+      }
       case "fdb-gc":
         fdbGc(this.k, ev.device, ev.bridge, ev.stamp);
         return;
@@ -1131,7 +1159,17 @@ function build(topology: Topology, seed: number): WorldState {
     };
   }
   const prng = seedPrng(seed);
-  const s: WorldState = { t: 0, seq: 0, nextFrameId: 1, prng, devices, links, queue: [] };
+  const s: WorldState = {
+    t: 0,
+    seq: 0,
+    nextFrameId: 1,
+    prng,
+    devices,
+    links,
+    queue: [],
+    repeatSends: {},
+    nextRepeatId: 1,
+  };
   for (const d of Object.values(devices)) {
     // First messages come early so the player sees the service working; then at its interval.
     // Several messengers start a little apart, so their letters don't all cross at once.
