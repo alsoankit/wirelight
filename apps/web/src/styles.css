@@ -3137,3 +3137,7 @@ body:has(.map.memory, .ending-stage, .cmd-memory)
   font: 10px / 1.2 var(--sans);
   cursor: pointer;
 }
+
+.plate-value-row {
+  margin: 4px 0;
+}

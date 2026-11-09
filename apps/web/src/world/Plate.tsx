@@ -16,7 +16,7 @@ type Props = {
   tab?: number;
 };
 
-function CopyValue({ value, label, children }: { value: string; label: string; children?: ReactNode }) {
+export function CopyValue({ value, label, children }: { value: string; label: string; children?: ReactNode }) {
   const [copied, setCopied] = useState(false);
   const copy = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -64,7 +64,7 @@ export function Address({ cidr, streets }: { cidr: string; streets: boolean }) {
   );
 }
 
-export function Plate({ position, name, mac, addrs, streets = false, linkUp, onOpen, tab }: Props) {
+export function Plate({ position, name, linkUp, onOpen, tab }: Props) {
   return (
     <Html position={position} center zIndexRange={[10, 0]}>
       <div className="plate plate-row" data-link={linkUp ? "up" : "down"}>
@@ -83,13 +83,6 @@ export function Plate({ position, name, mac, addrs, streets = false, linkUp, onO
             <span className="plate-name">{name}</span>
           </span>
         )}
-        <CopyValue value={name} label={`${name}'s name`} />
-        {mac && <CopyValue value={mac} label={`${name}'s MAC`} />}
-        {addrs?.map((address) => (
-          <CopyValue key={address} value={address} label={`${name}'s address`}>
-            <Address cidr={address} streets={streets} />
-          </CopyValue>
-        ))}
       </div>
     </Html>
   );
