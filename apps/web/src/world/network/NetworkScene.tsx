@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { voice } from "@wirelight/content";
 import { type RoomDef, roomById } from "@wirelight/rooms";
 import { Suspense, useMemo, useRef } from "react";
-import { AdditiveBlending, BoxGeometry, type Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from "three";
+import { AdditiveBlending, BoxGeometry, Matrix4, type Mesh, MeshBasicMaterial, SphereGeometry, Vector3 } from "three";
 import { progress } from "../../engine/clock";
 import { useSession } from "../../engine/store";
 import { useMachineLabel } from "../../play/roles";
@@ -18,6 +18,7 @@ import type { KeeperCue } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { VIEW_DIRECTION } from "../RoomCamera";
 import { asRegion } from "../region";
+import { hallSlots, MIRROR, planOf } from "../room/plan";
 import { networkSpots, type Spot } from "./spots";
 
 // The network world (prototype, 0103): the whole network in one calm view. A machine is a matte
@@ -107,6 +108,8 @@ const HALO = new MeshBasicMaterial({
 const SLAB = new BoxGeometry(PLATFORM, LIFT, PLATFORM);
 const PORT = new BoxGeometry(0.5, 0.16, 0.5);
 const UNIT = new BoxGeometry(1, 1, 1);
+const MIRRORED = new Matrix4().fromArray(MIRROR);
+const IDENTITY = new Matrix4();
 const BALL = new SphereGeometry(0.17, 12, 8);
 const GLOW = new SphereGeometry(0.42, 12, 8);
 const GROUND = new BoxGeometry(1, 0.2, 1);
@@ -117,11 +120,12 @@ function Platform({ spot, room, here }: { spot: Spot; room: RoomDef; here: boole
   const label = useMachineLabel();
   const colors = REGIONS[Math.max(0, Math.min(REGIONS.length - 1, room.region - 1))];
   const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
+  const mirrored = !!planOf(room.topology, room.playerDevice, spot.id)?.mirrored;
   const layout = useMemo(() => {
     const count = room.topology.devices.find((d) => d.id === spot.id)?.interfaces.length ?? 1;
     if (spot.id === room.playerDevice) return observatoryLayout(count, asRegion(room.region));
     if (spot.kind === "house") return houseLayout(asRegion(room.region));
-    return hallLayout(count, asRegion(room.region));
+    return hallLayout(hallSlots(room.topology, room.playerDevice, spot.id), asRegion(room.region));
   }, [room, spot, room.playerDevice, room.region]);
   if (!colors) return null;
   return (
@@ -130,19 +134,21 @@ function Platform({ spot, room, here }: { spot: Spot; room: RoomDef; here: boole
       <group onClick={() => open && goTo(spot.id)}>
         <mesh geometry={SLAB} material={here ? colors.here : colors.body} position={[0, 0, 0]} />
         <mesh geometry={UNIT} material={colors.top} position={[0, 0.2, 0]} scale={[4.55, 0.08, 4.55]} />
-        <Suspense fallback={null}>
-          <group position={[0, 0.25, 0]} scale={0.42}>
-            <StaticRoom
-              region={asRegion(room.region)}
-              placements={layout.placements}
-              extras={layout.extras}
-              toCamera={VIEW_DIRECTION}
-            />
-            <KitRoom pieces={layout.kitPieces} region={asRegion(room.region)} toCamera={VIEW_DIRECTION} />
+        {/* Turned an eighth so it reads as the room view does (0118): the open corner toward you, the
+            back wall's doors up and right, the left wall's up and left; a mirrored house mirrored. */}
+        <group position={[0, 0.25, 0]} rotation={[0, -Math.PI / 4, 0]} scale={0.42}>
+          <group matrix={mirrored ? MIRRORED : IDENTITY} matrixAutoUpdate={false}>
+            <Suspense fallback={null}>
+              <StaticRoom
+                region={asRegion(room.region)}
+                placements={layout.placements}
+                extras={layout.extras}
+                toCamera={VIEW_DIRECTION}
+              />
+              <KitRoom pieces={layout.kitPieces} region={asRegion(room.region)} toCamera={VIEW_DIRECTION} />
+            </Suspense>
+            <Keeper position={[0, 0, -0.55]} rest={[0, 0, -4]} cue={cue} region={asRegion(room.region)} />
           </group>
-        </Suspense>
-        <group position={[0, 0.25, 0]} scale={0.42}>
-          <Keeper position={[0, 0, -0.55]} rest={[0, 0, -4]} cue={cue} region={asRegion(room.region)} />
         </group>
       </group>
       <Html center position={[0, 3.35, 0]} zIndexRange={[10, 0]}>

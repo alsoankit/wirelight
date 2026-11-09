@@ -24,24 +24,18 @@ const vite = await createServer({
 });
 let layouts;
 try {
-  const [{ rooms }, { doorSides }] = await Promise.all([
+  const [{ rooms }, { planOf, layoutKey }] = await Promise.all([
     vite.ssrLoadModule(join(root, "packages/rooms/src/index.ts")),
-    vite.ssrLoadModule(join(root, "apps/web/src/world/room/doorSides.ts")),
+    vite.ssrLoadModule(join(root, "apps/web/src/world/room/plan.ts")),
   ]);
   const unique = new Map();
   for (const room of rooms) {
     for (const device of room.topology.devices) {
-      const obs = device.id === "observatory";
-      const hall = !obs && (!!device.bridges?.length || device.interfaces.length > 1);
-      const kind = obs ? "observatory" : hall ? "hall" : "house";
-      const doors = device.interfaces.filter((iface) =>
-        room.topology.links.some(
-          (link) =>
-            (link.a.device === device.id && link.a.iface === iface.name) ||
-            (link.b.device === device.id && link.b.iface === iface.name),
-        ),
-      ).length;
-      const id = `r${room.region}-${kind}-d${doors}`;
+      const obs = device.id === room.playerDevice;
+      // Each layout the floor plan makes (0118): halls by doors per wall, mirrored houses apart.
+      const plan = planOf(room.topology, room.playerDevice, device.id);
+      if (!plan || (!obs && room.access[device.id]?.state !== "enterable")) continue;
+      const id = layoutKey(room.region, plan);
       if (!unique.has(id)) unique.set(id, { id, room: room.id, walk: obs ? undefined : device.id });
     }
   }

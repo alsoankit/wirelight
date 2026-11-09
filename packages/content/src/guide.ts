@@ -7,7 +7,7 @@
  */
 
 /**
- * Things a room picture can point at. `glass` is the planning table and the Map: it keeps the Map's old
+ * Things a room picture can point at. `glass` is the Map: it keeps the Map's old
  * name, the one its callouts are saved under (apps/web/public/guide/marks.json).
  */
 export type GuideTarget = "door" | "plate" | "keeper" | "glass" | "gate" | "workbench" | "cable";
@@ -56,7 +56,6 @@ export const guide: GuideTopic[] = [
         { target: "door", label: "A door. A cable runs from here to another room." },
         { target: "plate", label: "The door's plate" },
         { target: "keeper", label: "The keeper, who handles every message" },
-        { target: "glass", label: "The planning table" },
       ],
     },
     body: [
@@ -75,14 +74,13 @@ export const guide: GuideTopic[] = [
         { target: "door", label: "Doors: archways in the back and left walls" },
         { target: "plate", label: "A plate beside every door" },
         { target: "keeper", label: "The keeper, in the middle of the room" },
-        { target: "glass", label: "The planning table (your room only)" },
         { target: "workbench", label: "A tool in some rooms" },
       ],
     },
     body: [
       "You see each room from above, with the front wall cut away so the whole room fits on screen. Every room of the same kind is laid out the same way, so you only have to learn it once.",
       "Doors are archways in the back and left walls, and each one has a plate beside it. The keeper, a hooded figure with a kitchen, stands in the middle of the room.",
-      "Your own machine is the observatory, the room you woke up in. It has a planning table; other rooms may hold tools you meet later.",
+      "Your own machine is the observatory, the room you woke up in. Some rooms hold tools you meet later.",
     ],
   },
   {

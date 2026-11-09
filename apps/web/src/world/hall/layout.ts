@@ -86,10 +86,18 @@ const ANGELS: Partial<Record<RegionId, StatuePlace[]>> = {
   ],
 };
 
-export function hallLayout(doors: number, region: RegionId = 1): RoomLayout {
-  const wallDoors = HALL_SLOTS.slice(0, doors);
+/**
+ * A hall with arches at `open` (its doors' slots, in door order: room/plan.ts, decision 0118), or for a
+ * bare count the first `open` of HALL_SLOTS (old callers, the contact sheet).
+ */
+export function hallLayout(open: readonly DoorSlot[] | number, region: RegionId = 1): RoomLayout {
+  const same = (a: DoorSlot) => (b: DoorSlot) => a.wall === b.wall && a.at === b.at;
+  const wallDoors =
+    typeof open === "number"
+      ? HALL_SLOTS.slice(0, open)
+      : open.map((slot) => HALL_SLOTS.find(same(slot))).filter((s): s is (typeof HALL_SLOTS)[number] => !!s);
   const frame = {
-    doorSlots: [...HALL_SLOTS],
+    doorSlots: [...wallDoors, ...HALL_SLOTS.filter((s) => !wallDoors.some(same(s)))],
     keeper: [0.4, 0, 0.2] as RoomLayout["keeper"],
     air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
   };

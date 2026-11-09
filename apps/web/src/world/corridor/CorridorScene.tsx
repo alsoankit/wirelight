@@ -27,6 +27,7 @@ import { Gears } from "../regions/Gears";
 import { Haze } from "../regions/Haze";
 import { Steam } from "../regions/Steam";
 import type { Vec3 } from "../room/layout";
+import { floorPlan } from "../room/plan";
 import { SecretDoor } from "../room/SecretDoor";
 import { Statue } from "../room/Statue";
 import { corridorDressing } from "./dressing";
@@ -44,10 +45,16 @@ const Z = CORRIDOR.cable;
 export const GLIDE_MS =
   (import.meta.env.DEV && Number(new URLSearchParams(window.location.search).get("glide"))) || 600;
 
-/** The cable's two ends: link.a on the left (−x), link.b on the right (+x). */
+/**
+ * The cable's two ends as the floor plan reads them (0118): `a` is the machine on the left (−x, the one
+ * whose back-wall door this is), `b` the one on the right (+x).
+ */
 function endsOf(room: RoomDef, link: string) {
   const l = room.topology.links.find((x) => x.id === link);
-  return l ? { a: l.a, b: l.b } : null;
+  if (!l) return null;
+  const plan = floorPlan(room.topology, room.playerDevice);
+  const left = (plan.devices.get(l.a.device)?.column ?? 0) <= (plan.devices.get(l.b.device)?.column ?? 0);
+  return left ? { a: l.a, b: l.b } : { a: l.b, b: l.a };
 }
 
 /** The rune-line along the floor (CORE-12): dark, lit, or broken (cracked, dimming slowly: no flicker). */

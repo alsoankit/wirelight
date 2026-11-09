@@ -7,6 +7,7 @@ import { preloadKitPieces } from "../kits/KitRoom";
 import { observatoryLayout } from "../observatory/layout";
 import { asRegion } from "../region";
 import type { RoomLayout } from "./layout";
+import { hallSlots, layoutKey, planOf } from "./plan";
 
 // The next rooms' models, fetched while this one is played (tech/rendering.md, loading): every
 // machine the player can walk to from here gets its layout's kit pieces requested, so walking in
@@ -29,7 +30,8 @@ export function preloadNeighbours(roomId: string, here: string): void {
     const spec = room.topology.devices.find((d) => d.id === peer);
     const doors = spec?.interfaces.length ?? 1;
     const kind = peer === room.playerDevice ? "observatory" : spec?.bridges?.length || doors > 1 ? "hall" : "house";
-    const key = `${kind}:${region}:${kind === "house" ? 0 : doors}`;
+    const plan = planOf(room.topology, room.playerDevice, peer);
+    const key = plan ? layoutKey(region, plan) : `${kind}:${region}:${doors}`;
     if (requested.has(key)) continue;
     requested.add(key);
     // Each kind of room is asked for once (its pieces are then cached by drei's loader).
@@ -37,7 +39,7 @@ export function preloadNeighbours(roomId: string, here: string): void {
       kind === "observatory"
         ? observatoryLayout(doors, region)
         : kind === "hall"
-          ? hallLayout(doors, region)
+          ? hallLayout(hallSlots(room.topology, room.playerDevice, peer), region)
           : houseLayout(region);
     for (const piece of new Set(layout.placements.map((p) => p.piece))) useGLTF.preload(pieceUrl(piece));
     preloadKitPieces(layout.kitPieces);

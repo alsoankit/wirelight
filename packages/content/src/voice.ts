@@ -77,7 +77,9 @@ export const voice = {
     repeat: "Keep sending",
     running: "Running sends",
     stop: "Stop",
-    broadcast: "Broadcast",
+    broadcast: "Send to everyone",
+    pick: "Pick a door you've met",
+    noneKnown: "No doors met yet. Read a plate, or wait for an answer.",
     refused: "A frame needs a name to go to.",
   },
   /** A switch's MAC board (CORE-27): reading it runs `bridge fdb show`. */

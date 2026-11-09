@@ -33,6 +33,8 @@ type Session = {
   roomId: string | null;
   /** The machine whose room the player is standing in (CORE-10); commands run there (UI-11). */
   here: string | null;
+  /** Every machine whose room the player has stood in this attempt (their plates have been seen). */
+  visited: string[];
   /**
    * In a corridor (0081): its cable and the machine the player came from (`here` stays that machine, so
    * the console still runs there). With `through`, the player is gliding on to that machine's room.
@@ -262,6 +264,7 @@ function apply(state: Session, batch: Batch): Partial<Session> {
 export const useSession = create<Session>((set, get) => ({
   roomId: null,
   here: null,
+  visited: [],
   corridor: null,
   panel: null,
   startedAt: 0,
@@ -303,6 +306,7 @@ export const useSession = create<Session>((set, get) => ({
     set({
       roomId,
       here: roomById(roomId)?.playerDevice ?? null,
+      visited: [roomById(roomId)?.playerDevice ?? ""],
       corridor: null,
       panel: null,
       captures: [],
@@ -365,7 +369,13 @@ export const useSession = create<Session>((set, get) => ({
       });
   },
 
-  goTo: (device) => set({ here: device, corridor: null, panel: null }),
+  goTo: (device) =>
+    set((s) => ({
+      here: device,
+      visited: s.visited.includes(device) ? s.visited : [...s.visited, device],
+      corridor: null,
+      panel: null,
+    })),
   enterCorridor: (link, from) => set({ corridor: { link, from }, here: from, panel: null }),
   passThrough: (link, from, to) => set({ corridor: { link, from, through: to }, here: from, panel: null }),
 

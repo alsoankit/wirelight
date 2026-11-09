@@ -350,8 +350,12 @@ export function cathedralHall(used: { wall: Wall; at: number }[]) {
     course(room.bag, wall, -4, 4, HEIGHT + 0.07, 0.2);
   }
   room.kit.push(...floor("floor_03"), ...piers());
-  // Candles in the far corner, by the plain bay (never in the foreground, where they hid the floor).
-  candles(room, [3.25, -3.25]);
+  // Candles against a plain far bay (never in the foreground, where they hid the floor, nor in front of
+  // a doorway): the outermost free bay of the back wall, else of the left wall.
+  const freeBack = [3, 1, -1, -3].find((at) => !taken("back", at));
+  const freeLeft = [3, 1, -1, -3].find((at) => !taken("left", at));
+  if (freeBack !== undefined) candles(room, [freeBack + 0.25, -3.25]);
+  else if (freeLeft !== undefined) candles(room, [-3.25, freeLeft + 0.25]);
   return finish(room); // its placements: CATHEDRAL_HALL_PIECES (hall/layout.ts)
 }
 

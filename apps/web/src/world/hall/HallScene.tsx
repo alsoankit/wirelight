@@ -5,6 +5,7 @@ import { useBarred } from "../observatory/ObservatoryScene";
 import { useRegion } from "../region";
 import { Board, Desk } from "../room/Furniture";
 import { MachineScene } from "../room/MachineScene";
+import { hallSlots } from "../room/plan";
 import { RegionStatue } from "../room/RegionStatue";
 import { SIDE_PLACE } from "../room/standing";
 import { TownSquare } from "../town/TownSquare";
@@ -22,7 +23,10 @@ export function HallScene({ device }: { device: string }) {
     return room?.topology.devices.find((d) => d.id === device)?.interfaces.length ?? 4;
   }, [roomId, device]);
   const region = useRegion();
-  const layout = useMemo(() => hallLayout(count, region), [count, region]);
+  const layout = useMemo(() => {
+    const room = roomId ? roomById(roomId) : undefined;
+    return hallLayout(room ? hallSlots(room.topology, room.playerDevice, device) : count, region);
+  }, [roomId, device, count, region]);
   const glows = [{ position: [0, 2.6, -1] as [number, number, number], colour: "#FFC27A", strength: 2.6 }];
   // A crossing hall (Region 4): the navigator stands between its lecterns, the stone map on one side,
   // its desk-lectern on the other, both clear of its silhouette and facing the room.
