@@ -1,4 +1,4 @@
-/** Lines spoken by things in the world: keepers, locks, the workbench. Plain voice (D2). */
+/** Lines spoken by things in the world: keepers, locks, and the Frame builder. Plain voice (D2). */
 import type { SimEvent } from "@wirelight/sim";
 
 type Decision = Extract<SimEvent, { kind: "fwd.decision" }>;
@@ -79,16 +79,6 @@ export const voice = {
     stop: "Stop",
     broadcast: "Broadcast",
     refused: "A frame needs a name to go to.",
-  },
-  /** The messenger's address card (CORE-35). {n} is the card's number when there are several. */
-  card: {
-    name: "Address card",
-    title: "The messenger's card",
-    // 3.3 labels its cards by the hall door each letter is for (floor-3.md): Door 1 is for eth1.
-    numbered: "Door {n}",
-    about: "The messenger sends to whatever is written here, again and again.",
-    blank: "(blank)",
-    write: "Write it on the card",
   },
   /** A switch's MAC board (CORE-27): reading it runs `bridge fdb show`. */
   board: {

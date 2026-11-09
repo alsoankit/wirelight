@@ -27,7 +27,7 @@ export const REGION_3_ARRIVAL = [
 export const whereNotWho: RoomText = {
   title: "A New Door",
   mission:
-    "Kitchen's door was replaced, so its door name changed. Your messenger still writes to the old name, and nothing arrives.",
+    "Kitchen's door was replaced, so its door name changed. Your repeated frame still goes to the old name, and nothing arrives.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
@@ -38,25 +38,22 @@ export const whereNotWho: RoomText = {
       text: "A door has a name; a house has an address. The address stays when the door changes.",
       codex: "ip-address",
     },
-    { text: "Give the messenger kitchen's house address instead of its MAC address." },
-    {
-      // The spec says "The messenger's ping reaches kitchen"; the word arrives in 5.2, so it waits until then.
-      text: "Set the card to `10.0.1.7`. The messenger's letter reaches kitchen, and its reply carries the key.",
-    },
+    { text: "Use kitchen's house address instead of its MAC address for your repeated frame." },
+    { text: "Use `10.0.1.7` as the destination. Kitchen's reply carries the key." },
   ],
   detectors: {
     "chase-the-new-name": {
       note: "It answered. What stays the same when a door changes?",
-      tried: "You wrote kitchen's new MAC address on the card. It answered, but the next new door would lose it again.",
+      tried: "You used kitchen's new MAC address. It answered, but the next new door would lose it again.",
     },
     "own-address": {
       note: "That's your own house.",
-      tried: "You put your own house address on the card.",
+      tried: "You used your own house address.",
     },
   },
   debrief: {
     happened:
-      "Kitchen's door changed, so its MAC address changed, and the messenger's frames went nowhere. Its house address didn't: that's its IP address. Writing to the IP address instead of the MAC address found kitchen, whichever door it has.",
+      "Kitchen's door changed, so its MAC address changed. Its house address didn't: that's its IP address. Use the address to find kitchen, whichever door it has.",
     terms: [{ id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" }],
   },
   questions: [
@@ -178,15 +175,15 @@ export const quietStreet: RoomText = {
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
-    { text: "Three things are wrong: one in your house, one in the square, one on the card." },
+    { text: "Three things are wrong: one in your house, one in the square, and one in the route to kitchen." },
     { text: "Ping a few houses. Who answers, and who doesn't?" },
     {
       text: "A house needs an address; a door needs to be on; a letter needs the right address.",
       codex: "ip-address",
     },
-    { text: "Give yourself an address, switch the square's door to kitchen on, fix the card." },
+    { text: "Give yourself an address, switch the square's door to kitchen on, then ping kitchen's address." },
     {
-      text: "In your house: `ip addr add 10.0.1.5/24 dev eth0`. In the square: `ip link set eth1 up`. Then set the card to `10.0.1.7` (`lab card --to 10.0.1.7`). Kitchen's reply carries the key.",
+      text: "In your house: `ip addr add 10.0.1.5/24 dev eth0`. In the square: `ip link set eth1 up`. Then ping `10.0.1.7`. Kitchen's reply carries the key.",
     },
   ],
   detectors: {
@@ -213,7 +210,7 @@ export const quietStreet: RoomText = {
   },
   debrief: {
     happened:
-      "Your house had no address, the square's door to kitchen was off, and the messenger had a wrong house number. Each one alone would keep the street quiet.",
+      "Your house had no address, the square's door to kitchen was off, and the route to kitchen's house address was missing. Each one alone would keep the street quiet.",
     terms: [],
   },
   voice: [

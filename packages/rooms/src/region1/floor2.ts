@@ -1,5 +1,5 @@
 /** floors/floor-2.md · Names on the Wire. The console arrives with the gift of the voice (2.4, 0032). */
-import { helloWithKey, keyFor, messengerMessage, mothCall } from "@wirelight/content";
+import { automaticMessage, helloWithKey, keyFor, mothCall } from "@wirelight/content";
 import { corridorLit, labDelivered, linkUp, messengerAnswered, printed, quietAfter, ran, sentTo } from "../predicates";
 import { defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
 import { BROADCAST, CELLAR, halls, KITCHEN, LIBRARY, OBSERVATORY } from "./topology";
@@ -112,7 +112,7 @@ export const wrongName = defineRoom({
   topology: halls({
     lanternReply: wrongNameReply,
     announcements: true,
-    messenger: { to: KITCHEN, msg: messengerMessage },
+    messenger: { to: KITCHEN, msg: automaticMessage },
   }),
   faults: [{ kind: "card", device: "observatory", to: "02:00:00:00:00:08" }],
   playerDevice: "observatory",
@@ -138,7 +138,7 @@ export const wrongName = defineRoom({
   ],
   teaches: ["destination-address"],
   uses: ["frame", "mac-address"],
-  cards: ["messenger", "captures", "ignored-mark", "everyone-address"],
+  cards: ["repeat-send", "captures", "ignored-mark", "everyone-address"],
   misconceptions: [linkBlame, cardToSelf],
   detectorTests: [
     {
@@ -270,7 +270,7 @@ export const silentLine = defineRoom({
   seed: 29,
   topology: halls({
     announcements: true,
-    messenger: { to: "", dev: "eth1", msg: messengerMessage },
+    messenger: { to: "", dev: "eth1", msg: automaticMessage },
     second: {
       id: "cellar",
       mac: CELLAR,

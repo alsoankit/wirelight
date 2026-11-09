@@ -1,5 +1,5 @@
 /** floors/floor-5.md · Addresses. From here, real IPv4: the messenger and `ping` send real echo requests. */
-import { keyFor, lanternNewDoorReply, messengerMessage } from "@wirelight/content";
+import { automaticMessage, keyFor, lanternNewDoorReply } from "@wirelight/content";
 import { messengerPingAnswered, printed, ran, ranBefore } from "../predicates";
 import { type Access, defineRoom, type Misconception, type SolutionStep } from "../types";
 import { answeredBy, crossedBothWays, hasAddr, pingRanFor, pingsTo, ranAfterAnswer } from "./predicates";
@@ -56,7 +56,7 @@ export const whereNotWho = defineRoom({
   seed: 51,
   topology: town({
     houses: ["kitchen", "library", "forge"],
-    messenger: { to: IP.kitchen, msg: messengerMessage, intervalMs: 3000 },
+    messenger: { to: IP.kitchen, msg: automaticMessage, intervalMs: 3000 },
     // An old-style frame written to kitchen's new door gets an answer, without the key.
     lanternLab: { mode: "responder", reply: lanternNewDoorReply },
   }),
@@ -204,7 +204,7 @@ export const quietStreet = defineRoom({
   seed: 59,
   topology: town({
     houses: ["kitchen", "library", "forge"],
-    messenger: { to: IP.kitchen, msg: messengerMessage, intervalMs: 3000 },
+    messenger: { to: IP.kitchen, msg: automaticMessage, intervalMs: 3000 },
   }),
   faults: [
     noAddress,

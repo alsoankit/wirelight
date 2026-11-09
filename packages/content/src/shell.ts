@@ -3,10 +3,9 @@ import type { ShellContent, ToolId } from "@wirelight/shell";
 
 const TOOL_LINES: Partial<Record<ToolId, string>> = {
   "ip link": "  ip link                  list this machine's doors and whether they're working",
-  "lab send-frame": "  lab send-frame --to MAC  send a frame by hand (lab tool)",
   "lab cable": "  lab cable plug|unplug D  plug a cable into door D, or pull it out (lab tool)",
   "lab keeper": "  lab keeper ...           do a keeper's job by hand (lab tool)",
-  "lab card": "  lab card --to ADDRESS    change where the messenger writes (lab tool)",
+  "lab send-frame": "  lab send-frame --to MAC --msg TEXT [--repeat]  build and send a frame",
   "lab scanner": "  lab scanner ...          catch, list and open messages on the Scanner (lab tool)",
   "lab scanner trace": "  lab scanner trace --next follow your next packet; compare two catches (lab tool)",
   "bridge fdb": "  bridge fdb show          read a switch's memory: which name is behind which door",

@@ -1,5 +1,5 @@
 /** floors/floor-3.md · The Switch. The hall is a Linux bridge; the player sorts by hand first (0042). */
-import { helloWithKey, helloWithKeyPart, keyFor, messengerMessage } from "@wirelight/content";
+import { automaticMessage, helloWithKey, helloWithKeyPart, keyFor } from "@wirelight/content";
 import { labDelivered, linkUp, printed, ran, sentTo } from "../predicates";
 import { defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
 import {
@@ -75,7 +75,7 @@ export const manyDoors = defineRoom({
   content: manyDoorsId,
   seed: 31,
   topology: works({
-    observatory: { messenger: { to: FORGE, msg: messengerMessage, intervalMs: 6000 } },
+    observatory: { messenger: { to: FORGE, msg: automaticMessage, intervalMs: 6000 } },
     machines: [
       { id: "kitchen", mac: KITCHEN, door: "eth1" },
       { id: "library", mac: LIBRARY, door: "eth2" },
@@ -165,7 +165,7 @@ export const keepersMemory = defineRoom({
   content: memoryId,
   seed: 32,
   topology: works({
-    observatory: { messenger: { to: "", msg: messengerMessage } },
+    observatory: { messenger: { to: "", msg: automaticMessage } },
     machines: [...chatter, { id: "gate", mac: GATE, door: "eth3", reply: gateReply }],
   }),
   faults: [],
@@ -223,7 +223,7 @@ export const findEveryone = defineRoom({
   content: findId,
   seed: 33,
   topology: works({
-    observatory: { messengers: letters.map((m) => ({ to: m.mac, msg: messengerMessage })) },
+    observatory: { messengers: letters.map((m) => ({ to: m.mac, msg: automaticMessage })) },
     machines: letters,
   }),
   // Only the doors were written down: every card is blank.
@@ -270,7 +270,7 @@ export const busyHall = defineRoom({
   content: busyId,
   seed: 39,
   topology: works({
-    observatory: { messenger: { to: LAUNDRY, msg: messengerMessage } },
+    observatory: { messenger: { to: LAUNDRY, msg: automaticMessage } },
     machines: [
       { ...(chatter[0] as (typeof chatter)[number]) },
       { id: "laundry", mac: LAUNDRY, door: "eth2", reply: wrenReply },

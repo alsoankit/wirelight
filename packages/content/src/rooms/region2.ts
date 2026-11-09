@@ -31,7 +31,7 @@ export const region2Arrival: { id: string; speaker: string; text: string }[] = [
 const manyDoors: RoomText = {
   title: "Sort It by Hand",
   mission:
-    "Your messenger writes to forge through the hall, but the hall's keeper has stopped passing messages on. Do its job by hand until it remembers how.",
+    "Frames to forge pass through the hall, but the hall's keeper has stopped passing them on. Send one yourself until it remembers how.",
   notes: [],
   hints: [
     { text: "A frame is waiting at the desk. Read it." },
@@ -129,7 +129,7 @@ const keepersMemory: RoomText = {
     { text: "A switch only learns a name when that machine sends something.", codex: "switch" },
     { text: "Get gate to send something, then ask the hall which name is behind eth3, then write to that name." },
     {
-      text: "Send a broadcast from the workbench. Then in the hall: `bridge fdb show` shows `02:00:00:00:00:0f dev eth3`. Send a frame to `02:00:00:00:00:0f`; gate answers with the key.",
+      text: "Send a broadcast from the Frame builder. Then in the hall: `bridge fdb show` shows `02:00:00:00:00:0f dev eth3`. Send a frame to `02:00:00:00:00:0f`; gate answers with the key.",
     },
   ],
   detectors: {
@@ -180,9 +180,9 @@ const keepersMemory: RoomText = {
 };
 
 const findEveryone: RoomText = {
-  title: "Fill In the Cards",
+  title: "Fill In the Destinations",
   mission:
-    "You left three messages, one for each door of the hall, but only wrote down the doors. Find out which machine is behind each door and fill in the cards.",
+    "You started three repeating sends, one for each door of the hall, but their destinations are wrong. Find which machine is behind each door and set each destination.",
   access: { bakery: SEALED, larder: SEALED, chapel: SEALED },
   notes: [],
   hints: [
@@ -192,15 +192,15 @@ const findEveryone: RoomText = {
       text: "The hall learns the name of every machine that sends something, and remembers its door.",
       codex: "mac-board",
     },
-    { text: "Make them all send something, read the hall's MAC table, then fill in each card by its door." },
+    { text: "Make them all send something, read the hall's MAC table, then set each repeating send's destination." },
     {
-      text: "Broadcast, then `bridge fdb show` in the hall: eth1 is `…:10`, eth2 is `…:11`, eth3 is `…:12`. Put each on the matching card.",
+      text: "Broadcast, then `bridge fdb show` in the hall: eth1 is `…:10`, eth2 is `…:11`, eth3 is `…:12`. Stop each wrong send and start it again with the matching destination.",
     },
   ],
   detectors: {
     "swapped-doors": {
       note: "That name lives behind another door. Check which door each line says.",
-      tried: "You gave a card the name behind a different door.",
+      tried: "One repeating send used the name behind a different door.",
     },
   },
   debrief: {
@@ -225,10 +225,10 @@ const busyHall: RoomText = {
     { text: "Its switch is broken. Use the hall's terminal." },
     { text: "A machine behind a dark door can't hear a broadcast, or answer one.", codex: "everyone-address" },
     {
-      text: "Switch the door on in the hall, make laundry send something, read its MAC address from the hall's MAC table, then fix the card.",
+      text: "Switch the door on in the hall, make laundry send something, read its MAC address from the hall's MAC table, then start a repeating send to it.",
     },
     {
-      text: "In the hall: `ip link set eth2 up`. Broadcast. `bridge fdb show` shows `02:00:00:00:00:13 dev eth2`. Set the card to it; laundry answers with the key.",
+      text: "In the hall: `ip link set eth2 up`. Broadcast. `bridge fdb show` shows `02:00:00:00:00:13 dev eth2`. Set To to that address and choose Keep sending; laundry answers with the key.",
     },
   ],
   detectors: {

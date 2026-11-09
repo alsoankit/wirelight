@@ -1,5 +1,5 @@
 /** floors/floor-4.md · Memory and Loops. Two halls (hall-a, hall-b), Linux bridges with no loop protection. */
-import { announcement, helloWithKey, keepsTheKey, keyFor, messengerMessage } from "@wirelight/content";
+import { announcement, automaticMessage, helloWithKey, keepsTheKey, keyFor } from "@wirelight/content";
 import type { LinkSpec } from "@wirelight/sim";
 import { labDelivered, ran, ranThen } from "../predicates";
 import { defineRoom, type Predicate, type SolutionStep } from "../types";
@@ -99,7 +99,7 @@ export const pinnedMemory = defineRoom({
   content: pinnedId,
   seed: 41,
   topology: works({
-    observatory: { messenger: { to: KITCHEN, msg: messengerMessage, intervalMs: 5000 } },
+    observatory: { messenger: { to: KITCHEN, msg: automaticMessage, intervalMs: 5000 } },
     machines: [
       // The old corridor: kitchen's cable when it lived behind eth1. Its far end lies loose.
       { id: "alcove", mac: "02:00:00:00:00:14", door: "eth1", mute: true },

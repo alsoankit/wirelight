@@ -10,8 +10,8 @@ export const lanternReply = (key: string) => helloWithKey("kitchen", key);
 /** Kitchen's regular message to the observatory (Floor 1), without a key. */
 export const lanternHello = "hello from kitchen";
 
-/** What the robot's messenger keeps sending. */
-export const messengerMessage = "hello from the observatory";
+/** What the observatory's background traffic sends. */
+export const automaticMessage = "hello from the observatory";
 
 /** What cellar keeps calling, to a name nobody has (Floor 2's boss). */
 export const mothCall = "is anyone there?";
