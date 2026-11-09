@@ -21,7 +21,7 @@ import type { KeeperCue } from "./Messages";
 // message. A heavy old cabinet with a keyboard and an amber screen. It stands still: its screen
 // brightens as a message arrives and dims when it is asleep (0042), and a thread of warm light runs
 // from the screen to the door it chose. Amber, never cyan: cyan belongs to messages (0090).
-// Built in code; its front is +z here, turned toward the player, who only ever sees the room from there.
+// Built in code; its front is +z here, aligned to the nearest wall direction toward its doorway.
 
 type Props = {
   position: [number, number, number];
@@ -42,6 +42,7 @@ const screenLevel = uniform(1);
 
 const PLINTH = new BoxGeometry(1, 0.1, 0.72);
 const BODY = new BoxGeometry(0.9, 0.62, 0.62);
+const BRASS_BAND = new BoxGeometry(0.94, 0.045, 0.66);
 const PANEL = new BoxGeometry(0.7, 0.4, 0.02);
 const SLAT = new BoxGeometry(0.6, 0.02, 0.012);
 const SHELF = new BoxGeometry(0.9, 0.06, 0.42);
@@ -105,7 +106,7 @@ export function Keeper({ position, rest, cue, region = 1, asleep = false }: Prop
   const beamRef = useRef<Group>(null);
 
   const door = useMemo(() => new Vector3(...rest), [rest]);
-  const facing = Math.atan2(rest[0] - position[0], rest[2] - position[2]);
+  const facing = Math.round(Math.atan2(rest[0] - position[0], rest[2] - position[2]) / (Math.PI / 2)) * (Math.PI / 2);
   const screenAt = useMemo(() => new Vector3(), []);
   const DOWN = useMemo(() => new Vector3(0, -1, 0), []);
 
@@ -145,6 +146,7 @@ export function Keeper({ position, rest, cue, region = 1, asleep = false }: Prop
       <group ref={machine} rotation={[0, facing, 0]}>
         <mesh geometry={PLINTH} material={iron} position={[0, 0.05, 0]} />
         <mesh geometry={BODY} material={stone} position={[0, 0.41, 0]} />
+        <mesh geometry={BRASS_BAND} material={brass} position={[0, 0.41, 0]} />
         <mesh geometry={PANEL} material={iron} position={[0, 0.42, 0.315]} />
         {SLATS.map((y) => (
           <mesh key={y} geometry={SLAT} material={brass} position={[0, y, 0.33]} />
