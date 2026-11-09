@@ -4,6 +4,7 @@ import { HALLS_HOUSE_PIECES, hallsHouse } from "../regions/halls";
 import { TOWN_HOUSE_PIECES, townHouse } from "../regions/town";
 import { worksHouse } from "../regions/works";
 import type { RoomLayout } from "../room/layout";
+import { roomMachines } from "../room/standing";
 
 // Another machine's room (a computer: kitchen, library…): one doorway on the near edge where the
 // corridor comes in (0111). Same 8 × 8 m frame as the Observatory, so the camera and the doorways line up the same
@@ -19,8 +20,8 @@ export function houseLayout(region: RegionId = 1): RoomLayout {
     keeper: [0, 0, -0.8] as RoomLayout["keeper"],
     air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
   };
-  if (region === 2) return { ...frame, ...worksHouse() };
-  if (region === 3) return { ...frame, ...townHouse() };
-  if (region === 4) return { ...frame, ...cathedralHouse() };
-  return { ...frame, ...hallsHouse() };
+  const regional =
+    region === 2 ? worksHouse() : region === 3 ? townHouse() : region === 4 ? cathedralHouse() : hallsHouse();
+  const room: RoomLayout = { ...frame, ...regional };
+  return { ...room, statues: [...(room.statues ?? []), ...roomMachines()] };
 }

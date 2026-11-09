@@ -34,11 +34,16 @@ export type StatueSpot = { at: [number, number, number]; turn: number };
  */
 export const FACING: Record<RegionId, number> = { 1: 3.9, 2: 3.9, 3: 0.7, 4: 3.9 };
 
-/**
- * In a house or a hall: on the open right-hand side (no wall there: the camera's side), between the
- * routes board at the front and the back wall's furniture.
- */
-export const SIDE_PLACE = (region: RegionId): StatueSpot => ({ at: [3.0, 0, -1.0], turn: FACING[region] });
+/** Regional room history stays near the far wall, away from the near-right machine workspace. */
+export const ROOM_HISTORY_PLACE: Record<RegionId, StatueSpot> = {
+  1: { at: [2.25, 0, -2.45], turn: FACING[1] },
+  2: { at: [3.0, 0, -2.45], turn: FACING[2] },
+  3: { at: [-2.7, 0, -2.45], turn: FACING[3] },
+  4: { at: [3.0, 0, -2.45], turn: FACING[4] },
+};
+
+/** The region's historical figure stays at the far end, clear of the near-right workspace. */
+export const SIDE_PLACE = (region: RegionId): StatueSpot => ROOM_HISTORY_PLACE[region];
 
 /**
  * Where each region's statue stands in the Observatory (0094), clear of the doorway and the boards.
@@ -138,6 +143,14 @@ const NEAR_EDGE = [
 ];
 const TERMINAL_ON_TABLE = machine("vintage-terminal", [2.75, TABLE_TOP, 1.45], Math.PI / 4);
 
+/** Quiet network hardware at the near-right edge of houses and halls, clear of every doorway. */
+export function roomMachines(): MachinePlace[] {
+  return [
+    machine("server-console", [3.25, 0, -0.55], Math.PI / 2),
+    machine("control-panel", [3.25, 0, 0.7], Math.PI / 2),
+  ];
+}
+
 export const MACHINES_AT: Record<number, MachinePlace[]> = {
   1: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), TERMINAL_ON_TABLE],
   2: [...NEAR_EDGE, machine("cable-spool", [1.4, 0, 3.3], 0.4), machine("robot-arm", [3.1, 0, 2.9], Math.PI / 2)],
@@ -154,7 +167,9 @@ export function standing(
   const out = [];
   const statue = STATUES[region];
   const place = kind === "observatory" ? STATUE_AT[region] : SIDE_PLACE(region);
-  if (place) out.push({ slug: statue.slug, position: place.at, turn: place.turn, scale: statue.scale });
+  const hallUsesAngel = kind === "hall" && (region === 1 || region === 3);
+  if (place && !hallUsesAngel)
+    out.push({ slug: statue.slug, position: place.at, turn: place.turn, scale: statue.scale });
   const dressing = kind === "observatory" ? DRESSING_AT[region] : undefined;
   if (dressing)
     out.push({
