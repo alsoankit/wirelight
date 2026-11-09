@@ -19,6 +19,14 @@ const fast = async () => {
 };
 /** Waits until `ms` more of network time have passed (the clock slows while frames cross). */
 const waitNet = async (ms) => {
+  if (!(await p.evaluate(() => !!window.__wirelight).catch(() => false))) {
+    const speed = await p
+      .locator(".top-bar")
+      .innerText()
+      .then((s) => Number(s.match(/(\d+)×/)?.[1] ?? 1));
+    await p.waitForTimeout(Math.ceil((ms / speed) * 2));
+    return;
+  }
   const now = () => p.evaluate(() => window.__wirelight.useSession.getState().status?.now ?? 0);
   const end = (await now()) + ms;
   await p.waitForFunction((t) => (window.__wirelight.useSession.getState().status?.now ?? 0) >= t, end, {

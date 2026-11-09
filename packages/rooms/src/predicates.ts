@@ -119,7 +119,7 @@ function deliveredFrom(trace: readonly SimEvent[], fromDevice: DeviceId, atDevic
  */
 export function messengerAnswered(from: DeviceId, to: DeviceId, text: string): Predicate {
   return ({ trace }) => {
-    const heard = deliveredFrom(trace, from, to, "messenger");
+    const heard = [...deliveredFrom(trace, from, to, "messenger"), ...deliveredFrom(trace, from, to, "command")];
     if (heard.length === 0) return false;
     const first = Math.min(...heard);
     return trace.some((e) => e.kind === "app.deliver" && e.device === from && e.text === text && e.t >= first);

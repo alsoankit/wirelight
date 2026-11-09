@@ -15,7 +15,7 @@ await open(p, base, "f1.two-rooms");
 await p.click("text=→ kitchen");
 await arrived(p, "kitchen");
 await tidy(p);
-await p.click("button.plate");
+await p.click(".plate-open");
 await check("1.1");
 
 await open(p, base, "f1.loose-cable");
@@ -54,8 +54,8 @@ await check("2.3");
 
 // 2.4 in a fresh browser would play the gift; with onboarding seen here, the gift still plays once.
 await open(p, base, "f2.lights-out");
-await p.click("button.plate");
-for (let i = 0; i < 20 && !(await p.$(".console .xterm")); i++) {
+await p.click(".plate-open");
+for (let i = 0; i < 100 && !(await p.$(".console .xterm")); i++) {
   const next = p.getByRole("button", { name: "Next" });
   const close = p.getByRole("button", { name: "Close" });
   const gotIt = p.getByRole("button", { name: "Got it" });

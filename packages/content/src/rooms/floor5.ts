@@ -3,7 +3,7 @@ import type { FloorText, RoomText } from "./types";
 /** floors/floor-5.md, word for word. Region 3, the Lantern Town. */
 
 /** Why a house's door is shut to the player on Floors 5–7. */
-export const HOUSE_LOCKED = "Locked. Nobody here has opened the door in years, but they still answer letters.";
+export const HOUSE_LOCKED = "Locked. Nobody here has opened the door in years, but the network can still reach them.";
 
 /** Arriving in Region 3 (R3-ARRIVE-01…03). */
 export const REGION_3_ARRIVAL = [
@@ -26,8 +26,7 @@ export const REGION_3_ARRIVAL = [
 
 export const whereNotWho: RoomText = {
   title: "A New Door",
-  mission:
-    "Kitchen's door was replaced, so its door name changed. Your repeated frame still goes to the old name, and nothing arrives.",
+  mission: "Kitchen's door was replaced, so its door name changed. Its house address stayed the same.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
@@ -38,23 +37,24 @@ export const whereNotWho: RoomText = {
       text: "A door has a name; a house has an address. The address stays when the door changes.",
       codex: "ip-address",
     },
-    { text: "Use kitchen's house address instead of its MAC address for your repeated frame." },
-    { text: "Use `10.0.1.7` as the destination. Kitchen's reply carries the key." },
+    {
+      text: "A door has a name; a house has an address. The address stays when the door changes.",
+      codex: "ip-address",
+    },
+    { text: "Ping kitchen at its house address: `ping -c 1 10.0.1.7`." },
   ],
   detectors: {
-    "chase-the-new-name": {
-      note: "It answered. What stays the same when a door changes?",
-      tried: "You used kitchen's new MAC address. It answered, but the next new door would lose it again.",
-    },
     "own-address": {
-      note: "That's your own house.",
-      tried: "You used your own house address.",
+      note: "That's your own address.",
+      tried: "You checked your own machine instead of the kitchen.",
     },
   },
   debrief: {
-    happened:
-      "Kitchen's door changed, so its MAC address changed. Its house address didn't: that's its IP address. Use the address to find kitchen, whichever door it has.",
-    terms: [{ id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" }],
+    happened: "Kitchen's door changed, but its house address stayed the same. Ping reaches it at that IP address.",
+    terms: [
+      { id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" },
+      { id: "ping", term: "ping", meaning: "asking a house 'are you there?'" },
+    ],
   },
   questions: [
     {
@@ -112,7 +112,6 @@ export const placeToLive: RoomText = {
     happened:
       "Your door had no address, so you couldn't send anything to a house, or hear back. With an address of your own, you pinged kitchen: an echo request out, an echo reply back.",
     terms: [
-      { id: "ping", term: "ping", meaning: "asking a house 'are you there?'" },
       {
         id: "echo-request-reply",
         term: "echo request / reply",

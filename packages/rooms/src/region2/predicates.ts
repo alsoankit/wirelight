@@ -449,7 +449,7 @@ function followed(trace: readonly SimEvent[], fromDevice: DeviceId, origin: stri
  */
 export function messengerHeard(from: DeviceId, to: DeviceId, text: string): Predicate {
   return ({ trace }) => {
-    const mine = followed(trace, from, "messenger");
+    const mine = new Set([...followed(trace, from, "messenger"), ...followed(trace, from, "command")]);
     const heard = trace.find((e) => e.kind === "app.deliver" && e.device === to && mine.has(e.frameId));
     if (!heard) return false;
     return trace.some((e) => e.kind === "app.deliver" && e.device === from && e.text === text && e.t >= heard.t);

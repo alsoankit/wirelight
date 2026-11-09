@@ -6,7 +6,11 @@ const [base] = process.argv.slice(2);
 const { browser, page: p, errors } = await launch();
 const results = [];
 const check = async (name) => results.push([name, await won(p, name)]);
-const isWon = () => p.evaluate(() => !!window.__wirelight.useSession.getState().status?.won);
+const isWon = () =>
+  p
+    .locator(".debrief")
+    .isVisible()
+    .catch(() => false);
 /** Walks through doors, one machine after another (each name is the room at the far end). */
 const walk = async (...rooms) => {
   for (const to of rooms) {

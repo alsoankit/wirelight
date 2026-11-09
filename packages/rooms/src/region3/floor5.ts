@@ -1,5 +1,5 @@
 /** floors/floor-5.md · Addresses. From here, real IPv4: the messenger and `ping` send real echo requests. */
-import { automaticMessage, keyFor, lanternNewDoorReply } from "@wirelight/content";
+import { automaticMessage, keyFor } from "@wirelight/content";
 import { messengerPingAnswered, printed, ran, ranBefore } from "../predicates";
 import { type Access, defineRoom, type Misconception, type SolutionStep } from "../types";
 import { answeredBy, crossedBothWays, hasAddr, pingRanFor, pingsTo, ranAfterAnswer } from "./predicates";
@@ -44,7 +44,7 @@ const pingForever: Misconception = { id: "ping-forever", detect: pingRanFor("obs
 // ── 5.1 · Where, Not Who ───────────────────────────────────────────────────────────────────
 
 const whereId = "f5.where-not-who";
-const cardAnswered = messengerPingAnswered("observatory", IP.kitchen);
+const kitchenAnswered = answeredBy("observatory", IP.kitchen, KITCHEN);
 export const whereNotWho = defineRoom({
   id: whereId,
   region: 3,
@@ -56,33 +56,25 @@ export const whereNotWho = defineRoom({
   seed: 51,
   topology: town({
     houses: ["kitchen", "library", "forge"],
-    messenger: { to: IP.kitchen, msg: automaticMessage, intervalMs: 3000 },
-    // An old-style frame written to kitchen's new door gets an answer, without the key.
-    lanternLab: { mode: "responder", reply: lanternNewDoorReply },
   }),
-  // The card still holds kitchen's old door name.
-  faults: [{ kind: "card", device: "observatory", to: "02:00:00:00:00:07" }],
+  faults: [],
   playerDevice: "observatory",
   access: access(["kitchen", "library", "forge"]),
-  controls: { console: "typing", card: "works", catching: true },
-  tools: {},
+  controls: { console: "typing", catching: true },
+  tools: { unlock: ["ping"] },
   glow: "symptoms",
-  winCondition: cardAnswered,
+  winCondition: kitchenAnswered,
   key: { word: keyFor(whereId), via: "mark" },
-  healthChecks: [{ id: "card-answered", object: { kind: "card", device: "observatory" }, check: cardAnswered }],
-  teaches: ["ip-address"],
+  healthChecks: [
+    { id: "house-answered", object: { kind: "slot", device: "observatory", iface: "eth0" }, check: kitchenAnswered },
+  ],
+  teaches: ["ip-address", "ping"],
   // The spec lists "switch"; Region 2 teaches the switch's ideas by these ids.
-  uses: ["mac-address", "frame", "flooding"],
+  uses: [],
   cards: ["ip-address", "register"],
-  misconceptions: [
-    { id: "chase-the-new-name", detect: ran("observatory", /^lab card --to 02:00:00:00:00:17$/) },
-    { id: "own-address", detect: ran("observatory", /^lab card --to 10\.0\.1\.5$/) },
-  ],
-  detectorTests: [
-    { misconception: "chase-the-new-name", steps: [click("observatory", `lab card --to ${KITCHEN}`)] },
-    { misconception: "own-address", steps: [click("observatory", `lab card --to ${IP.observatory}`)] },
-  ],
-  solution: [click("observatory", `lab card --to ${IP.kitchen}`)],
+  misconceptions: [{ id: "own-address", detect: ran("observatory", /^ping -c 1 10\.0\.1\.5$/) }],
+  detectorTests: [{ misconception: "own-address", steps: [typed("observatory", "ping -c 1 10.0.1.5", 1000)] }],
+  solution: [typed("observatory", `ping -c 1 ${IP.kitchen}`, 1000)],
 });
 
 // ── 5.2 · A Place to Live ──────────────────────────────────────────────────────────────────
@@ -116,8 +108,8 @@ export const placeToLive = defineRoom({
       check: crossedBothWays("path-observatory"),
     },
   ],
-  teaches: ["ping", "echo-request-reply"],
-  uses: ["ip-address"],
+  teaches: ["echo-request-reply"],
+  uses: ["ip-address", "ping"],
   cards: ["address-slot", "echo"],
   commandMemory: "CMD-04",
   misconceptions: [
