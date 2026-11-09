@@ -369,9 +369,6 @@ export const HALLS_HOUSE_PIECES: Placement[] = [
   { piece: "Pot3_Broken", position: [2.6, 0, -3.2], rotationY: 2.2 },
   { piece: "Bricks", position: [2.9, 0, 1.9], rotationY: 0.9 },
   { piece: "Brick", position: [-1.6, 0, 2.6], rotationY: 0.4 },
-  // What tells it from the Observatory: an old chest of the machine's own (the rest is each house's
-  // own traits: house/Traits.tsx).
-  { piece: "Chest", position: [-2.9, 0, 1.6], rotationY: 1.2 },
 ];
 
 const HOUSE_FLOOR: Extra[] = [
@@ -508,7 +505,6 @@ export const HALLS_HALL_DRESSING: Placement[] = [
   { piece: "Bricks", position: [2.9, 0, 2.6], rotationY: 0.8 },
   { piece: "Brick", position: [0.9, 0, 3.1], rotationY: 0.3 },
   { piece: "Barrel", position: [3.2, 0, -2.9] },
-  { piece: "Crate", position: [2.6, 0, -3.3], rotationY: 0.4 },
   { piece: "Grass", position: [-3.4, 0, 2.2] },
   { piece: "Grass", position: [2.2, 0, 1.0] },
 ];

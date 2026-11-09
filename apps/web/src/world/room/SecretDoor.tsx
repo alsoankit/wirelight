@@ -22,7 +22,7 @@ import { AT, secretHere, secretInCorridor } from "./secretPlaces";
 // - Inside Your Home Router — after the finale, at the foot of the spire.
 
 /** Each region's door-frame material (also the near-edge doorways' frames, 0111). */
-export const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Walnut", 3: "Timber", 4: "Sandstone" };
+export const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Iron", 3: "Sandstone", 4: "Sandstone" };
 
 function DoorBody({
   region,

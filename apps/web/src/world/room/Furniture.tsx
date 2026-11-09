@@ -17,12 +17,12 @@ import type { Vec3 } from "./layout";
 
 const STONE = "#6d6a63";
 
-// Each region dresses the boards and the desk in its own materials (art briefs): the builders' stone,
-// the Works' walnut and brass (the MAC board's entries are brass tiles), the town's timber notice
+// Each region dresses the boards and the desk in palace materials: the builders' stone,
+// the Works' iron and brass (the MAC board's entries are brass tiles), the town's sandstone notice
 // boards, the Cathedral's carved stone with brass inlay (the routing board) and a lectern.
-const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Walnut", 3: "Timber", 4: "Sandstone" };
+const FRAME: Record<RegionId, string> = { 1: "Main", 2: "Iron", 3: "Sandstone", 4: "Sandstone" };
 const STAND: Record<RegionId, string> = { 1: "Main", 2: "Brass", 3: "Iron", 4: "Sandstone" };
-const DESK: Record<RegionId, string> = { 1: "Wood", 2: "Walnut", 3: "Timber", 4: "Sandstone" };
+const DESK: Record<RegionId, string> = { 1: "Stone", 2: "Iron", 3: "Sandstone", 4: "Sandstone" };
 
 /** One mesh per material from code-made pieces (a board's marks: a few draw calls, not dozens). */
 function mergeBag(bag: Record<string, BufferGeometry[]>) {
@@ -258,9 +258,8 @@ export function Desk({ device, at }: { device: string; at: Vec3 }) {
     // biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); the chip is the keyboard way
     <group position={at} onClick={() => openPanel({ kind: "desk", device })}>
       {region === 1 ? (
-        <mesh position={[0, 0.5, 0]}>
+        <mesh position={[0, 0.5, 0]} material={regionMaterial("Stone", 1)}>
           <boxGeometry args={[1.6, 1.0, 0.6]} />
-          <meshStandardMaterial color="#5a4a3a" roughness={0.9} />
         </mesh>
       ) : lectern ? (
         <>

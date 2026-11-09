@@ -10,9 +10,9 @@ import type { RegionId } from "../region";
 // What makes one house's room its own (playtest, Region 4 #24: vesper, lumen, wren and halo looked
 // identical): a name plaque by its door and one of a few sets of things
 // its owner left behind, chosen from its name so the same house always looks the same. Made in
-// code, in the region's own wood; muted colours only (cyan, amber and violet mean something).
+// code, in palace stone or iron; muted colours only (cyan, amber and violet mean something).
 
-const WOOD: Record<RegionId, string> = { 1: "Wood", 2: "Walnut", 3: "Timber", 4: "DarkWood" };
+const ROOM_MATERIAL: Record<RegionId, string> = { 1: "Stone", 2: "Iron", 3: "Sandstone", 4: "Sandstone" };
 
 /** A small, stable number from a name. */
 function hash(name: string): number {
@@ -30,7 +30,7 @@ type Bag = Record<string, BufferGeometry[]>;
  * One of four sets of left-behind things, on the right-hand side of the room: clear of the door, the
  * keeper, the boards (ledger front left, routes front right) and the region's own pots.
  */
-function leftBehind(bag: Bag, wood: string, kind: number) {
+function leftBehind(bag: Bag, material: string, kind: number) {
   const [cx, cz] = [2.85, -1.5];
   if (kind === 0) {
     // A table with a jug on it, and a stool.
@@ -40,14 +40,14 @@ function leftBehind(bag: Bag, wood: string, kind: number) {
       [-0.5, 0.4],
       [0.5, 0.4],
     ] as const)
-      addTo(bag, wood, box([0.08, 0.72, 0.08], [cx + dx, 0.36, cz + dz]));
-    addTo(bag, wood, box([1.2, 0.07, 1.0], [cx, 0.75, cz]));
-    addTo(bag, wood, rod([cx - 1.0, 0, cz + 0.7], [cx - 1.0, 0.45, cz + 0.7], 0.2, 8));
+      addTo(bag, material, box([0.08, 0.72, 0.08], [cx + dx, 0.36, cz + dz]));
+    addTo(bag, material, box([1.2, 0.07, 1.0], [cx, 0.75, cz]));
+    addTo(bag, material, rod([cx - 1.0, 0, cz + 0.7], [cx - 1.0, 0.45, cz + 0.7], 0.2, 8));
     addTo(bag, "Pot_Main", rod([cx - 0.15, 0.79, cz + 0.1], [cx - 0.15, 1.0, cz + 0.1], 0.07, 8, 0.05));
   } else if (kind === 1) {
     // A cupboard, jars on top.
-    addTo(bag, wood, box([0.6, 1.3, 1.1], [cx + 0.3, 0.65, cz]));
-    addTo(bag, wood, box([0.04, 1.1, 0.02], [cx, 0.65, cz]));
+    addTo(bag, material, box([0.6, 1.3, 1.1], [cx + 0.3, 0.65, cz]));
+    addTo(bag, material, box([0.04, 1.1, 0.02], [cx, 0.65, cz]));
     for (const [dz, h] of [
       [-0.35, 0.22],
       [-0.05, 0.16],
@@ -56,23 +56,23 @@ function leftBehind(bag: Bag, wood: string, kind: number) {
       addTo(bag, "Pot_Main", rod([cx + 0.3, 1.3, cz + dz], [cx + 0.3, 1.3 + h, cz + dz], 0.08, 8, 0.06));
   } else if (kind === 2) {
     // Crates and a sack, stacked.
-    addTo(bag, wood, box([0.6, 0.6, 0.6], [cx, 0.3, cz - 0.3], [0, 0.3, 0]));
-    addTo(bag, wood, box([0.5, 0.5, 0.5], [cx + 0.1, 0.85, cz - 0.25], [0, -0.2, 0]));
-    addTo(bag, wood, box([0.55, 0.45, 0.55], [cx - 0.3, 0.225, cz + 0.6], [0, 0.6, 0]));
+    addTo(bag, material, box([0.6, 0.6, 0.6], [cx, 0.3, cz - 0.3], [0, 0.3, 0]));
+    addTo(bag, material, box([0.5, 0.5, 0.5], [cx + 0.1, 0.85, cz - 0.25], [0, -0.2, 0]));
+    addTo(bag, material, box([0.55, 0.45, 0.55], [cx - 0.3, 0.225, cz + 0.6], [0, 0.6, 0]));
     addTo(bag, "Cloth", rod([cx + 0.4, 0, cz + 0.7], [cx + 0.4, 0.5, cz + 0.7], 0.22, 8, 0.12));
   } else {
     // A low bench with a folded blanket, and a bucket.
-    addTo(bag, wood, box([0.45, 0.08, 1.6], [cx, 0.45, cz]));
-    for (const dz of [-0.65, 0.65]) addTo(bag, wood, box([0.4, 0.45, 0.08], [cx, 0.22, cz + dz]));
+    addTo(bag, material, box([0.45, 0.08, 1.6], [cx, 0.45, cz]));
+    for (const dz of [-0.65, 0.65]) addTo(bag, material, box([0.4, 0.45, 0.08], [cx, 0.22, cz + dz]));
     addTo(bag, "Cloth", box([0.4, 0.1, 0.5], [cx, 0.54, cz + 0.3]));
-    addTo(bag, wood, rod([cx - 0.7, 0, cz + 0.9], [cx - 0.7, 0.35, cz + 0.9], 0.16, 10, 0.19));
+    addTo(bag, material, rod([cx - 0.7, 0, cz + 0.9], [cx - 0.7, 0.35, cz + 0.9], 0.16, 10, 0.19));
   }
 }
 
 /** A second, smaller thing by the back wall, right of the door: so two houses rarely match. */
-function byTheDoor(bag: Bag, wood: string, kind: number) {
+function byTheDoor(bag: Bag, material: string, kind: number) {
   const [x, z] = [1.65, -3.4];
-  if (kind === 0) addTo(bag, wood, rod([x, 0, z], [x, 0.8, z], 0.3, 12, 0.27));
+  if (kind === 0) addTo(bag, material, rod([x, 0, z], [x, 0.8, z], 0.3, 12, 0.27));
   else if (kind === 1) {
     addTo(bag, "Pot_Main", rod([x, 0, z], [x, 0.45, z], 0.18, 10, 0.24));
     addTo(bag, "Texture_Leaves", ball([x, 0.75, z], 0.32, 10));
@@ -95,7 +95,7 @@ function worksLeftBehind(bag: Bag, kind: number) {
   const [cx, cz] = [2.85, -1.5];
   if (kind === 0) {
     // A crate of spare gears, one fallen out beside it.
-    addTo(bag, "Walnut", box([0.75, 0.5, 0.6], [cx, 0.25, cz], [0, 0.25, 0]));
+    addTo(bag, "Iron", box([0.75, 0.5, 0.6], [cx, 0.25, cz], [0, 0.25, 0]));
     for (const [dx, r, a] of [
       [-0.15, 0.3, 0.2],
       [0.12, 0.22, -0.3],
@@ -168,7 +168,7 @@ function worksByTheDoor(bag: Bag, kind: number) {
     for (let i = 0; i < 4; i++)
       addTo(
         bag,
-        i % 2 ? "Walnut" : "Parchment",
+        i % 2 ? "Iron" : "Parchment",
         box([0.5 - i * 0.05, 0.1, 0.36], [x, 0.05 + i * 0.1, z], [0, i * 0.3, 0]),
       );
   } else {
@@ -206,12 +206,12 @@ function ladder(bag: Bag, foot: V3, top: V3, width = 0.42) {
   const sl = Math.hypot(...side) || 1;
   const w: V3 = [(side[0] / sl) * (width / 2), 0, (side[2] / sl) * (width / 2)];
   for (const k of [-1, 1])
-    addTo(bag, "Timber", rod([fx + k * w[0], fy, fz + k * w[2]], [tx + k * w[0], ty, tz + k * w[2]], 0.025, 6));
+    addTo(bag, "Iron", rod([fx + k * w[0], fy, fz + k * w[2]], [tx + k * w[0], ty, tz + k * w[2]], 0.025, 6));
   const rungs = Math.floor(length / 0.3);
   for (let i = 1; i < rungs; i++) {
     const t = i / rungs;
     const c: V3 = [fx + along[0] * t, fy + along[1] * t, fz + along[2] * t];
-    addTo(bag, "Timber", rod([c[0] - w[0], c[1], c[2] - w[2]], [c[0] + w[0], c[1], c[2] + w[2]], 0.017, 5));
+    addTo(bag, "Iron", rod([c[0] - w[0], c[1], c[2] - w[2]], [c[0] + w[0], c[1], c[2] + w[2]], 0.017, 5));
   }
 }
 
@@ -251,16 +251,16 @@ function townLeftBehind(bag: Bag, kind: number) {
     lanternFrame(bag, [cx - 0.55, 0, cz + 0.45], true);
   } else if (kind === 2) {
     // Crates and a sack, stacked.
-    addTo(bag, "Timber", box([0.6, 0.6, 0.6], [cx, 0.3, cz - 0.3], [0, 0.3, 0]));
-    addTo(bag, "Timber", box([0.5, 0.5, 0.5], [cx + 0.1, 0.85, cz - 0.25], [0, -0.2, 0]));
-    addTo(bag, "Timber", box([0.55, 0.45, 0.55], [cx - 0.3, 0.225, cz + 0.6], [0, 0.6, 0]));
+    addTo(bag, "Iron", box([0.6, 0.6, 0.6], [cx, 0.3, cz - 0.3], [0, 0.3, 0]));
+    addTo(bag, "Iron", box([0.5, 0.5, 0.5], [cx + 0.1, 0.85, cz - 0.25], [0, -0.2, 0]));
+    addTo(bag, "Iron", box([0.55, 0.45, 0.55], [cx - 0.3, 0.225, cz + 0.6], [0, 0.6, 0]));
     addTo(bag, "Cloth", rod([cx + 0.4, 0, cz + 0.7], [cx + 0.4, 0.5, cz + 0.7], 0.22, 8, 0.12));
   } else {
     // A shutter fallen from its window, and broken roof slates.
     for (let i = 0; i < 4; i++)
-      addTo(bag, "Timber", box([0.15, 0.04, 1.1], [cx - 0.24 + i * 0.16, 0.03, cz], [0, 0.35, 0]));
-    addTo(bag, "Timber", box([0.66, 0.05, 0.07], [cx, 0.07, cz - 0.3], [0, 0.35, 0]));
-    addTo(bag, "Timber", box([0.66, 0.05, 0.07], [cx + 0.0, 0.07, cz + 0.3], [0, 0.35, 0]));
+      addTo(bag, "Iron", box([0.15, 0.04, 1.1], [cx - 0.24 + i * 0.16, 0.03, cz], [0, 0.35, 0]));
+    addTo(bag, "Iron", box([0.66, 0.05, 0.07], [cx, 0.07, cz - 0.3], [0, 0.35, 0]));
+    addTo(bag, "Iron", box([0.66, 0.05, 0.07], [cx + 0.0, 0.07, cz + 0.3], [0, 0.35, 0]));
     for (const [dx, dz, a] of [
       [-0.8, 0.6, 0.4],
       [-0.6, 0.85, 1.9],
@@ -306,11 +306,11 @@ function cathedralLeftBehind(bag: Bag, kind: number) {
   const [cx, cz] = [2.85, -1.5];
   if (kind === 0) {
     // A block of sandstone, half dressed, on two timbers; a mallet and two chisels; chips round it.
-    for (const dz of [-0.35, 0.35]) addTo(bag, "DarkWood", box([0.9, 0.12, 0.14], [cx, 0.06, cz + dz], [0, 0.2, 0]));
+    for (const dz of [-0.35, 0.35]) addTo(bag, "Sandstone", box([0.9, 0.12, 0.14], [cx, 0.06, cz + dz], [0, 0.2, 0]));
     addTo(bag, "Sandstone", box([0.8, 0.55, 0.65], [cx, 0.4, cz], [0, 0.2, 0]));
     addTo(bag, "Highlights", box([0.5, 0.18, 0.4], [cx - 0.05, 0.76, cz + 0.05], [0, 0.35, 0]));
-    addTo(bag, "DarkWood", rod([cx - 0.75, 0.05, cz + 0.55], [cx - 0.45, 0.05, cz + 0.85], 0.025, 6));
-    addTo(bag, "DarkWood", box([0.14, 0.12, 0.2], [cx - 0.78, 0.06, cz + 0.5], [0, -0.8, 0]));
+    addTo(bag, "Sandstone", rod([cx - 0.75, 0.05, cz + 0.55], [cx - 0.45, 0.05, cz + 0.85], 0.025, 6));
+    addTo(bag, "Sandstone", box([0.14, 0.12, 0.2], [cx - 0.78, 0.06, cz + 0.5], [0, -0.8, 0]));
     for (const [dx, dz, a] of [
       [-0.6, 0.15, 0.4],
       [-0.55, 0.3, 0.9],
@@ -347,12 +347,12 @@ function cathedralLeftBehind(bag: Bag, kind: number) {
         .rotateY(0.6)
         .translate(cx - 0.18, 0.42, cz - 0.2),
     );
-    addTo(bag, "DarkWood", box([0.18, 0.18, 1.3], [cx - 0.7, 0.09, cz + 0.4], [0, 0.4, 0]));
-    addTo(bag, "DarkWood", box([0.14, 0.14, 0.6], [cx - 0.5, 0.07, cz - 0.7], [0, -0.9, 0]));
+    addTo(bag, "Sandstone", box([0.18, 0.18, 1.3], [cx - 0.7, 0.09, cz + 0.4], [0, 0.4, 0]));
+    addTo(bag, "Sandstone", box([0.14, 0.14, 0.6], [cx - 0.5, 0.07, cz - 0.7], [0, -0.9, 0]));
   } else if (kind === 2) {
     // A rack of rolled charts (the crossings' maps), one unrolled on the floor under two stones.
-    for (const dx of [-0.35, 0.35]) addTo(bag, "DarkWood", box([0.06, 1.1, 0.5], [cx + dx, 0.55, cz - 0.6]));
-    for (const y of [0.35, 0.7, 1.05]) addTo(bag, "DarkWood", box([0.76, 0.04, 0.5], [cx, y, cz - 0.6]));
+    for (const dx of [-0.35, 0.35]) addTo(bag, "Sandstone", box([0.06, 1.1, 0.5], [cx + dx, 0.55, cz - 0.6]));
+    for (const y of [0.35, 0.7, 1.05]) addTo(bag, "Sandstone", box([0.76, 0.04, 0.5], [cx, y, cz - 0.6]));
     for (const [y, n] of [
       [0.42, 4],
       [0.77, 3],
@@ -393,7 +393,7 @@ function cathedralByTheDoor(bag: Bag, kind: number) {
   const [x, z] = [1.65, -3.4];
   if (kind === 0) {
     // A box of unlit candles.
-    addTo(bag, "DarkWood", box([0.55, 0.2, 0.35], [x, 0.1, z], [0, 0.2, 0]));
+    addTo(bag, "Sandstone", box([0.55, 0.2, 0.35], [x, 0.1, z], [0, 0.2, 0]));
     for (let i = 0; i < 6; i++)
       addTo(
         bag,
@@ -414,11 +414,7 @@ function cathedralByTheDoor(bag: Bag, kind: number) {
   } else if (kind === 2) {
     // A stack of hymnals.
     for (let i = 0; i < 4; i++)
-      addTo(
-        bag,
-        i % 2 ? "DarkWood" : "Parchment",
-        box([0.4 - i * 0.04, 0.09, 0.3], [x, 0.045 + i * 0.09, z], [0, i * 0.3, 0]),
-      );
+      addTo(bag, "Parchment", box([0.4 - i * 0.04, 0.09, 0.3], [x, 0.045 + i * 0.09, z], [0, i * 0.3, 0]));
   } else {
     // A pinnacle stone fallen from the parapet.
     addTo(bag, "Sandstone", box([0.35, 0.35, 0.35], [x, 0.175, z], [0, 0.5, 0]));
@@ -440,8 +436,8 @@ export function HouseTraits({ device, region }: { device: string; region: Region
       cathedralLeftBehind(bag, (h >>> 4) % 4);
       cathedralByTheDoor(bag, (h >>> 12) % 4);
     } else {
-      leftBehind(bag, WOOD[region], (h >>> 4) % 4);
-      byTheDoor(bag, WOOD[region], (h >>> 12) % 4);
+      leftBehind(bag, ROOM_MATERIAL[region], (h >>> 4) % 4);
+      byTheDoor(bag, ROOM_MATERIAL[region], (h >>> 12) % 4);
     }
     return Object.entries(bag).flatMap(([name, list]) => {
       const geometry = list.length === 1 ? list[0] : mergeGeometries(list);

@@ -477,8 +477,8 @@ function Bars({ slots, doors }: { slots: DoorSlot[]; doors: number }) {
       const g = doorGeometry(slot);
       const back = slot.wall !== "left";
       const at: V3 = back ? [g.doorway[0], 1.35, slot.wall === "front" ? 3.82 : -3.82] : [-3.82, 1.35, g.doorway[2]];
-      // A great oak beam with iron straps, resting in iron brackets either side of the door.
-      addTo(b, "Wood", box(back ? [2.4, 0.24, 0.16] : [0.16, 0.24, 2.4], at));
+      // A heavy iron bar with brass straps, resting in iron brackets either side of the door.
+      addTo(b, "Iron", box(back ? [2.4, 0.24, 0.16] : [0.16, 0.24, 2.4], at));
       for (const k of [-0.7, 0, 0.7]) {
         const strap: V3 = back ? [at[0] + k, at[1], at[2] + 0.01] : [at[0] + 0.01, at[1], at[2] + k];
         addTo(b, "Brass", box(back ? [0.06, 0.26, 0.17] : [0.17, 0.26, 0.06], strap));
