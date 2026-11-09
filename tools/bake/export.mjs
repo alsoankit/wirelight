@@ -119,14 +119,14 @@ function build({ kind, doors, slots, region, half }) {
   }
   if (kind === "observatory") {
     const layout = observatoryLayout(doors, region);
-    return { layout, glows: layout.glows ?? RUNE_GLOWS };
+    return { layout, glows: [...(layout.glows ?? RUNE_GLOWS), ...(layout.stubGlows ?? [])] };
   }
   if (kind === "house") {
     const layout = houseLayout(region);
-    return { layout, glows: layout.glows ?? HOUSE_LAMP };
+    return { layout, glows: [...(layout.glows ?? HOUSE_LAMP), ...(layout.stubGlows ?? [])] };
   }
   const layout = hallLayout(slots ?? doors, region);
-  return { layout, glows: layout.glows ?? HALL_LAMP };
+  return { layout, glows: [...(layout.glows ?? HALL_LAMP), ...(layout.stubGlows ?? [])] };
 }
 
 // Kit pieces, parsed from the files the game serves (textures are never needed: only shapes).

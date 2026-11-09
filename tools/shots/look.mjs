@@ -1,4 +1,4 @@
-// Screenshots of rooms on a running server: node tools/shots/look.mjs <url>/play <out-dir> room[:machine[:bench|birds]] …
+// Screenshots of rooms on a running server: node tools/shots/look.mjs <url>/play <out-dir> room[:machine|-[:bench|birds|corridor=<link>]] …
 import { chromium } from "playwright-core";
 
 const [base, out, ...shots] = process.argv.slice(2);
@@ -31,8 +31,16 @@ for (const shot of shots) {
   if (extra === "bench")
     await page.evaluate(() => window.__wirelight.useSession.getState().openPanel({ kind: "workbench" }));
   if (extra === "birds") await page.keyboard.press("b");
+  if (extra?.startsWith("corridor=")) {
+    const link = extra.slice(9);
+    await page.evaluate(
+      (l) => window.__wirelight.useSession.getState().enterCorridor(l, window.__wirelight.useSession.getState().here),
+      link,
+    );
+    await page.waitForTimeout(6000);
+  }
   await page.waitForTimeout(1500);
-  await page.screenshot({ path: `${out}/${room}-${walk}-${extra ?? ""}.png` });
+  await page.screenshot({ path: `${out}/${room}-${walk}-${(extra ?? "").replace(/[^a-z0-9-]/gi, "_")}.png` });
   console.log("shot", room, walk, extra ?? "");
 }
 console.log(errors.length ? errors.join("\n") : "no page errors");

@@ -4,6 +4,7 @@ import { HALLS_HOUSE_PIECES, hallsHouse } from "../regions/halls";
 import { TOWN_HOUSE_PIECES, townHouse } from "../regions/town";
 import { worksHouse } from "../regions/works";
 import type { RoomLayout } from "../room/layout";
+import { withStubs } from "../room/stubs";
 
 // Another machine's room (a computer: kitchen, library…): one arch in the back wall where the
 // corridor comes in (0116). Same 8 × 8 m frame as the Observatory, so the camera and the doorways line up the same
@@ -22,5 +23,6 @@ export function houseLayout(region: RegionId = 1): RoomLayout {
   const regional =
     region === 2 ? worksHouse() : region === 3 ? townHouse() : region === 4 ? cathedralHouse() : hallsHouse();
   const room: RoomLayout = { ...frame, ...regional };
-  return room;
+  // The corridor's first stretch behind the arch (0119).
+  return withStubs(room, region, frame.doorSlots);
 }

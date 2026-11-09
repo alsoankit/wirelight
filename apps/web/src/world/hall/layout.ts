@@ -6,6 +6,7 @@ import { TOWN_SQUARE_PIECES, townSquare } from "../regions/town";
 import { worksHall } from "../regions/works";
 import type { DoorSlot, RoomLayout } from "../room/layout";
 import type { StatuePlace } from "../room/standing";
+import { withStubs } from "../room/stubs";
 
 // A switch's room, the sorting hall (CORE-06, Region 2's brief): many doors around the keeper, the
 // MAC board on its stand, and the keeper's desk. Until Region 2's own kit is in (brass, gears,
@@ -101,10 +102,9 @@ export function hallLayout(open: readonly DoorSlot[] | number, region: RegionId 
     keeper: [0.4, 0, 0.2] as RoomLayout["keeper"],
     air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
   };
-  const dressed = (l: RoomLayout): RoomLayout => ({
-    ...l,
-    statues: [...(l.statues ?? []), ...(ANGELS[region] ?? [])],
-  });
+  // Its angels, and the corridors' first stretch behind its arches (0119).
+  const dressed = (l: RoomLayout): RoomLayout =>
+    withStubs({ ...l, statues: [...(l.statues ?? []), ...(ANGELS[region] ?? [])] }, region, wallDoors);
   // The Works builds its halls from its own kits (regions/works.ts): village walls, its doorways.
   if (region === 2) return dressed({ ...frame, ...worksHall(wallDoors) });
   if (region === 3) return dressed({ ...frame, placements: TOWN_SQUARE_PIECES, ...townSquare(wallDoors) });

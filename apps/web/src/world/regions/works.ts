@@ -1,5 +1,5 @@
 import type { BufferGeometry } from "three";
-import { type CorridorDressing, corridorFloor } from "../corridor/frame";
+import { CORRIDOR, type CorridorDressing, corridorFloor, rightGateX } from "../corridor/frame";
 import { FLOORS, makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import { addTo, ball, box, extras, gearGeometry, onWall, pipe, ring, rod, type V3 } from "../kit/shapes";
@@ -578,31 +578,49 @@ export function worksCorridor(half = 5): CorridorDressing {
   const glows: Glow[] = [];
   const gears: Gear[] = [];
   const steam: V3[] = [];
-  const kitPieces = wallRun("back", -half, half, []);
-  ironDado(bag, "back", -half, half);
+  // The gates are the Works' own round doors (0119): the left room's across the far end, the right
+  // room's in the back wall near the right end, where the cable turns in (corridor/frame.ts).
+  const gate = rightGateX(half);
+  const kitPieces = [
+    ...wallRun("back", -half, half, [gate], "Wall_UnevenBrick_Door_Round"),
+    {
+      kit: HALL,
+      piece: "Wall_UnevenBrick_Door_Round",
+      position: [-half - WALL_FACE, 0, CORRIDOR.cable],
+      rotationY: QUARTER,
+    },
+  ] as KitPlacement[];
+  ironDadoAround(bag, "back", [gate], -half, half);
   pipes(bag, [
     [
       [-half, 2.78, -3.86],
-      [half, 2.78, -3.86],
+      [gate - 1.1, 2.78, -3.86],
     ],
     [
       [-3.3, 0, -3.8],
       [-3.3, 2.5, -3.8],
-      [half, 2.5, -3.8],
+      [gate - 1.1, 2.5, -3.8],
     ],
   ]);
-  brackets(bag, "back", [-4.2, -2.4, 2.4, 4.2], 2.78, 0.08);
-  brackets(bag, "back", [-1.5, 3.3], 2.5, 0.14);
+  brackets(bag, "back", [-4.2, -2.4, 1.6], 2.78, 0.08);
+  brackets(bag, "back", [-1.5, 1.2], 2.5, 0.14);
   valve(bag, "back", -3.3, 1.2, 0.36);
   vent(bag, steam, [-3.3, 1.75, -3.8], [-3.3, 1.75, -3.52]);
   gauge(bag, "back", -2.5, 2.05, 0.12, 0.13);
   gauge(bag, "back", 2.4, 2.0, 0.12, 0.1);
   gearTrain(bag, gears, "back", 0.4, 1.55, { size: 0.75, a1: 0.7, a2: -0.4 });
   lamp(bag, glows, "back", -1.5, 2.1, 2.6);
-  lamp(bag, glows, "back", 3.3, 2.1, 2.6);
-  hatch(bag, "back", 4.1, 1.45, 0.3);
-  // The channel the cable runs in: two copper rails along the floor.
-  for (const z of [-2.34, -2.06]) addTo(bag, "Copper", rod([-half + 0.3, 0.05, z], [half - 0.3, 0.05, z], 0.025, 6));
+  lamp(bag, glows, "back", 1.9, 2.1, 2.6);
+  // Light by the left-hand gate, so the far end's door reads (0119).
+  lamp(bag, glows, "back", -half + 1.15, 2.1, 2.2);
+  // The channel the cable runs in: two copper rails along the floor, turning in to the right-hand gate.
+  for (const [z, x] of [
+    [-2.34, gate - 0.14],
+    [-2.06, gate + 0.14],
+  ] as const) {
+    addTo(bag, "Copper", rod([-half + 0.3, 0.05, z], [x, 0.05, z], 0.025, 6));
+    addTo(bag, "Copper", rod([x, 0.05, z], [x, 0.05, CORRIDOR.back + 0.1], 0.025, 6));
+  }
   return {
     placements: [{ piece: "Brick", position: [3.6, 0, -0.9], rotationY: 1.1 }],
     kitPieces,

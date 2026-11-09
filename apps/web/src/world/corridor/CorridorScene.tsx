@@ -31,7 +31,7 @@ import { floorPlan } from "../room/plan";
 import { SecretDoor } from "../room/SecretDoor";
 import { Statue } from "../room/Statue";
 import { corridorDressing } from "./dressing";
-import { CORRIDOR, corridorHalf, endArches } from "./frame";
+import { CORRIDOR, corridorHalf, endArches, rightGateX, turnsIntoBack } from "./frame";
 
 // A corridor (0081, CORE-10..13): the cable between two doors, as a place. A short cutaway tunnel in
 // the region's stone, the cable a rune-line along its floor showing dark / lit / broken (CORE-12),
@@ -62,9 +62,12 @@ function RuneLine({
   state,
   half,
   loose,
+  turn,
 }: {
   state: "dark" | "lit" | "broken";
   half: number;
+  /** Where the line turns in to a gate in the back wall (0119), if it does. */
+  turn?: number;
   /** A cable end that's out (unplugged): the line stops short there, its loose end on the floor. */
   loose: { left: boolean; right: boolean };
 }) {
@@ -86,6 +89,22 @@ function RuneLine({
     flow.value = state === "lit" ? clock.elapsedTime * 0.25 : flow.value;
   });
   const from = -half + 0.3 + (loose.left ? 1.4 : 0);
+  if (turn !== undefined) {
+    // Along the corridor, then a quarter turn in through the back wall's gate (local x along −z there).
+    const end = loose.right ? Z - 0.5 : CORRIDOR.back - 0.5;
+    return (
+      <>
+        <mesh position={[(from + turn + 0.06) / 2, 0.03, Z]} material={material}>
+          <boxGeometry args={[turn + 0.06 - from, 0.02, 0.12]} />
+        </mesh>
+        <mesh position={[turn, 0.03, (Z + 0.06 + end) / 2]} rotation={[0, Math.PI / 2, 0]} material={material}>
+          <boxGeometry args={[Z + 0.06 - end, 0.02, 0.12]} />
+        </mesh>
+        {loose.left && <LooseEnd at={[from - 0.1, 0.05, Z + 0.12]} />}
+        {loose.right && <LooseEnd at={[turn + 0.12, 0.05, end - 0.1]} />}
+      </>
+    );
+  }
   const to = half - 0.3 - (loose.right ? 1.4 : 0);
   return (
     <>
@@ -175,7 +194,9 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
     right: !!ends && cableEnds?.[`${ends.b.device}:${ends.b.iface}`] === "out",
   };
 
-  const xOf = (device: string) => (ends?.a.device === device ? -END : END);
+  // The right-hand gate: across the near end, or in the back wall where the corridor turns in (0119).
+  const turn = turnsIntoBack(region) ? rightGateX(END) : undefined;
+  const xOf = (device: string) => (ends?.a.device === device ? -END : (turn ?? END));
   const canEnter = (device: string) => room?.access[device]?.state === "enterable";
   // Gliding through: from the end the player came in by, toward the other (stopping short of it).
   const glide = corridor.through && ends ? { from: xOf(corridor.from) * 0.55, to: xOf(corridor.through) * 0.55 } : null;
@@ -254,12 +275,12 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
         />
       )}
       {region === 4 && <Haze haze={quality.moonbeams} glass={dressing.stainedGlass} />}
-      <RuneLine state={state} half={END} loose={loose} />
+      <RuneLine state={state} half={END} loose={loose} turn={turn} />
       <Messages
         device={ends.a.device}
         link={corridor.link}
-        corridorEnd={[END - 0.4, 0.45, Z]}
-        doorway={[0, 0.45, Z]}
+        corridorEnd={turn === undefined ? [END - 0.4, 0.45, Z] : [turn, 0.45, CORRIDOR.back - 0.4]}
+        doorway={turn === undefined ? [0, 0.45, Z] : [turn, 0.45, Z]}
         keeper={[-END + 0.4, 0.45, Z]}
         watch={watch}
         cue={cue}
@@ -271,8 +292,10 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
       )}
       {[ends.a, ends.b].map((end, i) => {
         const door = doors?.[`${end.device}:${end.iface}`];
-        const x = i === 0 ? -END : END;
-        const position: Vec3 = [x + (i === 0 ? 0.9 : -0.9), 2.35, CORRIDOR.back + 0.25];
+        const x = i === 0 ? -END : (turn ?? END);
+        // The right plate hangs beside its gate: left of it in the back wall when the corridor turns in.
+        const position: Vec3 = [i === 0 ? x + 0.9 : turn === undefined ? x - 0.9 : x - 1.6, 2.35, CORRIDOR.back + 0.25];
+        const chip: Vec3 = i === 1 && turn !== undefined ? [turn, 1.3, CORRIDOR.back + 0.6] : [x, 1.3, Z];
         return (
           <group key={`${end.device}:${end.iface}`}>
             {door && (
@@ -286,7 +309,7 @@ export function CorridorScene({ corridor }: { corridor: Corridor }) {
               />
             )}
             {!corridor.through && (
-              <Html center position={[x, 1.3, Z]} zIndexRange={[10, 0]}>
+              <Html center position={chip} zIndexRange={[10, 0]}>
                 {canEnter(end.device) ? (
                   <button
                     type="button"

@@ -150,7 +150,11 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
         </Suspense>
       )}
       <group matrix={mirrored ? MIRRORED : IDENTITY} matrixAutoUpdate={false}>
-        <RoomLights glows={layout.glows ?? glows} region={region} baked={baked || picture} />
+        <RoomLights
+          glows={[...(layout.glows ?? glows), ...(layout.stubGlows ?? [])]}
+          region={region}
+          baked={baked || picture}
+        />
         {!picture && (
           <>
             <Suspense fallback={null}>

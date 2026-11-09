@@ -65,6 +65,8 @@ export type RoomLayout = {
   extras: Extra[];
   /** The room's own lights (when not given, the scene's). */
   glows?: Glow[];
+  /** Soft light down each corridor stub behind its arches (room/stubs.ts), added to the room's lights. */
+  stubGlows?: Glow[];
   gears?: Gear[];
   /** Where steam rises from (Region 2's valves and vents: regions/Steam.tsx). */
   steam?: Vec3[];
