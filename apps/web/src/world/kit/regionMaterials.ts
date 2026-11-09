@@ -171,7 +171,7 @@ function nodeMaterial(swatch: Swatch, region: RegionId, baked = false, lightmaps
   const m = new MeshStandardNodeMaterial();
   const restoredness = float(1).sub(ruin);
   const mossColour = mix(color(look.moss.restored), color(look.moss.ruined), ruin);
-  let tint = mix(color(swatch.restored), color(swatch.ruined), ruin);
+  let tint = mix(color(swatch.restored), color(swatch.ruined), ruin).mul(mix(float(1), float(0.72), ruin));
   if (swatch.aged && baked) {
     const ageing = attribute("ageing", "vec2");
     tint = tint.mul(ageing.x);

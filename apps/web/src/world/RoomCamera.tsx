@@ -19,6 +19,8 @@ type Props = {
   settleFrom?: number;
   /** Lock the view only when this exact room has a picture; unsupported layouts keep live camera motion. */
   picture?: boolean;
+  /** Rooms with a left-wall doorway use the mirrored three-quarter view. */
+  direction?: Vector3;
 };
 
 // From the room toward the camera. Fixed for every room (no orbit), so static geometry facing away
@@ -28,11 +30,18 @@ const PARALLAX = 0.5; // metres of camera drift at the screen edge
 const LIFT_DROP = 2.6; // metres the view moves down while the console is open
 const LIFT_OUT = 4; // …and how far it steps back
 
-export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0, picture = false }: Props) {
+export function RoomCamera({
+  target,
+  distance = 24,
+  fov = 28,
+  settleFrom = 0,
+  picture = false,
+  direction = VIEW_DIRECTION,
+}: Props) {
   const ref = useRef<Camera>(null);
   const lookAt = useMemo(() => new Vector3(...target), [target]);
-  const home = useMemo(() => lookAt.clone().addScaledVector(VIEW_DIRECTION, distance), [lookAt, distance]);
-  const right = useMemo(() => new Vector3(1, 0, -1).normalize(), []);
+  const home = useMemo(() => lookAt.clone().addScaledVector(direction, distance), [lookAt, direction, distance]);
+  const right = useMemo(() => new Vector3(direction.z, 0, -direction.x).normalize(), [direction]);
   const wanted = useMemo(() => new Vector3(), []);
   const still = useReducedMotion();
   const lift = useRef(0);
@@ -57,14 +66,14 @@ export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0, pi
     if (still) {
       camera.position
         .copy(home)
-        .addScaledVector(VIEW_DIRECTION, lift.current * LIFT_OUT)
+        .addScaledVector(direction, lift.current * LIFT_OUT)
         .add({ x: 0, y: -drop, z: 0 });
       camera.lookAt(aim.copy(lookAt).add({ x: 0, y: -drop, z: 0 }));
       return;
     }
     wanted
       .copy(home)
-      .addScaledVector(VIEW_DIRECTION, lift.current * LIFT_OUT)
+      .addScaledVector(direction, lift.current * LIFT_OUT)
       .addScaledVector(right, pointer.x * PARALLAX)
       .add({ x: 0, y: pointer.y * PARALLAX * 0.6 - drop, z: 0 });
     camera.position.lerp(wanted, 1 - Math.exp(-delta * 3));
@@ -78,9 +87,9 @@ export function RoomCamera({ target, distance = 24, fov = 28, settleFrom = 0, pi
     () =>
       home
         .clone()
-        .addScaledVector(VIEW_DIRECTION, settle)
+        .addScaledVector(direction, settle)
         .add({ x: 0, y: settle * 0.4, z: 0 }),
-    [home, settle],
+    [home, direction, settle],
   );
   return <PerspectiveCamera ref={ref} makeDefault fov={fov} position={start.toArray()} near={0.5} far={120} />;
 }

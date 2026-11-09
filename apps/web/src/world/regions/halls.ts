@@ -301,7 +301,7 @@ function observatoryGrowth(secondDoor: boolean): KitPlacement[] {
 // stone of the first builders beyond the broken left wall. Both far outside, behind nothing.
 const OBSERVATORY_VIEW: StatuePlace[] = [
   { slug: "stone-gate", position: [5.6, 0, -5.7], turn: -0.6, scale: 0.72 },
-  { slug: "rune-monolith", position: [-6.3, 0, 2.2], turn: 0.8, scale: 0.9 },
+  { slug: "rune-monolith", position: [-6.3, 0, -2.2], turn: 0.8, scale: 0.9 },
 ];
 
 // Where the moon gets in: the barred window, the gap above the crumbled left wall, and the collapsed

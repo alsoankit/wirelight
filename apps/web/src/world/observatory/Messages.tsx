@@ -46,6 +46,8 @@ type Props = {
   catchable?: boolean;
   /** The room's floor: what hovering a message may say (packets are sealed before Floor 6). */
   floor?: number;
+  /** The active three-quarter room view. */
+  viewDirection?: Vector3;
 };
 
 const AIMING_SPEED = 0.12;
@@ -80,6 +82,7 @@ export function Messages({
   cue,
   catchable = false,
   floor = 1,
+  viewDirection = VIEW_DIRECTION,
 }: Props) {
   const meshes = useRef<(Group | null)[]>([]);
   /** Each slot's trail lights, behind it on its path. */
@@ -98,6 +101,10 @@ export function Messages({
   );
   const outward = useMemo(() => [...inward].reverse(), [inward]);
   const seen = useRef(new Map<number, boolean>()); // frame id → leaving this machine?
+  const ringFacing = useMemo(
+    () => new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), viewDirection),
+    [viewDirection],
+  );
 
   useFrame(({ clock }) => {
     const { onCables, status } = useSession.getState();
@@ -190,7 +197,7 @@ export function Messages({
             <sphereGeometry args={[0.13, 20, 12]} />
             <meshBasicMaterial color={MESSAGE_COLOUR} toneMapped={false} />
           </mesh>
-          <mesh ref={(m) => (slot(shapes.current, i).broadcast = m)} visible={false} quaternion={RING_FACING}>
+          <mesh ref={(m) => (slot(shapes.current, i).broadcast = m)} visible={false} quaternion={ringFacing}>
             <torusGeometry args={[0.15, 0.035, 8, 24]} />
             <meshBasicMaterial color={MESSAGE_COLOUR} toneMapped={false} />
           </mesh>
@@ -243,9 +250,6 @@ export function Messages({
 }
 
 const KINDS: MessageKind[] = ["unicast", "broadcast", "arp", "dhcp"];
-
-/** A broadcast's ring faces the room's fixed camera, so it reads as a ring, not a line. */
-const RING_FACING = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), VIEW_DIRECTION);
 
 function slot(all: Record<MessageKind, Mesh | null>[], i: number): Record<MessageKind, Mesh | null> {
   all[i] ??= { unicast: null, broadcast: null, arp: null, dhcp: null };

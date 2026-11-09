@@ -507,7 +507,7 @@ export function townSquare(used: { wall: Wall; at: number }[]) {
       if (door) kit.push(doorFrame(wall, at));
       k++;
     }
-    wing(kit, bag, wall, { dormers: [-3, -1, 1, 3], chimneys: [wall === "back" ? -2 : 2] });
+    wing(kit, bag, wall, { dormers: [-3, -1, 1, 3], chimneys: wall === "back" ? [-2] : [] });
     for (const at of [-2, 0, 2]) pilaster(bag, wall, at);
   }
   // A barrel and a crate by the houses (the street's, not a home's), a broken pot. No whole pots (0052).

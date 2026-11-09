@@ -32,6 +32,11 @@ export function World({ arriving = false }: { arriving?: boolean }) {
 function Scene({ roomId, here, arriving }: { roomId: string; here: string; arriving: boolean }) {
   const room = roomById(roomId);
   if (!room) return null;
+  const contactHall =
+    new URLSearchParams(window.location.search).has("capture") &&
+    new URLSearchParams(window.location.search).get("contact") === "hall";
+  if (contactHall && here === room.playerDevice)
+    return <HallScene key={`${roomId}:${here}:contact-hall`} device={here} />;
   if (here === room.playerDevice) return <ObservatoryScene key={`${roomId}:${here}`} arriving={arriving} />;
   const spec = room.topology.devices.find((d) => d.id === here);
   // A machine with a bridge (a switch) or several doors (a router) gets a hall: room for its doors,

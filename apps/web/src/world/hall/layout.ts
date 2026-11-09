@@ -5,7 +5,7 @@ import { HALLS_HALL_DRESSING, hallsHall } from "../regions/halls";
 import { TOWN_SQUARE_PIECES, townSquare } from "../regions/town";
 import { worksHall } from "../regions/works";
 import type { DoorSlot, RoomLayout } from "../room/layout";
-import { roomMachines, type StatuePlace } from "../room/standing";
+import type { StatuePlace } from "../room/standing";
 
 // A switch's room, the sorting hall (CORE-06, Region 2's brief): many doors around the keeper, the
 // MAC board on its stand, and the keeper's desk. Until Region 2's own kit is in (brass, gears,
@@ -61,7 +61,7 @@ export const HALL_PIECES: Placement[] = [
  * cathedral's halls (they keep their own statue).
  */
 function angel(tint: { restored: string; ruined: string }, scale: number, moss = 0): StatuePlace {
-  return { slug: "engel-wings", position: [3.1, 0, -2.75], turn: Math.PI / 2, scale, tint, moss, detail: 0.35 };
+  return { slug: "engel-wings", position: [3.15, 0, 2.8], turn: Math.PI / 2, scale, tint, moss, detail: 0.35 };
 }
 
 const ANGELS: Partial<Record<RegionId, StatuePlace[]>> = {
@@ -79,7 +79,7 @@ export function hallLayout(doors: number, region: RegionId = 1, frontDoors = 0):
   };
   const dressed = (l: RoomLayout): RoomLayout => ({
     ...l,
-    statues: [...(l.statues ?? []), ...(ANGELS[region] ?? []), ...roomMachines()],
+    statues: [...(l.statues ?? []), ...(ANGELS[region] ?? [])],
   });
   // The Works builds its halls from its own kits (regions/works.ts): village walls, its doorways.
   if (region === 2) return dressed({ ...frame, ...worksHall(wallDoors) });
