@@ -229,7 +229,11 @@ export function cathedralObservatoryPieces(secondDoor: boolean): Placement[] {
 }
 
 /** The plain and window bays of a chapel's walls, their plinths, shafts on the joints and a cornice. */
-function chapelWalls(room: Room, back: Record<number, WindowKind | "wall">, left: Record<number, WindowKind | "wall">) {
+function chapelWalls(
+  room: Room,
+  back: Record<number, WindowKind | "wall" | "door">,
+  left: Record<number, WindowKind | "wall" | "door">,
+) {
   for (const [wall, bays] of [
     ["back", back],
     ["left", left],
@@ -237,7 +241,10 @@ function chapelWalls(room: Room, back: Record<number, WindowKind | "wall">, left
     const starts = Object.keys(bays).map(Number);
     for (const from of starts) {
       const kind = bays[from];
-      if (kind === "wall") room.kit.push(bay("wall_01", wall, from));
+      if (kind === "door") {
+        addTo(room.bag, "Ashlar", onWall(wallWithDoor(2, HEIGHT, 0.3, 1.8, 2.9, true), wall, from, 0));
+        addTo(room.bag, "Stone", onWall(doorFrame(1.8, 2.9, 0.16, 0.14, true), wall, from, 0));
+      } else if (kind === "wall") room.kit.push(bay("wall_01", wall, from));
       else if (kind) windowBay(room, wall, from, kind);
       room.kit.push(plinth(wall, from));
     }
@@ -277,10 +284,10 @@ export const CATHEDRAL_HOUSE_PIECES: Placement[] = [
 
 export function cathedralHouse() {
   const room = newRoom();
-  // The back wall whole (0111: the door is on the near edge).
+  // A pointed doorway built into the back wall, with the chapel's own ashlar and moulding.
   chapelWalls(
     room,
-    { [-4]: "lancet", [-2]: "wall", 0: "wall", 2: "wall" },
+    { [-4]: "lancet", [-2]: "wall", 0: "door", 2: "wall" },
     { [-4]: "wall", [-2]: "tall", 0: "wall", 2: "wall" },
   );
   room.kit.push(...floor("floor_01"), ...piers());

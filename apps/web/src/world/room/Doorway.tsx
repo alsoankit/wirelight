@@ -119,24 +119,6 @@ function GateStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep
 /** Invisible but still hit by the pointer (a hidden mesh would be skipped by raycasting). */
 const HIT_MATERIAL = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
 
-function GateArch({ slot }: { slot: DoorSlot }) {
-  const g = doorGeometry(slot);
-  return (
-    <group position={[g.doorway[0], 0, g.doorway[2]]} rotation={[0, slot.wall === "back" ? 0 : Math.PI / 2, 0]}>
-      {[-0.9, 0.9].map((x) => (
-        <mesh key={x} position={[x, 1.15, 0]}>
-          <boxGeometry args={[0.22, 2.3, 0.36]} />
-          <meshStandardMaterial color="#aaa394" roughness={0.92} />
-        </mesh>
-      ))}
-      <mesh position={[0, 2.18, 0]}>
-        <torusGeometry args={[0.9, 0.12, 8, 24, Math.PI]} />
-        <meshStandardMaterial color="#b8b0a1" roughness={0.9} />
-      </mesh>
-    </group>
-  );
-}
-
 // Where messages died at this door (CORE-17): small faded scraps on the floor just inside it. They
 // pile up while messages keep dying here (2.2's clue: ignored messages pile at lantern's door), each
 // fading away about half a minute after it fell. They never say why: that's for the player to find out.
@@ -271,7 +253,6 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
 
   return (
     <>
-      <GateArch slot={slot} />
       <Cable slot={slot} state={corridor} />
       <GateStep slot={slot} name={peer} onStep={enter} />
       <Messages

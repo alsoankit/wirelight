@@ -100,12 +100,12 @@ const WALL_FACE = 0.09;
  * piece, the last piece is set flush with the gap's end and a little further back, behind its
  * neighbour (the kit has no half walls).
  */
-function wallRun(wall: Wall, from: number, to: number, doors: number[]): KitPlacement[] {
+function wallRun(wall: Wall, from: number, to: number, doors: number[], doorPiece = FLAT.piece): KitPlacement[] {
   const out: KitPlacement[] = [];
   const put = (piece: string, centre: number, back = 0) =>
     out.push(onWallKit(HALL, piece, wall, centre, [0, 0, -WALL_FACE - back]));
   const sorted = [...doors].sort((a, b) => a - b);
-  for (const d of sorted) put(FLAT.piece, d);
+  for (const d of sorted) put(doorPiece, d);
   const edges = [from, ...sorted.flatMap((d) => [d - 1, d + 1]), to];
   for (let i = 0; i < edges.length; i += 2) {
     const a = edges[i] as number;
@@ -396,15 +396,13 @@ export function worksObservatory(secondDoor: boolean) {
   const gears: Gear[] = [];
   const steam: V3[] = [];
   const kitPieces: KitPlacement[] = [
-    ...wallRun("back", -4, 4, [0]),
-    ...wallRun("left", -4.4, 4, secondDoor ? [2] : []),
+    ...wallRun("back", -4, 4, [0], "Wall_UnevenBrick_Door_Round"),
+    ...wallRun("left", -4.4, 4, secondDoor ? [2] : [], "Wall_UnevenBrick_Door_Round"),
     // A gearbox where the riser pipe goes into the floor.
     { kit: TURRETS, piece: "Base", position: [-3.5, 0, -3.5], scale: 0.42, rotationY: 0.3 },
   ];
   // The sorters' metal card index right of the door.
   drawerCabinet(bag, "back", 2.95);
-  doorFrame(bag, "back", 0, FLAT.half, FLAT.height);
-  if (secondDoor) doorFrame(bag, "left", 2, FLAT.half, FLAT.height);
   ironDadoAround(bag, "back", [0], -3.6);
   ironDadoAround(bag, "left", secondDoor ? [2] : [], -3.6);
   // The great gear train, left of the door, its middle gear climbing toward the door.
@@ -461,12 +459,11 @@ export function worksHouse() {
   const gears: Gear[] = [];
   const steam: V3[] = [];
   const kitPieces: KitPlacement[] = [
-    ...wallRun("back", -4, 4, []), // whole: the door is on the near edge (0111)
+    ...wallRun("back", -4, 4, [0], "Wall_UnevenBrick_Door_Round"),
     ...wallRun("left", -4.4, 4, []),
   ];
   drawerCabinet(bag, "back", -2.6, 2);
   sortingBench(bag, "left", -1.75);
-  doorFrame(bag, "back", 0, FLAT.half, FLAT.height);
   ironDadoAround(bag, "back", [0], -3.95);
   ironDadoAround(bag, "left", [], -3.6);
   pipes(bag, [
@@ -511,11 +508,10 @@ export function worksHall(used: { wall: Wall; at: number }[]) {
   const door = (wall: Wall, at: number) => used.some((s) => s.wall === wall && s.at === at);
   const doorsOn = (wall: Wall) => used.filter((s) => s.wall === wall).map((s) => s.at);
   const kitPieces: KitPlacement[] = [
-    ...wallRun("back", -4, 4, doorsOn("back")),
-    ...wallRun("left", -4.4, 4, doorsOn("left")),
+    ...wallRun("back", -4, 4, doorsOn("back"), "Wall_UnevenBrick_Door_Round"),
+    ...wallRun("left", -4.4, 4, doorsOn("left"), "Wall_UnevenBrick_Door_Round"),
   ];
   for (const s of used) {
-    doorFrame(bag, s.wall, s.at, FLAT.half, FLAT.height);
     // Its link light on the stone between it and the next bay.
     if (s.at < 3) doorDial(bag, s.wall, s.at + 1.0, 1.75);
   }

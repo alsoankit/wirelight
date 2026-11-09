@@ -466,7 +466,7 @@ export function townObservatory(_secondDoor: boolean) {
 
 export const TOWN_HOUSE_PIECES: Placement[] = [];
 
-const HOUSE_KIT: KitPlacement[] = [...interiorWalls([-3], [-1, 3], false), prop("Vase_Rubble_Medium", 2.6, -3.2, 0.6)];
+const HOUSE_KIT: KitPlacement[] = [...interiorWalls([-3], [-1, 3]), prop("Vase_Rubble_Medium", 2.6, -3.2, 0.6)];
 
 export function townHouse() {
   const bag: Bag = {};
@@ -504,7 +504,6 @@ export function townSquare(used: { wall: Wall; at: number }[]) {
           ? "Wall_Plaster_Window_Wide_Round"
           : "Wall_Plaster_Window_Thin_Round";
       front(kit, wall, at, face, { closed: !door && k % 4 === 3 });
-      if (door) kit.push(doorFrame(wall, at));
       k++;
     }
     wing(kit, bag, wall, { dormers: [-3, -1, 1, 3], chimneys: wall === "back" ? [-2] : [] });
