@@ -5,6 +5,7 @@ import { type Camera, PlaneGeometry, SRGBColorSpace, Vector3 } from "three";
 import { float, mix, positionGeometry, texture, uniform, uv, vec3, vec4 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { ruinAt } from "../ruin";
+import captured from "./pictures.json";
 
 // A room as a picture (prototype, 2.5D): the room rendered once, ruined and restored, drawn behind
 // the live things, with the camera locked so they line up. The restoration wave still sweeps: each
@@ -16,29 +17,11 @@ export const captureMode = params.has("capture");
 /** Picture rooms are the default; `?pre=0` returns to the live room everywhere. */
 export const pictureMode = !captureMode && params.get("pre") !== "0";
 
-/** Every captured room layout. Hall ids include the near-edge door count to keep doors on their picture. */
-const PICTURES = new Set([
-  "r1-observatory-d1",
-  "r1-observatory-d2",
-  "r1-house-d1",
-  "r2-observatory-d1",
-  "r2-house-d1",
-  "r2-hall-d4-f1",
-  "r2-hall-d4-f2",
-  "r2-hall-d5-f1",
-  "r2-hall-d5-f2",
-  "r3-observatory-d1",
-  "r3-house-d1",
-  "r3-hall-d3-f1",
-  "r3-hall-d4-f1",
-  "r3-hall-d5-f1",
-  "r3-hall-d6-f1",
-  "r3-hall-d7-f1",
-  "r4-observatory-d1",
-  "r4-house-d1",
-  "r4-hall-d2-f1",
-  "r4-hall-d3-f1",
-]);
+/**
+ * Every captured room layout, written by tools/shots/capture-rooms.mjs. Empty until the rooms are
+ * recaptured after a change (0116), so a stale picture never stands in for a changed room.
+ */
+const PICTURES = new Set<string>(captured);
 export const hasPicture = (id: string) => PICTURES.has(id);
 
 const SCREEN = new PlaneGeometry(2, 2);

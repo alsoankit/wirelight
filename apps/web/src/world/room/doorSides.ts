@@ -1,14 +1,12 @@
 import type { Topology } from "@wirelight/sim";
 import type { DoorSlot } from "./layout";
 
-// Doors follow the Map (decision 0111). The floor Map lays machines out by distance from the player's
-// machine; each room puts a door on the wall that faces the machine at its other end:
+// Doors follow the Map (decision 0111), on the far walls only (0116: the near sides stay open so the
+// whole room is always in view). The floor Map lays machines out by distance from the player's machine:
 // - further from the player → the back wall (deeper into the floor);
-// - closer to the player → the near edge, the way back (an opening toward the camera);
-// - the same distance → the left wall (a branch beside this one).
-// So a corridor's two ends always face each other.
+// - closer to the player (the way back) or the same distance (a branch) → the left wall.
 
-export type Side = "back" | "left" | "front";
+export type Side = "back" | "left";
 
 /** Each machine's distance from `start`, counted in cables (a breadth-first walk, as the Map does). */
 export function depthsFrom(t: Topology, start: string): Map<string, number> {
@@ -41,7 +39,7 @@ export function doorSides(t: Topology, start: string, here: string): Map<string,
     const other = end === l.a ? l.b : l.a;
     if (!end) continue;
     const theirs = depth.get(other.device) ?? 0;
-    out.set(end.iface, theirs > mine ? "back" : theirs < mine ? "front" : "left");
+    out.set(end.iface, theirs > mine ? "back" : "left");
   }
   return out;
 }

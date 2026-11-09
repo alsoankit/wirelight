@@ -9,9 +9,7 @@ import { MARK_MS, useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { useMachineLabel } from "../../play/roles";
 import { goThrough, stepIntoCorridor } from "../corridor/move";
-import { Piece } from "../kit/Piece";
 import { regionMaterial } from "../kit/regionMaterials";
-import { KitRoom } from "../kits/KitRoom";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { useRegion } from "../region";
@@ -293,7 +291,6 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
 
   return (
     <>
-      {slot.wall === "front" && <NearFrame slot={slot} viewDirection={viewDirection} />}
       <group>
         <mesh position={preview.center} material={floorMaterial}>
           <boxGeometry args={horizontal ? [2.2, 0.07, 1.35] : [1.35, 0.07, 2.2]} />
@@ -408,19 +405,6 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
       </Html>
     </>
   );
-}
-
-/**
- * A doorway on the near edge (0111): a regional stone arch set in a short wall stub. The opening
- * stays clear so the corridor is visible only through it.
- */
-function NearFrame({ slot, viewDirection }: { slot: DoorSlot; viewDirection: Vector3 }) {
-  const region = useRegion();
-  const x = slot.at;
-  if (region === 1) return <Piece name="Wall_ArchRound_Overgrown" position={[x, 0, 3.95]} scale={0.65} />;
-  const kit = region === 2 ? "region-2/hall" : region === 3 ? "region-3/village" : "region-4/cathedral";
-  const piece = region === 4 ? "doorway_01" : "Wall_UnevenBrick_Door_Round";
-  return <KitRoom pieces={[{ kit, piece, position: [x, 0, 3.8] }]} region={region} toCamera={viewDirection} />;
 }
 
 /** A door with no cable at all (a spare port): its plate, link down, and the dark doorway. */

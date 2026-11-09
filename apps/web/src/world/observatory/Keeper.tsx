@@ -21,7 +21,7 @@ import type { KeeperCue } from "./Messages";
 // message. A heavy old cabinet with a keyboard and an amber screen. It stands still: its screen
 // brightens as a message arrives and dims when it is asleep (0042), and a thread of warm light runs
 // from the screen to the door it chose. Amber, never cyan: cyan belongs to messages (0090).
-// Built in code; its front is +z here, aligned to the nearest wall direction toward its doorway.
+// Built in code; its front is +z here. Its back is to its doorway, square to the walls, so its screen faces into the room.
 
 type Props = {
   position: [number, number, number];
@@ -106,7 +106,8 @@ export function Keeper({ position, rest, cue, region = 1, asleep = false }: Prop
   const beamRef = useRef<Group>(null);
 
   const door = useMemo(() => new Vector3(...rest), [rest]);
-  const facing = Math.round(Math.atan2(rest[0] - position[0], rest[2] - position[2]) / (Math.PI / 2)) * (Math.PI / 2);
+  const facing =
+    Math.round(Math.atan2(rest[0] - position[0], rest[2] - position[2]) / (Math.PI / 2)) * (Math.PI / 2) + Math.PI;
   const screenAt = useMemo(() => new Vector3(), []);
   const DOWN = useMemo(() => new Vector3(0, -1, 0), []);
 

@@ -1,7 +1,7 @@
 // Capture every unique room layout in the room data, in ruin and restored states.
 // Usage: node tools/shots/capture-rooms.mjs http://localhost:5173/play [--only picture-id]
 import { execFileSync } from "node:child_process";
-import { mkdir, stat, unlink } from "node:fs/promises";
+import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -41,10 +41,7 @@ try {
             (link.b.device === device.id && link.b.iface === iface.name),
         ),
       ).length;
-      const front = hall
-        ? [...doorSides(room.topology, room.playerDevice, device.id).values()].filter((side) => side === "front").length
-        : 0;
-      const id = `r${room.region}-${kind}-d${doors}${hall ? `-f${front}` : ""}`;
+      const id = `r${room.region}-${kind}-d${doors}`;
       if (!unique.has(id)) unique.set(id, { id, room: room.id, walk: obs ? undefined : device.id });
     }
   }
@@ -112,3 +109,13 @@ try {
   await browser.close();
 }
 if (problems.length) throw new Error(`Capture page errors:\n${[...new Set(problems)].join("\n")}`);
+
+// The game shows a picture only for layouts listed here (both states captured), so a stale or missing
+// picture never stands in for a changed room.
+const files = new Set(await readdir(out));
+const captured = [...files]
+  .filter((f) => f.endsWith("-lit.webp") && files.has(f.replace(/-lit\.webp$/, "-ruin.webp")))
+  .map((f) => f.replace(/-lit\.webp$/, ""))
+  .sort();
+await writeFile(join(root, "apps/web/src/world/prerender/pictures.json"), `${JSON.stringify(captured, null, 2)}\n`);
+console.log(`pictures.json: ${captured.length} layouts`);

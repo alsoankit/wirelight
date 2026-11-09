@@ -79,6 +79,9 @@ type Props = {
   children?: ReactNode;
 };
 
+/** Where RoomCamera stands, for the picture (target and distance as below). */
+const PICTURE_HOME = new Vector3(0, 1.1, -0.6).addScaledVector(VIEW_DIRECTION, 19);
+
 export function MachineScene({ device, layout: given, barred, glows, arriving = false, children }: Props) {
   const watch = useRef<Object3D>(null);
   const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
@@ -99,20 +102,16 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
   const layout = useMemo(() => {
     if (!room) return given;
     const sides = doorSides(room.topology, room.playerDevice, device);
-    // Unplugged interfaces still take wall slots in a hall; keep the near-edge slot for a real return link.
+    // Unplugged interfaces still take wall slots in a hall.
     for (const iface of empty) if (!sides.has(iface)) sides.set(iface, "left");
-    // Only among slots with openings: hall layouts put near-edge slots first and cut wall arches for the rest.
+    // Only among slots with openings: halls cut wall arches for the first N slots.
     const used = doors.length + empty.length;
     const { placed, rest } = slotsFor([...doors.map((d) => d.iface), ...empty], sides, given.doorSlots.slice(0, used));
     const doorSlots = [...placed, ...rest, ...given.doorSlots.slice(used)];
     return { ...given, doorSlots: doorSlots.filter((s): s is DoorSlot => !!s) };
   }, [given, room, device, doors, empty]);
-  const leftWallView = doors.some((_, i) => layout.doorSlots[i]?.wall === "left");
-  const viewDirection = useMemo(
-    () => (leftWallView ? new Vector3(-1, 0.9, 1).normalize() : VIEW_DIRECTION),
-    [leftWallView],
-  );
-  const pictureHome = useMemo(() => new Vector3(0, 1.1, -0.6).addScaledVector(viewDirection, 19), [viewDirection]);
+  // One view for every room (0116): the open corner, so both far walls and every door are in sight.
+  const viewDirection = VIEW_DIRECTION;
   // The room restores on the win, all at once (playtest 2026-10-13, amending CORE-38's share of
   // failing checks): partial progress relights only the thing that was fixed (its corridor, its
   // plate's light), never the room. A room with no health checks still restores when won.
@@ -122,8 +121,7 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
   const origin: Vec3 = first ? [doorGeometry(first).doorway[0], 1, doorGeometry(first).doorway[2]] : [0, 1, 0];
 
   const hall = device !== "observatory" && layout.doorSlots.length > 2;
-  const frontDoors = layout.doorSlots.slice(0, doors.length).filter((slot) => slot?.wall === "front").length;
-  const pictureId = `r${region}-${device === "observatory" ? "observatory" : hall ? "hall" : "house"}-d${doors.length}${hall ? `-f${frontDoors}` : ""}`;
+  const pictureId = `r${region}-${device === "observatory" ? "observatory" : hall ? "hall" : "house"}-d${doors.length}`;
   const picture = pictureMode && hasPicture(pictureId);
   const baked = useMemo(() => lampsBaked(layout.placements, layout.extras, layout.kitPieces, region), [layout, region]);
 
@@ -141,7 +139,7 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
       <RoomLights glows={layout.glows ?? glows} region={region} baked={baked || picture} />
       {picture && (
         <Suspense fallback={null}>
-          <RoomPicture id={pictureId} home={pictureHome} />
+          <RoomPicture id={pictureId} home={PICTURE_HOME} />
         </Suspense>
       )}
       {!picture && (
