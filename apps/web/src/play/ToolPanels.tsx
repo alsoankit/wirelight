@@ -45,7 +45,7 @@ function WorkbenchPanel() {
   const broadcastTaught =
     room.region > 1 || room.floor > 2 || (room.region === 1 && room.floor === 2 && room.order >= 3);
   return (
-    <section className="panel" aria-label={voice.workbench.title}>
+    <section className="panel frame-builder-panel" aria-label={voice.workbench.title}>
       <h2>{voice.workbench.title}</h2>
       <p>{voice.workbench.about}</p>
       <label className="field">
