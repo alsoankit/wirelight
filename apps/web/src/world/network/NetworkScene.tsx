@@ -18,15 +18,17 @@ import type { KeeperCue } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { VIEW_DIRECTION } from "../RoomCamera";
 import { asRegion } from "../region";
+import { alongPath } from "../room/palaceMap";
 import { hallSlots, MIRROR, planOf } from "../room/plan";
-import { networkSpots, type Spot } from "./spots";
+import { networkRuns, networkSpots, type Run, type Spot } from "./spots";
 
 // The network world (prototype, 0103): the whole network in one calm view. A machine is a matte
 // platform, a cable a visible bridge between two machines, and every message the engine has on a cable
 // is a small light moving along it, placed from the same crossings as the map. Nothing here is
 // textured or lit live, so the view costs only a few cheap meshes.
 
-const PLATFORM = 5;
+// A room floor at the diorama scale (8 m x PALACE_SCALE), with a narrow rim.
+const PLATFORM = 3.75;
 const LIFT = 0.35;
 
 /** Basic materials keep this view cheap and compatible with both render backends. */
@@ -133,10 +135,14 @@ function Platform({ spot, room, here }: { spot: Spot; room: RoomDef; here: boole
       {/* biome-ignore lint/a11y/noStaticElementInteractions: a 3D object (raycast click); the chip is the keyboard way */}
       <group onClick={() => open && goTo(spot.id)}>
         <mesh geometry={SLAB} material={here ? colors.here : colors.body} position={[0, 0, 0]} />
-        <mesh geometry={UNIT} material={colors.top} position={[0, 0.2, 0]} scale={[4.55, 0.08, 4.55]} />
-        {/* Turned an eighth so it reads as the room view does (0118): the open corner toward you, the
-            back wall's doors up and right, the left wall's up and left; a mirrored house mirrored. */}
-        <group position={[0, 0.25, 0]} rotation={[0, -Math.PI / 4, 0]} scale={0.42}>
+        <mesh
+          geometry={UNIT}
+          material={colors.top}
+          position={[0, 0.2, 0]}
+          scale={[PLATFORM - 0.2, 0.08, PLATFORM - 0.2]}
+        />
+        {/* Where the room really lies, as the room view shows it (0120); a mirrored house mirrored. */}
+        <group position={[0, 0.25, 0]} scale={0.42}>
           <group matrix={mirrored ? MIRRORED : IDENTITY} matrixAutoUpdate={false}>
             <Suspense fallback={null}>
               <StaticRoom
@@ -165,63 +171,76 @@ function Platform({ spot, room, here }: { spot: Spot; room: RoomDef; here: boole
   );
 }
 
-/** A cable: a bridge between the two machines' edges, with a port at each end and its plate. */
+/** A cable: a walled walk along its L from one machine's door to the other's (0120), a port at each end. */
 function Cable({
   link,
-  spots: where,
+  run,
   room,
 }: {
   link: RoomDef["topology"]["links"][number];
-  spots: Map<string, Spot>;
+  run: Run | undefined;
   room: RoomDef;
 }) {
   const state = useSession((s) => s.status?.corridors[link.id] ?? "dark");
-  const a = where.get(link.a.device)?.at ?? [0, 0];
-  const b = where.get(link.b.device)?.at ?? [0, 0];
   const colors = REGIONS[room.region - 1];
-  if (!colors) return null;
-  const dx = b[0] - a[0];
-  const dz = b[1] - a[1];
-  const length = Math.hypot(dx, dz);
-  const ux = dx / length;
-  const uz = dz / length;
-  const edge = PLATFORM / 2 - 0.2;
-  const span = length - edge * 2;
+  if (!colors || !run) return null;
+  const first = run.points[0] ?? [0, 0];
+  const last = run.points[run.points.length - 1] ?? [0, 0];
+  const [aEnd, bEnd] = run.a === link.a.device ? [first, last] : [last, first];
   const ends: [string, string, number, number][] = [
-    [link.a.device, link.a.iface, a[0] + ux * edge, a[1] + uz * edge],
-    [link.b.device, link.b.iface, b[0] - ux * edge, b[1] - uz * edge],
+    [link.a.device, link.a.iface, aEnd[0], aEnd[1]],
+    [link.b.device, link.b.iface, bEnd[0], bEnd[1]],
   ];
+  const road = state === "lit" ? colors.roadLit : state === "broken" ? CABLE.broken : colors.road;
   return (
     <>
-      <mesh
-        geometry={UNIT}
-        material={state === "lit" ? colors.roadLit : state === "broken" ? CABLE.broken : colors.road}
-        position={[(a[0] + b[0]) / 2, -0.03, (a[1] + b[1]) / 2]}
-        rotation={[0, -Math.atan2(dz, dx), 0]}
-        scale={[span + 1.1, 0.22, 1.45]}
-      />
-      {[0.55, -0.55].map((side) => (
-        <mesh
-          key={side}
-          geometry={UNIT}
-          material={colors.wall}
-          position={[(a[0] + b[0]) / 2 - uz * side, 0.28, (a[1] + b[1]) / 2 + ux * side]}
-          rotation={[0, -Math.atan2(dz, dx), 0]}
-          scale={[span + 1.1, 0.42, 0.12]}
-        />
-      ))}
-      {Array.from({ length: Math.max(2, Math.floor(length / 3)) }, (_, index) => {
-        const count = Math.max(2, Math.floor(length / 3));
-        const t = (index + 1) / (count + 1) - 0.5;
-        return [-0.72, 0.72].map((side) => (
-          <mesh
-            key={`${t}-${side}`}
-            geometry={UNIT}
-            material={colors.arch}
-            position={[(a[0] + b[0]) / 2 + dx * t - uz * side, 0.48, (a[1] + b[1]) / 2 + dz * t + ux * side]}
-            scale={[0.34, 0.9, 0.34]}
-          />
-        ));
+      {run.points.slice(1).map((b, i) => {
+        const a = run.points[i] as [number, number];
+        const dx = b[0] - a[0];
+        const dz = b[1] - a[1];
+        const length = Math.hypot(dx, dz);
+        if (length < 0.01) return null;
+        const ux = dx / length;
+        const uz = dz / length;
+        const turn = -Math.atan2(dz, dx);
+        const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+        // Each leg runs a half-width past its corner, so the two legs meet without a gap.
+        const span = length + 0.5;
+        const count = Math.max(1, Math.floor(length / 2.2));
+        return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: an L's legs, fixed per cable
+          <group key={i}>
+            <mesh
+              geometry={UNIT}
+              material={road}
+              position={[mid[0], -0.03, mid[1]]}
+              rotation={[0, turn, 0]}
+              scale={[span, 0.22, 0.95]}
+            />
+            {[0.42, -0.42].map((side) => (
+              <mesh
+                key={side}
+                geometry={UNIT}
+                material={colors.wall}
+                position={[mid[0] - uz * side, 0.22, mid[1] + ux * side]}
+                rotation={[0, turn, 0]}
+                scale={[span, 0.32, 0.1]}
+              />
+            ))}
+            {Array.from({ length: count }, (_, index) => {
+              const t = (index + 1) / (count + 1) - 0.5;
+              return [-0.5, 0.5].map((side) => (
+                <mesh
+                  key={`${t}-${side}`}
+                  geometry={UNIT}
+                  material={colors.arch}
+                  position={[mid[0] + dx * t - uz * side, 0.4, mid[1] + dz * t + ux * side]}
+                  scale={[0.24, 0.7, 0.24]}
+                />
+              ));
+            })}
+          </group>
+        );
       })}
       {ends.map(([device, iface, x, z]) => (
         <group key={`${device}:${iface}`} position={[x, 0, z]}>
@@ -256,9 +275,8 @@ function Port({ device, iface, room }: { device: string; iface: string; room: Ro
 }
 
 /** Every message on a cable: drawn from the session each frame, from the same crossings as the map. */
-function Messages({ room, where }: { room: RoomDef; where: Map<string, Spot> }) {
+function Messages({ runs }: { runs: Map<string, Run> }) {
   const lights = useRef<(Mesh | null)[]>([]);
-  const links = useMemo(() => new Map(room.topology.links.map((l) => [l.id, l])), [room]);
   const at = useMemo(() => new Vector3(), []);
   useFrame(() => {
     const { onCables, status } = useSession.getState();
@@ -266,14 +284,15 @@ function Messages({ room, where }: { room: RoomDef; where: Map<string, Spot> }) 
     lights.current.forEach((light, i) => {
       if (!light) return;
       const c = onCables[i];
-      const l = c && links.get(c.link);
-      const a = l && where.get(l.a.device)?.at;
-      const b = l && where.get(l.b.device)?.at;
-      light.visible = !!(c && a && b);
-      if (!(c && l && a && b)) return;
+      const run = c && runs.get(c.link);
+      light.visible = !!(c && run);
+      if (!(c && run)) return;
       const t = progress(c, now);
-      const k = c.from === l.a.device ? t : 1 - t;
-      at.set(a[0] + (b[0] - a[0]) * k, 0.25, a[1] + (b[1] - a[1]) * k);
+      const p = alongPath(
+        run.points.map(([x, y]) => ({ x, y })),
+        c.from === run.a ? t : 1 - t,
+      );
+      at.set(p.x, 0.25, p.y);
       light.position.copy(at);
     });
   });
@@ -307,7 +326,8 @@ function View({ focus, reach }: { focus: [number, number]; reach: number }) {
     goal.set(focus[0], 0, focus[1]);
     if (reduced) target.copy(goal);
     else target.lerp(goal, 1 - Math.exp(-delta * 3));
-    camera.position.set(target.x, reach * 1.2, target.z + reach * 0.65);
+    // From the room camera's corner (south-east), so right on screen is right on the Map (0120).
+    camera.position.set(target.x + reach * 0.46, reach * 1.2, target.z + reach * 0.46);
     camera.lookAt(target.x, 0, target.z);
   });
   return null;
@@ -319,16 +339,20 @@ export function NetworkScene() {
   const openPanel = useSession((s) => s.openPanel);
   const room = roomId ? roomById(roomId) : undefined;
   const where = useMemo(() => (room ? networkSpots(room) : new Map<string, Spot>()), [room]);
+  const runs = useMemo(() => (room ? networkRuns(room) : new Map<string, Run>()), [room]);
   if (!room || !here) return null;
   const home = where.get(room.playerDevice)?.at ?? [0, 0];
   const all = [...where.values()].map((s) => s.at);
   const xs = all.map((a) => a[0]);
   const zs = all.map((a) => a[1]);
   const middle: [number, number] = [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...zs) + Math.max(...zs)) / 2];
+  // Framed on screen: across (x - z) and down (x + z), as the camera sees them.
+  const across = all.map((a) => (a[0] - a[1]) * Math.SQRT1_2);
+  const down = all.map((a) => (a[0] + a[1]) * Math.SQRT1_2);
   const reach = Math.max(
     8,
-    (Math.max(...xs) - Math.min(...xs)) * 0.42 + 3.5,
-    (Math.max(...zs) - Math.min(...zs)) * 0.7 + 4,
+    (Math.max(...across) - Math.min(...across)) * 0.45 + 3.5,
+    (Math.max(...down) - Math.min(...down)) * 0.8 + 4,
   );
   return (
     <>
@@ -348,9 +372,9 @@ export function NetworkScene() {
           <Platform key={s.id} spot={s} room={room} here={s.id === here} />
         ))}
         {room.topology.links.map((l) => (
-          <Cable key={l.id} link={l} spots={where} room={room} />
+          <Cable key={l.id} link={l} run={runs.get(l.id)} room={room} />
         ))}
-        <Messages room={room} where={where} />
+        <Messages runs={runs} />
         {room.controls.workbench === "works" && (
           <Html center position={[home[0], 1.5, home[1] + 1.6]} zIndexRange={[10, 0]}>
             <button type="button" className="world-chip" onClick={() => openPanel({ kind: "workbench" })}>

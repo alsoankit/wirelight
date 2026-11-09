@@ -1,5 +1,5 @@
 // Capture every unique room layout in the room data, in ruin and restored states.
-// Usage: node tools/shots/capture-rooms.mjs http://localhost:5173/play [--only picture-id]
+// Usage: node tools/shots/capture-rooms.mjs http://localhost:5173/play [--only picture-id] [--regions 1,2]
 import { execFileSync } from "node:child_process";
 import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -11,6 +11,8 @@ const [base, ...args] = process.argv.slice(2);
 if (!base) throw new Error("Pass the /play base URL, for example http://localhost:5173/play");
 const onlyIndex = args.indexOf("--only");
 const only = onlyIndex < 0 ? undefined : args[onlyIndex + 1];
+const regionsIndex = args.indexOf("--regions");
+const regions = regionsIndex < 0 ? undefined : args[regionsIndex + 1].split(",");
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const out = join(root, "apps/web/public/prerender");
 
@@ -46,6 +48,7 @@ try {
 
 if (only && !layouts.some((layout) => layout.id === only)) throw new Error(`Unknown layout: ${only}`);
 if (only) layouts = layouts.filter((layout) => layout.id === only);
+if (regions) layouts = layouts.filter((layout) => regions.some((r) => layout.id.startsWith(`r${r}-`)));
 await mkdir(out, { recursive: true });
 
 const browser = await chromium.launch({

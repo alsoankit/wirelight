@@ -25,6 +25,19 @@ const publicBake = join(repo, "apps/web/public/bake");
 const manifestFile = join(repo, "apps/web/src/world/bake/manifest.ts");
 const source = process.argv[2];
 const keepStale = process.argv.includes("--keep-stale");
+// --regions 1,2: only those regions' layouts come from this bake; every other layout keeps its entry
+// from the current manifest, as long as its geometry is unchanged (same key and signature).
+const regionsAt = process.argv.indexOf("--regions");
+const regions = regionsAt > 0 ? process.argv[regionsAt + 1].split(",") : null;
+const fromThisBake = (id) => !regions || regions.some((r) => id.startsWith(`r${r}-`));
+const previous = (() => {
+  if (!existsSync(manifestFile)) return {};
+  const out = {};
+  for (const m of readFileSync(manifestFile, "utf8").matchAll(/^\s*"?(\w+)"?: (\{.*\}),$/gm)) {
+    out[m[1]] = JSON.parse(m[2].replace(/(\w+): /g, '"$1": '));
+  }
+  return out;
+})();
 if (!source) {
   console.error("usage: import-results.mjs <results.zip | folder>");
   process.exit(2);
@@ -52,6 +65,16 @@ for (const [id, layout] of now) {
   const groups = [{ suffix: "", key: layout.key, size: layout.size, signature: layout.signature }];
   if (layout.kit) groups.push({ suffix: "-kit", ...layout.kit });
   const log = files.has(`${id}.log.json`) ? JSON.parse(readFileSync(join(dir, `${id}.log.json`), "utf8")) : null;
+  if (!fromThisBake(id)) {
+    for (const g of groups) {
+      const kept = previous[g.key];
+      if (kept && kept.signature === g.signature) {
+        bakes[g.key] = kept;
+        lines.push(`  ${id}${g.suffix}: kept from before`);
+      } else lines.push(`  ${id}${g.suffix}: no bake (not in this run)`);
+    }
+    continue;
+  }
   for (const g of groups) {
     const name = `${id}${g.suffix}`;
     const maps = states.map((s) => `${name}-${s}.webp`);

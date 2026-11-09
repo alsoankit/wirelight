@@ -1,15 +1,15 @@
 import { fill, keeperSays, voice } from "@wirelight/content";
 import { type RoomDef, roomById } from "@wirelight/rooms";
-import type { Topology } from "@wirelight/sim";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { progress } from "../engine/clock";
 import { journey } from "../engine/journey";
 import { useSession } from "../engine/store";
 import { messageSummary } from "../world/messageKind";
+import { alongPath } from "../world/room/palaceMap";
 import { RoomCommandMemory } from "./CommandMemory";
 import { CLOSE_MAP, OPEN_MAP } from "./keys";
 import { Memory } from "./Memory";
-import { layout, MAP_H, MAP_W, type Node } from "./mapLayout";
+import { MAP_H, MAP_W, type Path, project } from "./mapLayout";
 import { noteMoment } from "./momentRules";
 import { arrivalText, machineNamer } from "./names";
 import { useMachineLabel } from "./roles";
@@ -25,46 +25,14 @@ export type { Node } from "./mapLayout";
 export { layout, MAP_H, MAP_W } from "./mapLayout";
 
 type Pt = { x: number; y: number };
-/** A cable on the map: from its `a` end to its `b` end, bent when it shares its two machines with others. */
-type Curve = { a: Pt; c: Pt; b: Pt; aDevice: string };
+/** A cable on the map: its L from door to door (0120), `aDevice` at its first point. */
+type Curve = Path;
 
-/** A point `t` (0 at `a`, 1 at `b`) along a cable's curve (a quadratic Bézier). */
+/** A point `t` (0 at its `a` end, 1 at its `b` end) along a cable. */
 function along(k: Curve, t: number): Pt {
-  const u = 1 - t;
-  return { x: u * u * k.a.x + 2 * u * t * k.c.x + t * t * k.b.x, y: u * u * k.a.y + 2 * u * t * k.c.y + t * t * k.b.y };
+  return alongPath(k.points, t);
 }
 
-/**
- * Every cable's curve. Two or more cables between the same two machines (a loop, 4.3) bow apart, so
- * each one and its door names can be seen; a single cable stays straight.
- */
-export function curves(t: Topology, nodes: Map<string, Node>, spread: number): Map<string, Curve> {
-  const pairs = new Map<string, string[]>();
-  for (const l of t.links) {
-    const pair = [l.a.device, l.b.device].sort().join("|");
-    pairs.set(pair, [...(pairs.get(pair) ?? []), l.id]);
-  }
-  const out = new Map<string, Curve>();
-  for (const l of t.links) {
-    const a = nodes.get(l.a.device);
-    const b = nodes.get(l.b.device);
-    if (!a || !b) continue;
-    const [first] = [l.a.device, l.b.device].sort();
-    const same = pairs.get([l.a.device, l.b.device].sort().join("|")) ?? [l.id];
-    // The bend is measured across the line from the pair's first machine, so cables don't cancel out.
-    const p = first === l.a.device ? a : b;
-    const q = first === l.a.device ? b : a;
-    const len = Math.hypot(q.x - p.x, q.y - p.y) || 1;
-    const nx = -(q.y - p.y) / len;
-    const ny = (q.x - p.x) / len;
-    const bend = (same.indexOf(l.id) - (same.length - 1) / 2) * spread * 2;
-    const c = { x: (a.x + b.x) / 2 + nx * bend, y: (a.y + b.y) / 2 + ny * bend };
-    out.set(l.id, { a, c, b, aDevice: l.a.device });
-  }
-  return out;
-}
-
-/** The street (network) an address is on, like `10.0.1.0/24`. */
 export function streetOfAddress(cidr: string): string | null {
   const [ip = "", p = "32"] = cidr.split("/");
   const prefix = Number(p);
@@ -122,8 +90,9 @@ export function FloorMap({
   }, [room, doors]);
   const W = mini ? 240 : MAP_W;
   const H = mini ? 150 : MAP_H;
-  const nodes = useMemo(() => layout(room.topology, room.playerDevice, W, H), [room, W, H]);
-  const bends = useMemo(() => curves(room.topology, nodes, mini ? 9 : 34), [room, nodes, mini]);
+  const projected = useMemo(() => project(room.topology, room.playerDevice, W, H), [room, W, H]);
+  const nodes = projected.nodes;
+  const bends = projected.paths;
   const dots = useRef<SVGGElement>(null);
   // Messages: drawn each frame from the session, without React (positions change every frame).
   useEffect(() => {
@@ -157,23 +126,32 @@ export function FloorMap({
       role="img"
       aria-label={memory ? voice.memory.map : voice.map.floorMap}
     >
+      {/* Each room's floor, as the room view shows it (0120). */}
+      {[...projected.tiles].map(([id, pts]) => (
+        <polygon
+          key={`tile-${id}`}
+          points={pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
+          className="map-tile"
+          data-here={!memory && !inCorridor && id === here ? "yes" : undefined}
+        />
+      ))}
       {room.topology.links.map((l) => {
         const k = bends.get(l.id);
         if (!k) return null;
         const state = memory ? "lit" : (corridors?.[l.id] ?? "dark");
-        const near = along(k, 0.3);
-        const far = along(k, 0.7);
+        const near = along(k, 0.12);
+        const far = along(k, 0.88);
         return (
           <g key={l.id}>
             {!memory && inCorridor === l.id && (
               <path
-                d={`M${k.a.x},${k.a.y} Q${k.c.x},${k.c.y} ${k.b.x},${k.b.y}`}
+                d={`M${k.points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" L")}`}
                 className="map-here-link"
                 fill="none"
               />
             )}
             <path
-              d={`M${k.a.x},${k.a.y} Q${k.c.x},${k.c.y} ${k.b.x},${k.b.y}`}
+              d={`M${k.points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" L")}`}
               className={`map-link ${state}`}
               fill="none"
             />

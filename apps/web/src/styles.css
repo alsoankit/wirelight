@@ -1841,9 +1841,23 @@ body:has(.birds-eye-controls)
   height: 100%;
 }
 
+/* Each room's floor tile on the Map (0120), drawn as the room view shows it. */
+.map-tile {
+  fill: rgba(207, 227, 255, 0.05);
+  stroke: rgba(207, 227, 255, 0.22);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.map-tile[data-here="yes"] {
+  fill: rgba(242, 165, 74, 0.12);
+  stroke: rgba(242, 165, 74, 0.55);
+}
+
 .map-link {
   stroke: #5b6470;
   stroke-width: 2;
+  stroke-linejoin: round;
 }
 
 .map-link.lit {

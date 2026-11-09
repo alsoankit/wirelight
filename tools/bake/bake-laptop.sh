@@ -4,6 +4,7 @@
 #   tools/bake/bake-laptop.sh                 best quality, every layout, then import and run the checks
 #   tools/bake/bake-laptop.sh --commit        the same, and commit the new bake if every check passes
 #   tools/bake/bake-laptop.sh --quality final --only r1-house-d1 --no-import --work /tmp/x   (a quick test)
+#   tools/bake/bake-laptop.sh --regions 1,2   only those regions' layouts (the others' bakes are kept)
 #
 # Steps: export the layouts from the rooms as they are in this checkout → bake them in Blender (CPU)
 # → verify every map against the export → import into apps/web/public/bake → pnpm check, test and
@@ -15,6 +16,7 @@ set -uo pipefail
 repo="$(cd "$(dirname "$0")/../.." && pwd)"
 quality=best
 only=""
+regions=""
 work="$repo/assets-src/bake/laptop"
 import=1
 commit=0
@@ -22,6 +24,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --quality) quality="$2"; shift 2 ;;
     --only) only="$2"; shift 2 ;;
+    --regions) regions="$2"; shift 2 ;;
     --work) work="$2"; shift 2 ;;
     --no-import) import=0; shift ;;
     --commit) commit=1; shift ;;
@@ -48,6 +51,21 @@ only_args=()
 # Always every layout: the list (layouts.json) is only written for a full export. --only limits the bake.
 if ! (cd "$repo" && node tools/bake/export.mjs --out "$fresh") >>"$log" 2>&1 || [[ ! -f "$fresh/layouts.json" ]]; then
   say "Export failed: see $log"; exit 1
+fi
+# Only some regions (Regions 1–2 first, 0119): the others are left out of the bake and their earlier
+# bakes stay in the game (import-results.mjs --regions).
+if [[ -n "$regions" ]]; then
+  node -e '
+    const { readFileSync, rmSync, writeFileSync } = require("node:fs");
+    const [dir, list] = process.argv.slice(1);
+    const regions = list.split(",");
+    const file = `${dir}/layouts.json`;
+    const all = JSON.parse(readFileSync(file, "utf8"));
+    const wanted = (l) => regions.some((r) => l.id.startsWith(`r${r}-`));
+    for (const l of all.filter((l) => !wanted(l))) for (const x of [".glb", ".json"]) rmSync(`${dir}/${l.id}${x}`, { force: true });
+    writeFileSync(file, `${JSON.stringify(all.filter(wanted), null, 1)}\n`);
+  ' "$fresh" "$regions"
+  say "Regions $regions only."
 fi
 # Throw away only the layouts whose geometry changed (each has a signature); all of them if the
 # quality changed or this is the first run.
@@ -96,7 +114,9 @@ fi
 [[ "$import" == 1 ]] || { say "Verified. Not imported (--no-import)."; exit 0; }
 
 # 4. Import into the game, then the project's own checks.
-if ! "$repo/tools/bake/import-results.sh" "$work/out" 2>&1 | tee -a "$log"; then
+region_args=()
+[[ -n "$regions" ]] && region_args=(--regions "$regions")
+if ! "$repo/tools/bake/import-results.sh" "$work/out" "${region_args[@]}" 2>&1 | tee -a "$log"; then
   say "Import failed: see $log"; exit 1
 fi
 cd "$repo"
@@ -109,7 +129,7 @@ fi
 # 5. Commit the bake (only with --commit), as whoever this checkout's git identity is.
 if [[ "$commit" == 1 ]]; then
   git add apps/web/public/bake apps/web/src/world/bake/manifest.ts &&
-    git commit -q -m "Rebake every room at $quality quality" &&
+    git commit -q -m "Rebake ${regions:+region $regions }rooms at $quality quality" &&
     say "Committed $(git log -1 --format=%h). Push with: git push"
 else
   say "Done. To keep it: git add apps/web/public/bake apps/web/src/world/bake/manifest.ts && git commit -m \"Rebake every room at $quality quality\" && git push"

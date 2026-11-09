@@ -36,6 +36,7 @@ function HeldLantern() {
 
 export function RegionStatue({ region, place }: { region: RegionId; place: StatueSpot }) {
   const look = STATUES[region];
+  if (!look) return null;
   return (
     <Statue {...look} position={place.at} turn={place.turn}>
       {region === 3 && <HeldLantern />}

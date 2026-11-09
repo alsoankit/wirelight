@@ -2,7 +2,7 @@ import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { type Group, MeshBasicMaterial, type Object3D, type Vector3 } from "three";
+import { DoubleSide, type Group, MeshBasicMaterial, type Object3D, type Vector3 } from "three";
 import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
@@ -12,7 +12,7 @@ import { goThrough, stepIntoCorridor } from "../corridor/move";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { useRegion } from "../region";
-import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
+import { CHIP_Y, cableSpan, type DoorSlot, doorGeometry, GATE_TOP, type Vec3 } from "./layout";
 import { addToPile, type Scrap } from "./lostPile";
 import { Sealed } from "./Sealed";
 
@@ -76,6 +76,10 @@ function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broke
 }
 
 /** Invisible click area filling the arch opening, inset from its edges. */
+/**
+ * The gate's click area (owner, 2026-11-10): the whole arch with padding, from the floor to GATE_TOP,
+ * and an apron of floor in front of it, so the gate is easy to hit and no plate or chip covers it.
+ */
 function GateStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep: () => void }) {
   const g = doorGeometry(slot);
   const [hover, setHover] = useState(false);
@@ -83,11 +87,7 @@ function GateStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: a 3D target (raycast); Shift and the door's number is the keyboard way
     <group
-      position={[
-        g.doorway[0] + (slot.wall === "left" ? 0.08 : 0),
-        1.2,
-        g.doorway[2] + (slot.wall === "back" ? 0.08 : 0),
-      ]}
+      position={[g.doorway[0] + (slot.wall === "left" ? 0.08 : 0), 0, g.doorway[2] + (slot.wall === "back" ? 0.08 : 0)]}
       rotation={[0, rotationY, 0]}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -104,11 +104,14 @@ function GateStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep
         onStep();
       }}
     >
-      <mesh material={HIT_MATERIAL}>
-        <boxGeometry args={[1.45, 2.1, 0.08]} />
+      <mesh material={HIT_MATERIAL} position={[0, GATE_TOP / 2, 0]}>
+        <boxGeometry args={[2.3, GATE_TOP, 0.08]} />
+      </mesh>
+      <mesh material={HIT_MATERIAL} position={[0, 0.03, 0.7]}>
+        <boxGeometry args={[2.3, 0.04, 1.4]} />
       </mesh>
       {hover && (
-        <Html center position={[0, 0.5, 0]} zIndexRange={[20, 0]}>
+        <Html center position={[0, 1.7, 0]} zIndexRange={[20, 0]}>
           <div className="message-summary">{fill(voice.corridor.step, { name })}</div>
         </Html>
       )}
@@ -117,7 +120,9 @@ function GateStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep
 }
 
 /** Invisible but still hit by the pointer (a hidden mesh would be skipped by raycasting). */
-const HIT_MATERIAL = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+// Double-sided: in a mirrored house (0118) the faces toward the camera are wound the other way, and a
+// one-sided target would let the pointer through.
+const HIT_MATERIAL = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: DoubleSide });
 
 // Where messages died at this door (CORE-17): small faded scraps on the floor just inside it. They
 // pile up while messages keep dying here (2.2's clue: ignored messages pile at lantern's door), each
@@ -298,7 +303,7 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
         />
       )}
       {/* The way through (CORE-10): a chip in the arch; sealed rooms say why. */}
-      <Html center position={[g.doorway[0], 2.9, g.doorway[2]]} zIndexRange={[10, 0]}>
+      <Html center position={[g.doorway[0], CHIP_Y, g.doorway[2]]} zIndexRange={[10, 0]}>
         {walkable ? (
           <button
             type="button"

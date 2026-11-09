@@ -1,39 +1,47 @@
 import type { Topology } from "@wirelight/sim";
-import { floorPlan } from "../world/room/plan";
+import { corners, onScreen, palaceMap } from "../world/room/palaceMap";
 
 export type Node = { id: string; x: number; y: number; kind: "you" | "switch" | "router" | "house" };
+type Pt = { x: number; y: number };
+/** A cable on the Map: its L from the left room's door to the right room's (0120), `aDevice` at points[0]. */
+export type Path = { aDevice: string; points: Pt[] };
 
 /** The full map's size, in its own units (the SVG scales to fit). */
 export const MAP_W = 900;
 export const MAP_H = 520;
 
 /**
- * Lays the floor out as the rooms' doors read (decision 0118): a machine behind a back-wall door is one
- * column to the right, one behind a left-wall door one column to the left, and doors nearer the corner
- * are higher. Within a column, machines keep that order and are spread evenly.
+ * The floor drawn as it really lies (decisions 0118, 0120: world/room/palaceMap.ts), from the room
+ * camera's angle and fitted to `w` × `h`: rooms as their floor tiles, cables as Ls from door to door.
  */
+export function project(t: Topology, start: string, w: number, h: number) {
+  const map = palaceMap(t, start);
+  const raw = new Map([...map.rooms].map(([id, r]) => [id, corners(r.centre).map(onScreen)]));
+  const all = [...raw.values()].flat();
+  const minX = Math.min(...all.map((p) => p.x));
+  const maxX = Math.max(...all.map((p) => p.x));
+  const minY = Math.min(...all.map((p) => p.y));
+  const maxY = Math.max(...all.map((p) => p.y));
+  const pad = Math.min(w, h) * 0.12;
+  const scale = Math.min((w - 2 * pad) / (maxX - minX || 1), (h - 2 * pad) / (maxY - minY || 1));
+  const ox = (w - (maxX - minX) * scale) / 2 - minX * scale;
+  const oy = (h - (maxY - minY) * scale) / 2 - minY * scale;
+  const fit = (p: Pt): Pt => ({ x: p.x * scale + ox, y: p.y * scale + oy });
+
+  const nodes = new Map<string, Node>();
+  for (const [id, r] of map.rooms) {
+    const spec = t.devices.find((d) => d.id === id);
+    const kind =
+      id === start ? "you" : spec?.bridges?.length ? "switch" : (spec?.interfaces.length ?? 0) > 1 ? "router" : "house";
+    nodes.set(id, { id, kind, ...fit(onScreen(r.centre)) });
+  }
+  const tiles = new Map([...raw].map(([id, pts]) => [id, pts.map(fit)]));
+  const paths = new Map<string, Path>();
+  for (const [id, c] of map.cables) paths.set(id, { aDevice: c.a, points: c.points.map((p) => fit(onScreen(p))) });
+  return { nodes, tiles, paths, scale };
+}
+
+/** Where each machine sits on the Map (its room's centre). */
 export function layout(t: Topology, start: string, w: number, h: number): Map<string, Node> {
-  const plan = floorPlan(t, start);
-  const byColumn = new Map<number, string[]>();
-  for (const d of t.devices) {
-    const c = plan.devices.get(d.id)?.column ?? 0;
-    byColumn.set(c, [...(byColumn.get(c) ?? []), d.id]);
-  }
-  const out = new Map<string, Node>();
-  for (const [c, ids] of byColumn) {
-    ids.sort((a, b) => (plan.devices.get(a)?.y ?? 0) - (plan.devices.get(b)?.y ?? 0));
-    ids.forEach((id, i) => {
-      const spec = t.devices.find((d) => d.id === id);
-      const kind =
-        id === start
-          ? "you"
-          : spec?.bridges?.length
-            ? "switch"
-            : (spec?.interfaces.length ?? 0) > 1
-              ? "router"
-              : "house";
-      out.set(id, { id, kind, x: ((c + 0.5) / plan.columns) * w, y: ((i + 1) / (ids.length + 1)) * h });
-    });
-  }
-  return out;
+  return project(t, start, w, h).nodes;
 }
