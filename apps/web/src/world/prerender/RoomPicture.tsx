@@ -13,11 +13,32 @@ import { ruinAt } from "../ruin";
 const params = typeof location === "undefined" ? new URLSearchParams() : new URLSearchParams(location.search);
 /** `?capture=1`: the room alone, for tools/shots/capture-rooms.mjs. */
 export const captureMode = params.has("capture");
-/** `?pre=1`: rooms that have pictures are drawn from them. */
-export const pictureMode = params.has("pre");
+/** Picture rooms are the default; `?pre=0` returns to the live room everywhere. */
+export const pictureMode = !captureMode && params.get("pre") !== "0";
 
-/** The rooms captured so far. */
-const PICTURES = new Set(["r1-observatory-d1", "r1-house-d1", "r2-observatory-d1"]);
+/** Every captured room layout. Hall ids include the near-edge door count to keep doors on their picture. */
+const PICTURES = new Set([
+  "r1-observatory-d1",
+  "r1-observatory-d2",
+  "r1-house-d1",
+  "r2-observatory-d1",
+  "r2-house-d1",
+  "r2-hall-d4-f1",
+  "r2-hall-d4-f2",
+  "r2-hall-d5-f1",
+  "r2-hall-d5-f2",
+  "r3-observatory-d1",
+  "r3-house-d1",
+  "r3-hall-d3-f1",
+  "r3-hall-d4-f1",
+  "r3-hall-d5-f1",
+  "r3-hall-d6-f1",
+  "r3-hall-d7-f1",
+  "r4-observatory-d1",
+  "r4-house-d1",
+  "r4-hall-d2-f1",
+  "r4-hall-d3-f1",
+]);
 export const hasPicture = (id: string) => PICTURES.has(id);
 
 const SCREEN = new PlaneGeometry(2, 2);
