@@ -14,7 +14,6 @@ import { startEngine } from "./connect";
 export type Panel =
   | { kind: "plate"; device: string; iface: string }
   | { kind: "workbench" }
-  | { kind: "card" }
   | { kind: "captures"; open?: number }
   | { kind: "board"; device: string; board: "mac" | "ledger" | "routes"; execId?: number }
   | { kind: "desk"; device: string }

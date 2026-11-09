@@ -85,23 +85,6 @@ export function facts(trace: readonly SimEvent[], world: Facts["world"]): Facts 
   return { trace: sinceReset(trace), world };
 }
 
-/** A messenger's card (the first, or number `index`) holds this address. */
-export function cardPointsTo(device: DeviceId, address: string, index = 1): Predicate {
-  return ({ world }) => world.device(device)?.messengers[index - 1]?.to === address;
-}
-
-/** A messenger's ping (its card holds a house address) was answered by `from` (any messenger, or number `index`). */
-export function messengerPingAnswered(device: DeviceId, from: string, index?: number): Predicate {
-  return ({ trace }) =>
-    trace.some(
-      (e) =>
-        e.kind === "echo.heard" &&
-        e.device === device &&
-        e.from === from &&
-        (index === undefined || e.messenger === index),
-    );
-}
-
 /** Frames `fromDevice` sent with a given origin, that `atDevice` took in. */
 function deliveredFrom(trace: readonly SimEvent[], fromDevice: DeviceId, atDevice: DeviceId, origin: string): number[] {
   const mine = new Set<number>();
@@ -111,19 +94,6 @@ function deliveredFrom(trace: readonly SimEvent[], fromDevice: DeviceId, atDevic
     if (e.kind === "app.deliver" && e.device === atDevice && mine.has(e.frameId)) times.push(e.t);
   }
   return times;
-}
-
-/**
- * The automatic messenger was heard: one of its messages was taken in at `to`, and an answer
- * with `text` came back to `from` after it (SRS 0.2 and the Floor 0 boss).
- */
-export function messengerAnswered(from: DeviceId, to: DeviceId, text: string): Predicate {
-  return ({ trace }) => {
-    const heard = [...deliveredFrom(trace, from, to, "messenger"), ...deliveredFrom(trace, from, to, "command")];
-    if (heard.length === 0) return false;
-    const first = Math.min(...heard);
-    return trace.some((e) => e.kind === "app.deliver" && e.device === from && e.text === text && e.t >= first);
-  };
 }
 
 /** The player's own frame (a command, e.g. from the workbench) was taken in at `to`. */

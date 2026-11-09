@@ -43,7 +43,6 @@ function controlFor(r: RoomDef, s: CommandStep): "works" | "broken" | null {
   const end = s.line.match(/^lab cable (?:plug|unplug) (\S+)$/);
   if (end) return c.cableEnds?.[`${s.device}:${end[1]}`] ?? null;
   if (/^lab send-frame\b/.test(s.line)) return s.device === "observatory" ? (c.workbench ?? null) : null;
-  if (/^lab card\b/.test(s.line)) return c.card ?? null;
   if (/^bridge fdb( show)?$/.test(s.line)) return c.macBoards?.[s.device] ?? null;
   if (/^ip neigh( show)?$/.test(s.line)) return c.ledgers?.[s.device] ?? null;
   const slot = s.line.match(/^ip addr (?:add|del) \S+ dev (\S+)$/);
@@ -70,7 +69,6 @@ function controlStates(c: Controls): [string, "works" | "broken"][] {
     Object.values(m ?? {}).map((v) => [kind, v] as [string, "works" | "broken"]),
   );
   if (c.workbench) out.push(["workbench", c.workbench]);
-  if (c.card) out.push(["card", c.card]);
   return out;
 }
 
@@ -141,7 +139,6 @@ describe.each(rooms.map((r) => [r.id, r] as const))("%s", (_id, room) => {
       ...Object.values(room.controls.plateSwitches ?? {}),
       ...Object.values(room.controls.cableEnds ?? {}),
       room.controls.workbench,
-      room.controls.card,
     ];
     expect(all).not.toContain("broken");
   });

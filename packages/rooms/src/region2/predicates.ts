@@ -95,7 +95,7 @@ export function behind(f: Facts, device: DeviceId, port: IfaceName, mac: Mac): b
 type Exec = Extract<SimEvent, { kind: "cmd.exec" }>;
 const READ_BOARD = /^bridge fdb( show| list)?(\s|$)/;
 /** Commands that only look: they change nothing the switch could learn from. */
-const LOOKING = /^bridge fdb( show| list)?(\s|$)|^ip link( show\b.*)?$|^lab card( show)?$|^lab keeper show$/;
+const LOOKING = /^bridge fdb( show| list)?(\s|$)|^ip link( show\b.*)?$|^lab keeper show$/;
 
 /** The board was read on `device` twice with nothing done in between (3.2: expects gate to be listed). */
 export function readBoardTwiceIdle(device: DeviceId): Predicate {
@@ -428,7 +428,7 @@ export function cutTheHeldOne(spans: SpanEnds): Predicate {
   };
 }
 
-// ── Messengers through a switch ─────────────────────────────────────────────────────────────
+// ── Repeating frames through a switch ───────────────────────────────────────────────────────
 
 /** Frame ids of everything `fromDevice` sent with `origin`, followed through every forwarded copy. */
 function followed(trace: readonly SimEvent[], fromDevice: DeviceId, origin: string): Set<number> {
@@ -443,13 +443,17 @@ function followed(trace: readonly SimEvent[], fromDevice: DeviceId, origin: stri
 }
 
 /**
- * The messenger was heard through the halls: one of its letters (or a copy a switch passed on) was
- * taken in at `to`, and an answer with `text` reached `from` after it. Region 1's `messengerAnswered`
- * for a world with switches in it, where each hop's copy is a new frame.
+ * A repeating frame (or a copy a switch passed on) was taken in at `to`, and an answer with `text`
+ * reached `from` after it. Each switch hop has its own frame id, linked by `parent`.
  */
-export function messengerHeard(from: DeviceId, to: DeviceId, text: string): Predicate {
+export function repeatFrameAnswered(
+  from: DeviceId,
+  to: DeviceId,
+  text: string,
+  origin: "setup" | "command",
+): Predicate {
   return ({ trace }) => {
-    const mine = new Set([...followed(trace, from, "messenger"), ...followed(trace, from, "command")]);
+    const mine = followed(trace, from, origin);
     const heard = trace.find((e) => e.kind === "app.deliver" && e.device === to && mine.has(e.frameId));
     if (!heard) return false;
     return trace.some((e) => e.kind === "app.deliver" && e.device === from && e.text === text && e.t >= heard.t);

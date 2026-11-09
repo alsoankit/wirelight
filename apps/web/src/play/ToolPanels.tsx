@@ -11,8 +11,8 @@ import { ScannerPanel } from "./ScannerPanel";
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
 
-// The robot's tools as panels (UI-03): the workbench (CORE-34), the messenger's card (CORE-35) and
-// Captures (CORE-19, CORE-20). Every action runs a real command or a catch through the engine;
+// The robot's tools as panels (UI-03): the Frame builder (CORE-34) and Captures (CORE-19, CORE-20).
+// Every action runs a real command or a catch through the engine;
 // acting closes the panel so the player watches what happens (UI-04); drafts are kept while closed.
 
 const draft = { to: "", msg: "hello", dev: "" };

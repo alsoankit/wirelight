@@ -139,7 +139,7 @@ export interface LinkSpec {
 export interface Topology {
   devices: DeviceSpec[];
   links: LinkSpec[];
-  /** Repeating frames the room starts in the background, at 1.5s and every 2s afterwards. */
+  /** Repeating frames started by room setup; each uses its configured interval (2s by default). */
   repeatSends?: RepeatSendSpec[];
 }
 
@@ -148,6 +148,8 @@ export interface RepeatSendSpec {
   to: string;
   dev?: IfaceName;
   msg?: string;
+  /** Room setup can slow background traffic; player-started sends always use 2 seconds. */
+  intervalMs?: number;
 }
 
 /** Declarative mutations applied on top of the correct network. */
@@ -599,6 +601,7 @@ export interface WorldState {
     {
       device: DeviceId;
       origin: "command" | "setup";
+      intervalMs: number;
       options: { to: string; from?: string; dev?: IfaceName; msg: string };
     }
   >;

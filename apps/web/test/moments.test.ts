@@ -138,7 +138,7 @@ describe("the gentle way back (HELP-12)", () => {
     expect(matchingRoom(boss1, ["replugging"])?.id).toBe("f1.both-ends");
     expect(matchingRoom(boss1, ["replugging", "blaming-kitchen"])?.id).toBe("f1.loose-cable");
     expect(matchingRoom(boss1, [])?.id).toBe("f1.two-rooms");
-    expect(matchingRoom(room("f2.boss-silent-line"), ["card-to-self"])?.id).toBe("f2.wrong-name");
+    expect(matchingRoom(room("f2.boss-silent-line"), ["send-to-self"])?.id).toBe("f2.wrong-name");
   });
 
   it("finds an earlier room for every boss", () => {

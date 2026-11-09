@@ -197,12 +197,7 @@ const findEveryone: RoomText = {
       text: "Broadcast, then `bridge fdb show` in the hall: eth1 is `…:10`, eth2 is `…:11`, eth3 is `…:12`. Stop each wrong send and start it again with the matching destination.",
     },
   ],
-  detectors: {
-    "swapped-doors": {
-      note: "That name lives behind another door. Check which door each line says.",
-      tried: "One repeating send used the name behind a different door.",
-    },
-  },
+  detectors: {},
   debrief: {
     happened:
       "One broadcast taught the hall every MAC address at once, and its MAC table told you who is behind which door. That's a switch at work: it learns everyone without being told.",

@@ -436,12 +436,13 @@ export class Simulator implements WorldView {
     device: DeviceId,
     opts: { to: string; from?: string; dev?: IfaceName; msg: string },
     origin: "command" | "setup" = "command",
+    intervalMs = 2000,
   ): number | null {
     const sent = this.sendLabFrame(device, opts, origin);
     if (!sent.ok) return null;
     const id = this.s.nextRepeatId++;
-    this.s.repeatSends[id] = { device, origin, options: { ...opts } };
-    this.schedule({ t: this.s.t + 2000, kind: "repeat-frame", id });
+    this.s.repeatSends[id] = { device, origin, intervalMs, options: { ...opts } };
+    this.schedule({ t: this.s.t + intervalMs, kind: "repeat-frame", id });
     return id;
   }
 
@@ -891,7 +892,7 @@ export class Simulator implements WorldView {
         const job = this.s.repeatSends[ev.id];
         if (!job) return;
         this.sendLabFrame(job.device, job.options, job.origin);
-        this.schedule({ t: this.s.t + 2000, kind: "repeat-frame", id: ev.id });
+        this.schedule({ t: this.s.t + job.intervalMs, kind: "repeat-frame", id: ev.id });
         return;
       }
       case "fdb-gc":
@@ -1183,9 +1184,10 @@ function build(topology: Topology, seed: number): WorldState {
     s.repeatSends[id] = {
       device: send.device,
       origin: "setup",
+      intervalMs: send.intervalMs ?? 2000,
       options: { to: send.to, msg: send.msg ?? "hello", ...(send.dev ? { dev: send.dev } : {}) },
     };
-    heapPush(s.queue, { t: 1500, seq: s.seq++, kind: "repeat-frame", id });
+    heapPush(s.queue, { t: Math.min(1500, send.intervalMs ?? 2000), seq: s.seq++, kind: "repeat-frame", id });
   });
   for (const d of Object.values(devices)) {
     // First messages come early so the player sees the service working; then at its interval.

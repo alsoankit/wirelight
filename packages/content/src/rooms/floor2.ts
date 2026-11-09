@@ -89,7 +89,7 @@ export const wrongName: RoomText = {
       note: "The corridor is lit. Messages are getting there. What happens when they arrive?",
       tried: "You switched a door or replugged the cable, but the link was working.",
     },
-    "card-to-self": {
+    "send-to-self": {
       note: "Now the repeated frame is coming back to you. Which door should take it?",
       tried: "You sent to your own MAC address (your door's name).",
     },
@@ -307,7 +307,7 @@ export const silentLine: RoomText = {
       note: "Kitchen answered. But cellar is behind your other door.",
       tried: "You called out of eth0, toward kitchen, but cellar is behind eth1.",
     },
-    "card-to-self": {
+    "send-to-self": {
       note: "Now the repeated frame is coming back to you. Which door should take it?",
       tried: "You sent to your own MAC address (your door's name).",
     },

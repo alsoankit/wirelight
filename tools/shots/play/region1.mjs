@@ -1,6 +1,6 @@
 // Plays every room of Region 1 (the Prologue, Floors 1 and 2) by clicking and typing, as a player
 // would. Usage: node region1.mjs http://127.0.0.1:5173/play
-import { arrived, bench, card, launch, open, plateSwitch, tidy, type, won } from "./lib.mjs";
+import { arrived, bench, launch, open, plateSwitch, repeatSend, tidy, type, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
 const { browser, page: p, errors } = await launch();
@@ -43,7 +43,7 @@ await bench(p, "02:00:00:00:00:07");
 await check("2.1");
 
 await open(p, base, "f2.wrong-name");
-await card(p, "02:00:00:00:00:07");
+await repeatSend(p, "02:00:00:00:00:07");
 await check("2.2");
 
 await open(p, base, "f2.who-are-you");
@@ -73,7 +73,7 @@ await open(p, base, "f2.boss-silent-line", ".console .xterm");
 await type(p, "ip link set eth1 up");
 await bench(p, "ff:ff:ff:ff:ff:ff", "eth1");
 await p.waitForTimeout(2500);
-await card(p, "02:00:00:00:00:0e");
+await repeatSend(p, "02:00:00:00:00:0e");
 await check("2.B");
 
 const failed = results.filter(([, ok]) => !ok).map(([n]) => n);

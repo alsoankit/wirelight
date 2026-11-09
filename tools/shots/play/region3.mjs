@@ -56,7 +56,7 @@ await type(p, "ip addr add 10.0.1.5/24 dev eth0");
 await walk("square");
 await type(p, "ip link set eth1 up");
 await walk("observatory");
-await type(p, "lab card --to 10.0.1.7");
+await type(p, "ping -c 3 10.0.1.7");
 await check("5.B");
 
 // 6.1: the Scanner catches kitchen's announcement and opens it to the message.
@@ -95,7 +95,10 @@ await walk("square");
 await walk("library");
 await type(p, "ip addr del 10.0.1.7/24 dev eth0");
 await type(p, "ip addr add 10.0.1.12/24 dev eth0");
+await walk("square");
+await walk("observatory");
 await fast();
+await type(p, "ping -c 3 10.0.1.7");
 await check("6.3");
 
 // 6.B: the pinned line, and chapel's borrowed address.

@@ -1,6 +1,6 @@
-/** floors/floor-5.md · Addresses. From here, real IPv4: the messenger and `ping` send real echo requests. */
-import { automaticMessage, keyFor } from "@wirelight/content";
-import { messengerPingAnswered, printed, ran, ranBefore } from "../predicates";
+/** floors/floor-5.md · Addresses. From here, real IPv4: `ping` sends echo requests. */
+import { keyFor } from "@wirelight/content";
+import { printed, ran, ranBefore } from "../predicates";
 import { type Access, defineRoom, type Misconception, type SolutionStep } from "../types";
 import { answeredBy, crossedBothWays, hasAddr, pingRanFor, pingsTo, ranAfterAnswer } from "./predicates";
 import { CHAPEL, FORGE, IP, KITCHEN, LIBRARY, town } from "./topology";
@@ -184,7 +184,7 @@ export const rollCall = defineRoom({
 // ── 5.B · The Quiet Street ─────────────────────────────────────────────────────────────────
 
 const quietId = "f5.boss-quiet-street";
-const quietAnswered = messengerPingAnswered("observatory", IP.kitchen);
+const quietAnswered = answeredBy("observatory", IP.kitchen, KITCHEN);
 export const quietStreet = defineRoom({
   id: quietId,
   region: 3,
@@ -196,18 +196,12 @@ export const quietStreet = defineRoom({
   seed: 59,
   topology: town({
     houses: ["kitchen", "library", "forge"],
-    messenger: { to: IP.kitchen, msg: automaticMessage, intervalMs: 3000 },
   }),
-  faults: [
-    noAddress,
-    { kind: "iface-down", device: "square", iface: "eth1" },
-    { kind: "card", device: "observatory", to: "10.0.1.70" },
-  ],
+  faults: [noAddress, { kind: "iface-down", device: "square", iface: "eth1" }],
   playerDevice: "observatory",
   access: access(["kitchen", "library", "forge"]),
   controls: {
     console: "typing",
-    card: "works",
     catching: true,
     addressSlots: { "observatory:eth0": "broken" },
     plateSwitches: { "square:eth1": "broken" },
@@ -223,7 +217,7 @@ export const quietStreet = defineRoom({
       object: { kind: "door", device: "square", iface: "eth1" },
       check: ({ world }) => world.oper("square", "eth1").up,
     },
-    { id: "card-answered", object: { kind: "card", device: "observatory" }, check: quietAnswered },
+    { id: "kitchen-answered", object: { kind: "slot", device: "observatory", iface: "eth0" }, check: quietAnswered },
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
   teaches: [],
@@ -260,6 +254,6 @@ export const quietStreet = defineRoom({
   solution: [
     typed("observatory", ADD_OWN),
     typed("square", "ip link set eth1 up"),
-    click("observatory", `lab card --to ${IP.kitchen}`),
+    typed("observatory", `ping -c 3 ${IP.kitchen}`),
   ],
 });

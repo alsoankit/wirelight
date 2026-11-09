@@ -188,17 +188,9 @@ export const twoOfMe = defineRoom({
   pathTag: "core",
   content: twoId,
   seed: 63,
-  // The messenger keeps pinging kitchen, so the answers (and who sends them) keep coming.
-  // Kitchen and library each call on the observatory now and then; on real Linux the ledger keeps the
-  // first answer and switches only when the other house asks the observatory something itself
-  // (decision 0061), so these calls are what make the stranger answer "sometimes".
+  // The player pings while library still shares kitchen's address, then pings again after the fix.
   topology: town({
     houses: ["kitchen", "library", "forge"],
-    messenger: { to: IP.kitchen, intervalMs: 2000 },
-    extra: {
-      kitchen: { messenger: { to: "10.0.1.5", intervalMs: 9000 } },
-      library: { messenger: { to: "10.0.1.5", intervalMs: 13_000 } },
-    },
   }),
   faults: [
     { kind: "addr-remove", device: "library", cidr: "10.0.1.12/24", dev: "eth0" },
@@ -242,7 +234,8 @@ export const twoOfMe = defineRoom({
   ],
   solution: [
     typed("library", "ip addr del 10.0.1.7/24 dev eth0"),
-    typed("library", "ip addr add 10.0.1.12/24 dev eth0", 90_000),
+    typed("library", "ip addr add 10.0.1.12/24 dev eth0"),
+    typed("observatory", "ping -c 3 10.0.1.7", 15_000),
   ],
 });
 

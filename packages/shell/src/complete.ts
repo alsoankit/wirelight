@@ -10,7 +10,7 @@ const BUILTINS = ["clear", "exit", "help", "history", "hostname", "man"];
 /** Which tool each first word needs (any one of them). */
 const PROGRAMS: Record<string, ToolId[]> = {
   ip: ["ip link", "ip addr", "ip route", "ip neigh"],
-  lab: ["lab send-frame", "lab card", "lab cable", "lab keeper", "lab scanner"],
+  lab: ["lab send-frame", "lab cable", "lab keeper", "lab scanner"],
   bridge: ["bridge fdb", "bridge link"],
   ping: ["ping"],
   tcpdump: ["tcpdump"],
@@ -51,7 +51,6 @@ const NEXT: Record<string, [string, ToolId | null][]> = {
   ],
   lab: [
     ["send-frame", "lab send-frame"],
-    ["card", "lab card"],
     ["cable", "lab cable"],
     ["keeper", "lab keeper"],
     ["scanner", "lab scanner"],
@@ -77,10 +76,6 @@ const NEXT: Record<string, [string, ToolId | null][]> = {
   ],
   "lab scanner catch": [["--next", null]],
   "lab scanner trace": [["--next", null]],
-  "lab card": [
-    ["--to", null],
-    ["--messenger", null],
-  ],
   bridge: [
     ["fdb", "bridge fdb"],
     ["link", "bridge link"],

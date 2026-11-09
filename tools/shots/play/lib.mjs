@@ -126,11 +126,15 @@ export async function bench(p, to, door) {
   await p.waitForTimeout(600);
 }
 
-export async function card(p, to, n = 0) {
+export async function repeatSend(p, to, dev) {
   await tidy(p);
-  await p.getByRole("button", { name: "Frame builder" }).click();
+  const panel = p.locator(".frame-builder-panel");
+  if (!(await panel.isVisible().catch(() => false))) {
+    await p.getByRole("button", { name: "Frame builder" }).click();
+  }
   await p.waitForTimeout(300);
   await p.fill(".frame-builder-panel input >> nth=0", to);
+  if (dev) await p.selectOption(".frame-builder-panel select", dev);
   await p.getByRole("button", { name: "Keep sending" }).click();
   await p.waitForTimeout(500);
 }
