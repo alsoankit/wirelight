@@ -301,6 +301,7 @@ function observatoryGrowth(secondDoor: boolean): KitPlacement[] {
 // stone of the first builders beyond the broken left wall. Both far outside, behind nothing.
 const OBSERVATORY_VIEW: StatuePlace[] = [
   { slug: "stone-gate", position: [5.6, 0, -5.7], turn: -0.6, scale: 0.72 },
+  { slug: "temple-arch-broken", position: [-6.4, 0, -6.1], turn: 0.3, scale: 0.82 },
   { slug: "rune-monolith", position: [-6.3, 0, -2.2], turn: 0.8, scale: 0.9 },
 ];
 
@@ -474,7 +475,8 @@ function houseHedges(): BufferGeometry[] {
 const HOUSE_VIEW: StatuePlace[] = [
   { slug: "topiary", position: [3.5, 0, -3.45], scale: 0.85, ...TOPIARY },
   { slug: "lion-head", position: [-3.74, 0.85, -0.1], turn: QUARTER, scale: 1.7 },
-  { slug: "fantasy-arch", position: [6.6, 0, -7.2], turn: 0.5, scale: 1.5 },
+  { slug: "temple-arch", position: [6.6, 0, -7.2], turn: 0.5, scale: 0.9 },
+  { slug: "steps-mossy", position: [-6.1, 0, -5.7], turn: -0.4, scale: 0.8 },
   { slug: "wall-bosigran", position: [-5.2, 0, 1.6], turn: QUARTER, scale: 1.15 },
 ];
 
