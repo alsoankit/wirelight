@@ -161,8 +161,8 @@ export function FloorMap({
         const k = bends.get(l.id);
         if (!k) return null;
         const state = memory ? "lit" : (corridors?.[l.id] ?? "dark");
-        const near = along(k, 0.24);
-        const far = along(k, 0.76);
+        const near = along(k, 0.3);
+        const far = along(k, 0.7);
         return (
           <g key={l.id}>
             {!memory && inCorridor === l.id && (
@@ -179,10 +179,10 @@ export function FloorMap({
             />
             {!mini && (
               <>
-                <text x={near.x} y={near.y - 8} textAnchor="middle" className="map-door">
+                <text x={near.x} y={near.y - 12} textAnchor="middle" className="map-door">
                   {l.a.iface}
                 </text>
-                <text x={far.x} y={far.y - 8} textAnchor="middle" className="map-door">
+                <text x={far.x} y={far.y - 12} textAnchor="middle" className="map-door">
                   {l.b.iface}
                 </text>
               </>
@@ -209,16 +209,16 @@ export function FloorMap({
         })()}
       {[...nodes.values()].map((n) => (
         <g key={n.id} transform={`translate(${n.x},${n.y})`} className={`map-node ${n.kind}`}>
-          {!memory && !inCorridor && n.id === here && <circle r={mini ? 9 : 22} className="map-here" />}
+          {!memory && !inCorridor && n.id === here && <circle r={mini ? 11 : 25} className="map-here" />}
           {n.kind === "switch" ? (
-            <rect x={mini ? -6 : -14} y={mini ? -4 : -9} width={mini ? 12 : 28} height={mini ? 8 : 18} rx={2} />
+            <rect x={mini ? -7 : -17} y={mini ? -5 : -11} width={mini ? 14 : 34} height={mini ? 10 : 22} rx={3} />
           ) : n.kind === "router" ? (
-            <polygon points={mini ? "0,-6 6,0 0,6 -6,0" : "0,-14 14,0 0,14 -14,0"} />
+            <polygon points={mini ? "0,-7 7,0 0,7 -7,0" : "0,-17 17,0 0,17 -17,0"} />
           ) : (
-            <circle r={mini ? 5 : 11} />
+            <circle r={mini ? 6 : 14} />
           )}
           {!mini && (
-            <text y={30} textAnchor="middle" className="map-name">
+            <text y={38} textAnchor="middle" className="map-name">
               {label(n.id)}
               {streets.get(n.id) && <tspan className="map-street"> {streets.get(n.id)}</tspan>}
             </text>
@@ -374,6 +374,7 @@ export function MapView() {
       {open && replay === null && (
         <section className="map" aria-label={voice.map.title}>
           <nav className="menu-tabs">
+            <span className="map-title">{voice.map.title}</span>
             <button type="button" aria-pressed={view === "floor"} onClick={() => setView("floor")}>
               {voice.map.thisFloor}
             </button>
@@ -393,6 +394,18 @@ export function MapView() {
               {voice.map.close}
             </button>
           </nav>
+          {view === "floor" && (
+            <div className="map-guide">
+              <span className="map-legend">{voice.map.legend}</span>
+              <span className="map-current">
+                {corridorEnds
+                  ? fill(voice.hereCorridor, { a: label(corridorEnds[0]), b: label(corridorEnds[1]) })
+                  : here
+                    ? fill(voice.here, { machine: label(here) })
+                    : voice.map.youAreHere}
+              </span>
+            </div>
+          )}
           {view === "floor" ? <FloorMap room={room} mini={false} /> : <WorldMap />}
         </section>
       )}
