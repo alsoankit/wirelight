@@ -38,8 +38,8 @@ export function observatoryLayout(doors: number, region: RegionId = 1): RoomLayo
   // The corridors' first stretch behind the arches in use (0119).
   const open = frame.doorSlots.slice(0, doors > 1 ? 2 : 1);
   if (region === 2) return withStubs({ ...frame, ...worksObservatory(doors > 1) }, region, open);
-  if (region === 3) return { ...frame, ...townObservatory(doors > 1) };
-  if (region === 4) return { ...frame, ...cathedralObservatory(doors > 1) };
+  if (region === 3) return withStubs({ ...frame, ...townObservatory(doors > 1) }, region, open);
+  if (region === 4) return withStubs({ ...frame, ...cathedralObservatory(doors > 1) }, region, open);
   return withStubs({ ...frame, ...hallsObservatory(doors > 1) }, region, open);
 }
 

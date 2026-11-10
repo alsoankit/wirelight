@@ -1,5 +1,5 @@
 import type { BufferGeometry } from "three";
-import { type CorridorDressing, corridorFloor } from "../corridor/frame";
+import { type CorridorDressing, corridorFloor, rightGateX } from "../corridor/frame";
 import { FLOORS, makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import { addTo, box, extras, gable, placed, rod, type V3 } from "../kit/shapes";
@@ -533,19 +533,22 @@ export function townCorridor(): CorridorDressing {
   const bag: Bag = {};
   const glows: Glow[] = [];
   const kit: KitPlacement[] = [];
+  // The right-hand room's gate is a residence doorway in the back wall, where the lane turns in (0119).
+  const gate = rightGateX();
   const faces = [
     "Wall_Plaster_Window_Wide_Round",
     "Wall_Plaster_Window_Thin_Round",
     "Wall_UnevenBrick_Door_Round",
     "Wall_Plaster_Window_Thin_Round",
-    "Wall_Plaster_Window_Wide_Round",
+    "Wall_Plaster_Door_Round",
   ];
-  [-4, -2, 0, 2, 4].forEach((at, k) => {
+  [-4, -2, 0, 2, gate].forEach((at, k) => {
     front(kit, "back", at, faces[k] as string, { closed: k === 3 });
   });
+  kit.push(doorFrame("back", gate));
   wing(kit, bag, "back", { from: -5, to: 5, dormers: [-4, -2, 2, 4], chimneys: [-1] });
   for (const at of [-3, -1, 1, 3]) pilaster(bag, "back", at);
-  // The lane's one residence door is shut (a strapped door in its frame): the way on is the arches at the
+  // The lane's one residence door is shut (a strapped door in its frame): the way on is the gates at the
   // ends, never a dark doorway in the middle of the lane.
   kit.push(doorFrame("back", 0));
   kit.push(onWallKit("back", "Door_4_Round", -0.53, { out: -0.2 }));

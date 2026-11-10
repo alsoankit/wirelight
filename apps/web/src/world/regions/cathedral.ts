@@ -1,6 +1,6 @@
 import { BufferAttribute, type BufferGeometry, CircleGeometry, ExtrudeGeometry, ShapeGeometry } from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { type CorridorDressing, corridorFloor } from "../corridor/frame";
+import { type CorridorDressing, corridorFloor, rightGateX } from "../corridor/frame";
 import type { Placement } from "../kit/StaticRoom";
 import {
   addTo,
@@ -214,14 +214,14 @@ function finish(room: Room) {
 
 // ---------------------------------------------------------------------------------------------------
 // The Observatory: a side chapel of the Cathedral. A lancet in the back wall, a tall window in the
-// left, the gothic arch to the nave (and a second to the left with two doors), the region's statue in
+// left, a pointed doorway to the nave (and a second to the left with two doors) like the halls' and
+// the chapels', each in a 4 m stretch of coursed wall (the Ruins kit's broken gothic arch it had opened
+// wider than the corridor beyond, 0119), the region's statue in
 // the far corner, a column fallen along the left wall, candles in the back corner. A stone plinth
 // under the bays, shafts on their joints, a cornice along the top.
 
-export function cathedralObservatoryPieces(secondDoor: boolean): Placement[] {
+export function cathedralObservatoryPieces(_secondDoor: boolean): Placement[] {
   return [
-    { piece: "Wall_ArchGothic", position: [0, 0, -4] },
-    ...(secondDoor ? [{ piece: "Wall_ArchGothic", position: [-4, 0, 2], rotationY: QUARTER } as Placement] : []),
     { piece: "Bricks", position: [-2.9, 0, 3.5], rotationY: 2.1, scale: 0.7 },
     { piece: "Brick", position: [-2.2, 0, 2.6], rotationY: 0.7 },
     { piece: "Brick", position: [1.75, 0, 2.55], rotationY: 2.0 }, // weighs down the old letter
@@ -229,11 +229,7 @@ export function cathedralObservatoryPieces(secondDoor: boolean): Placement[] {
 }
 
 /** The plain and window bays of a chapel's walls, their plinths, shafts on the joints and a cornice. */
-function chapelWalls(
-  room: Room,
-  back: Record<number, WindowKind | "wall" | "door">,
-  left: Record<number, WindowKind | "wall" | "door">,
-) {
+function chapelWalls(room: Room, back: Record<number, WindowKind | "wall">, left: Record<number, WindowKind | "wall">) {
   for (const [wall, bays] of [
     ["back", back],
     ["left", left],
@@ -241,14 +237,11 @@ function chapelWalls(
     const starts = Object.keys(bays).map(Number);
     for (const from of starts) {
       const kind = bays[from];
-      if (kind === "door") {
-        addTo(room.bag, "Ashlar", onWall(wallWithDoor(2, HEIGHT, 0.3, 1.8, 2.9, true), wall, from, 0));
-        addTo(room.bag, "Stone", onWall(doorFrame(1.8, 2.9, 0.16, 0.14, true), wall, from, 0));
-      } else if (kind === "wall") room.kit.push(bay("wall_01", wall, from));
+      if (kind === "wall") room.kit.push(bay("wall_01", wall, from));
       else if (kind) windowBay(room, wall, from, kind);
       room.kit.push(plinth(wall, from));
     }
-    // A shaft wherever two bays meet (not beside an arch: the Ruins kit's arch has its own jambs).
+    // A shaft wherever two bays meet (not beside a doorway: its moulded frame is its own jamb).
     for (const from of starts) if (starts.includes(from + BAY)) shaft(room.bag, wall, from + BAY);
     course(room.bag, wall, -4, 4, HEIGHT + 0.07, 0.2);
   }
@@ -261,6 +254,8 @@ export function cathedralObservatory(secondDoor: boolean) {
     { [-4]: "lancet", 2: "wall" },
     secondDoor ? { [-4]: "wall", [-2]: "tall" } : { [-4]: "wall", [-2]: "tall", 0: "wall", 2: "wall" },
   );
+  pointedDoor(room, "back", 0, false, 2 * BAY);
+  if (secondDoor) pointedDoor(room, "left", 2, false, 2 * BAY);
   room.kit.push(...floor("floor_01"), ...piers(), fallenColumn([-3.25, 0.4]));
   candles(room, [-3.1, -3.15]);
   // The region's statue stands here now (room/RegionStatue.tsx, 0094).
@@ -284,12 +279,10 @@ export const CATHEDRAL_HOUSE_PIECES: Placement[] = [
 
 export function cathedralHouse() {
   const room = newRoom();
-  // A pointed doorway built into the back wall, with the chapel's own ashlar and moulding.
-  chapelWalls(
-    room,
-    { [-4]: "lancet", [-2]: "wall", 0: "door", 2: "wall" },
-    { [-4]: "wall", [-2]: "tall", 0: "wall", 2: "wall" },
-  );
+  // A pointed doorway built into the back wall, with the chapel's own ashlar and moulding, centred in
+  // a 4 m stretch (it was centred on a bay's joint, and half the opening was wall: 0119).
+  chapelWalls(room, { [-4]: "lancet", 2: "wall" }, { [-4]: "wall", [-2]: "tall", 0: "wall", 2: "wall" });
+  pointedDoor(room, "back", 0, false, 2 * BAY);
   room.kit.push(...floor("floor_01"), ...piers());
   candles(room, [-3.1, -3.15]);
   const statues: StatuePlace[] = [{ slug: "temple-pillar-broken", position: [6.2, 0, -6.1], turn: 0.2, scale: 0.85 }];
@@ -318,6 +311,19 @@ const LANCET_BAYS: { wall: Wall; at: number }[] = [
   { wall: "back", at: 1 },
 ];
 
+/**
+ * A pointed doorway centred `at` along a wall, in a stretch of wall `width` wide: the wall around it
+ * laid in courses like the kit's, a moulded frame, and (`dark`) the dark beyond in the arch's shape,
+ * where no corridor stub stands behind.
+ */
+function pointedDoor(room: Room, wall: Wall, at: number, dark: boolean, width = BAY) {
+  addTo(room.bag, "Ashlar", onWall(wallWithDoor(width, HEIGHT, 0.3, 1.8, 2.9, true), wall, at, 0));
+  addTo(room.bag, "Stone", onWall(doorFrame(1.8, 2.9, 0.16, 0.14, true), wall, at, 0));
+  if (!dark) return;
+  const shape = prep(new ExtrudeGeometry(lancetShape(1.8, 2.9), { depth: 0.02, bevelEnabled: false }));
+  addTo(room.bag, "Void", onWall(shape, wall, at, 0, -0.3));
+}
+
 export function cathedralHall(used: { wall: Wall; at: number }[]) {
   const room = newRoom();
   const taken = (wall: Wall, at: number) => used.some((s) => s.wall === wall && s.at === at);
@@ -329,12 +335,8 @@ export function cathedralHall(used: { wall: Wall; at: number }[]) {
   for (const wall of ["back", "left"] as const) {
     for (const at of [-3, -1, 1, 3]) {
       if (taken(wall, at)) {
-        // A pointed doorway: the wall around it laid in courses like the kit's, a moulded frame, the
-        // dark beyond in the arch's shape.
-        addTo(room.bag, "Ashlar", onWall(wallWithDoor(2, HEIGHT, 0.3, 1.8, 2.9, true), wall, at, 0));
-        addTo(room.bag, "Stone", onWall(doorFrame(1.8, 2.9, 0.16, 0.14, true), wall, at, 0));
-        const dark = prep(new ExtrudeGeometry(lancetShape(1.8, 2.9), { depth: 0.02, bevelEnabled: false }));
-        addTo(room.bag, "Void", onWall(dark, wall, at, 0, -0.3));
+        // The corridor's first stretch shows through it (room/stubs.ts, 0119).
+        pointedDoor(room, wall, at, false);
         continue;
       }
       if (rose && rose.wall === wall && rose.at === at) windowBay(room, wall, at - 1, "rose");
@@ -361,20 +363,27 @@ export function cathedralHall(used: { wall: Wall; at: number }[]) {
 
 // ---------------------------------------------------------------------------------------------------
 // A corridor (0081): a cloister walk (region-4 brief). Wall bays along the back on a stone plinth,
-// shafts between them, a lancet whose coloured light falls across the floor, a cornice, candles at
-// the far end; the rune-line inlaid down the middle. Room coordinates: back wall on z = −4, x from −5
-// to 5.
+// shafts between them, a lancet whose coloured light falls across the floor, a cornice, candles by
+// the right-hand gate in the back wall; the rune-line inlaid down the middle. Room coordinates: back
+// wall on z = −4, x from −5 to 5.
 
 export function cathedralCorridor(): CorridorDressing {
   const room = newRoom();
+  // The right-hand room's gate: a pointed doorway in the last bay, where the walk turns in (0119).
+  const gate = rightGateX();
   for (const from of [-5, -3, -1, 1, 3]) {
+    if (from === gate - 1) {
+      pointedDoor(room, "back", gate, true);
+      continue;
+    }
     if (from === -1) windowBay(room, "back", from, "lancet");
     else room.kit.push(bay("wall_01", "back", from));
     room.kit.push(plinth("back", from));
   }
-  for (const joint of [-3, -1, 1, 3]) shaft(room.bag, "back", joint);
+  for (const joint of [-3, -1, 1]) shaft(room.bag, "back", joint);
   course(room.bag, "back", -5, 5, HEIGHT + 0.07, 0.2);
-  candles(room, [4.1, -3.4]);
+  // Candles beside the gate, so it reads at the walk's end.
+  candles(room, [2.45, -3.4]);
   const done = finish(room);
   return {
     placements: [{ piece: "Bricks", position: [-3.6, 0, -0.9], rotationY: 0.4, scale: 0.6 }],

@@ -71,10 +71,10 @@ export function corridorFloor(
 /**
  * Does the corridor turn into its back wall at the right-hand end (0119)? Then the right room's gate is
  * an arch in the back wall (a far side) rather than an arch across the near end, which stood between the
- * camera and the corridor. Regions 1 and 2 so far; 3 and 4 still have an arch at each end.
+ * camera and the corridor. Every region now (Regions 3 and 4 copied from 1 and 2).
  */
-export function turnsIntoBack(region: RegionId): boolean {
-  return region <= 2;
+export function turnsIntoBack(_region: RegionId): boolean {
+  return true;
 }
 
 /** Where the right-hand gate's centre is along the back wall, when the corridor turns into it. */
@@ -85,13 +85,15 @@ export function rightGateX(half: number = CORRIDOR.half): number {
 /**
  * The gates the Ruins kit gives: the left one across the far (−x) end, facing the camera; the right
  * one across the near end, or in the back wall when the corridor turns into it (Region 1's, the same
- * overgrown arch its rooms use). Region 2's gates are its own village-kit doors (regions/works.ts).
+ * overgrown arch its rooms use). Region 2's gates are its own village-kit doors (regions/works.ts);
+ * Regions 3 and 4 make the right-hand gate a doorway in their own back wall (town.ts, cathedral.ts),
+ * since the Ruins' 4 m arch doesn't fit their 2 m bays.
  */
 export function endArches(region: RegionId, half: number = CORRIDOR.half): Placement[] {
   if (region === 2) return [];
   const piece = region === 1 ? "Wall_ArchRound_Overgrown" : region === 4 ? "Wall_ArchGothic" : "Wall_ArchRound";
   const { cable, back } = CORRIDOR;
   const left: Placement = { piece, position: [-half, 0, cable], rotationY: Math.PI / 2 };
-  if (turnsIntoBack(region)) return [left, { piece, position: [rightGateX(half), 0, back] }];
-  return [left, { piece, position: [half, 0, cable], rotationY: Math.PI / 2 }];
+  if (!turnsIntoBack(region)) return [left, { piece, position: [half, 0, cable], rotationY: Math.PI / 2 }];
+  return region === 1 ? [left, { piece, position: [rightGateX(half), 0, back] }] : [left];
 }
