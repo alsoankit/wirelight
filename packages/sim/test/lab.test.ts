@@ -87,6 +87,30 @@ describe("lab protocol over one cable", () => {
   });
 });
 
+describe("room-started repeat sends", () => {
+  it("begins as background traffic, repeats on the virtual clock, and can be stopped", () => {
+    const sim = new Simulator({
+      ...topo(),
+      repeatSends: [{ device: "observatory", to: "02:00:00:00:00:07", msg: "hello" }],
+    });
+    expect(sim.runningRepeatFrames("observatory")).toMatchObject([{ id: 1, to: "02:00:00:00:00:07", msg: "hello" }]);
+    expect(sim.trace).toEqual([]);
+    sim.advance(1500);
+    expect(sim.trace.filter((e) => e.kind === "frame.tx" && e.device === "observatory")).toMatchObject([
+      { origin: "setup" },
+    ]);
+    sim.advance(3600);
+    expect(
+      sim.trace.filter((e) => e.kind === "frame.tx" && e.device === "observatory" && e.origin === "setup"),
+    ).toHaveLength(2);
+    expect(sim.stopRepeatFrame(1)).toBe(true);
+    sim.advance(10_000);
+    expect(
+      sim.trace.filter((e) => e.kind === "frame.tx" && e.device === "observatory" && e.origin === "setup"),
+    ).toHaveLength(2);
+  });
+});
+
 describe("links", () => {
   it("a door that is down sends nothing; the frame dies at the sender's door", () => {
     const sim = new Simulator(topo(), [{ kind: "iface-down", device: "observatory", iface: "eth0" }]);

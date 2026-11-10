@@ -1,5 +1,5 @@
 /** floors/floor-3.md · The Switch. The hall is a Linux bridge; the player sorts by hand first (0042). */
-import { helloWithKey, helloWithKeyPart, keyFor, messengerMessage } from "@wirelight/content";
+import { automaticMessage, helloWithKey, helloWithKeyPart, keyFor } from "@wirelight/content";
 import { labDelivered, linkUp, printed, ran, sentTo } from "../predicates";
 import { defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
 import {
@@ -9,8 +9,8 @@ import {
   broadcastBeforeLink,
   handSend,
   keeperAwake,
-  messengerHeard,
   readBoardTwiceIdle,
+  repeatFrameAnswered,
   sortedByHand,
 } from "./predicates";
 import {
@@ -42,10 +42,10 @@ const readBoard = typed("hall", "bridge fdb show");
 const SEALED = { state: "off-limits" } as const;
 const OPEN = { state: "enterable" } as const;
 const sealed = (...ids: string[]) => Object.fromEntries(ids.map((id) => [id, SEALED]));
-/** Pantry and attic write to each other now and then (3.2, 3.B). */
+/** Pantry and attic send to each other now and then (3.2, 3.B). */
 const chatter = [
-  { id: "pantry", mac: PANTRY, door: "eth1", messenger: { to: ATTIC, intervalMs: 7000 } },
-  { id: "attic", mac: ATTIC, door: "eth2", messenger: { to: PANTRY, intervalMs: 9000 } },
+  { id: "pantry", mac: PANTRY, door: "eth1", repeatSend: { to: ATTIC, intervalMs: 7000 } },
+  { id: "attic", mac: ATTIC, door: "eth2", repeatSend: { to: PANTRY, intervalMs: 9000 } },
 ];
 
 // Detectors more than one room uses.
@@ -75,7 +75,7 @@ export const manyDoors = defineRoom({
   content: manyDoorsId,
   seed: 31,
   topology: works({
-    observatory: { messenger: { to: FORGE, msg: messengerMessage, intervalMs: 6000 } },
+    observatory: { repeatSends: [{ to: FORGE, msg: automaticMessage, intervalMs: 6000 }] },
     machines: [
       { id: "kitchen", mac: KITCHEN, door: "eth1" },
       { id: "library", mac: LIBRARY, door: "eth2" },
@@ -90,7 +90,6 @@ export const manyDoors = defineRoom({
     desk: "hall",
     macBoards: { hall: "works" },
     workbench: "works",
-    card: "works",
     catching: true,
   },
   // The board is readable here: clicking it runs `bridge fdb show` ("the machine heard"), so the
@@ -137,7 +136,7 @@ export const manyDoors = defineRoom({
     },
     { misconception: "forgot-to-remember", steps: [desk("send flood", 500), desk("send eth0")] },
   ],
-  // The messenger's first frame waits at the desk from 1.5 s, its next from 7.5 s.
+  // The room-started frame waits at the desk from 1.5 s, then returns every six seconds.
   solution: [
     desk("learn 02:00:00:00:00:05 eth0", 100),
     desk("send flood", 500),
@@ -165,13 +164,12 @@ export const keepersMemory = defineRoom({
   content: memoryId,
   seed: 32,
   topology: works({
-    observatory: { messenger: { to: "", msg: messengerMessage } },
     machines: [...chatter, { id: "gate", mac: GATE, door: "eth3", reply: gateReply }],
   }),
   faults: [],
   playerDevice: "observatory",
   access: { observatory: OPEN, hall: OPEN, ...sealed("pantry", "attic", "gate") },
-  controls: { console: "typing", macBoards: { hall: "broken" }, workbench: "works", card: "works", catching: true },
+  controls: { console: "typing", macBoards: { hall: "broken" }, workbench: "works", catching: true },
   tools: {},
   glow: "symptoms",
   winCondition: labDelivered("observatory", gateReply),
@@ -186,7 +184,7 @@ export const keepersMemory = defineRoom({
   misconceptions: [expectsListed, guessing, wrongConsole],
   detectorTests: [expectsListedTest, guessingTest, wrongConsoleTest],
   solution: [bench(BROADCAST, "who?"), readBoard, bench(GATE, "hello")],
-  altSolutions: [[bench(BROADCAST, "who?"), readBoard, click("observatory", `lab card --to ${GATE}`)]],
+  altSolutions: [[bench(BROADCAST, "who?"), readBoard, bench(GATE, "hello")]],
 });
 
 // ── 3.3 · Find Everyone ────────────────────────────────────────────────────────────────────
@@ -202,17 +200,8 @@ const letters = [
 ].map((m, i) => ({ ...m, reply: helloWithKeyPart(m.id, i + 1, 3, parts[i] as string) }));
 const letterAnswered = (i: number) => {
   const m = letters[i] as (typeof letters)[number];
-  return messengerHeard("observatory", m.id, m.reply);
+  return repeatFrameAnswered("observatory", m.id, m.reply, "command");
 };
-/** A card given the name behind a different door than its own (card N is door N). */
-const swappedDoors: Predicate = (f) =>
-  f.trace.some((e) => {
-    if (e.kind !== "cmd.exec" || e.device !== "observatory") return false;
-    const m = e.line.match(/^lab card --messenger (\d) --to (\S+)$/);
-    if (!m) return false;
-    const n = Number(m[1]);
-    return [1, 2, 3].some((door) => door !== n && behind(f, "hall", `eth${door}`, (m[2] as string).toLowerCase()));
-  });
 export const findEveryone = defineRoom({
   id: findId,
   region: 2,
@@ -223,36 +212,35 @@ export const findEveryone = defineRoom({
   content: findId,
   seed: 33,
   topology: works({
-    observatory: { messengers: letters.map((m) => ({ to: m.mac, msg: messengerMessage })) },
+    observatory: {
+      repeatSends: [LARDER, CHAPEL, BAKERY].map((to) => ({ to, msg: automaticMessage })),
+    },
     machines: letters,
   }),
-  // Only the doors were written down: every card is blank.
-  faults: [1, 2, 3].map((n) => ({ kind: "card", device: "observatory", to: "", messenger: n }) as const),
+  faults: [],
   playerDevice: "observatory",
   access: { observatory: OPEN, hall: OPEN, ...sealed("bakery", "larder", "chapel") },
-  controls: { console: "typing", macBoards: { hall: "broken" }, workbench: "works", card: "works", catching: true },
+  controls: { console: "typing", macBoards: { hall: "broken" }, workbench: "works", catching: true },
   tools: {},
   glow: "symptoms",
   winCondition: (f) => [0, 1, 2].every((i) => letterAnswered(i)(f)),
   key: { word: findKey, via: "lab-text" },
   healthChecks: [0, 1, 2].map((i) => ({
-    id: `card-${i + 1}-answered`,
-    object: { kind: "card", device: "observatory" } as const,
+    id: `send-${i + 1}-answered`,
+    object: { kind: "workbench", device: "observatory" } as const,
     check: letterAnswered(i),
   })),
   teaches: [],
   uses: ["mac-table", "learning-from-the-source", "broadcast"],
   cards: [],
-  misconceptions: [{ id: "swapped-doors", detect: swappedDoors }],
-  detectorTests: [
-    { misconception: "swapped-doors", steps: [click("observatory", `lab card --messenger 1 --to ${LARDER}`)] },
-  ],
+  misconceptions: [],
+  detectorTests: [],
   solution: [
     bench(BROADCAST, "who?"),
     readBoard,
-    click("observatory", `lab card --messenger 1 --to ${BAKERY}`),
-    click("observatory", `lab card --messenger 2 --to ${LARDER}`),
-    click("observatory", `lab card --messenger 3 --to ${CHAPEL}`),
+    click("observatory", `lab send-frame --to ${BAKERY} --msg "hello" --repeat`),
+    click("observatory", `lab send-frame --to ${LARDER} --msg "hello" --repeat`),
+    click("observatory", `lab send-frame --to ${CHAPEL} --msg "hello" --repeat`),
   ],
 });
 
@@ -270,17 +258,13 @@ export const busyHall = defineRoom({
   content: busyId,
   seed: 39,
   topology: works({
-    observatory: { messenger: { to: LAUNDRY, msg: messengerMessage } },
     machines: [
       { ...(chatter[0] as (typeof chatter)[number]) },
       { id: "laundry", mac: LAUNDRY, door: "eth2", reply: wrenReply },
       { ...(chatter[1] as (typeof chatter)[number]), door: "eth3" },
     ],
   }),
-  faults: [
-    { kind: "iface-down", device: "hall", iface: "eth2" },
-    { kind: "card", device: "observatory", to: "02:00:00:00:00:66" },
-  ],
+  faults: [{ kind: "iface-down", device: "hall", iface: "eth2" }],
   playerDevice: "observatory",
   access: { observatory: OPEN, hall: OPEN, ...sealed("pantry", "attic", "laundry") },
   controls: {
@@ -288,20 +272,19 @@ export const busyHall = defineRoom({
     plateSwitches: { "hall:eth2": "broken" },
     macBoards: { hall: "broken" },
     workbench: "works",
-    card: "works",
     catching: true,
   },
   tools: {},
   glow: "none",
-  winCondition: messengerHeard("observatory", "laundry", wrenReply),
+  winCondition: repeatFrameAnswered("observatory", "laundry", wrenReply, "command"),
   key: { word: keyFor(busyId), via: "lab-text" },
   healthChecks: [
     { id: "eth2-up", object: { kind: "door", device: "hall", iface: "eth2" }, check: linkUp("hall", "eth2") },
     { id: "board-laundry", object: { kind: "board", device: "hall" }, check: boardHas("hall", LAUNDRY, "eth2") },
     {
-      id: "card-answered",
-      object: { kind: "card", device: "observatory" },
-      check: messengerHeard("observatory", "laundry", wrenReply),
+      id: "send-answered",
+      object: { kind: "workbench", device: "observatory" },
+      check: repeatFrameAnswered("observatory", "laundry", wrenReply, "command"),
     },
   ],
   hintTiming: { revealAfterMs: 12 * 60_000 },
@@ -335,6 +318,6 @@ export const busyHall = defineRoom({
     typed("hall", "ip link set eth2 up"),
     bench(BROADCAST, "who?"),
     readBoard,
-    click("observatory", `lab card --to ${LAUNDRY}`),
+    click("observatory", `lab send-frame --to ${LAUNDRY} --msg "hello" --repeat`),
   ],
 });

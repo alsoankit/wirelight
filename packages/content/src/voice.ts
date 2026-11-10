@@ -1,4 +1,4 @@
-/** Lines spoken by things in the world: keepers, locks, the workbench. Plain voice (D2). */
+/** Lines spoken by things in the world: keepers, locks, and the Frame builder. Plain voice (D2). */
 import type { SimEvent } from "@wirelight/sim";
 
 type Decision = Extract<SimEvent, { kind: "fwd.decision" }>;
@@ -67,24 +67,20 @@ export const voice = {
     open: "The key fit. The way on is open.",
   },
   workbench: {
-    name: "Workbench",
+    name: "Frame builder",
     title: "Build a frame",
     about: "Write who it's for, then seal it and send it down the cable.",
     to: "To",
     door: "Out of door",
     message: "Message",
-    send: "Seal and send",
+    send: "Send once",
+    repeat: "Keep sending",
+    running: "Running sends",
+    stop: "Stop",
+    broadcast: "Send to everyone",
+    pick: "Pick a door you've met",
+    noneKnown: "No doors met yet. Read a plate, or wait for an answer.",
     refused: "A frame needs a name to go to.",
-  },
-  /** The messenger's address card (CORE-35). {n} is the card's number when there are several. */
-  card: {
-    name: "Address card",
-    title: "The messenger's card",
-    // 3.3 labels its cards by the hall door each letter is for (floor-3.md): Door 1 is for eth1.
-    numbered: "Door {n}",
-    about: "The messenger sends to whatever is written here, again and again.",
-    blank: "(blank)",
-    write: "Write it on the card",
   },
   /** A switch's MAC board (CORE-27): reading it runs `bridge fdb show`. */
   board: {
@@ -246,6 +242,8 @@ export const voice = {
     /** The plate's light, for screen readers (filled diamond, hollow diamond). */
     lightUp: "link up",
     lightDown: "link down",
+    copy: "Copy {value}",
+    copied: "Copied",
     linkUp: "Link up: the cable behind this door is working.",
     linkDown: "Link down: nothing can cross this door.",
     /** Switched on, but the cable behind it isn't working (1.3). */
@@ -279,7 +277,7 @@ export const voice = {
   /** A corridor (0081): a cable you can stand in and watch. */
   corridor: {
     /** On the cable at a doorway: stepping into its corridor and stopping there. */
-    step: "Step into the corridor to {name}",
+    step: "Enter the corridor to {name}",
     /** Where the player stands: the two machines the cable joins. */
     title: "The corridor between {a} and {b}",
     hint: "Every message on this cable passes here. Point at one to slow it down.",

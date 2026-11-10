@@ -286,13 +286,32 @@ function keeper(ctx: CommandContext, args: string[]): number {
   }
 }
 
-const USAGE = 'usage: lab send-frame --to <mac|machine> [--from <mac>] [--dev <iface>] [--msg "<text>"]';
+const USAGE =
+  'usage: lab send-frame --to <mac|machine> [--from <mac>] [--dev <iface>] [--msg "<text>"] [--repeat] | --stop <n>';
 
 function sendFrame(ctx: CommandContext, args: string[]): number {
   const opts: Record<string, string> = {};
+  let repeat = false;
   for (let i = 0; i < args.length; i++) {
     const flag = args[i] as string;
+    if (flag === "--repeat") {
+      repeat = true;
+      continue;
+    }
     const key = flag.replace(/^--/, "");
+    if (flag === "--stop") {
+      const id = Number(args[++i]);
+      if (!Number.isInteger(id) || id < 1 || i !== args.length - 1) {
+        ctx.err(USAGE);
+        return 2;
+      }
+      if (!ctx.sim.stopRepeatFrame(id)) {
+        ctx.err(`lab send-frame: no running send ${id}`);
+        return 1;
+      }
+      ctx.out(`stopped repeating send ${id}`);
+      return 0;
+    }
     if (!flag.startsWith("--") || !["to", "from", "dev", "msg"].includes(key)) {
       ctx.err(`lab send-frame: unknown option "${flag}"`);
       ctx.err(USAGE);
@@ -335,12 +354,19 @@ function sendFrame(ctx: CommandContext, args: string[]): number {
     ctx.err(`lab send-frame: ${iface.name}: Network is down`);
     return 1;
   }
-  const r = ctx.sim.sendLabFrame(ctx.device, {
+  const options = {
     to: opts.to,
     dev: iface.name,
     msg: opts.msg ?? "hello",
     ...(opts.from ? { from: opts.from } : {}),
-  });
+  };
+  if (repeat) {
+    const id = ctx.sim.startRepeatFrame(ctx.device, options);
+    if (id === null) return 1;
+    ctx.out(`started repeating send ${id} (to ${shownTo ?? parseMac(opts.to)}, every 2 seconds)`);
+    return 0;
+  }
+  const r = ctx.sim.sendLabFrame(ctx.device, options);
   if (!r.ok) return 1;
   ctx.out(`sent 1 frame (to ${shownTo ?? parseMac(opts.to)}, ${r.length} bytes)`);
   return 0;

@@ -21,7 +21,10 @@ function answers(roomId: string, device: string, steps?: SolutionStep[]): string
 
 describe("the keeper's why", () => {
   it("a computer took in what was for it, and ignored the rest", () => {
-    const said = answers("f2.wrong-name", "kitchen");
+    const said = answers("f2.wrong-name", "kitchen", [
+      { device: "observatory", line: "lab send-frame --to 02:00:00:00:00:05 --msg hello" },
+      { device: "observatory", line: "lab send-frame --to 02:00:00:00:00:07 --msg hello --repeat" },
+    ]);
     expect(said.some((t) => /That's not me, so I ignored it/.test(t))).toBe(true);
     expect(said.some((t) => /That's me, so I took it in|everyone/.test(t))).toBe(true);
   });

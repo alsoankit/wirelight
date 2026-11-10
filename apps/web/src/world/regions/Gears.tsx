@@ -45,7 +45,8 @@ export function Gears({ gears, region }: { gears: Gear[]; region: RegionId }) {
       shape.setAttribute("spin", new BufferAttribute(spin, 1));
       parts.push(shape);
     }
-    const merged = mergeGeometries(parts);
+    // A hall whose far walls are all doorways has no gears (mergeGeometries throws on none).
+    const merged = parts.length ? mergeGeometries(parts) : null;
     const m = ownRegionMaterial("Brass", region);
     // Rodrigues' rotation round each gear's own axis through its pivot.
     const pivot = attribute("pivot", "vec3");

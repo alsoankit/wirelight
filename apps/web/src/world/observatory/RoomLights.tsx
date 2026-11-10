@@ -54,12 +54,14 @@ export function RoomLights({
     const warm = 1 - r;
     if (ambient.current) {
       blend(ambient.current.color, c.ambient.ruined, c.ambient.restored, r);
-      ambient.current.intensity = 0.9 - warm * 0.1;
+      // Ruin is a dim moonlit night, not black: enough soft fill that the whole room reads (owner,
+      // 2026-11-10: "a dimly lit moonlight type effect … the room is at least visible").
+      ambient.current.intensity = 1.25 - warm * 0.45;
     }
     if (fill.current) {
       blend(fill.current.color, c.sky.ruined, c.sky.restored, r);
       blend(fill.current.groundColor, c.ground.ruined, c.ground.restored, r);
-      fill.current.intensity = 1.4 - warm * 0.5;
+      fill.current.intensity = 1.75 - warm * 0.85;
     }
     blend(fog.color, c.fog.ruined, c.fog.restored, r);
     fog.near = 20 + warm * 8;

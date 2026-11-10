@@ -12,8 +12,8 @@ import type { StatuePlace } from "./standing";
 // z = −4 and the left wall at x = −4 are built). A doorway on the back wall leads out along −z; one on
 // the left wall leads out along −x.
 
-/** "front": the near edge, open toward the camera; its corridor runs out toward you (0111). */
-export type Wall = "back" | "left" | "front";
+/** The far walls; the near sides are never built (0116). */
+export type Wall = "back" | "left";
 export type Vec3 = [number, number, number];
 
 export type DoorSlot = {
@@ -22,6 +22,11 @@ export type DoorSlot = {
   at: number;
   /** Where its plate hangs: beside the arch (default) or above a narrow doorway (halls). */
   plate?: "beside" | "above";
+  /**
+   * Where the door's name plate hangs (room/plan.ts decides): beside the arch on its near side, clear of
+   * the gate's click area, or above it, over the chip, where a neighbouring arch leaves no room.
+   */
+  label?: "beside" | "above";
 };
 
 /** A light in the room that relights as restoration reaches it (runes, lamps, lanterns, windows). */
@@ -65,6 +70,8 @@ export type RoomLayout = {
   extras: Extra[];
   /** The room's own lights (when not given, the scene's). */
   glows?: Glow[];
+  /** Soft light down each corridor stub behind its arches (room/stubs.ts), added to the room's lights. */
+  stubGlows?: Glow[];
   gears?: Gear[];
   /** Where steam rises from (Region 2's valves and vents: regions/Steam.tsx). */
   steam?: Vec3[];
@@ -81,28 +88,25 @@ export type RoomLayout = {
 };
 
 const FACE = -4;
+/** Heights above a doorway: the gate's click area reaches GATE_TOP, the chip and the plate stack above. */
+export const GATE_TOP = 2.75;
+export const CHIP_Y = 2.98;
+export const PLATE_Y = 3.45;
+/** A plate beside its arch: this far along the wall from the arch's centre, at this height. */
+export const BESIDE = 1.85;
+export const BESIDE_Y = 2.2;
 
 /** Where a doorway is, where its corridor goes, and where its plate hangs. */
 export function doorGeometry(slot: DoorSlot) {
-  if (slot.wall === "front") {
-    // The near edge: no wall, a frame of its own; the plate on its right post, as seen from inside.
-    const doorway: Vec3 = [slot.at, 0.9, -FACE];
-    return {
-      out: [0, 0, 1] as Vec3,
-      doorway,
-      corridorEnd: [slot.at, 0.35, -FACE + 1.8] as Vec3,
-      plate: [slot.at - 1.15, 1.55, -FACE - 0.15] as Vec3,
-      looseEnd: [slot.at - 0.7, 0.06, -FACE - 0.9] as Vec3,
-    };
-  }
   const out: Vec3 = slot.wall === "back" ? [0, 0, -1] : [-1, 0, 0];
   const doorway: Vec3 = slot.wall === "back" ? [slot.at, 0.9, FACE] : [FACE, 0.9, slot.at];
   const corridorEnd: Vec3 = [doorway[0] + out[0] * 1.8, 0.35, doorway[2] + out[2] * 1.8];
-  // The plate hangs on the wall to the right of the arch, as seen from inside.
-  const beside = slot.plate === "above" ? 0 : 1.6;
-  const height = slot.plate === "above" ? 2.2 : 2.35;
-  const plate: Vec3 =
-    slot.wall === "back" ? [slot.at + beside, height, FACE + 0.15] : [FACE + 0.15, height, slot.at + beside];
+  // The plate never covers the gate's click area (owner, 2026-11-10): beside the arch on its near side
+  // (lower on screen, clear of the mission card), or above it over the chip between close hall arches.
+  const beside = slot.label === "beside";
+  const along = beside ? slot.at + BESIDE : slot.at;
+  const y = beside ? BESIDE_Y : PLATE_Y;
+  const plate: Vec3 = slot.wall === "back" ? [along, y, FACE + 0.15] : [FACE + 0.15, y, along];
   // A loose cable end lies on the floor just inside the doorway.
   const looseEnd: Vec3 = slot.wall === "back" ? [slot.at + 0.7, 0.06, FACE + 0.9] : [FACE + 0.9, 0.06, slot.at - 0.7];
   return { out, doorway, corridorEnd, plate, looseEnd };
@@ -117,7 +121,6 @@ export function cableSpan(slot: DoorSlot): { centre: Vec3; length: number; along
   const inside = 0.5;
   const length = 1.7;
   const mid = FACE + inside - length / 2;
-  if (slot.wall === "front") return { centre: [slot.at, 0.05, -mid], length, along: "z" };
   return slot.wall === "back"
     ? { centre: [slot.at, 0.05, mid], length, along: "z" }
     : { centre: [mid, 0.05, slot.at], length, along: "x" };

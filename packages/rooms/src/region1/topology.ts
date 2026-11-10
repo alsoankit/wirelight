@@ -1,6 +1,6 @@
 /** The Overgrown Halls' machines (floors/floor-1.md, floor-2.md: "Machines"). */
 import { lanternAnnouncement } from "@wirelight/content";
-import type { DeviceSpec, Topology } from "@wirelight/sim";
+import type { DeviceSpec, RepeatSendSpec, Topology } from "@wirelight/sim";
 
 export const OBSERVATORY = "02:00:00:00:00:05";
 export const OBSERVATORY_ETH1 = "02:00:00:00:00:06";
@@ -16,16 +16,14 @@ export interface HallsOptions {
   lanternReply?: string;
   /** Kitchen's background announcement every 6 s (from Floor 2). */
   announcements?: boolean;
-  /** The messenger in the observatory: its card and the door it sends from. */
-  messenger?: { to: string; dev?: string; msg: string };
   /** A machine behind the observatory's second door, in a sealed room (2.3, 2.B). */
   second?: {
     id: string;
     mac: string;
     link: string;
     reply: string;
-    /** Its own calls (cellar's, to a name nobody has). */
-    calls?: { to: string; msg: string; intervalMs: number };
+    /** A background send the room starts on this machine. */
+    calls?: Omit<RepeatSendSpec, "device">;
   };
 }
 
@@ -38,7 +36,6 @@ export function halls(o: HallsOptions = {}): Topology {
     interfaces: [{ name: "eth0", mac: OBSERVATORY }, ...(o.second ? [{ name: "eth1", mac: OBSERVATORY_ETH1 }] : [])],
     // The observatory answers what's sent to it, so a message and its answer light the corridor.
     lab: { mode: "responder", answersBroadcast: true },
-    ...(o.messenger ? { messenger: { to: o.messenger.to, msg: o.messenger.msg, dev: o.messenger.dev ?? "eth0" } } : {}),
   };
   const kitchen: DeviceSpec = {
     id: "kitchen",
@@ -46,13 +43,15 @@ export function halls(o: HallsOptions = {}): Topology {
     kind: "host",
     interfaces: [{ name: "eth0", mac: KITCHEN }],
     lab: { mode: "responder", answersBroadcast: true, ...(o.lanternReply ? { reply: o.lanternReply } : {}) },
-    ...(o.lanternMessage ? { messenger: { to: OBSERVATORY, msg: o.lanternMessage, intervalMs: 4000 } } : {}),
     // A real IPv4/UDP broadcast; its inside stays sealed until Floor 6.
     ...(o.announcements
       ? { announcer: { ip: "10.0.0.7", port: 40000, text: lanternAnnouncement, intervalMs: 6000 } }
       : {}),
   };
   const devices = [observatory, kitchen];
+  const repeatSends: RepeatSendSpec[] = o.lanternMessage
+    ? [{ device: "kitchen", to: OBSERVATORY, msg: o.lanternMessage }]
+    : [];
   const links: Topology["links"] = [
     { id: "wire", a: { device: "observatory", iface: "eth0" }, b: { device: "kitchen", iface: "eth0" } },
   ];
@@ -64,9 +63,9 @@ export function halls(o: HallsOptions = {}): Topology {
       kind: "host",
       interfaces: [{ name: "eth0", mac: s.mac }],
       lab: { mode: "responder", answersBroadcast: true, reply: s.reply },
-      ...(s.calls ? { messenger: { to: s.calls.to, msg: s.calls.msg, intervalMs: s.calls.intervalMs } } : {}),
     });
+    if (s.calls) repeatSends.push({ device: s.id, ...s.calls });
     links.push({ id: s.link, a: { device: "observatory", iface: "eth1" }, b: { device: s.id, iface: "eth0" } });
   }
-  return { devices, links };
+  return { devices, links, ...(repeatSends.length ? { repeatSends } : {}) };
 }

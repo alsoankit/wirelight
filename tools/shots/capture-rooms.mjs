@@ -1,7 +1,7 @@
 // Capture every unique room layout in the room data, in ruin and restored states.
-// Usage: node tools/shots/capture-rooms.mjs http://localhost:5173/play [--only picture-id]
+// Usage: node tools/shots/capture-rooms.mjs http://localhost:5173/play [--only picture-id] [--regions 1,2]
 import { execFileSync } from "node:child_process";
-import { mkdir, stat, unlink } from "node:fs/promises";
+import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,6 +11,8 @@ const [base, ...args] = process.argv.slice(2);
 if (!base) throw new Error("Pass the /play base URL, for example http://localhost:5173/play");
 const onlyIndex = args.indexOf("--only");
 const only = onlyIndex < 0 ? undefined : args[onlyIndex + 1];
+const regionsIndex = args.indexOf("--regions");
+const regions = regionsIndex < 0 ? undefined : args[regionsIndex + 1].split(",");
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const out = join(root, "apps/web/public/prerender");
 
@@ -24,27 +26,18 @@ const vite = await createServer({
 });
 let layouts;
 try {
-  const [{ rooms }, { doorSides }] = await Promise.all([
+  const [{ rooms }, { planOf, layoutKey }] = await Promise.all([
     vite.ssrLoadModule(join(root, "packages/rooms/src/index.ts")),
-    vite.ssrLoadModule(join(root, "apps/web/src/world/room/doorSides.ts")),
+    vite.ssrLoadModule(join(root, "apps/web/src/world/room/plan.ts")),
   ]);
   const unique = new Map();
   for (const room of rooms) {
     for (const device of room.topology.devices) {
-      const obs = device.id === "observatory";
-      const hall = !obs && (!!device.bridges?.length || device.interfaces.length > 1);
-      const kind = obs ? "observatory" : hall ? "hall" : "house";
-      const doors = device.interfaces.filter((iface) =>
-        room.topology.links.some(
-          (link) =>
-            (link.a.device === device.id && link.a.iface === iface.name) ||
-            (link.b.device === device.id && link.b.iface === iface.name),
-        ),
-      ).length;
-      const front = hall
-        ? [...doorSides(room.topology, room.playerDevice, device.id).values()].filter((side) => side === "front").length
-        : 0;
-      const id = `r${room.region}-${kind}-d${doors}${hall ? `-f${front}` : ""}`;
+      const obs = device.id === room.playerDevice;
+      // Each layout the floor plan makes (0118): halls by doors per wall, mirrored houses apart.
+      const plan = planOf(room.topology, room.playerDevice, device.id);
+      if (!plan || (!obs && room.access[device.id]?.state !== "enterable")) continue;
+      const id = layoutKey(room.region, plan);
       if (!unique.has(id)) unique.set(id, { id, room: room.id, walk: obs ? undefined : device.id });
     }
   }
@@ -55,6 +48,7 @@ try {
 
 if (only && !layouts.some((layout) => layout.id === only)) throw new Error(`Unknown layout: ${only}`);
 if (only) layouts = layouts.filter((layout) => layout.id === only);
+if (regions) layouts = layouts.filter((layout) => regions.some((r) => layout.id.startsWith(`r${r}-`)));
 await mkdir(out, { recursive: true });
 
 const browser = await chromium.launch({
@@ -101,8 +95,9 @@ try {
       const png = join(out, `${id}-${state}.png`);
       const webp = join(out, `${id}-${state}.webp`);
       await page.screenshot({ path: png });
-      // Ruin stays cool, but lift the deepest shadows enough for room details to remain legible.
-      const clearer = state === "ruin" ? ["-level", "6%,58%,1.05", "-modulate", "100,112"] : [];
+      // Ruin stays cool and dim, its shadows lifted gently (no black point: crushing it made the ruined
+      // rooms harsh and patchy, owner 2026-11-10).
+      const clearer = state === "ruin" ? ["-level", "0%,90%,1.18", "-modulate", "100,106"] : [];
       execFileSync("magick", [png, ...clearer, "-quality", "72", "-define", "webp:method=6", webp]);
       await unlink(png);
       console.log(`${id} ${state} ${(await stat(webp)).size} bytes`);
@@ -112,3 +107,13 @@ try {
   await browser.close();
 }
 if (problems.length) throw new Error(`Capture page errors:\n${[...new Set(problems)].join("\n")}`);
+
+// The game shows a picture only for layouts listed here (both states captured), so a stale or missing
+// picture never stands in for a changed room.
+const files = new Set(await readdir(out));
+const captured = [...files]
+  .filter((f) => f.endsWith("-lit.webp") && files.has(f.replace(/-lit\.webp$/, "-ruin.webp")))
+  .map((f) => f.replace(/-lit\.webp$/, ""))
+  .sort();
+await writeFile(join(root, "apps/web/src/world/prerender/pictures.json"), `${JSON.stringify(captured, null, 2)}\n`);
+console.log(`pictures.json: ${captured.length} layouts`);

@@ -26,15 +26,16 @@ function seeded(seed: number) {
   };
 }
 
-/** Roots grown across a doorway: a few thick ones from the top, thinner ones wandering between. */
+/** Roots climbing the stone beside a sealed doorway, leaving the arch opening clear. */
 function rootsGeometry(seed: number, width: number, height: number): BufferGeometry | null {
   const random = seeded(seed);
   const parts: BufferGeometry[] = [];
   const half = width / 2;
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 6; i++) {
     const thick = i < 4;
-    const x0 = (random() - 0.5) * width * 0.9;
-    const x1 = Math.max(-half, Math.min(half, x0 + (random() - 0.5) * 1.4));
+    const side = i % 2 === 0 ? -1 : 1;
+    const x0 = side * (half + 0.1 + random() * 0.2);
+    const x1 = side * (half + 0.18 + random() * 0.55);
     const top = height * (0.82 + random() * 0.18);
     const bottom = thick ? 0 : height * random() * 0.5;
     const points: Vector3[] = [];

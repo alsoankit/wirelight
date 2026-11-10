@@ -34,7 +34,7 @@ export function readOnly(line: string): boolean {
   }
   if (tool === "lab") {
     if (what === undefined || words.length === 2) return true;
-    if (verb === "show" || verb === "list") return what === "card" || what === "scanner" || what === "keeper";
+    if (verb === "show" || verb === "list") return what === "scanner" || what === "keeper";
     return what === "scanner" && (verb === "open" || verb === "compare");
   }
   return false;

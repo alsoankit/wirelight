@@ -1,5 +1,5 @@
 /** floors/floor-4.md · Memory and Loops. Two halls (hall-a, hall-b), Linux bridges with no loop protection. */
-import { announcement, helloWithKey, keepsTheKey, keyFor, messengerMessage } from "@wirelight/content";
+import { announcement, automaticMessage, helloWithKey, keepsTheKey, keyFor } from "@wirelight/content";
 import type { LinkSpec } from "@wirelight/sim";
 import { labDelivered, ran, ranThen } from "../predicates";
 import { defineRoom, type Predicate, type SolutionStep } from "../types";
@@ -9,10 +9,10 @@ import {
   cutBeforePeace,
   cutTheHeldOne,
   loopAgain,
-  messengerHeard,
   noLoop,
   onlyOneHall,
   peaceInOneHall,
+  repeatFrameAnswered,
   type SpanEnds,
   sentInStorm,
   spareTookOver,
@@ -99,12 +99,12 @@ export const pinnedMemory = defineRoom({
   content: pinnedId,
   seed: 41,
   topology: works({
-    observatory: { messenger: { to: KITCHEN, msg: messengerMessage, intervalMs: 5000 } },
+    observatory: { repeatSends: [{ to: KITCHEN, msg: automaticMessage, intervalMs: 5000 }] },
     machines: [
       // The old corridor: kitchen's cable when it lived behind eth1. Its far end lies loose.
       { id: "alcove", mac: "02:00:00:00:00:14", door: "eth1", mute: true },
       // Library says something once, then goes quiet: its line fades after 300 s (ageing).
-      { id: "library", mac: LIBRARY, door: "eth2", messenger: { to: "02:00:00:00:00:05", intervalMs: 3_600_000 } },
+      { id: "library", mac: LIBRARY, door: "eth2", repeatSend: { to: "02:00:00:00:00:05", intervalMs: 3_600_000 } },
       // Kitchen only answers; it never speaks first.
       { id: "kitchen", mac: KITCHEN, door: "eth3", reply: lanternKeyReply },
     ],
@@ -127,7 +127,7 @@ export const pinnedMemory = defineRoom({
   },
   tools: {},
   glow: "symptoms",
-  winCondition: messengerHeard("observatory", "kitchen", lanternKeyReply),
+  winCondition: repeatFrameAnswered("observatory", "kitchen", lanternKeyReply, "setup"),
   key: { word: keyFor(pinnedId), via: "lab-text" },
   healthChecks: [
     { id: "board-kitchen", object: { kind: "board", device: "hall" }, check: boardHas("hall", KITCHEN, "eth3") },

@@ -1,6 +1,6 @@
 /** floors/floor-2.md · Names on the Wire. The console arrives with the gift of the voice (2.4, 0032). */
-import { helloWithKey, keyFor, messengerMessage, mothCall } from "@wirelight/content";
-import { corridorLit, labDelivered, linkUp, messengerAnswered, printed, quietAfter, ran, sentTo } from "../predicates";
+import { helloWithKey, keyFor, mothCall } from "@wirelight/content";
+import { corridorLit, labDelivered, linkUp, printed, quietAfter, ran, sentTo } from "../predicates";
 import { defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
 import { BROADCAST, CELLAR, halls, KITCHEN, LIBRARY, OBSERVATORY } from "./topology";
 
@@ -25,9 +25,9 @@ const LANTERN_ROOM = { observatory: { state: "enterable" }, kitchen: { state: "e
 
 // Detectors shared by several rooms.
 const linkBlame: Misconception = { id: "link-blame", detect: ran(null, /^ip link set \S+ down$|^lab cable unplug/) };
-const cardToSelf: Misconception = {
-  id: "card-to-self",
-  detect: ran("observatory", /^lab card --to 02:00:00:00:00:05$/),
+const sendToSelf: Misconception = {
+  id: "send-to-self",
+  detect: ran("observatory", /^lab send-frame\b.*--to 02:00:00:00:00:05\b/),
 };
 const guessing: Misconception = { id: "guessing", detect: sentTo("observatory", "unknown", 2, "eth1") };
 const wrongDoor: Misconception = { id: "wrong-door", detect: sentTo("observatory", BROADCAST, 1, "eth0") };
@@ -112,42 +112,40 @@ export const wrongName = defineRoom({
   topology: halls({
     lanternReply: wrongNameReply,
     announcements: true,
-    messenger: { to: KITCHEN, msg: messengerMessage },
   }),
-  faults: [{ kind: "card", device: "observatory", to: "02:00:00:00:00:08" }],
+  faults: [],
   playerDevice: "observatory",
   access: LANTERN_ROOM,
   controls: {
     console: "hidden",
     workbench: "works",
-    card: "works",
     catching: true,
     plateSwitches: { "observatory:eth0": "works", "kitchen:eth0": "works" },
     cableEnds: { "observatory:eth0": "works", "kitchen:eth0": "works" },
   },
-  tools: { unlock: ["lab card"] },
+  tools: {},
   glow: "symptoms",
-  winCondition: messengerAnswered("observatory", "kitchen", wrongNameReply),
+  winCondition: labDelivered("observatory", wrongNameReply),
   key: { word: keyFor(wrongNameId), via: "lab-text" },
   healthChecks: [
     {
-      id: "card-answered",
-      object: { kind: "card", device: "observatory" },
-      check: messengerAnswered("observatory", "kitchen", wrongNameReply),
+      id: "send-answered",
+      object: { kind: "workbench", device: "observatory" },
+      check: labDelivered("observatory", wrongNameReply),
     },
   ],
   teaches: ["destination-address"],
   uses: ["frame", "mac-address"],
-  cards: ["messenger", "captures", "ignored-mark", "everyone-address"],
-  misconceptions: [linkBlame, cardToSelf],
+  cards: ["repeat-send", "captures", "ignored-mark", "everyone-address"],
+  misconceptions: [linkBlame, sendToSelf],
   detectorTests: [
     {
       misconception: "link-blame",
       steps: [click("observatory", "ip link set eth0 down"), click("observatory", "ip link set eth0 up")],
     },
-    { misconception: "card-to-self", steps: [click("observatory", `lab card --to ${OBSERVATORY}`)] },
+    { misconception: "send-to-self", steps: [click("observatory", `lab send-frame --to ${OBSERVATORY} --repeat`)] },
   ],
-  solution: [click("observatory", `lab card --to ${KITCHEN}`)],
+  solution: [click("observatory", `lab send-frame --to ${KITCHEN} --repeat`)],
 });
 
 // ── 2.3 · Who Are You? ─────────────────────────────────────────────────────────────────────
@@ -270,13 +268,12 @@ export const silentLine = defineRoom({
   seed: 29,
   topology: halls({
     announcements: true,
-    messenger: { to: "", dev: "eth1", msg: messengerMessage },
     second: {
       id: "cellar",
       mac: CELLAR,
       link: "root",
       reply: mothReply,
-      calls: { to: "02:00:00:00:00:66", msg: mothCall, intervalMs: 5000 },
+      calls: { to: "02:00:00:00:00:66", msg: mothCall },
     },
   }),
   faults: [{ kind: "iface-down", device: "observatory", iface: "eth1" }],
@@ -285,13 +282,12 @@ export const silentLine = defineRoom({
   controls: {
     console: "typing",
     workbench: "works",
-    card: "works",
     catching: true,
     plateSwitches: { "observatory:eth0": "works", "observatory:eth1": "broken" },
   },
   tools: {},
   glow: "none",
-  winCondition: messengerAnswered("observatory", "cellar", mothReply),
+  winCondition: labDelivered("observatory", mothReply),
   key: { word: keyFor(bossId), via: "lab-text" },
   healthChecks: [
     {
@@ -300,9 +296,9 @@ export const silentLine = defineRoom({
       check: linkUp("observatory", "eth1"),
     },
     {
-      id: "card-answered",
-      object: { kind: "card", device: "observatory" },
-      check: messengerAnswered("observatory", "cellar", mothReply),
+      id: "send-answered",
+      object: { kind: "workbench", device: "observatory" },
+      check: labDelivered("observatory", mothReply),
     },
     { id: "root-lit", object: { kind: "corridor", link: "root" }, check: corridorLit("root") },
   ],
@@ -314,7 +310,7 @@ export const silentLine = defineRoom({
     wrongDoorName,
     guessing,
     wrongDoor,
-    cardToSelf,
+    sendToSelf,
     { id: "link-blame", detect: ran("observatory", /^ip link set eth0 down$/) },
     { id: "fix-moths-calls", detect: ran("observatory", /^lab send-frame\b.*--to 02:00:00:00:00:66\b/) },
   ],
@@ -329,7 +325,7 @@ export const silentLine = defineRoom({
       ],
     },
     { misconception: "wrong-door", steps: [bench(BROADCAST, "who?", "eth0")] },
-    { misconception: "card-to-self", steps: [click("observatory", `lab card --to ${OBSERVATORY}`)] },
+    { misconception: "send-to-self", steps: [click("observatory", `lab send-frame --to ${OBSERVATORY} --repeat`)] },
     { misconception: "link-blame", steps: [click("observatory", "ip link set eth0 down")] },
     {
       misconception: "fix-moths-calls",
@@ -339,10 +335,15 @@ export const silentLine = defineRoom({
   solution: [
     typed("observatory", "ip link set eth1 up"),
     bench(BROADCAST, "who?", "eth1"),
-    click("observatory", `lab card --to ${CELLAR}`),
+    click("observatory", `lab send-frame --dev eth1 --to ${CELLAR} --msg "who?" --repeat`),
   ],
   // Cellar's own calls arrive as ignored marks once eth1 is up; catching one shows cellar's name.
-  altSolutions: [[typed("observatory", "ip link set eth1 up"), click("observatory", `lab card --to ${CELLAR}`)]],
+  altSolutions: [
+    [
+      typed("observatory", "ip link set eth1 up"),
+      click("observatory", `lab send-frame --dev eth1 --to ${CELLAR} --msg "who?" --repeat`),
+    ],
+  ],
 });
 
 // ── Secret · Why 48 bits? (Region 1's secret room, decision 0065) ──────────────────────────

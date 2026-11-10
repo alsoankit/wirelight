@@ -5,7 +5,7 @@
  * eth0, by `wire`; every other machine sits behind one hall door, by a corridor named after it
  * (`hall-eth1`). The topology is the network as the room finds it; faults break it further.
  */
-import type { AnnouncerSpec, DeviceSpec, LabSpec, LinkSpec, MessengerSpec, Topology } from "@wirelight/sim";
+import type { AnnouncerSpec, DeviceSpec, LabSpec, LinkSpec, RepeatSendSpec, Topology } from "@wirelight/sim";
 
 export const OBSERVATORY = "02:00:00:00:00:05";
 export const KITCHEN = "02:00:00:00:00:07";
@@ -34,7 +34,7 @@ export interface Machine {
   hostname?: string;
   /** Its answer to a broadcast, when not `I'm here — <hostname>`. */
   broadcastReply?: string;
-  messenger?: MessengerSpec;
+  repeatSend?: Omit<RepeatSendSpec, "device">;
   announcer?: AnnouncerSpec;
   /** A machine with nothing listening: it never answers (4.1's empty alcove). */
   mute?: boolean;
@@ -49,7 +49,7 @@ export interface HallSpec {
 
 export interface WorksOptions {
   halls?: HallSpec[];
-  observatory?: { messenger?: MessengerSpec; messengers?: MessengerSpec[] };
+  observatory?: { repeatSends?: Omit<RepeatSendSpec, "device">[] };
   machines: Machine[];
   /** Cables between halls (4.2's span, 4.B's second one). */
   spans?: LinkSpec[];
@@ -78,10 +78,12 @@ export function works(o: WorksOptions): Topology {
     kind: "host",
     interfaces: [{ name: "eth0", mac: OBSERVATORY }],
     lab: { mode: "responder", answersBroadcast: true },
-    ...(o.observatory?.messenger ? { messenger: o.observatory.messenger } : {}),
-    ...(o.observatory?.messengers ? { messengers: o.observatory.messengers } : {}),
   };
   const devices: DeviceSpec[] = [observatory, ...halls.map(hallDevice)];
+  const repeatSends: RepeatSendSpec[] = (o.observatory?.repeatSends ?? []).map((send) => ({
+    device: "observatory",
+    ...send,
+  }));
   const links: LinkSpec[] = [
     { id: "wire", a: { device: "observatory", iface: "eth0" }, b: { device: first, iface: "eth0" } },
   ];
@@ -100,14 +102,14 @@ export function works(o: WorksOptions): Topology {
       kind: "host",
       interfaces: [{ name: "eth0", mac: m.mac }],
       ...(lab ? { lab } : {}),
-      ...(m.messenger ? { messenger: m.messenger } : {}),
       ...(m.announcer ? { announcer: m.announcer } : {}),
     });
+    if (m.repeatSend) repeatSends.push({ device: m.id, ...m.repeatSend });
     const hall = m.hall ?? first;
     links.push({ id: `${hall}-${m.door}`, a: { device: hall, iface: m.door }, b: { device: m.id, iface: "eth0" } });
   }
   links.push(...(o.spans ?? []));
-  return { devices, links };
+  return { devices, links, ...(repeatSends.length ? { repeatSends } : {}) };
 }
 
 /** A machine's background announcement: a real IPv4/UDP broadcast, its inside sealed until Floor 6. */

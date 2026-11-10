@@ -227,6 +227,20 @@ def add_lamp(lamp, share):
     return obj
 
 
+# The night sky over the roofless rooms (owner, 2026-11-10: "a dimly lit moonlight type effect"): a dim
+# dome in the moon's colour, so what the moon doesn't reach still gets soft light, darker in corners and
+# under things, instead of going black. Game units, like the moon's strength (a white surface open to the
+# whole sky gets this much light).
+SKY = {"ruin": 0.32, "lit": 0.06}
+
+
+def set_sky(colour, strength):
+    bg = bpy.context.scene.world.node_tree.nodes.get("Background")
+    r, g, b = hex_linear(colour) if colour else (0.0, 0.0, 0.0)
+    bg.inputs["Color"].default_value = (r, g, b, 1)
+    bg.inputs["Strength"].default_value = strength
+
+
 def clear_lights():
     for o in list(bpy.data.objects):
         if o.type == "LIGHT":
@@ -367,12 +381,14 @@ def bake_layout(meta, glb, out_dir, quality, device):
         style("lit" if state == "ao" else state)
         scene = bpy.context.scene
         if state == "ao":
+            set_sky(None, 0)
             scene.cycles.samples = quality["ao_samples"]
             bake_pass(objs, "AO")
         else:
             scene.cycles.samples = quality["samples"]
             moon = lights["moon"]["ruined" if state == "ruin" else "restored"]
             add_sun(lights["moon"]["toward"], moon["colour"], moon["strength"])
+            set_sky(moon["colour"], SKY[state])
             if state == "lit":
                 for lamp in lights["lamps"]:
                     add_lamp(lamp, LAMP_SHARE)

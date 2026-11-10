@@ -67,6 +67,7 @@ const { RUNE_GLOWS } = await load("src/world/observatory/Runes.tsx");
 const { observatoryLayout } = await load("src/world/observatory/layout.ts");
 const { houseLayout } = await load("src/world/house/layout.ts");
 const { hallLayout } = await load("src/world/hall/layout.ts");
+const { planOf, layoutKey: planKey, slotsOf } = await load("src/world/room/plan.ts");
 const { corridorDressing } = await load("src/world/corridor/dressing.ts");
 const { corridorHalf, endArches } = await load("src/world/corridor/frame.ts");
 
@@ -83,14 +84,14 @@ function layouts() {
     for (const d of room.topology.devices) {
       const player = d.id === room.playerDevice;
       if (!player && room.access[d.id]?.state !== "enterable") continue;
-      const n = d.interfaces.length;
-      let kind;
-      let doors;
-      if (player) [kind, doors] = ["observatory", n > 1 ? 2 : 1];
-      else if (d.bridges?.length || n > 1) [kind, doors] = ["hall", n];
-      else [kind, doors] = ["house", 1];
-      const id = `r${room.region}-${kind}-d${doors}`;
-      const entry = found.get(id) ?? { id, region: room.region, kind, doors, rooms: [] };
+      // The floor plan's layouts (0118). A mirrored house is the same geometry, so the same bake.
+      const plan = planOf(room.topology, room.playerDevice, d.id);
+      if (!plan) continue;
+      const kind = plan.kind;
+      const doors = plan.back.length + plan.left.length;
+      const id = planKey(room.region, plan).replace(/-m$/, "");
+      const slots = kind === "hall" ? [...slotsOf(plan).values()] : undefined;
+      const entry = found.get(id) ?? { id, region: room.region, kind, doors, slots, rooms: [] };
       entry.rooms.push(`${room.id}:${d.id}`);
       found.set(id, entry);
     }
@@ -104,7 +105,7 @@ function layouts() {
   return [...found.values()].sort((a, b) => a.id.localeCompare(b.id));
 }
 
-function build({ kind, doors, region, half }) {
+function build({ kind, doors, slots, region, half }) {
   if (kind === "corridor") {
     // As CorridorScene draws it: the end arches first, then the region's dressing.
     const d = corridorDressing(region, half);
@@ -118,14 +119,14 @@ function build({ kind, doors, region, half }) {
   }
   if (kind === "observatory") {
     const layout = observatoryLayout(doors, region);
-    return { layout, glows: layout.glows ?? RUNE_GLOWS };
+    return { layout, glows: [...(layout.glows ?? RUNE_GLOWS), ...(layout.stubGlows ?? [])] };
   }
   if (kind === "house") {
     const layout = houseLayout(region);
-    return { layout, glows: layout.glows ?? HOUSE_LAMP };
+    return { layout, glows: [...(layout.glows ?? HOUSE_LAMP), ...(layout.stubGlows ?? [])] };
   }
-  const layout = hallLayout(doors, region);
-  return { layout, glows: layout.glows ?? HALL_LAMP };
+  const layout = hallLayout(slots ?? doors, region);
+  return { layout, glows: [...(layout.glows ?? HALL_LAMP), ...(layout.stubGlows ?? [])] };
 }
 
 // Kit pieces, parsed from the files the game serves (textures are never needed: only shapes).

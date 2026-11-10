@@ -19,7 +19,6 @@ export type ObjectRef =
   | { kind: "door"; device: DeviceId; iface: IfaceName }
   | { kind: "corridor"; link: string }
   | { kind: "workbench"; device: DeviceId }
-  | { kind: "card"; device: DeviceId }
   | { kind: "board"; device: DeviceId }
   | { kind: "keeper"; device: DeviceId }
   | { kind: "ledger"; device: DeviceId }
@@ -69,7 +68,7 @@ export type ControlState = "works" | "broken";
  * Every control a room has (0040): what the player can do without typing. Each click runs a real
  * command, shown as "the machine heard:" (see it, then say it):
  * - plate: `ip link show <door>` (always readable) · its switch: `ip link set <door> up|down`
- * - cable end: `lab cable plug|unplug <door>` · workbench: `lab send-frame …` · card: `lab card …`
+ * - cable end: `lab cable plug|unplug <door>` · workbench: `lab send-frame …`
  * - MAC board: `bridge fdb show` · ledger: `ip neigh show` · routing board: `ip route …`
  * - address slot: `ip addr add|del <cidr> dev <door>` · desk: `lab keeper …`
  * - the Scanner: `lab scanner catch|open|list` (6.1), Capture = `tcpdump -n -i <door>` (8.4),
@@ -84,8 +83,6 @@ export interface Controls {
   mapOnSend?: boolean;
   /** The workbench (lab send-frame), on `observatory`. */
   workbench?: ControlState;
-  /** The messenger's address card (lab card --to). */
-  card?: ControlState;
   /** Catching passing messages (Captures, then the Scanner). */
   catching?: boolean;
   /** Plate reading (ip link show) is always possible where plates are; their switches by "device:iface". */

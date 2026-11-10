@@ -40,7 +40,7 @@ export const firstLight: RoomText = {
   memories: [
     {
       id: "F2-MEM-01",
-      title: "The workbench",
+      title: "The Frame builder",
       trigger: "first visit",
       text: "A table for writing my own messages. Who it's for goes here, what to say goes here. Then I seal it and send it.",
       action: "drag a word into the Message slot",
@@ -66,22 +66,22 @@ export const firstLight: RoomText = {
     text: "With more machines, a bare message wasn't enough. So every message goes in an envelope, with the name of the door it's for written on it.",
     shown: "a message folded into a frame; the to written in glowing ink",
   },
-  fieldGuide: ["The workbench", "Doors and plates"],
+  fieldGuide: ["The Frame builder", "Doors and plates"],
 };
 
 export const wrongName: RoomText = {
   title: "Wrong Address",
-  mission: "The messenger in your room keeps sending messages to kitchen, but kitchen never answers. Find out why.",
+  mission: "Your machine keeps sending frames to kitchen, but kitchen never answers. Find out why.",
   notes: [],
   hints: [
     { text: "Look at kitchen's door. Something is piling up there." },
     { text: "You can catch one of those messages and look inside." },
     { text: "A door takes in only frames that carry its own name as the to.", codex: "ignored-mark" },
     {
-      text: "Catch one of the messenger's frames, compare its to with kitchen's plate, then fix the messenger's card.",
+      text: "Catch one of the repeated frames, compare its To with kitchen's plate, then start a repeat with the right address.",
     },
     {
-      text: "The card says `02:00:00:00:00:08`; kitchen's door is `02:00:00:00:00:07`. Click the card and change it (`lab card --to 02:00:00:00:00:07`). Kitchen's next answer carries the key.",
+      text: "The frame says `02:00:00:00:00:08`; kitchen's door is `02:00:00:00:00:07`. In the Frame builder, set To to `02:00:00:00:00:07` and choose Keep sending. Kitchen's answer carries the key.",
     },
   ],
   detectors: {
@@ -89,14 +89,14 @@ export const wrongName: RoomText = {
       note: "The corridor is lit. Messages are getting there. What happens when they arrive?",
       tried: "You switched a door or replugged the cable, but the link was working.",
     },
-    "card-to-self": {
-      note: "Now the messenger is writing to you. Who should it be writing to?",
-      tried: "You put your own MAC address (your door's name) on the messenger's card.",
+    "send-to-self": {
+      note: "Now the repeated frame is coming back to you. Which door should take it?",
+      tried: "You sent to your own MAC address (your door's name).",
     },
   },
   debrief: {
     happened:
-      "The messenger was writing a name no door has. Every frame reached kitchen's door, but kitchen only takes frames with its own name as the to, so it ignored them. With the right name on the card, kitchen answered.",
+      "The repeated frame went to a name no door had. Kitchen only takes frames with its own name as the destination, so it ignored them. With the right name in To, kitchen answered.",
     terms: [
       {
         id: "destination-address",
@@ -138,7 +138,7 @@ export const wrongName: RoomText = {
     text: "So that no machine has to read everyone's messages, every door looks at who it's for first, and lets anything else fall away.",
     shown: "a door glancing at frames, accepting one, letting another fade",
   },
-  fieldGuide: ["Catching and opening messages", "The messenger and its card", "Messages, corridors and marks"],
+  fieldGuide: ["Catching and opening messages", "Repeat a frame", "Messages, corridors and marks"],
 };
 
 export const whoAreYou: RoomText = {
@@ -289,9 +289,9 @@ export const silentLine: RoomText = {
       text: "Once the door works, you need cellar's name: from a broadcast, or from the from on something cellar sends.",
       codex: "source-address",
     },
-    { text: "Switch eth1 on from the terminal, learn cellar's name, then put it on the messenger's card." },
+    { text: "Switch eth1 on from the terminal, learn cellar's name, then use it in a repeating frame." },
     {
-      text: "`ip link set eth1 up`; catch one of cellar's frames (or broadcast on eth1) and read its from: `02:00:00:00:00:0e`; set the messenger's card to it. Cellar answers with the key.",
+      text: "`ip link set eth1 up`; catch one of cellar's frames (or broadcast on eth1) and read its From: `02:00:00:00:00:0e`. In the Frame builder, set To to that address and choose Keep sending. Cellar answers with the key.",
     },
   ],
   detectors: {
@@ -307,12 +307,12 @@ export const silentLine: RoomText = {
       note: "Kitchen answered. But cellar is behind your other door.",
       tried: "You called out of eth0, toward kitchen, but cellar is behind eth1.",
     },
-    "card-to-self": {
-      note: "Now the messenger is writing to you. Who should it be writing to?",
-      tried: "You put your own MAC address (your door's name) on the messenger's card.",
+    "send-to-self": {
+      note: "Now the repeated frame is coming back to you. Which door should take it?",
+      tried: "You sent to your own MAC address (your door's name).",
     },
     "link-blame": {
-      note: "Your door is on and the corridor works. What does the messenger need now?",
+      note: "Your door is on and the corridor works. What address should the frame use?",
       tried: "You switched a working door off and on again.",
     },
     "fix-moths-calls": {
@@ -322,7 +322,7 @@ export const silentLine: RoomText = {
   },
   debrief: {
     happened:
-      "Three things kept cellar unheard: your door was off, the messenger had no name to send to, and you didn't know cellar's name. You switched the door on with a terminal command, learned cellar's name from what it sent, and gave the messenger the right card. A link, a frame, two names: that's everything the old halls were built on.",
+      "Three things kept cellar unheard: your door was off, the frame had no destination, and you didn't know cellar's name. You switched the door on with a terminal command, learned cellar's name from what it sent, and used that name in To. A link, a frame, two names: that's everything the old halls were built on.",
     terms: [],
   },
   voice: [
@@ -352,7 +352,7 @@ export const floor2: FloorText = {
       title: "Ride-along",
       text: "A door reads the to. Its own name, or everyone's: it takes it. Anything else: it lets it fall.",
       shown:
-        "a frame sealed at the workbench rides through eth0 to kitchen's door, which reads the to and lets it in; a broadcast reaches two doors and both take it in; a third frame, for someone else, stops at a door and fades",
+        "a frame built in the Frame builder rides through eth0 to kitchen's door, which reads the To address and lets it in; a broadcast reaches two doors and both take it in; a third frame, for someone else, stops at a door and fades",
     },
     {
       id: "F2-FM-04",
@@ -364,7 +364,7 @@ export const floor2: FloorText = {
   journal: {
     page: 2,
     title: "Names",
-    where: "tucked under the workbench in 2.3 (glows after the win)",
+    where: "tucked under the Frame builder in 2.3 (glows after the win)",
     text: "Log 3,152. Every door out here has a name starting with 02, the sign of a name set by hand. I'm keeping a list of them, in case my memory goes.",
   },
   farewell: {

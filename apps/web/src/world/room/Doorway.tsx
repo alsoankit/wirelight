@@ -1,21 +1,18 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { fill, voice } from "@wirelight/content";
-import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { type Group, MeshBasicMaterial, type Object3D, type Vector3 } from "three";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { DoubleSide, type Group, MeshBasicMaterial, type Object3D, type Vector3 } from "three";
 import { float, fract, mix, positionLocal, smoothstep, step, uniform, vec3 } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { MARK_MS, useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { useMachineLabel } from "../../play/roles";
 import { goThrough, stepIntoCorridor } from "../corridor/move";
-import { Piece } from "../kit/Piece";
-import { regionMaterial } from "../kit/regionMaterials";
-import { KitRoom } from "../kits/KitRoom";
 import { type KeeperCue, Messages } from "../observatory/Messages";
 import { Plate } from "../Plate";
 import { useRegion } from "../region";
-import { cableSpan, type DoorSlot, doorGeometry, type Vec3 } from "./layout";
+import { CHIP_Y, cableSpan, type DoorSlot, doorGeometry, GATE_TOP, type Vec3 } from "./layout";
 import { addToPile, type Scrap } from "./lostPile";
 import { Sealed } from "./Sealed";
 
@@ -78,18 +75,19 @@ function Cable({ slot, state }: { slot: DoorSlot; state: "dark" | "lit" | "broke
   );
 }
 
+/** Invisible click area filling the arch opening, inset from its edges. */
 /**
- * The cable's click area (0081): wider than the rune-line itself, unseen; pointing at it says what it
- * does, clicking steps into the corridor and stops there.
+ * The gate's click area (owner, 2026-11-10): the whole arch with padding, from the floor to GATE_TOP,
+ * and an apron of floor in front of it, so the gate is easy to hit and no plate or chip covers it.
  */
-function CableStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep: () => void }) {
-  const span = cableSpan(slot);
+function GateStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onStep: () => void }) {
+  const g = doorGeometry(slot);
   const [hover, setHover] = useState(false);
-  const rotationY = span.along === "z" ? 0 : Math.PI / 2;
+  const rotationY = slot.wall === "back" ? 0 : Math.PI / 2;
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: a 3D target (raycast); Shift and the door's number is the keyboard way
     <group
-      position={span.centre}
+      position={[g.doorway[0] + (slot.wall === "left" ? 0.08 : 0), 0, g.doorway[2] + (slot.wall === "back" ? 0.08 : 0)]}
       rotation={[0, rotationY, 0]}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -106,11 +104,14 @@ function CableStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onSte
         onStep();
       }}
     >
-      <mesh material={HIT_MATERIAL}>
-        <boxGeometry args={[0.7, 0.3, span.length]} />
+      <mesh material={HIT_MATERIAL} position={[0, GATE_TOP / 2, 0]}>
+        <boxGeometry args={[2.3, GATE_TOP, 0.08]} />
+      </mesh>
+      <mesh material={HIT_MATERIAL} position={[0, 0.03, 0.7]}>
+        <boxGeometry args={[2.3, 0.04, 1.4]} />
       </mesh>
       {hover && (
-        <Html center position={[0, 0.5, 0]} zIndexRange={[20, 0]}>
+        <Html center position={[0, 1.7, 0]} zIndexRange={[20, 0]}>
           <div className="message-summary">{fill(voice.corridor.step, { name })}</div>
         </Html>
       )}
@@ -119,7 +120,9 @@ function CableStep({ slot, name, onStep }: { slot: DoorSlot; name: string; onSte
 }
 
 /** Invisible but still hit by the pointer (a hidden mesh would be skipped by raycasting). */
-const HIT_MATERIAL = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+// Double-sided: in a mirrored house (0118) the faces toward the camera are wound the other way, and a
+// one-sided target would let the pointer through.
+const HIT_MATERIAL = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: DoubleSide });
 
 // Where messages died at this door (CORE-17): small faded scraps on the floor just inside it. They
 // pile up while messages keep dying here (2.2's clue: ignored messages pile at lantern's door), each
@@ -238,10 +241,6 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
   const region = useRegion();
   const exec = useSession((s) => s.exec);
   const openPanel = useSession((s) => s.openPanel);
-  const [entryOpen, setEntryOpen] = useState(false);
-  const entryRef = useRef<HTMLDivElement>(null);
-  const entryButton = useRef<HTMLButtonElement>(null);
-  const enterButton = useRef<HTMLButtonElement>(null);
 
   const readPlate = () => {
     openPanel({ kind: "plate", device: info.device, iface: info.iface });
@@ -252,67 +251,18 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
   const label = fill(voice.doorway.go, { door: info.iface, name: peer });
   // Number keys 1–9 go through the doors in order (CORE-47).
   const shortcut = index < 9 ? String(index + 1) : undefined;
+  // A blocked gate (a sealed room, or a spare way while its cable is out) can't be stepped through at
+  // all, not even into its corridor (owner, 2026-11-10); its chip says why.
   const enter = () => {
-    setEntryOpen(false);
+    if (!walkable) return;
     void exec(info.device, `ip link show ${info.iface}`, "click");
     stepIntoCorridor(info.link, info.device);
   };
 
-  useEffect(() => {
-    if (!entryOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopPropagation();
-      setEntryOpen(false);
-      entryButton.current?.focus({ preventScroll: true });
-    };
-    const onPointerDown = (e: PointerEvent) => {
-      if (!entryRef.current?.contains(e.target as Node)) setEntryOpen(false);
-    };
-    window.addEventListener("keydown", onKey, true);
-    document.addEventListener("pointerdown", onPointerDown, true);
-    requestAnimationFrame(() => enterButton.current?.focus({ preventScroll: true }));
-    return () => {
-      window.removeEventListener("keydown", onKey, true);
-      document.removeEventListener("pointerdown", onPointerDown, true);
-    };
-  }, [entryOpen]);
-
-  const floorMaterial = regionMaterial("Floor", region);
-  const brassMaterial = regionMaterial("Brass", region);
-  const preview = {
-    center: [g.doorway[0] + g.out[0] * 1.1, 0, g.doorway[2] + g.out[2] * 1.1] as Vec3,
-    lamp: [
-      g.doorway[0] + g.out[0] * 0.12 + (slot.wall === "left" ? 0 : 0.72),
-      1.72,
-      g.doorway[2] + g.out[2] * 0.12 + (slot.wall === "left" ? 0.72 : 0),
-    ] as Vec3,
-  };
-  const horizontal = slot.wall === "left";
-  const enterHitDown = (e: ReactPointerEvent<HTMLButtonElement>) => e.stopPropagation();
-
   return (
     <>
-      {slot.wall === "front" && <NearFrame slot={slot} viewDirection={viewDirection} />}
-      <group>
-        <mesh position={preview.center} material={floorMaterial}>
-          <boxGeometry args={horizontal ? [2.2, 0.07, 1.35] : [1.35, 0.07, 2.2]} />
-        </mesh>
-        <mesh position={[preview.center[0], 0.07, preview.center[2]]} rotation={[0, horizontal ? Math.PI / 2 : 0, 0]}>
-          <boxGeometry args={[0.07, 0.025, 1.85]} />
-          <meshBasicMaterial color="#3a969e" toneMapped={false} />
-        </mesh>
-        <mesh position={preview.lamp} material={brassMaterial}>
-          <boxGeometry args={[0.18, 0.09, 0.18]} />
-        </mesh>
-        <mesh position={preview.lamp}>
-          <sphereGeometry args={[0.09, 12, 8]} />
-          <meshBasicMaterial color="#ffcb79" toneMapped={false} />
-        </mesh>
-        <pointLight position={preview.lamp} color="#ffc16e" intensity={1.2} distance={4.5} decay={2} />
-      </group>
       <Cable slot={slot} state={corridor} />
-      <CableStep slot={slot} name={info.peer} onStep={() => stepIntoCorridor(info.link, info.device)} />
+      {walkable && <GateStep slot={slot} name={peer} onStep={enter} />}
       <Messages
         device={info.device}
         link={info.link}
@@ -356,7 +306,7 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
         />
       )}
       {/* The way through (CORE-10): a chip in the arch; sealed rooms say why. */}
-      <Html center position={[g.doorway[0], 2.9, g.doorway[2]]} zIndexRange={[10, 0]}>
+      <Html center position={[g.doorway[0], CHIP_Y, g.doorway[2]]} zIndexRange={[10, 0]}>
         {walkable ? (
           <button
             type="button"
@@ -385,42 +335,22 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
           </span>
         )}
       </Html>
-      <Html center position={[g.doorway[0], 1.55, g.doorway[2]]} zIndexRange={[9, 0]}>
-        <div ref={entryRef} className="corridor-entry">
+      {walkable && (
+        <Html center position={[g.doorway[0], 1.2, g.doorway[2]]} zIndexRange={[9, 0]}>
           <button
-            ref={entryButton}
             type="button"
             className="corridor-gate-hit"
             data-tab={TAB.door + index}
             aria-label={fill(voice.corridor.step, { name: peer })}
-            aria-haspopup="dialog"
-            onPointerDown={enterHitDown}
-            onClick={() => setEntryOpen(true)}
-          />
-          {entryOpen && (
-            <div className="corridor-entry-popup" role="dialog" aria-label={voice.corridor.enter}>
-              <button ref={enterButton} type="button" className="world-chip" onClick={enter}>
-                {voice.corridor.enter}
-              </button>
-            </div>
-          )}
-        </div>
-      </Html>
+            aria-keyshortcuts="Enter"
+            onClick={enter}
+          >
+            <span>{fill(voice.corridor.step, { name: peer })}</span>
+          </button>
+        </Html>
+      )}
     </>
   );
-}
-
-/**
- * A doorway on the near edge (0111): a regional stone arch set in a short wall stub. The opening
- * stays clear so the corridor is visible only through it.
- */
-function NearFrame({ slot, viewDirection }: { slot: DoorSlot; viewDirection: Vector3 }) {
-  const region = useRegion();
-  const x = slot.at;
-  if (region === 1) return <Piece name="Wall_ArchRound_Overgrown" position={[x, 0, 3.95]} scale={0.65} />;
-  const kit = region === 2 ? "region-2/hall" : region === 3 ? "region-3/village" : "region-4/cathedral";
-  const piece = region === 4 ? "doorway_01" : "Wall_UnevenBrick_Door_Round";
-  return <KitRoom pieces={[{ kit, piece, position: [x, 0, 3.8] }]} region={region} toCamera={viewDirection} />;
 }
 
 /** A door with no cable at all (a spare port): its plate, link down, and the dark doorway. */

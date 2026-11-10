@@ -6,6 +6,7 @@ import { TOWN_SQUARE_PIECES, townSquare } from "../regions/town";
 import { worksHall } from "../regions/works";
 import type { DoorSlot, RoomLayout } from "../room/layout";
 import type { StatuePlace } from "../room/standing";
+import { withStubs } from "../room/stubs";
 
 // A switch's room, the sorting hall (CORE-06, Region 2's brief): many doors around the keeper, the
 // MAC board on its stand, and the keeper's desk. Until Region 2's own kit is in (brass, gears,
@@ -26,12 +27,6 @@ export const HALL_SLOTS: (DoorSlot & { wall: "back" | "left" })[] = [
   { wall: "left", at: -3, plate: "above" },
   { wall: "back", at: -1, plate: "above" },
   { wall: "left", at: 1, plate: "above" },
-];
-
-// Return doors open on the near-left edge. The rest of the near edge stays clear for machines and statues.
-export const HALL_FRONT_SLOTS: DoorSlot[] = [
-  { wall: "front", at: -2.6, plate: "above" },
-  { wall: "front", at: -0.5, plate: "above" },
 ];
 
 /** The walls, with a gap wherever a door is. */
@@ -92,18 +87,24 @@ const ANGELS: Partial<Record<RegionId, StatuePlace[]>> = {
   ],
 };
 
-export function hallLayout(doors: number, region: RegionId = 1, frontDoors = 0): RoomLayout {
-  const front = HALL_FRONT_SLOTS.slice(0, frontDoors);
-  const wallDoors = HALL_SLOTS.slice(0, Math.max(0, doors - front.length));
+/**
+ * A hall with arches at `open` (its doors' slots, in door order: room/plan.ts, decision 0118), or for a
+ * bare count the first `open` of HALL_SLOTS (old callers, the contact sheet).
+ */
+export function hallLayout(open: readonly DoorSlot[] | number, region: RegionId = 1): RoomLayout {
+  const same = (a: DoorSlot) => (b: DoorSlot) => a.wall === b.wall && a.at === b.at;
+  const wallDoors =
+    typeof open === "number"
+      ? HALL_SLOTS.slice(0, open)
+      : open.map((slot) => HALL_SLOTS.find(same(slot))).filter((s): s is (typeof HALL_SLOTS)[number] => !!s);
   const frame = {
-    doorSlots: [...front, ...HALL_SLOTS],
+    doorSlots: [...wallDoors, ...HALL_SLOTS.filter((s) => !wallDoors.some(same(s)))],
     keeper: [0.4, 0, 0.2] as RoomLayout["keeper"],
     air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
   };
-  const dressed = (l: RoomLayout): RoomLayout => ({
-    ...l,
-    statues: [...(l.statues ?? []), ...(ANGELS[region] ?? [])],
-  });
+  // Its angels, and the corridors' first stretch behind its arches (0119).
+  const dressed = (l: RoomLayout): RoomLayout =>
+    withStubs({ ...l, statues: [...(l.statues ?? []), ...(ANGELS[region] ?? [])] }, region, wallDoors);
   // The Works builds its halls from its own kits (regions/works.ts): village walls, its doorways.
   if (region === 2) return dressed({ ...frame, ...worksHall(wallDoors) });
   if (region === 3) return dressed({ ...frame, placements: TOWN_SQUARE_PIECES, ...townSquare(wallDoors) });

@@ -2,7 +2,7 @@
 // screen frame. The main thread owns it; the worker only ever runs to the time it's asked for.
 // - While messages are on a cable, time slows so each crossing takes about SCREEN_MS_PER_CROSSING
 //   of screen time, whatever its real length (fractions of a millisecond), so it can be followed.
-// - With nothing on a cable, network time runs at real speed (timers, the messenger's next call).
+// - With nothing on a cable, network time runs at real speed (timers and room-started repeat sends).
 // - Pause stops it; speed scales it (0.25× to 64×).
 // - A crowd (a storm) can't be followed message by message, so with more than CROWD on cables time
 //   runs at least CROWD_RATE of real speed: timers still move and the storm still reads as a storm.

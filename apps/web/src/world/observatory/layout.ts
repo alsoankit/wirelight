@@ -5,6 +5,7 @@ import { hallsObservatory, hallsObservatoryPieces } from "../regions/halls";
 import { townObservatory, townObservatoryPieces } from "../regions/town";
 import { worksObservatory, worksObservatoryPieces } from "../regions/works";
 import type { RoomLayout } from "../room/layout";
+import { withStubs } from "../room/stubs";
 
 // The Observatory (the player's computer room), 8 × 8 m, centred on the origin. The camera looks from
 // the front right, so only the back wall (z = −4) and the left wall (x = −4) are built: a cutaway, as
@@ -34,10 +35,12 @@ export function observatoryLayout(doors: number, region: RegionId = 1): RoomLayo
     keeper: [0, 0, -0.6] as RoomLayout["keeper"],
     air: { min: [-3.4, 0.4, -3.4], max: [3.4, 3.0, 3.4] } as RoomLayout["air"],
   };
-  if (region === 2) return { ...frame, ...worksObservatory(doors > 1) };
-  if (region === 3) return { ...frame, ...townObservatory(doors > 1) };
-  if (region === 4) return { ...frame, ...cathedralObservatory(doors > 1) };
-  return { ...frame, ...hallsObservatory(doors > 1) };
+  // The corridors' first stretch behind the arches in use (0119).
+  const open = frame.doorSlots.slice(0, doors > 1 ? 2 : 1);
+  if (region === 2) return withStubs({ ...frame, ...worksObservatory(doors > 1) }, region, open);
+  if (region === 3) return withStubs({ ...frame, ...townObservatory(doors > 1) }, region, open);
+  if (region === 4) return withStubs({ ...frame, ...cathedralObservatory(doors > 1) }, region, open);
+  return withStubs({ ...frame, ...hallsObservatory(doors > 1) }, region, open);
 }
 
 // Where things are, for the scene and the message paths.

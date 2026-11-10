@@ -1,6 +1,6 @@
 // Plays every room of Region 2 (Floors 3 and 4) by clicking and typing, as a player would.
 // Usage: node region2.mjs http://127.0.0.1:5173/play
-import { arrived, bench, card, closeConsole, launch, open, tidy, type, won } from "./lib.mjs";
+import { arrived, bench, closeConsole, launch, open, repeatSend, tidy, type, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
 const { browser, page: p, errors } = await launch();
@@ -19,6 +19,14 @@ const fast = async () => {
 };
 /** Waits until `ms` more of network time have passed (the clock slows while frames cross). */
 const waitNet = async (ms) => {
+  if (!(await p.evaluate(() => !!window.__wirelight).catch(() => false))) {
+    const speed = await p
+      .locator(".top-bar")
+      .innerText()
+      .then((s) => Number(s.match(/(\d+)×/)?.[1] ?? 1));
+    await p.waitForTimeout(Math.ceil((ms / speed) * 2));
+    return;
+  }
   const now = () => p.evaluate(() => window.__wirelight.useSession.getState().status?.now ?? 0);
   const end = (await now()) + ms;
   await p.waitForFunction((t) => (window.__wirelight.useSession.getState().status?.now ?? 0) >= t, end, {
@@ -60,23 +68,23 @@ await walk("observatory");
 await bench(p, "02:00:00:00:00:0f");
 await check("3.2");
 
-// 3.3: three cards, one per door.
+// 3.3: three repeating sends, one per door.
 await open(p, base, "f3.find-everyone");
 await bench(p, "ff:ff:ff:ff:ff:ff");
 await p.waitForTimeout(2500);
-await card(p, "02:00:00:00:00:10", 0);
-await card(p, "02:00:00:00:00:11", 1);
-await card(p, "02:00:00:00:00:12", 2);
+await repeatSend(p, "02:00:00:00:00:10");
+await repeatSend(p, "02:00:00:00:00:11");
+await repeatSend(p, "02:00:00:00:00:12");
 await check("3.3");
 
-// 3.B: the hall's eth2 by voice, everyone speaks, laundry's name on the card.
+// 3.B: the hall's eth2 by voice, everyone speaks, then a repeating send reaches laundry.
 await open(p, base, "f3.boss-busy-hall");
 await walk("hall");
 await type(p, "ip link set eth2 up");
 await walk("observatory");
 await bench(p, "ff:ff:ff:ff:ff:ff");
 await p.waitForTimeout(2500);
-await card(p, "02:00:00:00:00:13");
+await repeatSend(p, "02:00:00:00:00:13");
 await check("3.B");
 
 // 4.1: the pinned memory, removed.

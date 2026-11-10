@@ -57,6 +57,22 @@ describe("lab send-frame", () => {
     expect(got).toMatchObject([{ text: "key: copper-kitchen", from: "02:00:00:00:00:07" }]);
   });
 
+  it("repeats on the virtual clock and can be stopped by its id", () => {
+    const { b, run } = setup();
+    expect(run('lab send-frame --to 02:00:00:00:00:07 --msg "hello" --repeat').out.at(-1)).toBe(
+      "stdout: started repeating send 1 (to 02:00:00:00:00:07, every 2 seconds)",
+    );
+    b.advance(4100);
+    expect(
+      b.trace().filter((e) => e.kind === "frame.tx" && e.device === "observatory" && e.origin === "command"),
+    ).toHaveLength(3);
+    expect(run("lab send-frame --stop 1").code).toBe(0);
+    b.advance(10_000);
+    expect(
+      b.trace().filter((e) => e.kind === "frame.tx" && e.device === "observatory" && e.origin === "command"),
+    ).toHaveLength(3);
+  });
+
   it("normalizes uppercase MACs and reports bad ones", () => {
     const { run } = setup();
     run("lab send-frame --to 02:00:00:00:00:07");

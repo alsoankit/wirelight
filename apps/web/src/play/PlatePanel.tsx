@@ -2,7 +2,7 @@ import { fill, voice } from "@wirelight/content";
 import { roomById } from "@wirelight/rooms";
 import { useState } from "react";
 import { useSession } from "../engine/store";
-import { Address } from "../world/Plate";
+import { Address, CopyValue } from "../world/Plate";
 import { arrivalText, DOOR_NAMES_FLOOR } from "./names";
 
 // A door's plate, opened (UI-03): its name, its MAC address (Floor 2 on), whether its link works, and
@@ -49,8 +49,12 @@ export function PlatePanel() {
           {door.up ? "◆" : "◇"}
         </span>{" "}
         {panel.iface}
-        {room.floor >= DOOR_NAMES_FLOOR && <span className="plate-mac"> {door.mac}</span>}
       </p>
+      {room.floor >= DOOR_NAMES_FLOOR && (
+        <div className="plate-value-row">
+          <CopyValue value={door.mac} label={`${panel.iface}'s MAC`} />
+        </div>
+      )}
       <p>
         {door.up
           ? voice.plate.linkUp
@@ -72,8 +76,10 @@ export function PlatePanel() {
           <span>{crossing ? voice.plate.doorAddress : voice.plate.address}</span>
           {door.addrs.length === 0 && <span className="panel-note">{voice.plate.noAddress}</span>}
           {door.addrs.map((a) => (
-            <div key={a} className="addr-row">
-              <Address cidr={a} streets={room.floor >= 7} />
+            <div key={a} className="addr-row plate-value-row">
+              <CopyValue value={a} label={`${panel.iface}'s address`}>
+                <Address cidr={a} streets={room.floor >= 7} />
+              </CopyValue>
               {slot === "works" && (
                 <button
                   type="button"

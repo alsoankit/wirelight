@@ -59,7 +59,7 @@ export function journey(events: readonly SimEvent[], frameId: number): Hop[] {
 
 /**
  * The answer that won the room: the last message taken in by the player's machine (a lab answer, or a
- * messenger's ping answered), else the last IPv4 packet that reached it (a ping's reply).
+ * repeat send answered), else the last IPv4 packet that reached it (a ping's reply).
  */
 export function winningFrame(events: readonly SimEvent[], device: string): number | null {
   let packet: number | null = null;

@@ -3,7 +3,7 @@ import type { FloorText, RoomText } from "./types";
 /** floors/floor-5.md, word for word. Region 3, the Lantern Town. */
 
 /** Why a house's door is shut to the player on Floors 5–7. */
-export const HOUSE_LOCKED = "Locked. Nobody here has opened the door in years, but they still answer letters.";
+export const HOUSE_LOCKED = "Locked. Nobody here has opened the door in years, but the network can still reach them.";
 
 /** Arriving in Region 3 (R3-ARRIVE-01…03). */
 export const REGION_3_ARRIVAL = [
@@ -26,8 +26,7 @@ export const REGION_3_ARRIVAL = [
 
 export const whereNotWho: RoomText = {
   title: "A New Door",
-  mission:
-    "Kitchen's door was replaced, so its door name changed. Your messenger still writes to the old name, and nothing arrives.",
+  mission: "Kitchen's door was replaced, so its door name changed. Its house address stayed the same.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
@@ -38,26 +37,24 @@ export const whereNotWho: RoomText = {
       text: "A door has a name; a house has an address. The address stays when the door changes.",
       codex: "ip-address",
     },
-    { text: "Give the messenger kitchen's house address instead of its MAC address." },
     {
-      // The spec says "The messenger's ping reaches kitchen"; the word arrives in 5.2, so it waits until then.
-      text: "Set the card to `10.0.1.7`. The messenger's letter reaches kitchen, and its reply carries the key.",
+      text: "A door has a name; a house has an address. The address stays when the door changes.",
+      codex: "ip-address",
     },
+    { text: "Ping kitchen at its house address: `ping -c 1 10.0.1.7`." },
   ],
   detectors: {
-    "chase-the-new-name": {
-      note: "It answered. What stays the same when a door changes?",
-      tried: "You wrote kitchen's new MAC address on the card. It answered, but the next new door would lose it again.",
-    },
     "own-address": {
-      note: "That's your own house.",
-      tried: "You put your own house address on the card.",
+      note: "That's your own address.",
+      tried: "You checked your own machine instead of the kitchen.",
     },
   },
   debrief: {
-    happened:
-      "Kitchen's door changed, so its MAC address changed, and the messenger's frames went nowhere. Its house address didn't: that's its IP address. Writing to the IP address instead of the MAC address found kitchen, whichever door it has.",
-    terms: [{ id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" }],
+    happened: "Kitchen's door changed, but its house address stayed the same. Ping reaches it at that IP address.",
+    terms: [
+      { id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" },
+      { id: "ping", term: "ping", meaning: "asking a house 'are you there?'" },
+    ],
   },
   questions: [
     {
@@ -115,7 +112,6 @@ export const placeToLive: RoomText = {
     happened:
       "Your door had no address, so you couldn't send anything to a house, or hear back. With an address of your own, you pinged kitchen: an echo request out, an echo reply back.",
     terms: [
-      { id: "ping", term: "ping", meaning: "asking a house 'are you there?'" },
       {
         id: "echo-request-reply",
         term: "echo request / reply",
@@ -178,15 +174,15 @@ export const quietStreet: RoomText = {
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
-    { text: "Three things are wrong: one in your house, one in the square, one on the card." },
+    { text: "Three things are wrong: one in your house, one in the square, and one in the route to kitchen." },
     { text: "Ping a few houses. Who answers, and who doesn't?" },
     {
       text: "A house needs an address; a door needs to be on; a letter needs the right address.",
       codex: "ip-address",
     },
-    { text: "Give yourself an address, switch the square's door to kitchen on, fix the card." },
+    { text: "Give yourself an address, switch the square's door to kitchen on, then ping kitchen's address." },
     {
-      text: "In your house: `ip addr add 10.0.1.5/24 dev eth0`. In the square: `ip link set eth1 up`. Then set the card to `10.0.1.7` (`lab card --to 10.0.1.7`). Kitchen's reply carries the key.",
+      text: "In your house: `ip addr add 10.0.1.5/24 dev eth0`. In the square: `ip link set eth1 up`. Then ping `10.0.1.7`. Kitchen's reply carries the key.",
     },
   ],
   detectors: {
@@ -213,7 +209,7 @@ export const quietStreet: RoomText = {
   },
   debrief: {
     happened:
-      "Your house had no address, the square's door to kitchen was off, and the messenger had a wrong house number. Each one alone would keep the street quiet.",
+      "Your house had no address, the square's door to kitchen was off, and the route to kitchen's house address was missing. Each one alone would keep the street quiet.",
     terms: [],
   },
   voice: [

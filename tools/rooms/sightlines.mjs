@@ -15,11 +15,21 @@ const vite = await viteModule.createServer({
   server: { middlewareMode: true },
   appType: "custom",
 });
-let rooms, doorSides, slotsFor, doorGeometry, observatoryLayout, houseLayout, hallLayout, KITS, standing, DRESSING_AT;
+let rooms,
+  planOf,
+  slotsOf,
+  layoutKey,
+  doorGeometry,
+  observatoryLayout,
+  houseLayout,
+  hallLayout,
+  KITS,
+  standing,
+  DRESSING_AT;
 try {
   [
     { rooms },
-    { doorSides, slotsFor },
+    { planOf, slotsOf, layoutKey },
     { doorGeometry },
     { observatoryLayout },
     { houseLayout },
@@ -28,7 +38,7 @@ try {
     { standing, DRESSING_AT },
   ] = await Promise.all([
     vite.ssrLoadModule(join(root, "packages/rooms/src/index.ts")),
-    vite.ssrLoadModule(join(root, "apps/web/src/world/room/doorSides.ts")),
+    vite.ssrLoadModule(join(root, "apps/web/src/world/room/plan.ts")),
     vite.ssrLoadModule(join(root, "apps/web/src/world/room/layout.ts")),
     vite.ssrLoadModule(join(root, "apps/web/src/world/observatory/layout.ts")),
     vite.ssrLoadModule(join(root, "apps/web/src/world/house/layout.ts")),
@@ -164,42 +174,27 @@ const structural = /^(Wall|Door|Floor|Roof|Window|Arch|Column|Pillar|Cornice|Bea
 const observations = new Map();
 for (const room of rooms)
   for (const device of room.topology.devices) {
-    const isObservatory = device.id === "observatory";
-    const isHall = !isObservatory && (!!device.bridges?.length || device.interfaces.length > 1);
-    const kind = isObservatory ? "observatory" : isHall ? "hall" : "house";
-    const linked = device.interfaces.filter((iface) =>
-      room.topology.links.some(
-        (link) =>
-          (link.a.device === device.id && link.a.iface === iface.name) ||
-          (link.b.device === device.id && link.b.iface === iface.name),
-      ),
-    );
-    if (!linked.length) continue;
-    const sides = doorSides(room.topology, room.playerDevice, device.id);
-    const empty = device.interfaces.filter(
-      (iface) => iface.name !== "lo" && !linked.some((d) => d.name === iface.name),
-    );
-    for (const iface of empty) if (!sides.has(iface.name)) sides.set(iface.name, "left");
-    const front = [...sides.values()].filter((side) => side === "front").length;
-    const layout = isObservatory
-      ? observatoryLayout(linked.length, room.region)
-      : isHall
-        ? hallLayout(linked.length, room.region, front)
-        : houseLayout(room.region);
-    const sideDoorSlots = slotsFor(
-      [...linked.map((d) => d.name), ...empty.map((d) => d.name)],
-      sides,
-      layout.doorSlots,
-    );
-    const slots = sideDoorSlots.placed.filter(Boolean);
-    const key = `${room.region}/${kind}/d${linked.length}/f${front}`;
+    // The floor plan's layout (0118). A mirrored house is checked unmirrored: the mirror is across the
+    // camera's own diagonal, so what blocks the view is the same.
+    const plan = planOf(room.topology, room.playerDevice, device.id);
+    if (!plan || plan.back.length + plan.left.length === 0) continue;
+    const kind = plan.kind;
+    const bySlot = slotsOf(plan);
+    const layout =
+      kind === "observatory"
+        ? observatoryLayout(plan.back.length + plan.left.length, room.region)
+        : kind === "hall"
+          ? hallLayout([...bySlot.values()], room.region)
+          : houseLayout(room.region);
+    const slots = [...bySlot.values()];
+    const key = layoutKey(room.region, plan).replace(/-m$/, "");
     if (!observations.has(key)) observations.set(key, { room, device, kind, layout, slots });
   }
 
 const failures = [];
 for (const [key, { room, kind, layout, slots }] of observations) {
-  const leftView = slots.some((slot) => slot.wall === "left");
-  const direction = new THREE.Vector3(leftView ? -1 : 1, 0.9, 1).normalize();
+  // One view for every room (0116).
+  const direction = new THREE.Vector3(1, 0.9, 1).normalize();
   const cameraV = new THREE.Vector3(0, 1.1, -0.6).addScaledVector(direction, 19);
   const camera = cameraV.toArray();
   const targets = [{ name: "keeper", point: layout.keeper }];
@@ -246,7 +241,6 @@ for (const [key, { room, kind, layout, slots }] of observations) {
           box: placedBounds(box, dressing.position, dressing.scale ?? 1, [0, dressing.turn ?? 0, 0]),
         });
     }
-    blockers.push({ name: "planning table", box: [-0.95 + 2.4, 0, 1.6 - 0.625, 0.95 + 2.4, 0.9, 1.6 + 0.625] });
   }
   for (const target of targets)
     for (const blocker of blockers) {

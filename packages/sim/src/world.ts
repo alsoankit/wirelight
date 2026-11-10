@@ -414,7 +414,11 @@ export class Simulator implements WorldView {
   }
 
   /** `lab send-frame` (SIM-09). */
-  sendLabFrame(device: DeviceId, opts: { to: string; from?: string; dev?: IfaceName; msg: string }): SendResult {
+  sendLabFrame(
+    device: DeviceId,
+    opts: { to: string; from?: string; dev?: IfaceName; msg: string },
+    origin: "command" | "setup" = "command",
+  ): SendResult {
     const d = this.s.devices[device];
     if (!d) return { ok: false, error: "no-device" };
     const iface = opts.dev ? d.ifaces.find((i) => i.name === opts.dev) : firstDoor(d);
@@ -424,8 +428,34 @@ export class Simulator implements WorldView {
     if (!to || !from) return { ok: false, error: "bad-mac" };
     const bytes = encodeEth({ dst: to, src: from, type: ETHERTYPE.lab, payload: encodeLab(opts.msg) });
     const frameId = this.s.nextFrameId;
-    this.sendFrame(device, iface.name, bytes, "command");
+    this.sendFrame(device, iface.name, bytes, origin);
     return { ok: true, frameId, length: bytes.length };
+  }
+
+  startRepeatFrame(
+    device: DeviceId,
+    opts: { to: string; from?: string; dev?: IfaceName; msg: string },
+    origin: "command" | "setup" = "command",
+    intervalMs = 2000,
+  ): number | null {
+    const sent = this.sendLabFrame(device, opts, origin);
+    if (!sent.ok) return null;
+    const id = this.s.nextRepeatId++;
+    this.s.repeatSends[id] = { device, origin, intervalMs, options: { ...opts } };
+    this.schedule({ t: this.s.t + intervalMs, kind: "repeat-frame", id });
+    return id;
+  }
+
+  stopRepeatFrame(id: number): boolean {
+    if (!this.s.repeatSends[id]) return false;
+    delete this.s.repeatSends[id];
+    return true;
+  }
+
+  runningRepeatFrames(device?: DeviceId) {
+    return Object.entries(this.s.repeatSends)
+      .filter(([, job]) => !device || job.device === device)
+      .map(([id, job]) => ({ id: Number(id), device: job.device, ...job.options }));
   }
 
   /** `lab card --to`: change the address on a messenger's card (number `index`, from 1): a door name or a house address. */
@@ -858,6 +888,13 @@ export class Simulator implements WorldView {
         if (ev.service === "messenger") this.messengerTick(ev.device, ev.index ?? 0);
         else this.announcerTick(ev.device);
         return;
+      case "repeat-frame": {
+        const job = this.s.repeatSends[ev.id];
+        if (!job) return;
+        this.sendLabFrame(job.device, job.options, job.origin);
+        this.schedule({ t: this.s.t + job.intervalMs, kind: "repeat-frame", id: ev.id });
+        return;
+      }
       case "fdb-gc":
         fdbGc(this.k, ev.device, ev.bridge, ev.stamp);
         return;
@@ -1131,7 +1168,27 @@ function build(topology: Topology, seed: number): WorldState {
     };
   }
   const prng = seedPrng(seed);
-  const s: WorldState = { t: 0, seq: 0, nextFrameId: 1, prng, devices, links, queue: [] };
+  const s: WorldState = {
+    t: 0,
+    seq: 0,
+    nextFrameId: 1,
+    prng,
+    devices,
+    links,
+    queue: [],
+    repeatSends: {},
+    nextRepeatId: (topology.repeatSends?.length ?? 0) + 1,
+  };
+  topology.repeatSends?.forEach((send, index) => {
+    const id = index + 1;
+    s.repeatSends[id] = {
+      device: send.device,
+      origin: "setup",
+      intervalMs: send.intervalMs ?? 2000,
+      options: { to: send.to, msg: send.msg ?? "hello", ...(send.dev ? { dev: send.dev } : {}) },
+    };
+    heapPush(s.queue, { t: Math.min(1500, send.intervalMs ?? 2000), seq: s.seq++, kind: "repeat-frame", id });
+  });
   for (const d of Object.values(devices)) {
     // First messages come early so the player sees the service working; then at its interval.
     // Several messengers start a little apart, so their letters don't all cross at once.

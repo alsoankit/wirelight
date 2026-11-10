@@ -139,6 +139,17 @@ export interface LinkSpec {
 export interface Topology {
   devices: DeviceSpec[];
   links: LinkSpec[];
+  /** Repeating frames started by room setup; each uses its configured interval (2s by default). */
+  repeatSends?: RepeatSendSpec[];
+}
+
+export interface RepeatSendSpec {
+  device: DeviceId;
+  to: string;
+  dev?: IfaceName;
+  msg?: string;
+  /** Room setup can slow background traffic; player-started sends always use 2 seconds. */
+  intervalMs?: number;
 }
 
 /** Declarative mutations applied on top of the correct network. */
@@ -532,6 +543,7 @@ export type Scheduled =
   | { t: number; seq: number; kind: "arrive"; link: string; dir: 0 | 1; frameId: number; hex: string }
   | { t: number; seq: number; kind: "lab-reply"; device: DeviceId; iface: IfaceName; to: Mac; text: string }
   | { t: number; seq: number; kind: "timer"; device: DeviceId; service: "messenger" | "announcer"; index?: number }
+  | { t: number; seq: number; kind: "repeat-frame"; id: number }
   /** The forwarding database's clean-up work (br_fdb_cleanup). */
   | { t: number; seq: number; kind: "fdb-gc"; device: DeviceId; bridge: IfaceName; stamp: number }
   /** A spanning-tree timer (stp.ts): hello, tcn, tc, or a port's age, fwd or hold. */
@@ -584,6 +596,16 @@ export interface WorldState {
   devices: Record<DeviceId, DeviceState>;
   links: Record<string, LinkState>;
   queue: Scheduled[];
+  repeatSends: Record<
+    number,
+    {
+      device: DeviceId;
+      origin: "command" | "setup";
+      intervalMs: number;
+      options: { to: string; from?: string; dev?: IfaceName; msg: string };
+    }
+  >;
+  nextRepeatId: number;
   /** The Scanner's catches and what it's waiting for (0043); absent until it's first used. */
   scanner?: ScannerState;
 }
@@ -796,6 +818,7 @@ export type SimEvent =
 export type SimEventKind = SimEvent["kind"];
 export type FrameOrigin =
   | "command"
+  | "setup"
   | "responder"
   | "messenger"
   | "announcer"

@@ -8,18 +8,10 @@ import type { RegionId } from "../region";
 export type StatueLook = CarvedOptions & { slug: string; scale: number };
 
 /** Each region's statue (0094): a figure of its part of the palace. */
-export const STATUES: Record<RegionId, StatueLook> = {
+export const STATUES: Partial<Record<RegionId, StatueLook>> = {
   // The outer gardens: a seated stone woman with roses, moss on her shoulders and lap.
   1: { slug: "frauenfigur", scale: 0.8, tint: { restored: "#BDB6A7", ruined: "#6A6F78" }, moss: 0.85, detail: 0.3 },
-  // The works: the clockwork owl, in bronze.
-  2: {
-    slug: "owl-carved",
-    scale: 0.85,
-    tint: { restored: "#A98245", ruined: "#5A5550" },
-    metalness: 0.35,
-    roughness: 0.55,
-    detail: 0.4,
-  },
+  // The works: none since the owl went (owner, 2026-11-10: it doesn't fit the palace).
   // The town: a robed figure with a lantern, in warm stone.
   3: { slug: "lamplighter-mourner", scale: 1.0, tint: { restored: "#C8B89C", ruined: "#6D6F76" }, detail: 0.3 },
   // The cathedral: a winged grave angel, in sandstone.
@@ -74,16 +66,6 @@ export const DRESSING_AT: Record<number, StatuePlace> = {
     tint: { restored: "#BDB6A7", ruined: "#6A6F78" },
     moss: 0.8,
   },
-  // The bronze owl vessel on the floor, by the back wall.
-  2: {
-    slug: "owl-zun",
-    position: [-3.35, 0, -1.35],
-    turn: 0.8,
-    scale: 1.0,
-    tint: { restored: "#A98245", ruined: "#5A5550" },
-    metalness: 0.6,
-    roughness: 0.5,
-  },
   // A small praying monk in the corner.
   3: {
     slug: "praying-monk",
@@ -120,7 +102,7 @@ export function standing(
   const statue = STATUES[region];
   const place = kind === "observatory" ? STATUE_AT[region] : SIDE_PLACE(region);
   const hallUsesAngel = kind === "hall" && (region === 1 || region === 3);
-  if (place && !hallUsesAngel)
+  if (statue && place && !hallUsesAngel)
     out.push({ slug: statue.slug, position: place.at, turn: place.turn, scale: statue.scale });
   const dressing = kind === "observatory" ? DRESSING_AT[region] : undefined;
   if (dressing)

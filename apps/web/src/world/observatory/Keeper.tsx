@@ -1,17 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { type RefObject, useMemo, useRef } from "react";
-import {
-  AdditiveBlending,
-  BoxGeometry,
-  CylinderGeometry,
-  DoubleSide,
-  type Group,
-  PlaneGeometry,
-  type PointLight,
-  SphereGeometry,
-  Vector3,
-} from "three";
-import { color, float, floor, fract, mix, positionLocal, sin, smoothstep, step, uniform, uv } from "three/tsl";
+import { BoxGeometry, CylinderGeometry, type Group, PlaneGeometry, type PointLight, SphereGeometry } from "three";
+import { color, float, floor, fract, mix, sin, step, uniform, uv } from "three/tsl";
 import { MeshBasicNodeMaterial } from "three/webgpu";
 import { regionMaterial } from "../kit/regionMaterials";
 import type { RegionId } from "../region";
@@ -19,25 +9,23 @@ import type { KeeperCue } from "./Messages";
 
 // The keeper (0107): the machine in the middle of every room, the thing that really handles each
 // message. A heavy old cabinet with a keyboard and an amber screen. It stands still: its screen
-// brightens as a message arrives and dims when it is asleep (0042), and a thread of warm light runs
-// from the screen to the door it chose. Amber, never cyan: cyan belongs to messages (0090).
-// Built in code; its front is +z here, aligned to the nearest wall direction toward its doorway.
+// brightens as a message arrives and dims when it is asleep (0042). Amber, never cyan: cyan belongs
+// to messages (0090). (Its old beam toward the chosen door is gone: owner, 2026-11-10, "not accurate".)
+// Built in code; its front is +z here. Its back is to its doorway, square to the walls, so its screen faces into the room.
 
 type Props = {
   position: [number, number, number];
   region?: RegionId;
   /** Its desk holds messages it won't pass on (0042): the screen is nearly out. */
   asleep?: boolean;
-  rest: [number, number, number]; // the doorway, where a decision's beam ends
+  rest: [number, number, number]; // the doorway it turns its back to
   cue: RefObject<KeeperCue>; // when to brighten (a message arrived) and when to point (an answer left)
 };
 
 const ARRIVAL_SECONDS = 1.0;
-const BEAM_SECONDS = 1.1;
 const SCREEN_AT: [number, number, number] = [0, 1.12, 0.222];
 
-// One keeper per room: one beam level and one screen level.
-const beamLevel = uniform(0);
+// One keeper per room: one screen level.
 const screenLevel = uniform(1);
 
 const PLINTH = new BoxGeometry(1, 0.1, 0.72);
@@ -73,29 +61,6 @@ function screenMaterial() {
   return m;
 }
 
-// The beam of its decision (CORE-24): a thin thread of warm light from its screen toward the door it
-// chose, brightest at the screen, fading along its length and away over about a second.
-function Beam() {
-  const material = useMemo(() => {
-    const m = new MeshBasicNodeMaterial({
-      transparent: true,
-      depthWrite: false,
-      blending: AdditiveBlending,
-      toneMapped: false,
-      side: DoubleSide,
-    });
-    // positionLocal.y: +0.5 at the screen, −0.5 at the door.
-    const along = smoothstep(-0.5, 0.35, positionLocal.y);
-    m.colorNode = color("#FFD9A0").mul(along.mul(beamLevel).mul(0.16));
-    return m;
-  }, []);
-  return (
-    <mesh material={material}>
-      <cylinderGeometry args={[0.01, 0.045, 1, 12, 1, true]} />
-    </mesh>
-  );
-}
-
 export function Keeper({ position, rest, cue, region = 1, asleep = false }: Props) {
   const stone = regionMaterial("Stone", region);
   const iron = regionMaterial("Iron", region);
@@ -103,42 +68,20 @@ export function Keeper({ position, rest, cue, region = 1, asleep = false }: Prop
   const screen = useMemo(screenMaterial, []);
   const machine = useRef<Group>(null);
   const glow = useRef<PointLight>(null);
-  const beamRef = useRef<Group>(null);
-
-  const door = useMemo(() => new Vector3(...rest), [rest]);
-  const facing = Math.round(Math.atan2(rest[0] - position[0], rest[2] - position[2]) / (Math.PI / 2)) * (Math.PI / 2);
-  const screenAt = useMemo(() => new Vector3(), []);
-  const DOWN = useMemo(() => new Vector3(0, -1, 0), []);
+  const facing =
+    Math.round(Math.atan2(rest[0] - position[0], rest[2] - position[2]) / (Math.PI / 2)) * (Math.PI / 2) + Math.PI;
 
   useFrame(({ clock }) => {
     const now = clock.elapsedTime;
     const c = cue.current;
     const m = machine.current;
-    const beam = beamRef.current;
-    const root = beam?.parent;
-    if (!m || !beam || !root) return;
+    if (!m) return;
 
     const sinceArrival = now - c.arrived;
     const arriving = sinceArrival >= 0 && sinceArrival < ARRIVAL_SECONDS;
     const pulse = arriving ? Math.sin((Math.PI * sinceArrival) / ARRIVAL_SECONDS) : 0;
     screenLevel.value = asleep ? 0.12 : 1 + pulse * 0.5;
     if (glow.current) glow.current.intensity = screenLevel.value;
-
-    // An answer left: the beam from the screen toward the doorway.
-    const sinceDeparture = now - c.departed;
-    const on = sinceDeparture >= 0 && sinceDeparture < BEAM_SECONDS;
-    beam.visible = on;
-    if (on) {
-      const x = sinceDeparture / BEAM_SECONDS;
-      beamLevel.value = Math.min(x / 0.12, 1) * (1 - Math.max(0, (x - 0.12) / 0.88)) ** 1.5;
-      m.localToWorld(screenAt.set(...SCREEN_AT));
-      const from = root.worldToLocal(screenAt.clone());
-      const to = root.worldToLocal(door.clone());
-      const dir = to.clone().sub(from);
-      beam.position.copy(from).add(to).multiplyScalar(0.5);
-      beam.quaternion.setFromUnitVectors(DOWN, dir.clone().normalize());
-      beam.scale.set(1, dir.length(), 1);
-    }
   });
 
   return (
@@ -164,9 +107,6 @@ export function Keeper({ position, rest, cue, region = 1, asleep = false }: Prop
         ))}
         <mesh geometry={MAST} material={brass} position={[0.3, 1.56, -0.1]} />
         <pointLight ref={glow} position={[0, 1.1, 0.55]} color="#FFD9A0" distance={2.6} decay={2} />
-      </group>
-      <group ref={beamRef} visible={false}>
-        <Beam />
       </group>
     </group>
   );

@@ -48,6 +48,7 @@ export type RoomStatus = {
   routes: Record<string, { dst: string; via: string | null; dev: string }[]>;
   /** Each machine's messengers' cards, in order ("" is a blank card). */
   cards: Record<string, string[]>;
+  repeatingSends: { id: number; to: string; dev?: string; msg: string }[];
   /** Keepers that have forgotten their job (0042): which desk, and what waits on it, oldest first. */
   desks: Record<string, { desk: "switch" | "host" | "router"; waiting: { from: string; to: string; door: string }[] }>;
 };
@@ -284,6 +285,9 @@ export class Session {
           .filter((d) => d.messengers.length > 0)
           .map((d) => [d.id, d.messengers.map((m) => m.to)]),
       ),
+      repeatingSends: this.live()
+        .world.runningRepeatFrames(room.playerDevice)
+        .map(({ id, to, dev, msg }) => ({ id, to, dev, msg })),
       cableEnds: Object.fromEntries(
         f.world.links().flatMap((l) => [
           [`${l.a.device}:${l.a.iface}`, l.out.includes("a") ? "out" : "in"],

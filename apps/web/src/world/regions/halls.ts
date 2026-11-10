@@ -351,8 +351,8 @@ export function hallsObservatory(secondDoor: boolean): HallsRoom {
 // fountain ran, and the next court's ruined arch beyond the fallen corner.
 
 export const HALLS_HOUSE_PIECES: Placement[] = [
-  // Back wall: whole now (0111: the door is on the near edge), plain walls either side.
-  { piece: "Wall_Overgrown", position: [0, 0, -4] },
+  // Back wall: the arch the corridor comes through (0116), plain walls either side.
+  { piece: "Wall_ArchRound_Overgrown", position: [0, 0, -4] },
   { piece: "Wall", position: [-3, 0, -4] },
   { piece: "Wall_Overgrown", position: [-3, 2, -4] },
   { piece: "Wall_Broken", position: [3, 0, -4] },
@@ -540,7 +540,7 @@ function corridorRunes(half: number): RuneMark[] {
       ]
     : [
         { wall: "back", along: -1.7, y: 1.45 },
-        { wall: "back", along: 3.5, y: 1.05, size: 0.16 },
+        { wall: "back", along: 0.4, y: 1.05, size: 0.16 },
       ];
 }
 
@@ -578,8 +578,8 @@ function corridorRoots(half: number): BufferGeometry[] {
         [hole + 0.3, 1.0, -4.5],
         [hole + 0.35, 0.8, -3.88],
         [hole + 0.5, 0.15, -3.7],
-        [hole + 0.9, 0.07, -3.5],
-        [hole + 1.5, 0.05, -3.45],
+        [hole + 0.6, 0.07, -3.5],
+        [hole + 0.85, 0.05, -3.45],
       ],
       radius: 0.12,
       strands: 2,
@@ -591,12 +591,12 @@ function corridorRoots(half: number): BufferGeometry[] {
     // The long tunnel (1.B): roots from the far end too.
     runs.push({
       path: [
-        [half - 1.6, 1.75, -4.5],
-        [half - 1.65, 1.6, -3.8],
-        [half - 1.7, 0.5, -3.78],
-        [half - 1.9, 0.09, -3.6],
-        [half - 2.6, 0.07, -3.5],
-        [half - 3.3, 0.05, -3.6],
+        [half - 2.4, 1.75, -4.5],
+        [half - 2.45, 1.6, -3.8],
+        [half - 2.5, 0.5, -3.78],
+        [half - 2.7, 0.09, -3.6],
+        [half - 3.4, 0.07, -3.5],
+        [half - 4.1, 0.05, -3.6],
       ],
       radius: 0.17,
       strands: 3,
@@ -633,7 +633,8 @@ export function hallsCorridor(half = 5): CorridorDressing {
   // The back wall in 2 m pieces along the whole length, a hole the moon comes through, broken tops.
   const cycle = ["Wall_Overgrown", "Wall", "Wall_Overgrown", "Wall_Hole", "Wall_Overgrown", "Wall"];
   const walls: Placement[] = [];
-  for (let x = -half + 1, k = 0; x < half; x += 2, k++) {
+  // It stops short of the right-hand gate, an arch in this wall (corridor/frame.ts, 0119).
+  for (let x = -half + 1, k = 0; x < half - 2; x += 2, k++) {
     walls.push({ piece: cycle[k % cycle.length] as string, position: [x, 0, -4] });
     if (k % 3 !== 0) walls.push({ piece: "Wall_Broken", position: [x, 2, -4] });
   }
@@ -644,8 +645,8 @@ export function hallsCorridor(half = 5): CorridorDressing {
     nature("Grass_Wispy_Tall", [1.6, 0, -3.7], 1.1, 0.8),
     nature("Clover_1", [2.4, 0, -3.6], 2.2, 0.7),
     nature("Clover_2", [3.2, 0, -2.9], 0.5, 0.55),
-    nature("Fern_1", [half - 1.7, 0, -3.55], 2.0, 0.7),
-    nature("Rock_Medium_2", [half - 0.65, -0.08, -3.45], 1.3, 0.32),
+    nature("Fern_1", [half - 2.4, 0, -3.55], 2.0, 0.7),
+    nature("Rock_Medium_2", [half - 0.35, -0.08, -2.9], 1.3, 0.32),
     // The front edge: low tufts only, so the rune-line and the messages stay in view.
     nature("Grass_Wispy_Short", [-1.8, 0, -0.75], 0.3, 0.8),
     nature("Grass_Common_Short", [1.1, 0, -0.7], 1.7, 0.8),
@@ -656,8 +657,8 @@ export function hallsCorridor(half = 5): CorridorDressing {
     growth.push(nature("Mushroom_Common", [-half + 3.2, 0, -3.6], 2.1, 0.9));
     growth.push(nature("Grass_Wispy_Tall", [-half + 4.1, 0, -3.65], 0.2, 0.75));
     growth.push(nature("Clover_1", [half - 4.2, 0, -3.55], 1.4, 0.65));
-    growth.push(nature("Mushroom_Laetiporus", [half - 2.3, 0, -3.3], 2.6, 0.4));
-    growth.push(nature("Clover_2", [half - 1.5, 0, -2.75], 1.9, 0.5));
+    growth.push(nature("Mushroom_Laetiporus", [half - 2.6, 0, -3.3], 2.6, 0.4));
+    growth.push(nature("Clover_2", [half - 0.4, 0, -1.6], 1.9, 0.5));
   }
   return {
     placements: [

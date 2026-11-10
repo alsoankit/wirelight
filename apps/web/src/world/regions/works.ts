@@ -1,5 +1,5 @@
 import type { BufferGeometry } from "three";
-import { type CorridorDressing, corridorFloor } from "../corridor/frame";
+import { CORRIDOR, type CorridorDressing, corridorFloor, rightGateX } from "../corridor/frame";
 import { FLOORS, makeEarth, makeFlagstones } from "../kit/floor";
 import type { Extra, Placement } from "../kit/StaticRoom";
 import { addTo, ball, box, extras, gearGeometry, onWall, pipe, ring, rod, type V3 } from "../kit/shapes";
@@ -100,12 +100,12 @@ const WALL_FACE = 0.09;
  * piece, the last piece is set flush with the gap's end and a little further back, behind its
  * neighbour (the kit has no half walls).
  */
-function wallRun(wall: Wall, from: number, to: number, doors: number[]): KitPlacement[] {
+function wallRun(wall: Wall, from: number, to: number, doors: number[], doorPiece = FLAT.piece): KitPlacement[] {
   const out: KitPlacement[] = [];
   const put = (piece: string, centre: number, back = 0) =>
     out.push(onWallKit(HALL, piece, wall, centre, [0, 0, -WALL_FACE - back]));
   const sorted = [...doors].sort((a, b) => a - b);
-  for (const d of sorted) put(FLAT.piece, d);
+  for (const d of sorted) put(doorPiece, d);
   const edges = [from, ...sorted.flatMap((d) => [d - 1, d + 1]), to];
   for (let i = 0; i < edges.length; i += 2) {
     const a = edges[i] as number;
@@ -396,15 +396,13 @@ export function worksObservatory(secondDoor: boolean) {
   const gears: Gear[] = [];
   const steam: V3[] = [];
   const kitPieces: KitPlacement[] = [
-    ...wallRun("back", -4, 4, [0]),
-    ...wallRun("left", -4.4, 4, secondDoor ? [2] : []),
+    ...wallRun("back", -4, 4, [0], "Wall_UnevenBrick_Door_Round"),
+    ...wallRun("left", -4.4, 4, secondDoor ? [2] : [], "Wall_UnevenBrick_Door_Round"),
     // A gearbox where the riser pipe goes into the floor.
     { kit: TURRETS, piece: "Base", position: [-3.5, 0, -3.5], scale: 0.42, rotationY: 0.3 },
   ];
   // The sorters' metal card index right of the door.
   drawerCabinet(bag, "back", 2.95);
-  doorFrame(bag, "back", 0, FLAT.half, FLAT.height);
-  if (secondDoor) doorFrame(bag, "left", 2, FLAT.half, FLAT.height);
   ironDadoAround(bag, "back", [0], -3.6);
   ironDadoAround(bag, "left", secondDoor ? [2] : [], -3.6);
   // The great gear train, left of the door, its middle gear climbing toward the door.
@@ -461,12 +459,11 @@ export function worksHouse() {
   const gears: Gear[] = [];
   const steam: V3[] = [];
   const kitPieces: KitPlacement[] = [
-    ...wallRun("back", -4, 4, []), // whole: the door is on the near edge (0111)
+    ...wallRun("back", -4, 4, [0], "Wall_UnevenBrick_Door_Round"),
     ...wallRun("left", -4.4, 4, []),
   ];
   drawerCabinet(bag, "back", -2.6, 2);
   sortingBench(bag, "left", -1.75);
-  doorFrame(bag, "back", 0, FLAT.half, FLAT.height);
   ironDadoAround(bag, "back", [0], -3.95);
   ironDadoAround(bag, "left", [], -3.6);
   pipes(bag, [
@@ -511,11 +508,10 @@ export function worksHall(used: { wall: Wall; at: number }[]) {
   const door = (wall: Wall, at: number) => used.some((s) => s.wall === wall && s.at === at);
   const doorsOn = (wall: Wall) => used.filter((s) => s.wall === wall).map((s) => s.at);
   const kitPieces: KitPlacement[] = [
-    ...wallRun("back", -4, 4, doorsOn("back")),
-    ...wallRun("left", -4.4, 4, doorsOn("left")),
+    ...wallRun("back", -4, 4, doorsOn("back"), "Wall_UnevenBrick_Door_Round"),
+    ...wallRun("left", -4.4, 4, doorsOn("left"), "Wall_UnevenBrick_Door_Round"),
   ];
   for (const s of used) {
-    doorFrame(bag, s.wall, s.at, FLAT.half, FLAT.height);
     // Its link light on the stone between it and the next bay.
     if (s.at < 3) doorDial(bag, s.wall, s.at + 1.0, 1.75);
   }
@@ -582,31 +578,49 @@ export function worksCorridor(half = 5): CorridorDressing {
   const glows: Glow[] = [];
   const gears: Gear[] = [];
   const steam: V3[] = [];
-  const kitPieces = wallRun("back", -half, half, []);
-  ironDado(bag, "back", -half, half);
+  // The gates are the Works' own round doors (0119): the left room's across the far end, the right
+  // room's in the back wall near the right end, where the cable turns in (corridor/frame.ts).
+  const gate = rightGateX(half);
+  const kitPieces = [
+    ...wallRun("back", -half, half, [gate], "Wall_UnevenBrick_Door_Round"),
+    {
+      kit: HALL,
+      piece: "Wall_UnevenBrick_Door_Round",
+      position: [-half - WALL_FACE, 0, CORRIDOR.cable],
+      rotationY: QUARTER,
+    },
+  ] as KitPlacement[];
+  ironDadoAround(bag, "back", [gate], -half, half);
   pipes(bag, [
     [
       [-half, 2.78, -3.86],
-      [half, 2.78, -3.86],
+      [gate - 1.1, 2.78, -3.86],
     ],
     [
       [-3.3, 0, -3.8],
       [-3.3, 2.5, -3.8],
-      [half, 2.5, -3.8],
+      [gate - 1.1, 2.5, -3.8],
     ],
   ]);
-  brackets(bag, "back", [-4.2, -2.4, 2.4, 4.2], 2.78, 0.08);
-  brackets(bag, "back", [-1.5, 3.3], 2.5, 0.14);
+  brackets(bag, "back", [-4.2, -2.4, 1.6], 2.78, 0.08);
+  brackets(bag, "back", [-1.5, 1.2], 2.5, 0.14);
   valve(bag, "back", -3.3, 1.2, 0.36);
   vent(bag, steam, [-3.3, 1.75, -3.8], [-3.3, 1.75, -3.52]);
   gauge(bag, "back", -2.5, 2.05, 0.12, 0.13);
   gauge(bag, "back", 2.4, 2.0, 0.12, 0.1);
   gearTrain(bag, gears, "back", 0.4, 1.55, { size: 0.75, a1: 0.7, a2: -0.4 });
   lamp(bag, glows, "back", -1.5, 2.1, 2.6);
-  lamp(bag, glows, "back", 3.3, 2.1, 2.6);
-  hatch(bag, "back", 4.1, 1.45, 0.3);
-  // The channel the cable runs in: two copper rails along the floor.
-  for (const z of [-2.34, -2.06]) addTo(bag, "Copper", rod([-half + 0.3, 0.05, z], [half - 0.3, 0.05, z], 0.025, 6));
+  lamp(bag, glows, "back", 1.9, 2.1, 2.6);
+  // Light by the left-hand gate, so the far end's door reads (0119).
+  lamp(bag, glows, "back", -half + 1.15, 2.1, 2.2);
+  // The channel the cable runs in: two copper rails along the floor, turning in to the right-hand gate.
+  for (const [z, x] of [
+    [-2.34, gate - 0.14],
+    [-2.06, gate + 0.14],
+  ] as const) {
+    addTo(bag, "Copper", rod([-half + 0.3, 0.05, z], [x, 0.05, z], 0.025, 6));
+    addTo(bag, "Copper", rod([x, 0.05, z], [x, 0.05, CORRIDOR.back + 0.1], 0.025, 6));
+  }
   return {
     placements: [{ piece: "Brick", position: [3.6, 0, -0.9], rotationY: 1.1 }],
     kitPieces,

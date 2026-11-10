@@ -34,16 +34,6 @@ export const fields = {
     open: "Open",
     back: "Back to Captures",
   },
-  card: {
-    title: "The address card",
-    about: "The messenger sends to whatever address is written here, every few seconds.",
-    to: "Sends to",
-    every: "Every",
-    message: "Message",
-    newTo: "New address",
-    write: "Write it on the card",
-    runs: "runs in the terminal:",
-  },
 };
 
 export const ETHERTYPE_NAMES: Record<number, string> = {

@@ -760,37 +760,27 @@ button.world-chip {
   cursor: pointer;
 }
 
-.corridor-entry {
-  position: relative;
-}
-
 .corridor-gate-hit {
   display: block;
-  width: 76px;
-  height: 96px;
+  width: 110px;
+  height: 132px;
   padding: 0;
   border: 0;
   background: transparent;
-  cursor: pointer;
-  pointer-events: auto;
+  cursor: default;
+  pointer-events: none;
+}
+
+.corridor-gate-hit span {
+  opacity: 0;
 }
 
 .corridor-gate-hit:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: -3px;
-  border-radius: 8px;
+  outline: none;
 }
 
-.corridor-entry-popup {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  padding: 5px;
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  background: var(--glass);
-  box-shadow: 0 5px 18px #0009;
+.corridor-gate-hit:focus-visible span {
+  opacity: 1;
 }
 
 /* Task 06: one clear hierarchy across the reading panels and controls. */
@@ -934,19 +924,20 @@ button.world-chip {
   stroke-width: 2.5px;
 }
 
-.corridor-gate-hit {
-  width: 76px;
-  height: 96px;
+.repeat-sends {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-.corridor-entry-popup {
-  z-index: 12;
-  padding: 8px;
-}
-
-.corridor-entry-popup button {
-  min-height: 44px;
-  font-size: 14px;
+.repeat-sends li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  border-top: 1px solid var(--glass-border);
+  font: 12px / 1.4 var(--mono);
 }
 
 @media (max-width: 760px) {
@@ -1170,6 +1161,66 @@ body:has(.console[data-open="yes"]) .panel {
 .panel-note {
   color: var(--text-dim);
   font-style: italic;
+}
+
+.frame-to {
+  display: flex;
+  gap: 4px;
+}
+
+.frame-to input {
+  flex: 1;
+  min-width: 0;
+}
+
+.frame-to-pick {
+  width: 30px;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.frame-to-pick[aria-expanded="true"],
+.frame-to-pick:hover {
+  border-color: var(--cyan);
+}
+
+.frame-to-list {
+  margin: 4px 0 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.frame-to-list button {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  font: 13px / 1.3 var(--sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.frame-to-list button:hover,
+.frame-to-list button:focus-visible {
+  background: rgba(94, 224, 232, 0.12);
+}
+
+.frame-to-list code {
+  color: var(--text-dim);
+  font: 12px / 1.3 var(--mono);
 }
 
 .catch-list {
@@ -1790,9 +1841,23 @@ body:has(.birds-eye-controls)
   height: 100%;
 }
 
+/* Each room's floor tile on the Map (0120), drawn as the room view shows it. */
+.map-tile {
+  fill: rgba(207, 227, 255, 0.05);
+  stroke: rgba(207, 227, 255, 0.22);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.map-tile[data-here="yes"] {
+  fill: rgba(242, 165, 74, 0.12);
+  stroke: rgba(242, 165, 74, 0.55);
+}
+
 .map-link {
   stroke: #5b6470;
   stroke-width: 2;
+  stroke-linejoin: round;
 }
 
 .map-link.lit {
@@ -3085,4 +3150,67 @@ body:has(.map.memory, .ending-stage, .cmd-memory)
 
 :root[data-reduced="yes"] .boot-line {
   animation: none;
+}
+
+.plate-row {
+  gap: 7px;
+  pointer-events: auto;
+}
+
+.plate-open {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.plate-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text);
+  font-family: var(--mono);
+}
+
+.plate .plate-value {
+  color: var(--text-dim);
+}
+
+.plate-copy {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  opacity: 0.55;
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    background 0.15s;
+}
+
+.plate-copy:hover,
+.plate-copy:focus-visible {
+  opacity: 1;
+  color: var(--cyan);
+  background: rgba(94, 224, 232, 0.12);
+}
+
+.plate-copied {
+  font: 600 10px / 1 var(--sans);
+  color: var(--cyan);
+}
+
+.plate-value-row {
+  margin: 4px 0;
 }

@@ -3,7 +3,7 @@ import { voice } from "@wirelight/content";
 import { type RoomDef, roomById } from "@wirelight/rooms";
 import { type ReactNode, Suspense, useMemo, useRef } from "react";
 import type { Object3D } from "three";
-import { Vector3 } from "three";
+import { Matrix4, Vector3 } from "three";
 import { useSession } from "../../engine/store";
 import { TAB } from "../../play/keys";
 import { useQuality } from "../../render/quality";
@@ -26,8 +26,8 @@ import { Haze } from "../regions/Haze";
 import { Steam } from "../regions/Steam";
 import { BossPiece } from "./BossPiece";
 import { type DoorInfo, Doorway, EmptyDoor } from "./Doorway";
-import { doorSides, slotsFor } from "./doorSides";
 import { type DoorSlot, doorGeometry, type RoomLayout, type Vec3 } from "./layout";
+import { layoutKey, MIRROR, planOf, slotsOf } from "./plan";
 import { Statue } from "./Statue";
 
 // One machine's room (CORE-06): its layout, its keeper, and a doorway for each of its real doors,
@@ -79,6 +79,12 @@ type Props = {
   children?: ReactNode;
 };
 
+const MIRRORED = new Matrix4().fromArray(MIRROR);
+const IDENTITY = new Matrix4();
+
+/** Where RoomCamera stands, for the picture (target and distance as below). */
+const PICTURE_HOME = new Vector3(0, 1.1, -0.6).addScaledVector(VIEW_DIRECTION, 19);
+
 export function MachineScene({ device, layout: given, barred, glows, arriving = false, children }: Props) {
   const watch = useRef<Object3D>(null);
   const cue = useRef<KeeperCue>({ arrived: -1, departed: -1 });
@@ -95,35 +101,35 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
     const linked = new Set(doors.map((d) => d.iface));
     return (spec?.interfaces ?? []).map((i) => i.name).filter((n) => n !== "lo" && !linked.has(n));
   }, [room, device, doors]);
-  // Doors follow the Map (0111): each door takes a slot on the side facing the machine at its other end.
+  // Doors follow one left-to-right flow with the Map (0118): each door's far-wall slot is in the plan.
+  const plan = useMemo(() => (room ? planOf(room.topology, room.playerDevice, device) : undefined), [room, device]);
   const layout = useMemo(() => {
-    if (!room) return given;
-    const sides = doorSides(room.topology, room.playerDevice, device);
-    // Unplugged interfaces still take wall slots in a hall; keep the near-edge slot for a real return link.
-    for (const iface of empty) if (!sides.has(iface)) sides.set(iface, "left");
-    // Only among slots with openings: hall layouts put near-edge slots first and cut wall arches for the rest.
-    const used = doors.length + empty.length;
-    const { placed, rest } = slotsFor([...doors.map((d) => d.iface), ...empty], sides, given.doorSlots.slice(0, used));
-    const doorSlots = [...placed, ...rest, ...given.doorSlots.slice(used)];
-    return { ...given, doorSlots: doorSlots.filter((s): s is DoorSlot => !!s) };
-  }, [given, room, device, doors, empty]);
-  const leftWallView = doors.some((_, i) => layout.doorSlots[i]?.wall === "left");
-  const viewDirection = useMemo(
-    () => (leftWallView ? new Vector3(-1, 0.9, 1).normalize() : VIEW_DIRECTION),
-    [leftWallView],
-  );
-  const pictureHome = useMemo(() => new Vector3(0, 1.1, -0.6).addScaledVector(viewDirection, 19), [viewDirection]);
+    if (!plan) return given;
+    const slots = slotsOf(plan);
+    const placed = [...doors.map((d) => d.iface), ...empty].map((iface) => slots.get(iface));
+    const taken = (s: DoorSlot) => placed.some((p) => p && p.wall === s.wall && p.at === s.at);
+    const rest = given.doorSlots.filter((s) => !taken(s));
+    // Doors keep their index (Doorway reads slot i for door i); a missing slot takes a spare one.
+    const doorSlots = placed.map((p) => p ?? rest.shift()).filter((s): s is DoorSlot => !!s);
+    return { ...given, doorSlots: [...doorSlots, ...rest] };
+  }, [given, plan, doors, empty]);
+  // A house to the right of its neighbour is mirrored across its diagonal (0118): its arch on the left wall.
+  const mirrored = !!plan?.mirrored;
+  // One view for every room (0116): the open corner, so both far walls and every door are in sight.
+  const viewDirection = VIEW_DIRECTION;
   // The room restores on the win, all at once (playtest 2026-10-13, amending CORE-38's share of
   // failing checks): partial progress relights only the thing that was fixed (its corridor, its
   // plate's light), never the room. A room with no health checks still restores when won.
   const ruinLevel = useSession((s) => (s.status ? (s.status.won ? 0 : 1) : null));
   const first = layout.doorSlots[0];
   // Restoration spreads from the doorway (the door and its corridor are what rooms fix first).
-  const origin: Vec3 = first ? [doorGeometry(first).doorway[0], 1, doorGeometry(first).doorway[2]] : [0, 1, 0];
+  const at = first ? doorGeometry(first).doorway : undefined;
+  const origin: Vec3 = at ? (mirrored ? [at[2], 1, at[0]] : [at[0], 1, at[2]]) : [0, 1, 0];
 
   const hall = device !== "observatory" && layout.doorSlots.length > 2;
-  const frontDoors = layout.doorSlots.slice(0, doors.length).filter((slot) => slot?.wall === "front").length;
-  const pictureId = `r${region}-${device === "observatory" ? "observatory" : hall ? "hall" : "house"}-d${doors.length}${hall ? `-f${frontDoors}` : ""}`;
+  const pictureId = plan
+    ? layoutKey(region, plan)
+    : `r${region}-${device === "observatory" ? "observatory" : hall ? "hall" : "house"}-d${doors.length}`;
   const picture = pictureMode && hasPicture(pictureId);
   const baked = useMemo(() => lampsBaked(layout.placements, layout.extras, layout.kitPieces, region), [layout, region]);
 
@@ -138,95 +144,103 @@ export function MachineScene({ device, layout: given, barred, glows, arriving = 
       />
       <color attach="background" args={[look.background]} />
       <RuinDial level={ruinLevel} origin={origin} />
-      <RoomLights glows={layout.glows ?? glows} region={region} baked={baked || picture} />
       {picture && (
         <Suspense fallback={null}>
-          <RoomPicture id={pictureId} home={pictureHome} />
+          <RoomPicture id={pictureId} home={PICTURE_HOME} />
         </Suspense>
       )}
-      {!picture && (
-        <>
-          <Suspense fallback={null}>
-            <StaticRoom
-              region={region}
-              placements={layout.placements}
-              extras={layout.extras}
-              toCamera={viewDirection}
-            />
-          </Suspense>
-          <Suspense fallback={null}>
-            <KitRoom pieces={layout.kitPieces} region={region} toCamera={viewDirection} />
-          </Suspense>
-          {layout.statues?.map((s) => (
-            <Statue key={`${s.slug}${s.position.join()}`} {...look.carved} {...s} />
-          ))}
-          {layout.gears && <Gears gears={layout.gears} region={region} />}
-          {quality.moonbeams && layout.steam && <Steam vents={layout.steam} />}
-          {quality.moonbeams && layout.beams && (
-            <Moonbeams
-              beams={layout.beams.list}
-              direction={layout.beams.direction}
-              colour={layout.beams.colour}
-              ruined={layout.beams.ruined}
-              restored={layout.beams.restored}
-              pools={layout.beams.pools}
-            />
-          )}
-          {region === 4 && <Haze haze={quality.moonbeams} glass={layout.stainedGlass} />}
-        </>
-      )}
-      {!captureMode && quality.fireflies && look.fireflies && <Fireflies bounds={layout.air} colour={look.fireflies} />}
-      {!captureMode && quality.dust && <Dust bounds={layout.air} colour={look.dust} />}
-      {!captureMode && (
-        <>
-          <Keeper
-            position={layout.keeper}
-            rest={[origin[0], 1.4, origin[2]]}
-            cue={cue}
-            region={region}
-            asleep={asleep}
-          />
-          {/* Ask the keeper why (CORE-25). */}
-          <Html center position={[layout.keeper[0], 1.95, layout.keeper[2]]} zIndexRange={[10, 0]}>
-            <button
-              type="button"
-              className="world-chip"
-              data-tab={TAB.keeper}
-              onClick={() => openPanel({ kind: "keeper", device })}
-            >
-              {voice.keeper.name}
-            </button>
-          </Html>
-          {doors.map((info, i) => {
-            const slot = layout.doorSlots[i];
-            return slot ? (
-              <Doorway
-                key={info.iface}
-                info={info}
-                index={i}
-                slot={slot}
-                keeper={layout.keeper}
-                viewDirection={viewDirection}
-                watch={watch}
-                cue={cue}
+      <group matrix={mirrored ? MIRRORED : IDENTITY} matrixAutoUpdate={false}>
+        <RoomLights
+          glows={[...(layout.glows ?? glows), ...(layout.stubGlows ?? [])]}
+          region={region}
+          baked={baked || picture}
+        />
+        {!picture && (
+          <>
+            <Suspense fallback={null}>
+              <StaticRoom
+                region={region}
+                placements={layout.placements}
+                extras={layout.extras}
+                toCamera={viewDirection}
               />
-            ) : null;
-          })}
-          {/* Doors with no cable (the home router's spare ports): the doorway and its plate, nothing beyond. */}
-          {empty.map((iface, i) => {
-            const slot = layout.doorSlots[doors.length + i];
-            return slot ? <EmptyDoor key={iface} device={device} iface={iface} slot={slot} /> : null;
-          })}
-        </>
-      )}
-      <BossPiece
-        device={device}
-        region={region}
-        slots={layout.doorSlots}
-        doors={doors.length}
-        hall={layout.doorSlots.length > 2}
-      />
-      {children}
+            </Suspense>
+            <Suspense fallback={null}>
+              <KitRoom pieces={layout.kitPieces} region={region} toCamera={viewDirection} />
+            </Suspense>
+            {layout.statues?.map((s) => (
+              <Statue key={`${s.slug}${s.position.join()}`} {...look.carved} {...s} />
+            ))}
+            {layout.gears && <Gears gears={layout.gears} region={region} />}
+            {quality.moonbeams && layout.steam && <Steam vents={layout.steam} />}
+            {quality.moonbeams && layout.beams && (
+              <Moonbeams
+                beams={layout.beams.list}
+                direction={layout.beams.direction}
+                colour={layout.beams.colour}
+                ruined={layout.beams.ruined}
+                restored={layout.beams.restored}
+                pools={layout.beams.pools}
+              />
+            )}
+            {region === 4 && <Haze haze={quality.moonbeams} glass={layout.stainedGlass} />}
+          </>
+        )}
+        {!captureMode && quality.fireflies && look.fireflies && (
+          <Fireflies bounds={layout.air} colour={look.fireflies} />
+        )}
+        {!captureMode && quality.dust && <Dust bounds={layout.air} colour={look.dust} />}
+        {!captureMode && (
+          <>
+            <Keeper
+              position={layout.keeper}
+              rest={[origin[0], 1.4, origin[2]]}
+              cue={cue}
+              region={region}
+              asleep={asleep}
+            />
+            {/* Ask the keeper why (CORE-25). */}
+            <Html center position={[layout.keeper[0], 1.95, layout.keeper[2]]} zIndexRange={[10, 0]}>
+              <button
+                type="button"
+                className="world-chip"
+                data-tab={TAB.keeper}
+                onClick={() => openPanel({ kind: "keeper", device })}
+              >
+                {voice.keeper.name}
+              </button>
+            </Html>
+            {doors.map((info, i) => {
+              const slot = layout.doorSlots[i];
+              return slot ? (
+                <Doorway
+                  key={info.iface}
+                  info={info}
+                  index={i}
+                  slot={slot}
+                  keeper={layout.keeper}
+                  viewDirection={viewDirection}
+                  watch={watch}
+                  cue={cue}
+                />
+              ) : null;
+            })}
+            {/* Doors with no cable (the home router's spare ports): the doorway and its plate, nothing beyond. */}
+            {empty.map((iface, i) => {
+              const slot = layout.doorSlots[doors.length + i];
+              return slot ? <EmptyDoor key={iface} device={device} iface={iface} slot={slot} /> : null;
+            })}
+          </>
+        )}
+        <BossPiece
+          device={device}
+          region={region}
+          slots={layout.doorSlots}
+          doors={doors.length}
+          hall={layout.doorSlots.length > 2}
+        />
+        {children}
+      </group>
       {/* The finishing pass: bloom, tone mapping, the region's grade, vignette (world/post). */}
       {!picture && <RoomPost />}
     </>

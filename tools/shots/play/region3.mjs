@@ -1,6 +1,6 @@
 // Plays every room of Region 3 (Floors 5, 6 and 7) by clicking and typing, as a player would.
 // Usage: node region3.mjs http://127.0.0.1:5173/play
-import { arrived, card, closeConsole, launch, open, tidy, type, won } from "./lib.mjs";
+import { arrived, closeConsole, launch, open, tidy, type, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
 const { browser, page: p, errors } = await launch();
@@ -19,7 +19,7 @@ const fast = async () => {
 };
 const giveAddress = async (cidr) => {
   await tidy(p);
-  await p.click("button.plate >> nth=0");
+  await p.click(".plate-open >> nth=0");
   await p.waitForTimeout(300);
   await p.fill(".addr-form input", cidr);
   await p.click(".addr-form button");
@@ -31,9 +31,9 @@ const scanner = async () => {
   await p.waitForTimeout(300);
 };
 
-// 5.1: the card takes a house address.
+// 5.1: reach the house by its IP address even though its door name changed.
 await open(p, base, "f5.where-not-who");
-await card(p, "10.0.1.7");
+await type(p, "ping -c 1 10.0.1.7");
 await check("5.1");
 
 // 5.2: an address by the plate's slot, then ping.
@@ -50,13 +50,13 @@ for (const ip of ["10.0.1.7", "10.0.1.10", "10.0.1.12", "10.0.1.18"]) {
 }
 await check("5.3");
 
-// 5.B: an address, the square's door to kitchen, the card.
+// 5.B: an address, the square's door to kitchen, the running send.
 await open(p, base, "f5.boss-quiet-street");
 await type(p, "ip addr add 10.0.1.5/24 dev eth0");
 await walk("square");
 await type(p, "ip link set eth1 up");
 await walk("observatory");
-await card(p, "10.0.1.7");
+await type(p, "ping -c 3 10.0.1.7");
 await check("5.B");
 
 // 6.1: the Scanner catches kitchen's announcement and opens it to the message.
@@ -95,7 +95,10 @@ await walk("square");
 await walk("library");
 await type(p, "ip addr del 10.0.1.7/24 dev eth0");
 await type(p, "ip addr add 10.0.1.12/24 dev eth0");
+await walk("square");
+await walk("observatory");
 await fast();
+await type(p, "ping -c 3 10.0.1.7");
 await check("6.3");
 
 // 6.B: the pinned line, and chapel's borrowed address.
@@ -113,7 +116,7 @@ await check("6.B");
 
 // 7.1: off the wrong street, onto the right one, by the slot.
 await open(p, base, "f7.same-street");
-await p.click("button.plate >> nth=0");
+await p.click(".plate-open >> nth=0");
 await p.waitForTimeout(300);
 await p.click(".addr-row button");
 await p.waitForTimeout(500);

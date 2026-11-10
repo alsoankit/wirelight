@@ -3,12 +3,12 @@
  * every house on one street, 10.0.1.0/24. A door's MAC ends in its house number (forge .10 → 0a), except
  * kitchen's, whose door was replaced (5.1): 02:00:00:00:00:17, house still 10.0.1.7.
  */
-import type { AnnouncerSpec, DeviceSpec, LabSpec, MessengerSpec, Topology } from "@wirelight/sim";
+import type { AnnouncerSpec, DeviceSpec, LabSpec, RepeatSendSpec, Topology } from "@wirelight/sim";
 
 export const OBSERVATORY = "02:00:00:00:00:05";
 /** Kitchen's door since last winter (5.1). */
 export const KITCHEN = "02:00:00:00:00:17";
-/** Kitchen's old door: the name the messenger's card still holds in 5.1, and 6.B's pinned line. */
+/** Kitchen's old door, still pinned in 6.B's neighbour ledger. */
 export const LANTERN_OLD = "02:00:00:00:00:07";
 export const LIBRARY = "02:00:00:00:00:0c";
 export const FORGE = "02:00:00:00:00:0a";
@@ -45,8 +45,8 @@ export const DOOR: Record<House, string> = {
 export interface TownOptions {
   /** The houses on the square, in the order of its doors (eth1, eth2…). Kitchen is always first. */
   houses: House[];
-  /** The messenger in the observatory (its card; a house address sends real pings). */
-  messenger?: MessengerSpec;
+  /** Background frames the room starts at the observatory or on a house. */
+  repeatSends?: RepeatSendSpec[];
   /** Kitchen's answer to an old-style lab frame written to its door (5.1). */
   lanternLab?: LabSpec;
   /** Kitchen's announcement, the sealed letter since Floor 2 (6.1). */
@@ -66,7 +66,6 @@ export function town(o: TownOptions): Topology {
   });
   const observatory: DeviceSpec = {
     ...host("observatory", OBSERVATORY, IP.observatory),
-    ...(o.messenger ? { messenger: { dev: "eth0", ...o.messenger } } : {}),
   };
   const houses: DeviceSpec[] = o.houses.map((h) => {
     const d = host(h, DOOR[h], IP[h]);
@@ -90,5 +89,5 @@ export function town(o: TownOptions): Topology {
     a: { device: id, iface: "eth0" },
     b: { device: "square", iface: `eth${i}` },
   }));
-  return { devices: [observatory, square, ...houses], links };
+  return { devices: [observatory, square, ...houses], links, ...(o.repeatSends ? { repeatSends: o.repeatSends } : {}) };
 }

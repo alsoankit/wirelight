@@ -7,7 +7,7 @@
  */
 
 /**
- * Things a room picture can point at. `glass` is the planning table and the Map: it keeps the Map's old
+ * Things a room picture can point at. `glass` is the Map: it keeps the Map's old
  * name, the one its callouts are saved under (apps/web/public/guide/marks.json).
  */
 export type GuideTarget = "door" | "plate" | "keeper" | "glass" | "gate" | "workbench" | "cable";
@@ -56,7 +56,6 @@ export const guide: GuideTopic[] = [
         { target: "door", label: "A door. A cable runs from here to another room." },
         { target: "plate", label: "The door's plate" },
         { target: "keeper", label: "The keeper, who handles every message" },
-        { target: "glass", label: "The planning table" },
       ],
     },
     body: [
@@ -75,14 +74,13 @@ export const guide: GuideTopic[] = [
         { target: "door", label: "Doors: archways in the back and left walls" },
         { target: "plate", label: "A plate beside every door" },
         { target: "keeper", label: "The keeper, in the middle of the room" },
-        { target: "glass", label: "The planning table (your room only)" },
-        { target: "workbench", label: "The workbench (some rooms)" },
+        { target: "workbench", label: "A tool in some rooms" },
       ],
     },
     body: [
       "You see each room from above, with the front wall cut away so the whole room fits on screen. Every room of the same kind is laid out the same way, so you only have to learn it once.",
       "Doors are archways in the back and left walls, and each one has a plate beside it. The keeper, a hooded figure with a kitchen, stands in the middle of the room.",
-      "Your own machine is the observatory, the room you woke up in. It has a few extra things: a planning table, and in some rooms a workbench and a messenger.",
+      "Your own machine is the observatory, the room you woke up in. Some rooms hold tools you meet later.",
     ],
   },
   {
@@ -300,20 +298,20 @@ export const guide: GuideTopic[] = [
   // ── Floor 2 ─────────────────────────────────────────────────────────────────────────────────
   {
     id: "workbench",
-    title: "The workbench",
+    title: "The Frame builder",
     blurb: "Building a message by hand",
     visual: {
       kind: "room",
       click: "workbench",
       marks: [
-        { target: "workbench", label: "The workbench: click it to build a frame" },
+        { target: "workbench", label: "The Frame builder: click it to build a frame" },
         { target: "door", label: "Your frame leaves through here" },
       ],
     },
     from: "f2.first-light",
     body: [
-      "The workbench builds a frame by hand: the envelope a message travels in across a cable. Write who it's for, add a message, then seal it and send it.",
-      "The bench keeps what you wrote, so you can come back and change it.",
+      "The Frame builder makes the envelope a message travels in across a cable. Set who it's for and add a message, then send it.",
+      "The builder keeps what you wrote, so you can come back and change it.",
     ],
   },
   {
@@ -344,13 +342,13 @@ export const guide: GuideTopic[] = [
     ],
   },
   {
-    id: "messenger",
-    title: "The messenger and its card",
-    blurb: "A small machine that sends messages",
+    id: "repeat-send",
+    title: "Repeat a frame",
+    blurb: "Send the same frame until you stop it",
     from: "f2.wrong-name",
     body: [
-      "The messenger is a small machine in the observatory. It holds an address card, and it sends a message to whatever is written on the card, again and again.",
-      "Click the messenger's card to read it, or to write something new on it. The messenger uses the new card from its next message on.",
+      "The Frame builder can send a frame every two seconds. Choose its destination and message, then select Keep sending.",
+      "Each repeat uses the same destination and message. Stop a send in the running list when you no longer need it. Several sends can run at once.",
     ],
   },
   {
@@ -369,7 +367,7 @@ export const guide: GuideTopic[] = [
     blurb: "Speaking to a machine",
     visual: {
       kind: "console",
-      caption: "After you send from the workbench, the terminal shows the command it ran.",
+      caption: "After you send from the Frame builder, the terminal shows the command it ran.",
       lines: [
         { text: 'lab send-frame --to 02:00:00:00:00:07 --msg "hello"', tone: "echo" },
         { text: "lab tools exist only in Wirelight. Real Linux doesn't have this command.", tone: "note" },

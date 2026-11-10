@@ -55,7 +55,7 @@ test("a first visit reaches Floor 1 and wins its first room", async ({ page }) =
   await tidy(page);
   await page.getByRole("button", { name: /kitchen's room/ }).click();
   await tidy(page);
-  await page.locator("button.plate").first().click();
+  await page.locator(".plate-open").first().click();
   await expect(page.locator(".debrief")).toBeVisible({ timeout: 90_000 });
 
   // Back later: the game goes on with the next room, with nothing from the first visit again.

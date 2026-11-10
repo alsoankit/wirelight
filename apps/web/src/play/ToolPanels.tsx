@@ -6,13 +6,14 @@ import { useSession } from "../engine/store";
 import { KeeperPanel } from "./KeeperPanel";
 import { noteMoment } from "./momentRules";
 import { arrivalText, plainSummary, sayDoor } from "./names";
+import { useMachineLabel } from "./roles";
 import { ScannerPanel } from "./ScannerPanel";
 
 /** One empty list, so selectors return the same value when there's nothing (no render loop). */
 const NONE: never[] = [];
 
-// The robot's tools as panels (UI-03): the workbench (CORE-34), the messenger's card (CORE-35) and
-// Captures (CORE-19, CORE-20). Every action runs a real command or a catch through the engine;
+// The robot's tools as panels (UI-03): the Frame builder (CORE-34) and Captures (CORE-19, CORE-20).
+// Every action runs a real command or a catch through the engine;
 // acting closes the panel so the player watches what happens (UI-04); drafts are kept while closed.
 
 const draft = { to: "", msg: "hello", dev: "" };
@@ -22,43 +23,123 @@ function useRoom() {
   return roomId ? roomById(roomId) : undefined;
 }
 
+const BROADCAST = "ff:ff:ff:ff:ff:ff";
+
+/**
+ * The doors the player has met, so the To field can offer them: doors that sent the player something,
+ * and doors whose plates the player has seen (a room stood in, or `ip link` run on its machine). Never
+ * the whole floor: finding a door's name is what some rooms teach. The player's own doors are left out.
+ */
+function useKnownDoors(device: string | undefined) {
+  const roomId = useSession((s) => s.roomId);
+  const events = useSession((s) => s.events);
+  const visited = useSession((s) => s.visited);
+  return useMemo(() => {
+    const room = roomId ? roomById(roomId) : undefined;
+    if (!room || !device) return [];
+    const seen = new Set<string>();
+    const looked = new Set(visited);
+    for (const e of events) {
+      if (e.kind === "app.deliver" && e.device === device) seen.add(e.from.toLowerCase());
+      if (e.kind === "cmd.exec" && e.exitCode === 0 && /^ip (-\S+ )*link( show| list)?(\s|$)/.test(e.line))
+        looked.add(e.device);
+    }
+    const out: { device: string; iface: string; mac: string }[] = [];
+    for (const d of room.topology.devices) {
+      if (d.id === device) continue;
+      for (const i of d.interfaces) {
+        if (i.name === "lo" || !i.mac) continue;
+        if (looked.has(d.id) || seen.has(i.mac.toLowerCase())) out.push({ device: d.id, iface: i.name, mac: i.mac });
+      }
+    }
+    return out;
+  }, [roomId, device, events, visited]);
+}
+
 function WorkbenchPanel() {
   const room = useRoom();
   const exec = useSession((s) => s.exec);
   const close = useSession((s) => s.closePanel);
+  const repeating = useSession((s) => s.status?.repeatingSends ?? NONE);
+  const label = useMachineLabel();
+  const known = useKnownDoors(room?.playerDevice);
   const [to, setTo] = useState(draft.to);
   const [msg, setMsg] = useState(draft.msg);
   const [dev, setDev] = useState(draft.dev);
+  const [picking, setPicking] = useState(false);
   const [refused, setRefused] = useState(false);
   if (!room) return null;
-  const doors = room.topology.devices.find((d) => d.id === room.playerDevice)?.interfaces.map((i) => i.name) ?? [];
-  const send = () => {
-    Object.assign(draft, { to, msg, dev });
+  const doors =
+    room.topology.devices
+      .find((d) => d.id === room.playerDevice)
+      ?.interfaces.map((i) => i.name)
+      .filter((n) => n !== "lo") ?? [];
+  // Only rooms whose answer sends to everyone get the button (they come after broadcast is taught).
+  const needsBroadcast = JSON.stringify(room.solution).toLowerCase().includes(`--to ${BROADCAST}`);
+  const send = (repeat = false, target = to.trim()) => {
+    Object.assign(draft, { to: target === BROADCAST ? to : target, msg, dev });
     const text = msg.replaceAll('"', "'");
-    const line = `lab send-frame${dev ? ` --dev ${dev}` : ""}${to.trim() ? ` --to ${to.trim()}` : ""} --msg "${text}"`;
+    const line = `lab send-frame${dev ? ` --dev ${dev}` : ""}${target ? ` --to ${target}` : ""} --msg "${text}"${repeat ? " --repeat" : ""}`;
     void exec(room.playerDevice, line, "click");
-    // The bench refuses a frame with no name to go to (the command fails, and says so).
-    if (!to.trim()) return setRefused(true);
-    close();
+    // The builder refuses a frame with no name to go to (the command fails, and says so).
+    if (!target) return setRefused(true);
+    if (!repeat) close();
   };
   return (
-    <section className="panel" aria-label={voice.workbench.title}>
+    <section className="panel frame-builder-panel" aria-label={voice.workbench.title}>
       <h2>{voice.workbench.title}</h2>
       <p>{voice.workbench.about}</p>
-      <label className="field">
-        <span>{voice.workbench.to}</span>
-        <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="02:00:00:00:00:00" spellCheck={false} />
-      </label>
-      {doors.length > 1 && (
-        <label className="field">
-          <span>{voice.workbench.door}</span>
-          <select value={dev || doors[0]} onChange={(e) => setDev(e.target.value)}>
-            {doors.map((d) => (
-              <option key={d}>{d}</option>
+      <div className="field">
+        <label htmlFor="frame-to">{voice.workbench.to}</label>
+        <div className="frame-to">
+          <input
+            id="frame-to"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            placeholder="02:00:00:00:00:00"
+            spellCheck={false}
+            autoComplete="off"
+          />
+          <button
+            type="button"
+            className="frame-to-pick"
+            aria-label={voice.workbench.pick}
+            aria-expanded={picking}
+            onClick={() => setPicking(!picking)}
+          >
+            ▾
+          </button>
+        </div>
+        {picking && (
+          <ul className="frame-to-list">
+            {known.length === 0 && <li className="panel-note">{voice.workbench.noneKnown}</li>}
+            {known.map((k) => (
+              <li key={k.mac}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTo(k.mac);
+                    setPicking(false);
+                  }}
+                >
+                  <span>
+                    {label(k.device)} · {k.iface}
+                  </span>
+                  <code>{k.mac}</code>
+                </button>
+              </li>
             ))}
-          </select>
-        </label>
-      )}
+          </ul>
+        )}
+      </div>
+      <label className="field">
+        <span>{voice.workbench.door}</span>
+        <select value={dev || doors[0]} onChange={(e) => setDev(e.target.value)}>
+          {doors.map((d) => (
+            <option key={d}>{d}</option>
+          ))}
+        </select>
+      </label>
       <label className="field">
         <span>{voice.workbench.message}</span>
         <input
@@ -71,59 +152,37 @@ function WorkbenchPanel() {
       </label>
       {refused && <p className="panel-note">{voice.workbench.refused}</p>}
       <div className="panel-actions">
-        <button type="button" onClick={send}>
+        <button type="button" onClick={() => send()}>
           {voice.workbench.send}
         </button>
+        {needsBroadcast && (
+          <button type="button" onClick={() => send(false, BROADCAST)}>
+            {voice.workbench.broadcast}
+          </button>
+        )}
+        <button type="button" onClick={() => send(true)}>
+          {voice.workbench.repeat}
+        </button>
         <button type="button" className="quiet" onClick={close}>
           {voice.captures.close}
         </button>
       </div>
-    </section>
-  );
-}
-
-function CardPanel() {
-  const room = useRoom();
-  const cards = useSession((s) => (room ? (s.status?.cards[room.playerDevice] ?? NONE) : NONE));
-  const exec = useSession((s) => s.exec);
-  const close = useSession((s) => s.closePanel);
-  const [values, setValues] = useState<string[]>(cards);
-  if (!room) return null;
-  const write = (i: number) => {
-    const line =
-      cards.length > 1
-        ? `lab card --messenger ${i + 1} --to ${values[i]?.trim()}`
-        : `lab card --to ${values[i]?.trim()}`;
-    close();
-    void exec(room.playerDevice, line, "click");
-  };
-  return (
-    <section className="panel" aria-label={voice.card.title}>
-      <h2>{voice.card.title}</h2>
-      <p>{voice.card.about}</p>
-      {cards.map((c, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: the cards are numbered by their place on the desk
-        <div key={i} className="field">
-          <span>{cards.length > 1 ? fill(voice.card.numbered, { n: String(i + 1) }) : voice.card.name}</span>
-          <input
-            aria-label={cards.length > 1 ? fill(voice.card.numbered, { n: String(i + 1) }) : voice.card.name}
-            value={values[i] ?? ""}
-            placeholder={c || voice.card.blank}
-            onChange={(e) => setValues((v) => v.map((x, j) => (j === i ? e.target.value : x)))}
-            spellCheck={false}
-          />
-          <div className="panel-actions">
-            <button type="button" onClick={() => write(i)} disabled={!values[i]?.trim()}>
-              {voice.card.write}
-            </button>
-          </div>
-        </div>
-      ))}
-      <div className="panel-actions">
-        <button type="button" className="quiet" onClick={close}>
-          {voice.captures.close}
-        </button>
-      </div>
+      {repeating.length > 0 && (
+        <ul className="repeat-sends" aria-label={voice.workbench.running}>
+          {repeating.map((item) => (
+            <li key={item.id}>
+              <span>{`${item.id}: ${sayDoor(item.to, room)} · ${item.dev ?? doors[0]}`}</span>
+              <button
+                type="button"
+                className="quiet"
+                onClick={() => void exec(room.playerDevice, `lab send-frame --stop ${item.id}`, "click")}
+              >
+                {voice.workbench.stop}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
@@ -578,7 +637,6 @@ export function CapturesButton() {
 export function ToolPanels() {
   const panel = useSession((s) => s.panel);
   if (panel?.kind === "workbench") return <WorkbenchPanel />;
-  if (panel?.kind === "card") return <CardPanel />;
   if (panel?.kind === "captures") return <CapturesPanel open={panel.open} />;
   if (panel?.kind === "board" && panel.board === "routes")
     return <RoutesPanel device={panel.device} execId={panel.execId} />;

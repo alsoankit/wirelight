@@ -65,12 +65,12 @@ export const REGION_1_CARDS: Card[] = [
     title: "MAC address",
     text: "Every door has a name like 02:00:00:00:00:07. It's written on the plate, and it's how frames find the right door.",
   },
-  { id: "workbench", floor: 2, title: "Workbench", text: "A table for building a frame by hand." },
+  { id: "workbench", floor: 2, title: "Frame builder", text: "A carved stone stand for building and sending frames." },
   {
-    id: "messenger",
+    id: "repeat-send",
     floor: 2,
-    title: "Messenger",
-    text: "A small machine that sends the same message over and over, to the name on its card.",
+    title: "Repeat a frame",
+    text: "Keep sending repeats the same frame every two seconds until you stop it.",
   },
   {
     id: "captures",
