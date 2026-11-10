@@ -114,7 +114,8 @@ export function bakedLightNodes(maps: Lightmaps) {
   const at = uv(1);
   const light = mix(texture(maps.lit, at).rgb, texture(maps.ruin, at).rgb, ruinHere)
     .mul(RANGE)
-    .mul(mix(float(1), float(0.62), ruinHere));
+    // In ruin the baked moon is held back so its shadows stay soft against the moonlit fill (RoomLights).
+    .mul(mix(float(1), float(0.55), ruinHere));
   const bakedAo = texture(maps.ao, at).r.max(float(0.25));
   const ao = mix(float(1), bakedAo, AO_STRENGTH);
   return { light, ao };

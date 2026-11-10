@@ -95,8 +95,9 @@ try {
       const png = join(out, `${id}-${state}.png`);
       const webp = join(out, `${id}-${state}.webp`);
       await page.screenshot({ path: png });
-      // Ruin stays cool, but lift the deepest shadows enough for room details to remain legible.
-      const clearer = state === "ruin" ? ["-level", "6%,58%,1.05", "-modulate", "100,112"] : [];
+      // Ruin stays cool and dim, its shadows lifted gently (no black point: crushing it made the ruined
+      // rooms harsh and patchy, owner 2026-11-10).
+      const clearer = state === "ruin" ? ["-level", "0%,90%,1.18", "-modulate", "100,106"] : [];
       execFileSync("magick", [png, ...clearer, "-quality", "72", "-define", "webp:method=6", webp]);
       await unlink(png);
       console.log(`${id} ${state} ${(await stat(webp)).size} bytes`);

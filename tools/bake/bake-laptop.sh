@@ -5,6 +5,7 @@
 #   tools/bake/bake-laptop.sh --commit        the same, and commit the new bake if every check passes
 #   tools/bake/bake-laptop.sh --quality final --only r1-house-d1 --no-import --work /tmp/x   (a quick test)
 #   tools/bake/bake-laptop.sh --regions 1,2   only those regions' layouts (the others' bakes are kept)
+#   tools/bake/bake-laptop.sh --fresh         bake everything again (after a lighting change in bake.py)
 #
 # Steps: export the layouts from the rooms as they are in this checkout → bake them in Blender (CPU)
 # → verify every map against the export → import into apps/web/public/bake → pnpm check, test and
@@ -17,6 +18,7 @@ repo="$(cd "$(dirname "$0")/../.." && pwd)"
 quality=best
 only=""
 regions=""
+fresh_start=0
 work="$repo/assets-src/bake/laptop"
 import=1
 commit=0
@@ -25,6 +27,7 @@ while [[ $# -gt 0 ]]; do
     --quality) quality="$2"; shift 2 ;;
     --only) only="$2"; shift 2 ;;
     --regions) regions="$2"; shift 2 ;;
+    --fresh) fresh_start=1; shift ;;
     --work) work="$2"; shift 2 ;;
     --no-import) import=0; shift ;;
     --commit) commit=1; shift ;;
@@ -67,6 +70,8 @@ if [[ -n "$regions" ]]; then
   ' "$fresh" "$regions"
   say "Regions $regions only."
 fi
+# --fresh: the lighting itself changed (bake.py), so nothing earlier can be kept.
+[[ "$fresh_start" == 1 ]] && rm -f "$work/quality"
 # Throw away only the layouts whose geometry changed (each has a signature); all of them if the
 # quality changed or this is the first run.
 if [[ -f "$work/in/layouts.json" && -f "$work/quality" && "$(cat "$work/quality")" == "$quality" && -d "$work/out" ]]; then

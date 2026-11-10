@@ -5,11 +5,14 @@
 #
 #   tools/bake/overnight.sh            Regions 1 and 2 (0119: get them right first)
 #   tools/bake/overnight.sh 1,2,3      other regions
+#   tools/bake/overnight.sh 1,2 --fresh   bake them all again (after a lighting change in bake.py)
 #
 # Logged to assets-src/bake/overnight.log (and the bake itself to assets-src/bake/laptop/bake.log).
 set -uo pipefail
 
 regions="${1:-1,2}"
+fresh=()
+[[ "${2:-}" == "--fresh" ]] && fresh=(--fresh)
 repo="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$repo"
 log="assets-src/bake/overnight.log"
@@ -30,7 +33,7 @@ say "Overnight bake: regions $regions, branch $(git branch --show-current) at $(
 started=$(date +%s)
 
 # 1. Bake (export, Blender at best quality, verify, import keeping the other regions, checks, commit).
-if ! tools/bake/bake-laptop.sh --quality best --regions "$regions" --commit; then
+if ! tools/bake/bake-laptop.sh --quality best --regions "$regions" "${fresh[@]}" --commit; then
   say "The bake stopped: see assets-src/bake/laptop/bake.log. Run '$0 $regions' again to resume."; exit 1
 fi
 

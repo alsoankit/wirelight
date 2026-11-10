@@ -251,7 +251,10 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
   const label = fill(voice.doorway.go, { door: info.iface, name: peer });
   // Number keys 1–9 go through the doors in order (CORE-47).
   const shortcut = index < 9 ? String(index + 1) : undefined;
+  // A blocked gate (a sealed room, or a spare way while its cable is out) can't be stepped through at
+  // all, not even into its corridor (owner, 2026-11-10); its chip says why.
   const enter = () => {
+    if (!walkable) return;
     void exec(info.device, `ip link show ${info.iface}`, "click");
     stepIntoCorridor(info.link, info.device);
   };
@@ -259,7 +262,7 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
   return (
     <>
       <Cable slot={slot} state={corridor} />
-      <GateStep slot={slot} name={peer} onStep={enter} />
+      {walkable && <GateStep slot={slot} name={peer} onStep={enter} />}
       <Messages
         device={info.device}
         link={info.link}
@@ -332,18 +335,20 @@ export function Doorway({ info, index, slot, keeper, viewDirection, watch, cue }
           </span>
         )}
       </Html>
-      <Html center position={[g.doorway[0], 1.2, g.doorway[2]]} zIndexRange={[9, 0]}>
-        <button
-          type="button"
-          className="corridor-gate-hit"
-          data-tab={TAB.door + index}
-          aria-label={fill(voice.corridor.step, { name: peer })}
-          aria-keyshortcuts="Enter"
-          onClick={enter}
-        >
-          <span>{fill(voice.corridor.step, { name: peer })}</span>
-        </button>
-      </Html>
+      {walkable && (
+        <Html center position={[g.doorway[0], 1.2, g.doorway[2]]} zIndexRange={[9, 0]}>
+          <button
+            type="button"
+            className="corridor-gate-hit"
+            data-tab={TAB.door + index}
+            aria-label={fill(voice.corridor.step, { name: peer })}
+            aria-keyshortcuts="Enter"
+            onClick={enter}
+          >
+            <span>{fill(voice.corridor.step, { name: peer })}</span>
+          </button>
+        </Html>
+      )}
     </>
   );
 }

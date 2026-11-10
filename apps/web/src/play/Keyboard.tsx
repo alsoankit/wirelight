@@ -35,7 +35,8 @@ function goThroughDoor(n: number): boolean {
 /** Shift and a number key: into that door's corridor, stopping there (0081). */
 function stepIntoDoorCorridor(n: number): boolean {
   const d = door(n);
-  if (!d) return false;
+  // A sealed room's gate is closed, corridor and all (owner, 2026-11-10).
+  if (!d?.enterable) return false;
   stepIntoCorridor(d.link, d.device);
   return true;
 }
