@@ -449,8 +449,8 @@ export function HouseTraits({ device, region }: { device: string; region: Region
       {parts.map((p) => (
         <mesh key={p.name} geometry={p.geometry} material={regionMaterial(p.name, region)} />
       ))}
-      {/* Its name by the door. */}
-      <Html center position={[-1.55, 2.35, -3.85]} zIndexRange={[5, 0]}>
+      {/* Its name on the wall, low and clear of the door's chip and plate (also when mirrored). */}
+      <Html center position={[-2.4, 1.65, -3.85]} zIndexRange={[5, 0]}>
         <span className="house-plaque">{fill(town.plaque, { name: device })}</span>
       </Html>
     </>

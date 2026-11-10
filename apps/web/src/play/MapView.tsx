@@ -126,15 +126,6 @@ export function FloorMap({
       role="img"
       aria-label={memory ? voice.memory.map : voice.map.floorMap}
     >
-      {/* Each room's floor, as the room view shows it (0120). */}
-      {[...projected.tiles].map(([id, pts]) => (
-        <polygon
-          key={`tile-${id}`}
-          points={pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}
-          className="map-tile"
-          data-here={!memory && !inCorridor && id === here ? "yes" : undefined}
-        />
-      ))}
       {room.topology.links.map((l) => {
         const k = bends.get(l.id);
         if (!k) return null;

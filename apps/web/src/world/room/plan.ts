@@ -1,5 +1,5 @@
 import type { Topology } from "@wirelight/sim";
-import type { DoorSlot, Wall } from "./layout";
+import { BESIDE, type DoorSlot, type Wall } from "./layout";
 
 // One left-to-right flow for the whole floor (decision 0118). On screen the back wall is the room's
 // right half and the left wall its left half, so every cable reads left to right: if B is to the
@@ -204,6 +204,13 @@ export function slotsOf(p: DevicePlan): Map<string, DoorSlot> {
   } else {
     // A house's one arch is its back arch; mirrored, that arch is on the left wall (see `MIRROR`).
     put("back", [...p.back, ...p.left], [0]);
+  }
+  // Each plate beside its arch, on the near side, if the wall goes on that far and no arch is there;
+  // otherwise above the arch (owner, 2026-11-10: plates must not cover the gate or sit under the HUD).
+  const used = [...out.values()];
+  for (const [iface, s] of out) {
+    const room = s.at + BESIDE <= 3.6 && !used.some((o) => o.wall === s.wall && o.at > s.at && o.at - s.at < 2.5);
+    out.set(iface, { ...s, label: room ? "beside" : "above" });
   }
   return out;
 }

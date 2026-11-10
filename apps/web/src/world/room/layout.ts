@@ -22,6 +22,11 @@ export type DoorSlot = {
   at: number;
   /** Where its plate hangs: beside the arch (default) or above a narrow doorway (halls). */
   plate?: "beside" | "above";
+  /**
+   * Where the door's name plate hangs (room/plan.ts decides): beside the arch on its near side, clear of
+   * the gate's click area, or above it, over the chip, where a neighbouring arch leaves no room.
+   */
+  label?: "beside" | "above";
 };
 
 /** A light in the room that relights as restoration reaches it (runes, lamps, lanterns, windows). */
@@ -87,15 +92,21 @@ const FACE = -4;
 export const GATE_TOP = 2.75;
 export const CHIP_Y = 2.98;
 export const PLATE_Y = 3.45;
+/** A plate beside its arch: this far along the wall from the arch's centre, at this height. */
+export const BESIDE = 1.85;
+export const BESIDE_Y = 2.2;
 
 /** Where a doorway is, where its corridor goes, and where its plate hangs. */
 export function doorGeometry(slot: DoorSlot) {
   const out: Vec3 = slot.wall === "back" ? [0, 0, -1] : [-1, 0, 0];
   const doorway: Vec3 = slot.wall === "back" ? [slot.at, 0.9, FACE] : [FACE, 0.9, slot.at];
   const corridorEnd: Vec3 = [doorway[0] + out[0] * 1.8, 0.35, doorway[2] + out[2] * 1.8];
-  // The plate hangs above the arch, over the door's chip, so neither covers the gate's click area
-  // (owner, 2026-11-10); the same for every room, so a door is always read the same way.
-  const plate: Vec3 = slot.wall === "back" ? [slot.at, PLATE_Y, FACE + 0.15] : [FACE + 0.15, PLATE_Y, slot.at];
+  // The plate never covers the gate's click area (owner, 2026-11-10): beside the arch on its near side
+  // (lower on screen, clear of the mission card), or above it over the chip between close hall arches.
+  const beside = slot.label === "beside";
+  const along = beside ? slot.at + BESIDE : slot.at;
+  const y = beside ? BESIDE_Y : PLATE_Y;
+  const plate: Vec3 = slot.wall === "back" ? [along, y, FACE + 0.15] : [FACE + 0.15, y, along];
   // A loose cable end lies on the floor just inside the doorway.
   const looseEnd: Vec3 = slot.wall === "back" ? [slot.at + 0.7, 0.06, FACE + 0.9] : [FACE + 0.9, 0.06, slot.at - 0.7];
   return { out, doorway, corridorEnd, plate, looseEnd };
