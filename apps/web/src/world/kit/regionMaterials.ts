@@ -129,7 +129,9 @@ const REGION_4: Record<string, Swatch> = {
   Sandstone: { ruined: "#5c5e64", restored: "#C2A57E", roughness: 0.95, aged: true },
   // Code-made walls beside the kit's (the crossing halls' doorway bays): laid in the same courses as
   // the kit's trim sheet, as dark as its stone reads, so a doorway bay is wall, not a flat panel.
-  Ashlar: { ruined: "#505257", restored: "#8f7b60", roughness: 0.95, aged: true, coursed: [0.2, 0.42] },
+  // Ruined, it read a quarter of the kit brick's brightness beside it (measured in the moonlit
+  // pictures, 2026-11-11): lifted to read just under the brick, as it does restored.
+  Ashlar: { ruined: "#73757c", restored: "#8f7b60", roughness: 0.95, aged: true, coursed: [0.2, 0.42] },
   Leaf_Texture: { ruined: "#505259", restored: "#b69a74", roughness: 0.95, aged: true },
   Green: { ruined: "#505259", restored: "#b69a74", roughness: 0.95, aged: true },
   Earth: { ruined: "#1f2128", restored: "#2e261e", roughness: 1, aged: true },
