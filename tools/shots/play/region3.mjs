@@ -1,5 +1,7 @@
 // Plays every room of Region 3 (Floors 5, 6 and 7) by clicking and typing, as a player would.
 // Usage: node region3.mjs http://127.0.0.1:5173/play
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { arrived, closeConsole, launch, open, tidy, type, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
@@ -68,7 +70,7 @@ await p.waitForSelector(".catch-list li", { timeout: 15000 });
 await p.click(".catch-list li >> nth=0 >> text=Message");
 await p.waitForTimeout(500);
 await p.screenshot({
-  path: "/tmp/r3-scanner.png",
+  path: join(tmpdir(), "r3-scanner.png"),
 });
 await check("6.1");
 

@@ -48,6 +48,7 @@ Only assets that allow commercial use and redistribution are used: CC0, CC BY, M
 
 - **3D art:** Quaternius' modular ruins, nature, village, props and turret packs, and SigilsVault's Modular Cathedral Kit (all CC0), restyled per region; statues and decoration from museum and artist scans (CC0 and CC BY).
 - **Sound:** Kenney's audio packs (CC0); other effects and ambience synthesised for Wirelight with FFmpeg.
+- **Music:** calm, human-made tracks from OpenGameArt (CC0 and CC BY), being added now.
 - **Fonts:** Inter, JetBrains Mono and Cinzel (SIL Open Font License).
 - **Libraries:** React, three.js, React Three Fiber, drei, Zustand, xterm.js, Comlink, Vite, Biome, Vitest, Playwright and others, each under its own MIT or Apache-2.0 licence.
 
@@ -79,7 +80,16 @@ http://localhost:5173/play?room=prologue&autoplay=1&until=game&speed=1&pace=1
 **Play-through checks:** `node tools/shots/play/region1.mjs http://localhost:5173/play` (and `region2` to `region4`) plays every room of a region in Chrome, as a player would, and reports each win. Set `CHROME` to a Chrome binary to play on the GPU; without it, Playwright's own Chromium plays, drawing in software.
 
 ## Status
-All 40 first-release rooms and the four secret rooms are playable. In progress: rooms drawn as pictures behind the live scene for speed, every door placed to face its corridor, room dressing, and the final light bake. Then music, voices and playtests with real beginners.
+All 40 first-release rooms and the four secret rooms are playable from start to finish, with baked light, ambience and sound effects. Next: music, voices, and playtests with real beginners.
+
+## How it was made
+Wirelight is made by **Ankit Kumar**, who designed the game, wrote its design and directs every decision.
+It was co-developed with **[Claude](https://www.anthropic.com/claude)**, Anthropic's AI model, which wrote much of the code, the simulator's tests against real Linux, and the build and bake tools, working from that design.
+
+## Contributing
+Bug reports and ideas are welcome as issues. If you'd like to send a change, open an issue first so we can agree on it; every pull request must pass `pnpm check`, `pnpm test` and `pnpm rooms:validate`. Room text follows the game's rules: plain modern English, one new idea per room, and nothing used before it's taught.
 
 ## Licence
-Wirelight's own code and art: © Ankit Kumar, all rights reserved. Third-party assets keep their own licences, listed in [`CREDITS.md`](CREDITS.md).
+Wirelight's own code, text, tools and the art and sounds made for it are released under the [MIT License](LICENSE), © 2026 Ankit Kumar.
+
+Third-party assets (3D models, textures, sound packs, fonts, icons and music) are **not** covered by that licence: each keeps its own (CC0, CC BY, the Quaternius Asset License or OFL), listed with links in [`CREDITS.md`](CREDITS.md), with records in `assets-src/licenses/`. If you reuse them, get them from their authors and keep their credits.

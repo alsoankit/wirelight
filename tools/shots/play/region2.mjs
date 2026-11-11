@@ -1,5 +1,7 @@
 // Plays every room of Region 2 (Floors 3 and 4) by clicking and typing, as a player would.
 // Usage: node region2.mjs http://127.0.0.1:5173/play
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { arrived, bench, closeConsole, launch, open, repeatSend, tidy, type, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
@@ -50,7 +52,7 @@ const sortByHand = async (mac, out, learn = true) => {
 await open(p, base, "f3.many-doors");
 await walk("hall");
 await p.screenshot({
-  path: "/tmp/r2-hall.png",
+  path: join(tmpdir(), "r2-hall.png"),
 });
 await p.click("text=Keeper's desk");
 await sortByHand("02:00:00:00:00:05", "flood");

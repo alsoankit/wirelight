@@ -1,5 +1,5 @@
 // Capture one observatory, house, hall and corridor in each region, ruined and restored.
-// Usage: node tools/shots/palace-contact.mjs http://127.0.0.1:5173/play [output-directory]
+// Usage: node tools/shots/palace-contact.mjs http://127.0.0.1:5173/play <output-directory>
 import { execFileSync } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -7,8 +7,9 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 
-const [base, out = "notes/art/contact/2026-11-09"] = process.argv.slice(2);
-if (!base) throw new Error("Pass the /play base URL, for example http://127.0.0.1:5173/play");
+const [base, out] = process.argv.slice(2);
+if (!base || !out)
+  throw new Error("Usage: node tools/shots/palace-contact.mjs http://127.0.0.1:5173/play <output-directory>");
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const require = createRequire(join(root, "apps/web/package.json"));
 const { createServer } = await import(require.resolve("vite"));

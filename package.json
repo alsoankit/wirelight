@@ -1,5 +1,6 @@
 {
   "name": "wirelight",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@12.10.1",

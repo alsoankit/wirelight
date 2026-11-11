@@ -1,5 +1,7 @@
 // Plays every room of Region 4 (Floors 8 and 9) by clicking and typing, as a player would.
 // Usage: node region4.mjs http://127.0.0.1:5173/play
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { arrived, closeConsole, launch, open, tidy, type, waitPrompt, won } from "./lib.mjs";
 
 const [base] = process.argv.slice(2);
@@ -35,7 +37,7 @@ const walk = async (...rooms) => {
             .filter((l) => /intercepts|visible|stable|outside/.test(l))
             .join(" | "),
         );
-        await p.screenshot({ path: `/tmp/walk-${to}.png` }).catch(() => {});
+        await p.screenshot({ path: join(tmpdir(), `walk-${to}.png`) }).catch(() => {});
         throw new Error(`walk: no way through to ${to} after two minutes: ${why}`);
       }
     }
@@ -85,7 +87,7 @@ await scanner();
 await p.click(".panel button:has-text('Start')");
 await p.waitForTimeout(4000);
 await p.screenshot({
-  path: "/tmp/r4-capture.png",
+  path: join(tmpdir(), "r4-capture.png"),
 });
 await p.click(".panel button:has-text('Stop')");
 await p.click(".panel .quiet");
@@ -150,7 +152,7 @@ await p.fill(".panel .addr-form input[type=number] >> nth=1", "3");
 await p.click(".panel button:has-text('Compare')");
 await p.waitForTimeout(800);
 await p.screenshot({
-  path: "/tmp/r4-compare.png",
+  path: join(tmpdir(), "r4-compare.png"),
 });
 await check("9.1");
 

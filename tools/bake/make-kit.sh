@@ -37,14 +37,16 @@ mkdir -p "$cache" "$stage/blender"
 cp "$cache/$blender_file" "$stage/blender/"
 
 cp "$repo/tools/bake/bake.py" "$stage/"
-for f in verify.py pack.py run.sh README.md CLAUDE.md; do
+for f in verify.py pack.py run.sh README.md; do
   cp "$repo/tools/bake/kit/$f" "$stage/"
 done
+# Optional, local only (git-ignored): instructions for an agent running the kit.
+[[ -f "$repo/tools/bake/kit/CLAUDE.md" ]] && cp "$repo/tools/bake/kit/CLAUDE.md" "$stage/"
 chmod +x "$stage/run.sh"
 layouts="$(node -e 'console.log(require(process.argv[1]).length)' "$stage/in/layouts.json")"
 # About 8 minutes a layout at best quality on 12 fast cores, as a range.
 hours="$(node -e 'const n = +process.argv[1]; console.log(`${Math.max(1, Math.round(n * 0.1))}–${Math.ceil(n * 0.17)}`)' "$layouts")"
-sed -i "s/{{LAYOUTS}}/$layouts/g; s/{{DATE}}/$date/g; s/{{HOURS}}/$hours/g" "$stage/README.md" "$stage/CLAUDE.md"
+sed -i "s/{{LAYOUTS}}/$layouts/g; s/{{DATE}}/$date/g; s/{{HOURS}}/$hours/g" "$stage/README.md" $([[ -f "$stage/CLAUDE.md" ]] && echo "$stage/CLAUDE.md")
 
 rm -f "$repo/dist-bake/$name.zip"
 (cd "$repo/dist-bake" && zip -q -r -6 -n .xz "$name.zip" "$name")
