@@ -23,7 +23,6 @@ const slots = {
   "sfx.plate.broken": ["sfx/plate-broken.ogg", 0.6, kenney("Impact Sounds")],
   "sfx.slate.catch": ["sfx/slate-catch.ogg", 0.55, made],
   "sfx.restore": ["sfx/restore-swell.ogg", 0.9, made],
-  "sfx.key": ["sfx/key.ogg", 0.75, kenney("RPG Audio")],
   "sfx.ui.click": ["sfx/ui-click.ogg", 0.3, kenney("UI Audio")],
   "ambience.region.1.ruin": ["ambience/region1-ruin.ogg", 1, madeWith(["RPG Audio"]), true],
   "ambience.region.1.restored": ["ambience/region1-restored.ogg", 0.85, made, true],

@@ -61,6 +61,48 @@
       "loop": true,
       "credit": "Made for Wirelight (synthesised), with Impact Sounds by Kenney (CC0)"
     },
+    "music.boss": {
+      "src": "music/boss.ogg",
+      "volume": 0.7,
+      "loop": true,
+      "credit": "\"Harmony in the Mists\" by Tsorthan Grove (https://opengameart.org/content/harmony-in-the-mists), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), edited (trimmed loop, re-encoded)"
+    },
+    "music.finale": {
+      "src": "music/finale.ogg",
+      "volume": 0.7,
+      "loop": true,
+      "credit": "\"The Path Revealed\" by Eliot Corley from ChaosIsHarmony (https://opengameart.org/content/the-path-revealed), CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/), edited (re-encoded)"
+    },
+    "music.landing": {
+      "src": "music/landing.ogg",
+      "volume": 0.7,
+      "loop": true,
+      "credit": "\"Moongate\" by Tsorthan Grove (https://opengameart.org/content/moongate), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), edited (trimmed loop, re-encoded)"
+    },
+    "music.region.1": {
+      "src": "music/region1.ogg",
+      "volume": 0.7,
+      "loop": true,
+      "credit": "\"Dryad's Dream\" by Tsorthan Grove (https://opengameart.org/content/dryads-dream), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), edited (trimmed loop, re-encoded)"
+    },
+    "music.region.2": {
+      "src": "music/region2.ogg",
+      "volume": 0.7,
+      "loop": true,
+      "credit": "\"Refraction (Crystal Caverns)\" by Tsorthan Grove (https://opengameart.org/content/crystal-caverns), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), edited (trimmed loop, re-encoded)"
+    },
+    "music.region.3": {
+      "src": "music/region3.ogg",
+      "volume": 0.7,
+      "loop": true,
+      "credit": "\"Moonlit Mirage\" by Tsorthan Grove (https://opengameart.org/content/moonlit-mirage), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), edited (trimmed loop, re-encoded)"
+    },
+    "music.region.4": {
+      "src": "music/region4.ogg",
+      "volume": 0.7,
+      "loop": true,
+      "credit": "\"The Chamber of Celestial Peace\" by Tsorthan Grove (https://opengameart.org/content/the-chamber-of-celestial-peace), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), edited (trimmed loop, re-encoded)"
+    },
     "sfx.bell.far": {
       "src": "sfx/bell-far.ogg",
       "volume": 0.5,
@@ -120,11 +162,6 @@
       "src": "sfx/keeper-gears.ogg",
       "volume": 0.45,
       "credit": "Made for Wirelight (synthesised)"
-    },
-    "sfx.key": {
-      "src": "sfx/key.ogg",
-      "volume": 0.75,
-      "credit": "Kenney, RPG Audio (CC0)"
     },
     "sfx.key.lock": {
       "src": "sfx/key-lock.ogg",

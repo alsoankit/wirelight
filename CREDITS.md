@@ -29,11 +29,17 @@
 - **Ancient Stone Gate Ruin - Moss Covered** and **Floating Rune Monolith - Ancient Stone** — by s8819296, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (the author lists them as AI-generated). Reworked (carved look).
 
 ## Sound effects and ambience
-- **Interface Sounds**, **UI Audio**, **Impact Sounds** and **RPG Audio** — by [Kenney](https://kenney.nl/assets?q=audio) (www.kenney.nl), CC0 1.0. Licence files and source pages in `assets-src/licenses/kenney-*`. Clicks, switches, latches, the key jingle, doors, footsteps, creaks and the far bell, softened and levelled by `tools/audio/make-sfx.sh`.
+- **Interface Sounds**, **UI Audio**, **Impact Sounds** and **RPG Audio** — by [Kenney](https://kenney.nl/assets?q=audio) (www.kenney.nl), CC0 1.0. Licence files and source pages in `assets-src/licenses/kenney-*`. Clicks, switches, latches, doors, footsteps, creaks and the far bell, softened and levelled by `tools/audio/make-sfx.sh`.
 - Every other effect (the broadcast chime, capture chime, restoration swell, shimmer, memory rewind, swooshes, wind gust, drip, keeper's gears, the Sorting Works gate and the Cathedral's stone door) and every ambience bed and hum was made for Wirelight, synthesised with FFmpeg by `tools/audio/make-sfx.sh` (the beds mix in a few of the Kenney creaks, a clank and the bell).
 
-## Music and voices
-(Added as tracks and voice models are plugged in.)
+## Music
+Each track was trimmed to its loop, levelled and re-encoded for the game (Ogg Opus). The OpenGameArt pages are kept as licence records in `assets-src/licenses/opengameart-*`.
+
+- **Moongate** (title and Prologue), **Dryad's Dream** (the Overgrown Halls), **Refraction** from *Crystal Caverns* (the Sorting Works), **Moonlit Mirage** (the Lantern Town), **The Chamber of Celestial Peace** (the Cathedral of Crossings) and **Harmony in the Mists** (each floor's last room) — by [Tsorthan Grove](https://opengameart.org/users/tsorthan-grove), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), via [OpenGameArt](https://opengameart.org/content/moongate) ([Dryad's Dream](https://opengameart.org/content/dryads-dream), [Crystal Caverns](https://opengameart.org/content/crystal-caverns), [Moonlit Mirage](https://opengameart.org/content/moonlit-mirage), [The Chamber of Celestial Peace](https://opengameart.org/content/the-chamber-of-celestial-peace), [Harmony in the Mists](https://opengameart.org/content/harmony-in-the-mists)). Edited (trimmed loops, re-encoded).
+- **The Path Revealed** (the ending) — by Eliot Corley from ChaosIsHarmony, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), via [OpenGameArt](https://opengameart.org/content/the-path-revealed). Edited (re-encoded).
+
+## Voices
+(Added as voice models are plugged in.)
 
 ## Icons
 From [game-icons.net](https://game-icons.net), licensed under CC BY 3.0. Each icon used is listed with its author:

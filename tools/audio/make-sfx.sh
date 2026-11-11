@@ -147,9 +147,6 @@ from "$(kenney interface-sounds switch_005)" "$TMP/k-plate-off.wav" "$soft"
 sfx plate-off "$TMP/k-plate-off.wav"
 from "$(kenney impact-sounds impactWood_light_001)" "$TMP/k-plate-broken.wav" "highpass=f=60,lowpass=f=2500"
 sfx plate-broken "$TMP/k-plate-broken.wav"
-from "$(kenney rpg-audio handleCoins)" "$TMP/k-key.wav" "highpass=f=200,lowpass=f=7000"
-verb "$TMP/k-key.wav" "$TMP/k-key-v.wav" "$TMP/ir-room-m.wav" 1 0.25
-sfx key "$TMP/k-key-v.wav"
 from "$(kenney rpg-audio metalClick)" "$TMP/k-lock.wav" "highpass=f=80,lowpass=f=6000"
 verb "$TMP/k-lock.wav" "$TMP/k-lock-v.wav" "$TMP/ir-room-m.wav" 1 0.2
 sfx key-lock "$TMP/k-lock-v.wav"

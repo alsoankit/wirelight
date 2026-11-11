@@ -1,19 +1,21 @@
 import { roomById } from "@wirelight/rooms";
 import { useEffect, useRef } from "react";
 import { useSession } from "../engine/store";
+import { useMoments } from "../play/momentRules";
 import { useProgress } from "../progress/progress";
 import { effect, loadManifest, playAmbience, playMusic, setRuin, setTextOnly, setVolumes, unlock } from "./audio";
 
 // Plays the game's sound from what happens (gameplay/audio.md): the floor's music (muffled in ruin,
 // opening as the room restores), and effects from the trace: a soft chime for each broadcast copy
 // (throttled), a click when a keeper decides, the cable plugging in and out, a plate switching (or
-// refusing), the Scanner catching, the swell and the key on a win, and a soft click on any button. The
+// refusing), the Scanner catching, the swell on a win, and a soft click on any button. The
 // region's ambience beds blend from ruined to restored with the room (0021).
 // Every slot may be missing: then nothing plays (0047).
 
 export function AudioDriver() {
   const roomId = useSession((s) => s.roomId);
   const settings = useProgress((s) => s.settings);
+  const ending = useMoments((s) => s.ending);
   const seen = useRef(0);
 
   useEffect(() => {
@@ -41,10 +43,24 @@ export function AudioDriver() {
   useEffect(() => {
     const room = roomId ? roomById(roomId) : undefined;
     if (!room) return;
-    void playMusic(room.kind === "boss" ? "music.boss" : `music.region.${room.region}`);
     void playAmbience(`ambience.region.${room.region}`);
     seen.current = 0;
   }, [roomId]);
+
+  // Music (0127, 0128): the title theme carries on through the Prologue (the robot waking), each
+  // region has its own, a floor's last room has one, and the first release's ending has the finale.
+  useEffect(() => {
+    const room = roomId ? roomById(roomId) : undefined;
+    if (!room) return;
+    const slot = ending
+      ? "music.finale"
+      : room.kind === "prologue"
+        ? "music.landing"
+        : room.kind === "boss"
+          ? "music.boss"
+          : `music.region.${room.region}`;
+    void playMusic(slot);
+  }, [roomId, ending]);
 
   // Effects and the ruin's filter, from new events and the status (subscribed, not rendered).
   useEffect(
@@ -54,7 +70,6 @@ export function AudioDriver() {
         if (checks.length) setRuin(checks.filter((ok) => !ok).length / checks.length);
         if (s.status?.won && !prev.status?.won) {
           void effect("sfx.restore");
-          setTimeout(() => void effect("sfx.key"), 1800);
         }
         // `seen` counts the whole trace; the store may have let the oldest events go.
         if (s.dropped + s.events.length < seen.current) seen.current = 0;

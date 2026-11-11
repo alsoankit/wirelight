@@ -1,5 +1,6 @@
 import { landing } from "@wirelight/content/intro";
 import { lazy, StrictMode, Suspense, useCallback, useEffect, useState } from "react";
+import { loadManifest, playMusic, setVolumes, unlock } from "./audio/audio";
 import { BootScreen } from "./landing/BootScreen";
 import { LandingPage } from "./landing/LandingPage";
 import { useProgress } from "./progress/progress";
@@ -48,6 +49,10 @@ export function App() {
   const start = useCallback(
     (skipIntro: boolean) => {
       void loadPlay().then((m) => m.preloadRoom());
+      // This click is the first moment browsers allow sound: the title theme starts here (0128).
+      unlock();
+      setVolumes(useProgress.getState().settings.volumes);
+      void loadManifest().then(() => playMusic("music.landing"));
       setQuick(skipIntro); // Skip intro also skips the tour (ONB-07)
       const first = !skipIntro && !useProgress.getState().sightGiven;
       setStage("fading");
