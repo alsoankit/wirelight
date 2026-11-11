@@ -6,7 +6,7 @@ import { createJSONStorage, persist, type StateStorage } from "zustand/middlewar
 import { renameCards } from "./renamedCards";
 
 // The player's progress, saved in this browser (ONB-22, idb-keyval): what's been seen (the gifts,
-// the path, the tour), rooms cleared, keys, discovery cards, memories, notes and hints. If storage
+// the path, the tour), rooms cleared, discovery cards, memories, notes and hints. If storage
 // isn't available the game simply plays without saving; it's never blocked.
 
 export type RoomRecord = {
@@ -14,7 +14,6 @@ export type RoomRecord = {
   firstTry: boolean;
   hintsOpened: number;
   revealed: boolean;
-  key: string;
 };
 
 /** Settings (UI-17), kept with progress so they come back with the player. */
@@ -53,7 +52,6 @@ type Progress = {
   /** The room to come back to (ONB-20). */
   current: string | null;
   cleared: Record<string, RoomRecord>;
-  keys: string[];
   cardsSeen: string[];
   memoriesSeen: string[];
   floorMemoriesSeen: number[];
@@ -103,7 +101,6 @@ export const useProgress = create<Progress>()(
       voiceGiven: false,
       current: null,
       cleared: {},
-      keys: [],
       cardsSeen: [],
       memoriesSeen: [],
       floorMemoriesSeen: [],
@@ -120,7 +117,6 @@ export const useProgress = create<Progress>()(
         setState((s) => ({
           // A replay keeps the first record (first try stays first try).
           cleared: s.cleared[roomId] ? s.cleared : { ...s.cleared, [roomId]: record },
-          keys: add(s.keys, record.key),
         })),
       seeCard: (id) => setState((s) => ({ cardsSeen: add(s.cardsSeen, id) })),
       seeMemory: (id) => setState((s) => ({ memoriesSeen: add(s.memoriesSeen, id) })),

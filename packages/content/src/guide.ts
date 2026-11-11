@@ -228,9 +228,9 @@ export const guide: GuideTopic[] = [
   {
     id: "after-a-win",
     title: "After you restore a room",
-    blurb: "The debrief, keys and memories",
+    blurb: "The debrief and memories",
     body: [
-      "When a room works again, an answer comes back to you carrying the room's key: a word that opens the way on.",
+      "When a room's network works again, the room lights up and the way on opens.",
       "Then the debrief: what happened, the new words you met (each with a plain meaning), and a kind line about each thing you tried along the way.",
       "In the first regions you can also see why each room is built the way it is. After a floor's last room, your memory of the whole floor working comes back. Both play on the Map.",
     ],
@@ -258,7 +258,7 @@ export const guide: GuideTopic[] = [
   },
   {
     id: "keys",
-    title: "Keys at a glance",
+    title: "Keyboard shortcuts",
     blurb: "Every shortcut in one place",
     body: [
       "[[M]] open or close the menu",

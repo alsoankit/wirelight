@@ -1,5 +1,5 @@
 /** floors/floor-4.md · Memory and Loops. Two halls (hall-a, hall-b), Linux bridges with no loop protection. */
-import { announcement, automaticMessage, helloWithKey, keepsTheKey, keyFor } from "@wirelight/content";
+import { announcement, answerFrom, automaticMessage, waitingForYou } from "@wirelight/content";
 import type { LinkSpec } from "@wirelight/sim";
 import { labDelivered, ran, ranThen } from "../predicates";
 import { defineRoom, type Predicate, type SolutionStep } from "../types";
@@ -88,7 +88,7 @@ const machine = (id: string, mac: string, hall: string, door: string, last: numb
 // ── 4.1 · The Pinned Memory ────────────────────────────────────────────────────────────────
 
 const pinnedId = "f4.pinned-memory";
-const lanternKeyReply = helloWithKey("kitchen", keyFor(pinnedId));
+const lanternKeyReply = answerFrom("kitchen");
 export const pinnedMemory = defineRoom({
   id: pinnedId,
   region: 2,
@@ -128,7 +128,6 @@ export const pinnedMemory = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: repeatFrameAnswered("observatory", "kitchen", lanternKeyReply, "setup"),
-  key: { word: keyFor(pinnedId), via: "lab-text" },
   healthChecks: [
     { id: "board-kitchen", object: { kind: "board", device: "hall" }, check: boardHas("hall", KITCHEN, "eth3") },
   ],
@@ -153,7 +152,7 @@ export const pinnedMemory = defineRoom({
 // ── 4.2 · Who Has the Key? ─────────────────────────────────────────────────────────────────
 
 const whoId = "f4.who-has-the-key";
-const anvilReply = helloWithKey("forge", keyFor(whoId));
+const anvilReply = answerFrom("forge");
 export const whoHasTheKey = defineRoom({
   id: whoId,
   region: 2,
@@ -168,13 +167,13 @@ export const whoHasTheKey = defineRoom({
     machines: [
       { id: "pantry", mac: PANTRY, hall: "hall-a", door: "eth1" },
       { id: "attic", mac: ATTIC, hall: "hall-a", door: "eth2" },
-      // Forge's broadcast answer says it keeps the key.
+      // Forge's broadcast answer says it is the one waiting for you.
       {
         id: "forge",
         mac: FORGE,
         hall: "hall-b",
         door: "eth1",
-        broadcastReply: keepsTheKey("forge"),
+        broadcastReply: waitingForYou("forge"),
         reply: anvilReply,
       },
       { id: "chapel", mac: CHAPEL, hall: "hall-b", door: "eth2" },
@@ -199,7 +198,6 @@ export const whoHasTheKey = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: labDelivered("observatory", anvilReply),
-  key: { word: keyFor(whoId), via: "lab-text" },
   healthChecks: [
     {
       // Something crossed the span both ways: each hall learned a name from the other side.
@@ -221,7 +219,7 @@ export const whoHasTheKey = defineRoom({
 // ── 4.3 · The Spare Cable (decision 0067) ──────────────────────────────────────────────────
 
 const spareId = "f4.spare-cable";
-const anvilSpareReply = helloWithKey("forge", keyFor(spareId));
+const anvilSpareReply = answerFrom("forge");
 export const spareCable = defineRoom({
   id: spareId,
   region: 2,
@@ -265,7 +263,6 @@ export const spareCable = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: stormThenThrough(SPAN_ENDS, "observatory", anvilSpareReply),
-  key: { word: keyFor(spareId), via: "lab-text" },
   healthChecks: [{ id: "storm-passed", object: { kind: "corridor", link: "span-2" }, check: stormPassed(SPANS) }],
   teaches: ["switching-loop", "broadcast-storm"],
   uses: ["broadcast", "flooding", "mac-table", "learning-from-the-source", "broadcast-domain"],
@@ -312,7 +309,7 @@ export const spareCable = defineRoom({
 // ── 4.B ★ The Storm ────────────────────────────────────────────────────────────────────────
 
 const stormId = "f4.boss-storm";
-const wrenReply = helloWithKey("laundry", keyFor(stormId));
+const wrenReply = answerFrom("laundry");
 /** A span's door switched off or its cable pulled, at either hall. */
 const BREAKS = /^ip link set eth[034] down$|^lab cable unplug eth[034]$/;
 const MENDS = /^ip link set eth[034] up$|^lab cable plug eth[034]$/;
@@ -375,7 +372,6 @@ export const storm = defineRoom({
   tools: {},
   glow: "none",
   winCondition: labDelivered("observatory", wrenReply),
-  key: { word: keyFor(stormId), via: "lab-text" },
   healthChecks: [
     { id: "no-loop", object: { kind: "corridor", link: "span-2" }, check: noLoop(SPANS) },
     { id: "board-laundry", object: { kind: "board", device: "hall-b" }, check: boardHas("hall-b", LAUNDRY, "eth3") },
@@ -442,7 +438,7 @@ export const storm = defineRoom({
 // ── Secret · The Peacekeeper (Region 2's secret room, decisions 0065, 0067) ────────────────
 
 const peaceId = "f4.secret-peacekeeper";
-const wrenPeaceReply = helloWithKey("laundry", keyFor(peaceId));
+const wrenPeaceReply = answerFrom("laundry");
 const STP_ON = "ip link set br0 type bridge stp_state 1";
 export const peacekeeper = defineRoom({
   id: peaceId,
@@ -489,7 +485,6 @@ export const peacekeeper = defineRoom({
   tools: { unlock: ["bridge link"] },
   glow: "none",
   winCondition: spareTookOver(SPAN_ENDS, ["hall-a", "hall-b"], "observatory", wrenPeaceReply),
-  key: { word: keyFor(peaceId), via: "lab-text" },
   healthChecks: [
     {
       id: "peace-kept",

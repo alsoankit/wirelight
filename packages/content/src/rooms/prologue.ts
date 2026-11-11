@@ -9,7 +9,7 @@ export const firstMessage: RoomText = {
     "Note to self: there's someone at the other end of that cable. I sent a message and never got an answer. Try again when you wake up.",
   ],
   hints: [
-    { text: "The big button is the only thing you need here." },
+    { text: "Press the Send button. It sends a message to kitchen, down the cable." },
     { text: "Press Send, then watch the corridor." },
     { text: "A message goes out along the cable. Wait and see if anything comes back.", codex: "message" },
     { text: "Press Send once and keep your eyes on the Map until a light returns." },
@@ -18,7 +18,7 @@ export const firstMessage: RoomText = {
   detectors: {},
   debrief: {
     happened:
-      "That's a network: machines, a cable between them, and messages going back and forth. The corridor lit up when the answer came back. Remember that: sending isn't the same as being heard.",
+      "That's a network: machines, a cable between them, and messages going back and forth. The corridor lit up when the answer came back. Sending a message doesn't prove it arrived: only an answer coming back does.",
     terms: [],
   },
   memories: [
@@ -64,7 +64,7 @@ export const firstMessage: RoomText = {
     "Time",
     "When you're stuck",
     "The keeper",
-    "Keys at a glance",
+    "Keyboard shortcuts",
   ],
   voice: [
     { id: "P-GIFT-01", speaker: "You", text: "Power's back. I'm awake. How long was I switched off?" },

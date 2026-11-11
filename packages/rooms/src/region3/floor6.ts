@@ -1,5 +1,5 @@
 /** floors/floor-6.md · Envelopes. The Scanner replaces Captures (0043); the house's keeper by hand (0042). */
-import { keyFor, lanternLampsRemember } from "@wirelight/content";
+import { lanternInsideMessage } from "@wirelight/content";
 import type { Fault } from "@wirelight/sim";
 import { all, not, ran } from "../predicates";
 import { type Access, defineRoom, type Misconception, type SolutionStep } from "../types";
@@ -55,7 +55,7 @@ export const insideTheEnvelope = defineRoom({
   seed: 61,
   topology: town({
     houses: ["kitchen", "library", "forge"],
-    lanternAnnounces: { text: lanternLampsRemember(keyFor(envelopeId)) },
+    lanternAnnounces: { text: lanternInsideMessage },
   }),
   faults: [],
   playerDevice: "observatory",
@@ -64,7 +64,6 @@ export const insideTheEnvelope = defineRoom({
   tools: { unlock: ["lab scanner"] },
   glow: "symptoms",
   winCondition: openedLantern,
-  key: { word: keyFor(envelopeId), via: "mark" },
   // Nothing is broken here: the room comes back to life once the sealed letter is opened all the way.
   healthChecks: [
     { id: "letter-opened", object: { kind: "door", device: "observatory", iface: "eth0" }, check: openedLantern },
@@ -112,7 +111,6 @@ export const whoHasThisAddress = defineRoom({
   tools: { unlock: ["ip neigh"] },
   glow: "symptoms",
   winCondition: answeredBy("observatory", IP.kitchen, KITCHEN),
-  key: { word: keyFor(whoHasId), via: "mark" },
   healthChecks: [
     {
       id: "ledger-has-kitchen",
@@ -207,7 +205,6 @@ export const twoOfMe = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: all(quillOwnHouse, lastAnswersFrom("observatory", IP.kitchen, KITCHEN, 3)),
-  key: { word: keyFor(twoId), via: "mark" },
   healthChecks: [
     {
       id: "one-claims-kitchen",
@@ -276,7 +273,6 @@ export const mixedUpLetters = defineRoom({
   tools: {},
   glow: "none",
   winCondition: all(answeredBy("observatory", IP.kitchen, KITCHEN), answeredBy("observatory", IP.forge, FORGE)),
-  key: { word: keyFor(mixedId), via: "mark" },
   healthChecks: [
     {
       id: "no-pinned-line",

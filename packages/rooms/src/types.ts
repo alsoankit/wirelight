@@ -136,8 +136,6 @@ export interface RoomDef {
   mapOpen?: boolean;
 
   winCondition: Predicate;
-  /** Floors 1–4: the key is real text in an answer; from Floor 5, a mark on the winning answer; 1.1: a lock that opens. */
-  key: { word: string; via: "lab-text" | "mark" | "lock" };
   healthChecks: HealthCheck[];
   hintTiming?: HintTiming;
 

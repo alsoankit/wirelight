@@ -1,5 +1,5 @@
 /** floors/floor-3.md · The Switch. The hall is a Linux bridge; the player sorts by hand first (0042). */
-import { automaticMessage, helloWithKey, helloWithKeyPart, keyFor } from "@wirelight/content";
+import { answerFrom, automaticMessage } from "@wirelight/content";
 import { labDelivered, linkUp, printed, ran, sentTo } from "../predicates";
 import { defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
 import {
@@ -62,7 +62,7 @@ const wrongConsoleTest = { misconception: "wrong-console", steps: [typed("observ
 // ── 3.1 · Many Doors ───────────────────────────────────────────────────────────────────────
 
 const manyDoorsId = "f3.many-doors";
-const anvilReply = helloWithKey("forge", keyFor(manyDoorsId));
+const anvilReply = answerFrom("forge");
 /** Three frames sorted right by hand, at least one sent out every other door: the keeper remembers. */
 const sortedEnough: Predicate = sortedByHand("hall", 3);
 export const manyDoors = defineRoom({
@@ -97,7 +97,6 @@ export const manyDoors = defineRoom({
   tools: { unlock: ["lab keeper", "bridge fdb"] },
   glow: "causes",
   winCondition: (f) => keeperAwake("hall")(f) && labDelivered("observatory", anvilReply)(f),
-  key: { word: keyFor(manyDoorsId), via: "lab-text" },
   healthChecks: [
     {
       id: "board-knows",
@@ -153,7 +152,7 @@ export const manyDoors = defineRoom({
 // ── 3.2 · The Keeper's Memory ──────────────────────────────────────────────────────────────
 
 const memoryId = "f3.keepers-memory";
-const gateReply = helloWithKey("gate", keyFor(memoryId));
+const gateReply = answerFrom("gate");
 export const keepersMemory = defineRoom({
   id: memoryId,
   region: 2,
@@ -173,7 +172,6 @@ export const keepersMemory = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: labDelivered("observatory", gateReply),
-  key: { word: keyFor(memoryId), via: "lab-text" },
   healthChecks: [
     { id: "board-eth3", object: { kind: "board", device: "hall" }, check: boardHasBehind("hall", "eth3") },
   ],
@@ -190,14 +188,11 @@ export const keepersMemory = defineRoom({
 // ── 3.3 · Find Everyone ────────────────────────────────────────────────────────────────────
 
 const findId = "f3.find-everyone";
-const findKey = keyFor(findId);
-const third = Math.ceil(findKey.length / 3);
-const parts = [findKey.slice(0, third), findKey.slice(third, 2 * third), findKey.slice(2 * third)];
 const letters = [
   { id: "bakery", mac: BAKERY, door: "eth1" },
   { id: "larder", mac: LARDER, door: "eth2" },
   { id: "chapel", mac: CHAPEL, door: "eth3" },
-].map((m, i) => ({ ...m, reply: helloWithKeyPart(m.id, i + 1, 3, parts[i] as string) }));
+].map((m) => ({ ...m, reply: answerFrom(m.id) }));
 const letterAnswered = (i: number) => {
   const m = letters[i] as (typeof letters)[number];
   return repeatFrameAnswered("observatory", m.id, m.reply, "command");
@@ -224,7 +219,6 @@ export const findEveryone = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: (f) => [0, 1, 2].every((i) => letterAnswered(i)(f)),
-  key: { word: findKey, via: "lab-text" },
   healthChecks: [0, 1, 2].map((i) => ({
     id: `send-${i + 1}-answered`,
     object: { kind: "workbench", device: "observatory" } as const,
@@ -247,7 +241,7 @@ export const findEveryone = defineRoom({
 // ── 3.B · The Busy Hall ────────────────────────────────────────────────────────────────────
 
 const busyId = "f3.boss-busy-hall";
-const wrenReply = helloWithKey("laundry", keyFor(busyId));
+const wrenReply = answerFrom("laundry");
 export const busyHall = defineRoom({
   id: busyId,
   region: 2,
@@ -277,7 +271,6 @@ export const busyHall = defineRoom({
   tools: {},
   glow: "none",
   winCondition: repeatFrameAnswered("observatory", "laundry", wrenReply, "command"),
-  key: { word: keyFor(busyId), via: "lab-text" },
   healthChecks: [
     { id: "eth2-up", object: { kind: "door", device: "hall", iface: "eth2" }, check: linkUp("hall", "eth2") },
     { id: "board-laundry", object: { kind: "board", device: "hall" }, check: boardHas("hall", LAUNDRY, "eth2") },

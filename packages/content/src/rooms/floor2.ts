@@ -7,12 +7,12 @@ export const firstLight: RoomText = {
   mission: "There's no Send button this time. Write a message to kitchen yourself, on the table, and get an answer.",
   notes: [],
   hints: [
-    { text: "The table is waiting for something in its first slot." },
+    { text: "The table's first slot, To, needs the name of the door you're writing to." },
     { text: "Every door's name is written on its plate." },
     { text: "A frame needs the name of the door it's going to: its MAC address.", codex: "mac-address" },
     { text: "Read kitchen's plate, write that name in the To slot, add any message, then seal and send." },
     {
-      text: "Put `02:00:00:00:00:07` (kitchen's name, from its plate) in To, any word in Message, then Seal and send. Kitchen answers with the key.",
+      text: "Put `02:00:00:00:00:07` (kitchen's name, from its plate) in To, any word in Message, then Seal and send. Kitchen answers you.",
     },
   ],
   detectors: {
@@ -81,7 +81,7 @@ export const wrongName: RoomText = {
       text: "Catch one of the repeated frames, compare its To with kitchen's plate, then start a repeat with the right address.",
     },
     {
-      text: "The frame says `02:00:00:00:00:08`; kitchen's door is `02:00:00:00:00:07`. In the Frame builder, set To to `02:00:00:00:00:07` and choose Keep sending. Kitchen's answer carries the key.",
+      text: "The frame says `02:00:00:00:00:08`; kitchen's door is `02:00:00:00:00:07`. In the Frame builder, set To to `02:00:00:00:00:07` and choose Keep sending. Kitchen answers.",
     },
   ],
   detectors: {
@@ -147,14 +147,17 @@ export const whoAreYou: RoomText = {
   access: { library: "Sealed. You can't go in, but anything you send can." },
   notes: ["Found a room I couldn't get into. Didn't know its name. So I called out to everyone."],
   hints: [
-    { text: "You can't read library's plate. Can library tell you its name?" },
-    { text: "Remember the address that means everyone?", codex: "everyone-address" },
+    { text: "You can't read library's plate, but every answer says which door sent it. Get library to answer you." },
+    {
+      text: "One address reaches every door on the cable at once: the broadcast address, `ff:ff:ff:ff:ff:ff`.",
+      codex: "everyone-address",
+    },
     { text: "Send a frame to everyone, then look at who the answer is from.", codex: "source-address" },
     {
       text: "Send to `ff:ff:ff:ff:ff:ff` out of eth1, catch or open the answer, read its from, then send to that name.",
     },
     {
-      text: "Send to `ff:ff:ff:ff:ff:ff` on eth1. Library answers `I'm here — library` from `02:00:00:00:00:0c`. Send a frame to `02:00:00:00:00:0c`, and library answers with the key.",
+      text: "Send to `ff:ff:ff:ff:ff:ff` on eth1. Library answers from `02:00:00:00:00:0c`. Send a frame to `02:00:00:00:00:0c`, and library answers you.",
     },
   ],
   detectors: {
@@ -212,7 +215,7 @@ export const lightsOut: RoomText = {
     { text: "`ip link` lists every door and whether it's switched on.", codex: "console" },
     { text: "Look for your door's state in the list, then tell the machine to switch that door on." },
     {
-      text: "Type `ip link` to see `eth0 … state DOWN`, then `ip link set eth0 up`. Both lights come on and kitchen's next message carries the key.",
+      text: "Type `ip link` to see `eth0 … state DOWN`, then `ip link set eth0 up`. Both lights come on and kitchen's next message gets through.",
     },
   ],
   detectors: {
@@ -291,7 +294,7 @@ export const silentLine: RoomText = {
     },
     { text: "Switch eth1 on from the terminal, learn cellar's name, then use it in a repeating frame." },
     {
-      text: "`ip link set eth1 up`; catch one of cellar's frames (or broadcast on eth1) and read its From: `02:00:00:00:00:0e`. In the Frame builder, set To to that address and choose Keep sending. Cellar answers with the key.",
+      text: "`ip link set eth1 up`; catch one of cellar's frames (or broadcast on eth1) and read its From: `02:00:00:00:00:0e`. In the Frame builder, set To to that address and choose Keep sending. Cellar answers.",
     },
   ],
   detectors: {

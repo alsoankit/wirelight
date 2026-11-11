@@ -16,7 +16,7 @@ export const insideTheEnvelope: RoomText = {
     { text: "A frame can carry another envelope inside it: a packet.", codex: "packet" },
     { text: "Open a catch, then open what's inside the frame, then what's inside that." },
     {
-      text: "Catch a kitchen announcement on the Scanner and open it to the message layer. The key is in the message.",
+      text: "Catch a kitchen announcement on the Scanner and open it all the way down, to the message inside.",
     },
   ],
   detectors: {
@@ -58,7 +58,7 @@ export const insideTheEnvelope: RoomText = {
     {
       id: "F6-SEAL-01",
       speaker: "You",
-      text: "So that's how it works. The house letter goes inside the door letter. It always did.",
+      text: "So that's how it works. The packet, addressed with IP addresses, travels inside the frame, addressed with MAC addresses.",
     },
   ],
 };

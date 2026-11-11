@@ -62,9 +62,9 @@ export const voice = {
   },
   lock: {
     closedTitle: "A locked gate",
-    closed: "It's waiting for a key. Keys come back with answers.",
+    closed: "It opens when this room's network works again.",
     openTitle: "The gate is open",
-    open: "The key fit. The way on is open.",
+    open: "This room's network works again. The way on is open.",
   },
   workbench: {
     name: "Frame builder",
@@ -406,7 +406,6 @@ export const voice = {
   discovery: { new: "New", more: "Tell me more", ok: "Got it" },
   /** After the win (HELP-13). */
   after: {
-    key: "Key",
     building: "Why it's built this way",
     floorMemory: "Memory restored",
     next: "Continue",

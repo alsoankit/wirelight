@@ -3,7 +3,7 @@ import type { FloorText, RoomText } from "./types";
 /** floors/floor-5.md, word for word. Region 3, the Lantern Town. */
 
 /** Why a house's door is shut to the player on Floors 5–7. */
-export const HOUSE_LOCKED = "Locked. Nobody here has opened the door in years, but the network can still reach them.";
+export const HOUSE_LOCKED = "You can't go in, but messages can still reach this machine over the network.";
 
 /** Arriving in Region 3 (R3-ARRIVE-01…03). */
 export const REGION_3_ARRIVAL = [
@@ -26,11 +26,12 @@ export const REGION_3_ARRIVAL = [
 
 export const whereNotWho: RoomText = {
   title: "A New Door",
-  mission: "Kitchen's door was replaced, so its door name changed. Its house address stayed the same.",
+  mission:
+    "Kitchen's door was replaced, so its door name changed, and your messages to the old name go nowhere. Reach kitchen another way.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
-    { text: "Kitchen isn't gone. Its door is new." },
+    { text: "Kitchen isn't gone. Its door is new, but its house address is the same." },
     // Kitchen's house is locked in 5.1, so its own plate can't be read: the register is the place to look.
     { text: "Read the register on the square's wall: it lists every house's address." },
     {
@@ -38,7 +39,7 @@ export const whereNotWho: RoomText = {
       codex: "ip-address",
     },
     {
-      text: "A door has a name; a house has an address. The address stays when the door changes.",
+      text: "Find kitchen's house address on the register, then ping that address.",
       codex: "ip-address",
     },
     { text: "Ping kitchen at its house address: `ping -c 1 10.0.1.7`." },
@@ -80,7 +81,7 @@ export const placeToLive: RoomText = {
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: ["Our house: 10.0.1.5/24."],
   hints: [
-    { text: "Your plate is missing something." },
+    { text: "Your plate has no address on it." },
     { text: "Look at the note on the table in your room." },
     { text: "A house needs its own address before it can send or receive.", codex: "ip-address" },
     { text: "Write the address from the note in your plate's address slot, then ping kitchen." },
@@ -162,7 +163,7 @@ export const rollCall: RoomText = {
   },
   debrief: {
     happened:
-      "You gave your house its address with a terminal command, then called the roll. Four houses answered. One stayed dark, and that's an answer too.",
+      "You gave your house its address with a terminal command, then called the roll. Four houses answered. One stayed silent: no reply means no machine answered at that address.",
     terms: [],
   },
   fieldGuide: ["Command book: `ip addr`"],
@@ -182,7 +183,7 @@ export const quietStreet: RoomText = {
     },
     { text: "Give yourself an address, switch the square's door to kitchen on, then ping kitchen's address." },
     {
-      text: "In your house: `ip addr add 10.0.1.5/24 dev eth0`. In the square: `ip link set eth1 up`. Then ping `10.0.1.7`. Kitchen's reply carries the key.",
+      text: "In your house: `ip addr add 10.0.1.5/24 dev eth0`. In the square: `ip link set eth1 up`. Then ping `10.0.1.7`. Kitchen replies.",
     },
   ],
   detectors: {

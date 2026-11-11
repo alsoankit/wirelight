@@ -81,7 +81,6 @@ export function RoomHud() {
       firstTry: fired.length === 0 && hintsOpened === 0,
       hintsOpened,
       revealed: hintsOpened >= 5,
-      key: room.key.word,
     });
     // A returning player goes on from here (ONB-20): the saved place is now the next room on the path.
     const next = nextOnPath(rooms, room.id, useProgress.getState().path ?? "new");
@@ -168,9 +167,6 @@ export function RoomHud() {
               ))}
             </ul>
           )}
-          <p className="debrief-key">
-            {voice.after.key}: <code>{room.key.word}</code>
-          </p>
           <div className="panel-actions">
             {text.building && (
               <button type="button" className="quiet" onClick={() => openMemory({ kind: "building", roomId: room.id })}>

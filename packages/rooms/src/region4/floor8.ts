@@ -1,5 +1,5 @@
 /** floors/floor-8.md · Crossings. From Floor 5 the key is a mark on the winning answer. */
-import { keyFor } from "@wirelight/content";
+
 import type { Topology } from "@wirelight/sim";
 import { all, ran } from "../predicates";
 import {
@@ -96,7 +96,6 @@ export const otherStreet = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: all(pingAnswered("observatory", IP.crossing0), pingAnswered("gallery", IP.crossing1)),
-  key: { word: keyFor(otherId), via: "mark" },
   // Nothing is broken: each side comes back to life once it has talked to the crossing.
   healthChecks: [
     {
@@ -154,7 +153,6 @@ export const acrossTheStreet = defineRoom({
   tools: { unlock: ["ip route"] },
   glow: "symptoms",
   winCondition: pingAnswered("observatory", IP.gallery),
-  key: { word: keyFor(acrossId), via: "mark" },
   healthChecks: [{ id: "gateway", object: { kind: "board", device: "observatory" }, check: observatoryGateway }],
   teaches: ["default-gateway", "routing-table"],
   uses: ["router", "subnet", "ip-address", "ping"],
@@ -201,7 +199,6 @@ export const directions = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: pingAnswered("observatory", IP.belfry),
-  key: { word: keyFor(directionsId), via: "mark" },
   healthChecks: [{ id: "crossing-knows-tower", object: { kind: "board", device: "crossing" }, check: crossingToTower }],
   teaches: ["specific-route"],
   uses: ["routing-table", "default-gateway", "router"],
@@ -238,7 +235,6 @@ export const noWayBack = defineRoom({
   tools: { unlock: ["tcpdump"] },
   glow: "symptoms",
   winCondition: pingAnswered("observatory", IP.gallery),
-  key: { word: keyFor(noWayId), via: "mark" },
   healthChecks: [
     {
       id: "gallery-way-back",
@@ -306,7 +302,6 @@ export const sleepingKeeper = defineRoom({
   glow: "symptoms",
   // Three answers once the navigator does it itself (the key is a mark on the third).
   winCondition: answeredAfterWake("observatory", IP.gallery, "crossing", 3),
-  key: { word: keyFor(sleepingId), via: "mark" },
   healthChecks: [
     { id: "forwarding-on", object: { kind: "keeper", device: "crossing" }, check: sysctlIs("crossing", FORWARD, "1") },
   ],
@@ -375,7 +370,6 @@ export const closedCrossing = defineRoom({
   tools: {},
   glow: "none",
   winCondition: pingAnswered("observatory", IP.belfry),
-  key: { word: keyFor(closedId), via: "mark" },
   healthChecks: [
     { id: "observatory-gateway", object: { kind: "board", device: "observatory" }, check: observatoryGateway },
     { id: "crossing-knows-tower", object: { kind: "board", device: "crossing" }, check: crossingToTower },

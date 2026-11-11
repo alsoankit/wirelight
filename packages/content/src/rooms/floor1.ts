@@ -4,10 +4,10 @@ import type { FloorText, RoomText } from "./types";
 
 export const twoRooms: RoomText = {
   title: "First Contact",
-  mission: "Something keeps arriving at your door. Follow it back and find out where it comes from.",
+  mission: "Messages keep arriving at your door. Follow the cable back and find out which machine is sending them.",
   notes: [],
   hints: [
-    { text: "Where do those lights come from?" },
+    { text: "Each moving light is a message. Follow one back along the corridor to where it starts." },
     { text: "Doors lead to corridors, and corridors lead to other rooms." },
     { text: "Every door has a plate that tells you whose door it is.", codex: "door" },
     { text: "Walk the corridor into the other room and read the plate on its door." },
@@ -112,7 +112,7 @@ export const bothEnds: RoomText = {
   mission: "The cable is plugged in at both ends, but nothing gets through.",
   notes: [],
   hints: [
-    { text: "Both lights are dark, but the cable is plugged in. What else could be off?" },
+    { text: "Both lights are dark, but the cable is plugged in at both ends. Look at the doors themselves." },
     { text: "Doors can be switched off. Check both of them." },
     { text: "A link is up only when both doors are switched on and the cable is plugged in.", codex: "door-switch" },
     { text: "Go to kitchen's room and look closely at its door's plate." },
@@ -173,7 +173,7 @@ export const darkCorridor: RoomText = {
     { text: "A link needs the cable in at both ends and both doors on.", codex: "cable-end" },
     { text: "Switch your door on, then go to kitchen's room, plug its end in and switch its door on." },
     {
-      text: "Click the switch on your plate (`ip link set eth0 up`). Then in kitchen's room, click its loose cable end (`lab cable plug eth0`) and the switch on its plate (`ip link set eth0 up`). Kitchen's next message brings the key.",
+      text: "Click the switch on your plate (`ip link set eth0 up`). Then in kitchen's room, click its loose cable end (`lab cable plug eth0`) and the switch on its plate (`ip link set eth0 up`). Kitchen's next message gets through.",
     },
   ],
   detectors: {

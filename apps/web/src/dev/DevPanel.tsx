@@ -26,7 +26,7 @@ function Sheet({ room }: { room: RoomDef }) {
   return (
     <div className="dev-sheet">
       <p>
-        <strong>{t.title}</strong> · {room.kind} · {room.pathTag} · key <code>{room.key.word}</code>
+        <strong>{t.title}</strong> · {room.kind} · {room.pathTag}
       </p>
       <p>{say(t.mission)}</p>
       <details>

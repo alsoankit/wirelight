@@ -1,5 +1,5 @@
 /** floors/floor-7.md · Neighbourhoods. Streets and the `/24`; the registry hands out addresses (DHCP). */
-import { keyFor } from "@wirelight/content";
+
 import type { DeviceSpec } from "@wirelight/sim";
 import { all, not, ran } from "../predicates";
 import { type Access, defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
@@ -88,7 +88,6 @@ export const sameStreet = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: answeredBy("observatory", IP.kitchen, KITCHEN),
-  key: { word: keyFor(sameStreetId), via: "mark" },
   healthChecks: [
     {
       id: "on-the-square",
@@ -140,7 +139,6 @@ export const askForAnAddress = defineRoom({
   tools: { unlock: ["dhclient"] },
   glow: "symptoms",
   winCondition: all(holdsLease, answeredBy("observatory", IP.kitchen, KITCHEN)),
-  key: { word: keyFor(askId), via: "mark" },
   healthChecks: [
     { id: "holds-lease", object: { kind: "slot", device: "observatory", iface: "eth0" }, check: holdsLease },
   ],
@@ -221,7 +219,6 @@ export const census = defineRoom({
   tools: {},
   glow: "none",
   winCondition: (f) => answeredCensus(f).length === CENSUS.length,
-  key: { word: keyFor(censusId), via: "mark" },
   healthChecks: [
     { id: "holds-lease", object: { kind: "slot", device: "observatory", iface: "eth0" }, check: holdsLease },
     {
@@ -309,7 +306,6 @@ export const binaryBehind24 = defineRoom({
   tools: {},
   glow: "none",
   winCondition: answeredBy("observatory", BELL_HOUSE, CHAPEL),
-  key: { word: keyFor(secretBinaryId), via: "mark" },
   healthChecks: [
     {
       id: "whole-street",

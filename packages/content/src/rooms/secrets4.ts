@@ -15,7 +15,7 @@ export const insideYourHomeRouter: RoomText = {
     "Found this at the foot of the spire. It looks like the little boxes people keep at home, with the blinking lights. A whole network in one box.",
   ],
   hints: [
-    { text: "You have no address. In the Lantern Town, how did you get one without guessing?" },
+    { text: "You have no address. Ask for one the way you did in the Lantern Town, instead of guessing." },
     {
       text: "With an address, ping the world. If it's silent, walk into home's room: it stands between your subnet and the world.",
     },

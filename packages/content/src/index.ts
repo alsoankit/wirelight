@@ -15,7 +15,6 @@ export * from "./fields";
 export * from "./floors";
 export * from "./guide";
 export * from "./intro";
-export * from "./keys";
 export * from "./memories";
 export { region2Arrival } from "./rooms/region2";
 export { REGION_3_ARRIVAL as region3Arrival } from "./rooms/region3";

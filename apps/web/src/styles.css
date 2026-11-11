@@ -1581,10 +1581,6 @@ button.link {
   margin-top: 14px;
 }
 
-.debrief-key code {
-  color: var(--amber);
-}
-
 :root[data-reduced="yes"] .tour-ring {
   animation: none;
 }

@@ -10,7 +10,9 @@ export const why48Bits: RoomText = {
   access: { vault: "Sealed. It answers what's sent to it, by name." },
   notes: ["Found a door out here that nobody named by hand. Its name doesn't start with 02. A factory made this one."],
   hints: [
-    { text: "You don't know its name yet. How did you learn library's?" },
+    {
+      text: "You don't know its name yet. Learn it the way you learned library's: get it to answer, then read who the answer is from.",
+    },
     { text: "Call everyone out of the door the vault is behind, then read who answered." },
     {
       text: "Not every MAC address starts with 02: some were burned in by whoever made the door.",
@@ -18,7 +20,7 @@ export const why48Bits: RoomText = {
     },
     { text: "Send a broadcast out of eth1, read the answer's from, then send a frame to that MAC address." },
     {
-      text: "Send to `ff:ff:ff:ff:ff:ff` out of eth1. The vault answers from `00:1b:21:3a:4f:9c`. Send a frame to that name, and it answers with the key.",
+      text: "Send to `ff:ff:ff:ff:ff:ff` out of eth1. The vault answers from `00:1b:21:3a:4f:9c`. Send a frame to that name, and it answers.",
     },
   ],
   detectors: {

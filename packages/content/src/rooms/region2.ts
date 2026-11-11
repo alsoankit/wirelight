@@ -31,7 +31,7 @@ export const region2Arrival: { id: string; speaker: string; text: string }[] = [
 const manyDoors: RoomText = {
   title: "Sort It by Hand",
   mission:
-    "Frames to forge pass through the hall, but the hall's keeper has stopped passing them on. Send one yourself until it remembers how.",
+    "Frames to forge pass through the hall, but the hall's keeper has stopped passing them on. Pass them on by hand at its desk until it takes over again.",
   notes: [],
   hints: [
     { text: "A frame is waiting at the desk. Read it." },
@@ -120,16 +120,16 @@ const manyDoors: RoomText = {
 const keepersMemory: RoomText = {
   title: "What the Hall Remembers",
   mission:
-    "The machine behind the hall's third door has the key, but you don't know its MAC address and the hall's board can't be read. Find out its address.",
+    "Get the machine behind the hall's third door to answer you. You don't know its MAC address, and the hall's board can't be read.",
   access: { pantry: SEALED, attic: SEALED, gate: SEALED },
-  notes: ["The one behind the third door has the key."],
+  notes: ["The one behind the third door is waiting for a message."],
   hints: [
-    { text: "The board can't be read. Can the hall tell you what's in its MAC table?" },
+    { text: "The board can't be read, but the hall itself can tell you what's in its MAC table." },
     { text: "Go into the hall's room and ask it from the terminal there." },
     { text: "A switch only learns a name when that machine sends something.", codex: "switch" },
     { text: "Get gate to send something, then ask the hall which name is behind eth3, then write to that name." },
     {
-      text: "Send a broadcast from the Frame builder. Then in the hall: `bridge fdb show` shows `02:00:00:00:00:0f dev eth3`. Send a frame to `02:00:00:00:00:0f`; gate answers with the key.",
+      text: "Send a broadcast from the Frame builder. Then in the hall: `bridge fdb show` shows `02:00:00:00:00:0f dev eth3`. Send a frame to `02:00:00:00:00:0f`; gate answers.",
     },
   ],
   detectors: {
@@ -186,7 +186,7 @@ const findEveryone: RoomText = {
   access: { bakery: SEALED, larder: SEALED, chapel: SEALED },
   notes: [],
   hints: [
-    { text: "Three letters, three doors, three names you don't know yet." },
+    { text: "Three repeating sends, three doors, three MAC addresses you don't know yet." },
     { text: "You've done this before, one name at a time." },
     {
       text: "The hall learns the name of every machine that sends something, and remembers its door.",
@@ -223,7 +223,7 @@ const busyHall: RoomText = {
       text: "Switch the door on in the hall, make laundry send something, read its MAC address from the hall's MAC table, then start a repeating send to it.",
     },
     {
-      text: "In the hall: `ip link set eth2 up`. Broadcast. `bridge fdb show` shows `02:00:00:00:00:13 dev eth2`. Set To to that address and choose Keep sending; laundry answers with the key.",
+      text: "In the hall: `ip link set eth2 up`. Broadcast. `bridge fdb show` shows `02:00:00:00:00:13 dev eth2`. Set To to that address and choose Keep sending; laundry answers.",
     },
   ],
   detectors: {
@@ -310,7 +310,7 @@ const pinnedMemory: RoomText = {
     { text: "Most memories fade when a machine goes quiet. A pinned one never does.", codex: "pinned-memory" },
     { text: "Remove the wrong line, then let the hall learn again." },
     {
-      text: "In the hall: `bridge fdb del 02:00:00:00:00:07 dev eth1 master`. The next frame floods, kitchen answers from eth3, and the key arrives.",
+      text: "In the hall: `bridge fdb del 02:00:00:00:00:07 dev eth1 master`. The next frame floods, kitchen answers from eth3, and the hall learns the right door.",
     },
   ],
   detectors: {
@@ -370,19 +370,19 @@ const pinnedMemory: RoomText = {
 const whoHasTheKey: RoomText = {
   title: "Ask Everyone",
   mission:
-    "One machine somewhere in these two halls has the key, and you don't know which one or where it is. Find it.",
+    "One machine somewhere in these two halls is waiting for your message, and you don't know which one or where it is. Find it and write to it.",
   access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED, bakery: SEALED },
   notes: [],
   hints: [
-    { text: "You don't know where it is. Who could you ask all at once?" },
-    { text: "Your broadcast." },
+    { text: "You don't know where it is, so ask every machine at once." },
+    { text: "Send a broadcast: every machine joined by the halls hears it." },
     {
       text: "A broadcast is flooded by every switch it meets, so it reaches every machine joined by switches.",
       codex: "span",
     },
-    { text: "Broadcast, read who says they keep the key, then write to them by name." },
+    { text: "Broadcast, read which machine says it's waiting for you, then write to it by name." },
     {
-      text: "Broadcast; forge answers `I'm here — forge (I keep the key)` from `02:00:00:00:00:0a`. Send it a frame by name.",
+      text: "Broadcast; forge answers `I'm here — forge. I'm the one waiting for your message.` from `02:00:00:00:00:0a`. Send it a frame by name.",
     },
   ],
   detectors: {
@@ -434,7 +434,7 @@ const spareCable: RoomText = {
     },
     { text: "Take one of the two cables away, let the halls settle, then write to forge." },
     {
-      text: 'Unplug the spare again (hall-b\'s eth4). Wait a few seconds, then send forge a frame: `lab send-frame --to 02:00:00:00:00:0a --msg "hello"`. It answers with the key.',
+      text: 'Unplug the spare again (hall-b\'s eth4). Wait a few seconds, then send forge a frame: `lab send-frame --to 02:00:00:00:00:0a --msg "hello"`. It answers.',
     },
   ],
   detectors: {
@@ -500,7 +500,7 @@ const storm: RoomText = {
     },
     { text: "Break the loop by taking one of the two spans away, then check what hall-b remembers about laundry." },
     {
-      text: "Unplug `span-2` (or `ip link set eth4 down` in hall-b). Then in hall-b, `bridge fdb del 02:00:00:00:00:13 dev eth2 master`. Write to laundry; it answers with the key.",
+      text: "Unplug `span-2` (or `ip link set eth4 down` in hall-b). Then in hall-b, `bridge fdb del 02:00:00:00:00:13 dev eth2 master`. Write to laundry; it answers.",
     },
   ],
   detectors: {

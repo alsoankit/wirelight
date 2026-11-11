@@ -1,5 +1,5 @@
 /** floors/floor-5.md · Addresses. From here, real IPv4: `ping` sends echo requests. */
-import { keyFor } from "@wirelight/content";
+
 import { printed, ran, ranBefore } from "../predicates";
 import { type Access, defineRoom, type Misconception, type SolutionStep } from "../types";
 import { answeredBy, crossedBothWays, hasAddr, pingRanFor, pingsTo, ranAfterAnswer } from "./predicates";
@@ -64,7 +64,6 @@ export const whereNotWho = defineRoom({
   tools: { unlock: ["ping"] },
   glow: "symptoms",
   winCondition: kitchenAnswered,
-  key: { word: keyFor(whereId), via: "mark" },
   healthChecks: [
     { id: "house-answered", object: { kind: "slot", device: "observatory", iface: "eth0" }, check: kitchenAnswered },
   ],
@@ -99,7 +98,6 @@ export const placeToLive = defineRoom({
   glow: "symptoms",
   subtitles: true,
   winCondition: lanternAnswered,
-  key: { word: keyFor(placeId), via: "mark" },
   healthChecks: [
     ownAddress,
     {
@@ -161,7 +159,6 @@ export const rollCall = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: (f) => ROLL.every((h) => answeredBy("observatory", h.ip, h.door)(f)),
-  key: { word: keyFor(rollId), via: "mark" },
   healthChecks: [ownAddress],
   teaches: [],
   uses: ["ip-address", "ping", "echo-request-reply"],
@@ -209,7 +206,6 @@ export const quietStreet = defineRoom({
   tools: {},
   glow: "none",
   winCondition: quietAnswered,
-  key: { word: keyFor(quietId), via: "mark" },
   healthChecks: [
     ownAddress,
     {

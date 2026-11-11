@@ -1,5 +1,5 @@
 /** floors/floor-1.md · The Wire. Everything is done by clicking; no console yet (0032). */
-import { helloWithKey, keyFor, lanternHello } from "@wirelight/content";
+import { answerFrom, lanternHello } from "@wirelight/content";
 import {
   all,
   corridorLit,
@@ -25,7 +25,7 @@ const PLATE = /^ip link show eth0$/;
 const PLUG = /^lab cable plug eth0$/;
 const UNPLUG = /^lab cable unplug eth0$/;
 const BOTH_ROOMS = { observatory: { state: "enterable" }, kitchen: { state: "enterable" } } as const;
-const keyMessage = (room: string) => helloWithKey("kitchen", keyFor(room));
+const keyMessage = (room: string) => answerFrom("kitchen");
 
 const wireLit = { id: "wire-lit", object: { kind: "corridor", link: "wire" }, check: corridorLit("wire") } as const;
 const doorUp = (device: string) => ({
@@ -71,7 +71,6 @@ export const twoRooms = defineRoom({
   glow: "causes",
   // The lock opens when you know whose room it is: kitchen's plate has been read.
   winCondition: readLantern,
-  key: { word: keyFor(twoRoomsId), via: "lock" },
   healthChecks: [
     { id: "kitchen-plate", object: { kind: "door", device: "kitchen", iface: "eth0" }, check: readLantern },
   ],
@@ -108,7 +107,6 @@ export const looseCable = defineRoom({
   tools: { unlock: ["lab cable"] },
   glow: "symptoms",
   winCondition: labDelivered("observatory", keyMessage(looseId)),
-  key: { word: keyFor(looseId), via: "lab-text" },
   healthChecks: [doorUp("observatory"), wireLit],
   teaches: ["link", "link-light"],
   uses: ["interface"],
@@ -138,7 +136,6 @@ export const bothEnds = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: labDelivered("observatory", keyMessage(bothId)),
-  key: { word: keyFor(bothId), via: "lab-text" },
   healthChecks: [doorUp("kitchen"), wireLit],
   teaches: ["link-up-down"],
   uses: ["interface", "link", "link-light"],
@@ -177,7 +174,6 @@ export const darkCorridor = defineRoom({
   tools: {},
   glow: "none",
   winCondition: labDelivered("observatory", keyMessage(bossId)),
-  key: { word: keyFor(bossId), via: "lab-text" },
   healthChecks: [
     { id: "cable-in", object: { kind: "corridor", link: "wire" }, check: ({ world }) => !!world.links()[0]?.plugged },
     doorUp("observatory"),

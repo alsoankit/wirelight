@@ -1,5 +1,5 @@
 /** floors/floor-2.md · Names on the Wire. The console arrives with the gift of the voice (2.4, 0032). */
-import { helloWithKey, keyFor, mothCall } from "@wirelight/content";
+import { answerFrom, mothCall } from "@wirelight/content";
 import { corridorLit, labDelivered, linkUp, printed, quietAfter, ran, sentTo } from "../predicates";
 import { defineRoom, type Misconception, type Predicate, type SolutionStep } from "../types";
 import { BROADCAST, CELLAR, halls, KITCHEN, LIBRARY, OBSERVATORY } from "./topology";
@@ -53,7 +53,7 @@ function clicksAfterGift(control: string, n: number): Predicate {
 // ── 2.1 · First Light ──────────────────────────────────────────────────────────────────────
 
 const firstLightId = "f2.first-light";
-const firstLightReply = helloWithKey("kitchen", keyFor(firstLightId));
+const firstLightReply = answerFrom("kitchen");
 export const firstLight = defineRoom({
   id: firstLightId,
   region: 1,
@@ -76,7 +76,6 @@ export const firstLight = defineRoom({
   tools: { unlock: ["workbench"] },
   glow: "symptoms",
   winCondition: labDelivered("observatory", firstLightReply),
-  key: { word: keyFor(firstLightId), via: "lab-text" },
   healthChecks: [wireLit],
   teaches: ["frame", "mac-address"],
   uses: ["interface"],
@@ -99,7 +98,7 @@ export const firstLight = defineRoom({
 // ── 2.2 · Wrong Name ───────────────────────────────────────────────────────────────────────
 
 const wrongNameId = "f2.wrong-name";
-const wrongNameReply = helloWithKey("kitchen", keyFor(wrongNameId));
+const wrongNameReply = answerFrom("kitchen");
 export const wrongName = defineRoom({
   id: wrongNameId,
   region: 1,
@@ -126,7 +125,6 @@ export const wrongName = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: labDelivered("observatory", wrongNameReply),
-  key: { word: keyFor(wrongNameId), via: "lab-text" },
   healthChecks: [
     {
       id: "send-answered",
@@ -151,7 +149,7 @@ export const wrongName = defineRoom({
 // ── 2.3 · Who Are You? ─────────────────────────────────────────────────────────────────────
 
 const whoId = "f2.who-are-you";
-const quillReply = helloWithKey("library", keyFor(whoId));
+const quillReply = answerFrom("library");
 export const whoAreYou = defineRoom({
   id: whoId,
   region: 1,
@@ -172,7 +170,6 @@ export const whoAreYou = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: labDelivered("observatory", quillReply),
-  key: { word: keyFor(whoId), via: "lab-text" },
   healthChecks: [{ id: "vine-lit", object: { kind: "corridor", link: "vine" }, check: corridorLit("vine") }],
   teaches: ["broadcast", "source-address"],
   uses: ["frame", "mac-address", "destination-address"],
@@ -196,7 +193,7 @@ export const whoAreYou = defineRoom({
 // ── 2.4 · Lights Out ───────────────────────────────────────────────────────────────────────
 
 const lightsId = "f2.lights-out";
-const lightsMessage = helloWithKey("kitchen", keyFor(lightsId));
+const lightsMessage = answerFrom("kitchen");
 export const lightsOut = defineRoom({
   id: lightsId,
   region: 1,
@@ -219,7 +216,6 @@ export const lightsOut = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: labDelivered("observatory", lightsMessage),
-  key: { word: keyFor(lightsId), via: "lab-text" },
   healthChecks: [
     {
       id: "door-up",
@@ -256,7 +252,7 @@ export const lightsOut = defineRoom({
 // ── 2.B ★ The Silent Line ──────────────────────────────────────────────────────────────────
 
 const bossId = "f2.boss-silent-line";
-const mothReply = helloWithKey("cellar", keyFor(bossId));
+const mothReply = answerFrom("cellar");
 export const silentLine = defineRoom({
   id: bossId,
   region: 1,
@@ -288,7 +284,6 @@ export const silentLine = defineRoom({
   tools: {},
   glow: "none",
   winCondition: labDelivered("observatory", mothReply),
-  key: { word: keyFor(bossId), via: "lab-text" },
   healthChecks: [
     {
       id: "eth1-up",
@@ -350,7 +345,7 @@ export const silentLine = defineRoom({
 
 const VAULT = "00:1b:21:3a:4f:9c";
 const secretId = "f2.secret-48-bits";
-const relicReply = helloWithKey("vault", keyFor(secretId));
+const relicReply = answerFrom("vault");
 export const why48Bits = defineRoom({
   id: secretId,
   region: 1,
@@ -368,7 +363,6 @@ export const why48Bits = defineRoom({
   tools: {},
   glow: "none",
   winCondition: labDelivered("observatory", relicReply),
-  key: { word: keyFor(secretId), via: "lab-text" },
   healthChecks: [{ id: "seam-lit", object: { kind: "corridor", link: "seam" }, check: corridorLit("seam") }],
   teaches: [],
   uses: ["frame", "mac-address", "broadcast", "source-address"],

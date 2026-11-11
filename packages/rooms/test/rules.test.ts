@@ -162,10 +162,6 @@ describe.each(rooms.map((r) => [r.id, r] as const))("%s", (_id, room) => {
     }
   });
 
-  it("ROOM-09: has a key", () => {
-    expect(room.key.word).toMatch(/^[a-z]+-[a-z]+$/);
-  });
-
   it("0009: its path tag fits its kind", () => {
     if (room.kind === "boss") expect(room.pathTag).toBe("boss");
     if (room.kind === "prologue") expect(room.pathTag).toBe("all");
@@ -209,17 +205,6 @@ describe("across rooms", () => {
         expect(seen.get(c), `card ${c} opens twice`).toBeUndefined();
         seen.set(c, r.id);
       }
-  });
-
-  it("ROOM-09: no two rooms share a key", () => {
-    const seen = new Map<string, string>();
-    const clashes: string[] = [];
-    for (const r of rooms) {
-      const other = seen.get(r.key.word);
-      if (other) clashes.push(`${r.id} and ${other} both have "${r.key.word}"`);
-      seen.set(r.key.word, r.id);
-    }
-    expect(clashes).toEqual([]);
   });
 
   it("detector tests name distinct misconceptions in each room", () => {

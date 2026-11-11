@@ -14,7 +14,7 @@ export const otherStreet: RoomText = {
   mission: "Gallery is on the next subnet, and you can't reach it. Find the machine that stands between you.",
   notes: [],
   hints: [
-    { text: "Who has a door on both subnets?" },
+    { text: "Look for the machine that has a door on both subnets." },
     { text: "Walk to the room between you and gallery. Read its plates." },
     {
       text: "A router has a door on each subnet it joins; each door has an address on its own subnet.",
@@ -165,7 +165,7 @@ export const noWayBack: RoomText = {
   mission: "Your pings to gallery get no reply and no error message. Find out where they stop.",
   notes: [],
   hints: [
-    { text: "No error means nothing turned your packet back. Where did it go?" },
+    { text: "No error means nothing turned your packet back. Find out how far it got." },
     { text: "The Scanner can listen at doors now. Try one at each step." },
     { text: "A reply needs its own way back: the far house needs a route too.", codex: "return-path" },
     { text: "Find the door where requests arrive but nothing leaves, and give that house its way back." },
@@ -200,7 +200,8 @@ export const noWayBack: RoomText = {
 
 export const sleepingKeeper: RoomText = {
   title: "Not Allowed",
-  mission: "Crossing's keeper has stopped passing anything along. Your pings for gallery pile up at its desk.",
+  mission:
+    "Your pings for gallery reach crossing and pile up at its desk: its keeper has stopped passing anything along. Get them through to gallery.",
   notes: [],
   hints: [
     { text: "Your packets reach the router, crossing, and stop." },

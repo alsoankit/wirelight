@@ -1,12 +1,11 @@
 /** floors/prologue.md · The First Message. */
-import { keyFor, lanternReply } from "@wirelight/content";
+import { lanternReply } from "@wirelight/content";
 import { corridorLit, labDelivered } from "../predicates";
 import { defineRoom } from "../types";
 import { halls } from "./topology";
 
 const id = "p.first-message";
-const key = keyFor(id);
-const reply = lanternReply(key);
+const reply = lanternReply;
 const send = { device: "observatory", line: 'lab send-frame --to kitchen --msg "hello"', source: "click" as const };
 
 export const firstMessage = defineRoom({
@@ -26,7 +25,6 @@ export const firstMessage = defineRoom({
   tools: { unlock: ["lab send-frame"] },
   glow: "causes",
   winCondition: labDelivered("observatory", reply),
-  key: { word: key, via: "lab-text" },
   healthChecks: [{ id: "wire-lit", object: { kind: "corridor", link: "wire" }, check: corridorLit("wire") }],
   teaches: [],
   uses: [],

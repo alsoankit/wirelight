@@ -1,5 +1,5 @@
 /** floors/floor-9.md · The Journey (the first release's finale). Keys are marks on the winning answer. */
-import { keyFor } from "@wirelight/content";
+
 import { all, ran } from "../predicates";
 import { defineRoom, type Misconception, type Predicate } from "../types";
 import { click, crackedBoards, openRooms, typed } from "./floor8";
@@ -73,7 +73,6 @@ export const twoEnvelopes = defineRoom({
   glow: "symptoms",
   // Arch's lock opens on a compare showing a new frame around the same packet.
   winCondition: newFrameSamePacket,
-  key: { word: keyFor(envelopesId), via: "mark" },
   // Nothing is broken: the room comes back to life once the player has seen the frame change and the packet stay.
   healthChecks: [
     {
@@ -149,7 +148,6 @@ export const showTheWay = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: (f) => pingAnswered("laundry", IP.observatory)(f) && tracedHops("laundry", 3)(f),
-  key: { word: keyFor(showId), via: "mark" },
   healthChecks: [
     {
       id: "laundry-gateway",
@@ -195,7 +193,6 @@ export const oneStepOnly = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: (f) => crossingLock(f) && archLock(f),
-  key: { word: keyFor(oneStepId), via: "mark" },
   healthChecks: [
     { id: "crossing-lock", object: { kind: "keeper", device: "crossing" }, check: crossingLock },
     { id: "arch-lock", object: { kind: "keeper", device: "arch" }, check: archLock },
@@ -238,7 +235,6 @@ export const roundAndRound = defineRoom({
   tools: {},
   glow: "symptoms",
   winCondition: pingAnswered("observatory", IP.loft),
-  key: { word: keyFor(roundId), via: "mark" },
   healthChecks: [{ id: "arch-knows-window", object: { kind: "board", device: "arch" }, check: archToWindow }],
   teaches: ["routing-loop"],
   uses: ["ttl", "icmp", "routing-table", "specific-route", "default-gateway", "hop"],
@@ -287,7 +283,6 @@ export const theCrossing = defineRoom({
   tools: {},
   glow: "none",
   winCondition: pingAnswered("observatory", IP.loft),
-  key: { word: keyFor(crossingId), via: "mark" },
   healthChecks: [
     {
       id: "crossing-knows-the-way",
@@ -397,7 +392,6 @@ export const insideYourHomeRouter = defineRoom({
   tools: {},
   glow: "none",
   winCondition: all(holdsLease("observatory", ...HOME.pool), pingAnswered("observatory", HOME.world)),
-  key: { word: keyFor(homeId), via: "mark" },
   healthChecks: [
     {
       id: "holds-lease",

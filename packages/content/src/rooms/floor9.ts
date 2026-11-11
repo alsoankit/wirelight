@@ -72,7 +72,7 @@ export const showTheWay: RoomText = {
   notes: [],
   hints: [
     { text: "Read laundry's routing table." },
-    { text: "What does every machine need to reach other subnets?" },
+    { text: "Laundry's routing table has a line for its own subnet only." },
     { text: "A default gateway: a router's door on its own subnet.", codex: "default-gateway" },
     { text: "Give laundry a default via arch's door on the bell tower, then trace a ping home." },
     { text: "In laundry: `ip route add default via {archTower}`. Trace a ping to `{observatory}`." },
@@ -93,7 +93,7 @@ export const showTheWay: RoomText = {
 export const oneStepOnly: RoomText = {
   title: "One Step Only",
   mission:
-    "Two locks: one at the first router, one at the second. Each opens only for a ping that runs out exactly there.",
+    "Each router on the way to belfry has a padlock that opens only when a ping's countdown runs out right at that router. Open both.",
   notes: [],
   hints: [
     { text: "Each router takes one off a packet's countdown." },
@@ -226,7 +226,7 @@ export const theCrossing: RoomText = {
       tried: "You gave the ping a bigger TTL, which only bought it more laps.",
     },
     "step-by-step": {
-      note: "Where does it stop now? Ask the road.",
+      note: "Where does it stop now? Trace it again and look.",
       tried: "You tried several changes in a row without asking the road where your ping stopped.",
     },
   },

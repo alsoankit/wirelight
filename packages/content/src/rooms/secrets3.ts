@@ -11,7 +11,7 @@ export const binaryBehind24: RoomText = {
   access: { kitchen: HOUSE_LOCKED },
   notes: ["Someone changed my plate from /24 to /25 while I was counting houses. Half the square went quiet."],
   hints: [
-    { text: "Ping kitchen, then ping chapel. Only one of them answers. Why that one?" },
+    { text: "Ping kitchen, then ping chapel. Only kitchen answers. Compare chapel's address with your plate." },
     { text: "Compare the `/` on your plate with the one on the street sign." },
     {
       text: "An address is 32 bits, four numbers of 8. The `/` (the prefix length) counts how many bits, from the left, are the subnet. One more bit cuts the subnet in half.",
