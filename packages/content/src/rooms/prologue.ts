@@ -3,22 +3,23 @@ import type { RoomText } from "./types";
 /** floors/prologue.md, word for word. */
 export const firstMessage: RoomText = {
   title: "Wake Up and Say Hello",
-  mission: "There's someone at the other end of this cable. Press Send and see what happens.",
+  mission:
+    "Another machine, kitchen, is at the other end of this cable. Press Send to send it a message, and wait for an answer.",
   access: { kitchen: "Not yet. Send your message first." },
   notes: [
     "Note to self: there's someone at the other end of that cable. I sent a message and never got an answer. Try again when you wake up.",
   ],
   hints: [
     { text: "Press the Send button. It sends a message to kitchen, down the cable." },
-    { text: "Press Send, then watch the corridor." },
+    { text: "Press Send, then watch the corridor: it's the cable between you and kitchen." },
     { text: "A message goes out along the cable. Wait and see if anything comes back.", codex: "message" },
-    { text: "Press Send once and keep your eyes on the Map until a light returns." },
+    { text: "Press Send once and watch the Map until a light comes back: that light is kitchen's answer." },
     { text: "Press Send. Your message travels to kitchen, kitchen answers, and the answer lights the corridor." },
   ],
   detectors: {},
   debrief: {
     happened:
-      "That's a network: machines, a cable between them, and messages going back and forth. The corridor lit up when the answer came back. Sending a message doesn't prove it arrived: only an answer coming back does.",
+      "That's a network: machines, a cable between them, and messages going back and forth. The corridor lit up when kitchen's answer came back. Real networks work the same way: sending a message doesn't prove it arrived, only an answer coming back does.",
     terms: [],
   },
   memories: [
@@ -33,7 +34,7 @@ export const firstMessage: RoomText = {
   questions: [
     {
       q: "What is this place?",
-      a: "The room I shut down in. It's a machine, like every room here. The palace calls it the observatory, so that's its name.",
+      a: "The room I shut down in. Every room here is a machine, and this one's name is observatory.",
     },
     {
       q: "What is that light in the corridor?",

@@ -19,7 +19,7 @@ export const REGION_2_COMMANDS: Record<string, CommandMemory> = {
     id: "CMD-02",
     command: "bridge fdb",
     room: "f3.keepers-memory",
-    intro: "The board can't be read any more, but the hall still remembers. Ask it from the terminal.",
+    intro: "The MAC board is too damaged to read, but the switch still keeps its table. Read it from the terminal.",
     anatomy: [
       { word: "bridge", role: "tool", meaning: "the tool for switches (Linux calls a switch a bridge)" },
       { word: "fdb", role: "about what", meaning: "its forwarding database: the MAC table" },
@@ -43,7 +43,7 @@ export const REGION_2_COMMANDS: Record<string, CommandMemory> = {
         ...bridgeLines,
       ].join("\n"),
       marks: [
-        { match: "02:00:00:00:00:0d", meaning: "a name it has seen" },
+        { match: "02:00:00:00:00:0d", meaning: "a MAC address it has seen" },
         { match: "dev eth1", meaning: "behind this door" },
         { match: "master br0", meaning: "in this switch's table" },
         {
@@ -63,13 +63,13 @@ export const REGION_2_COMMANDS: Record<string, CommandMemory> = {
     anatomy: [
       { word: "bridge fdb", role: "tool", meaning: "the switch's memory, as before" },
       { word: "del", role: "do what", meaning: "remove a line" },
-      { word: "02:00:00:00:00:07", role: "which one", meaning: "which name" },
+      { word: "02:00:00:00:00:07", role: "which one", meaning: "which MAC address" },
       { word: "dev eth1", role: "where", meaning: "the door it's written against" },
       { word: "master", role: "whose", meaning: "in the switch's table" },
     ],
     forms: [
-      { line: "bridge fdb del <name> dev <door> master", meaning: "forget one line" },
-      { line: "bridge fdb add <name> dev <door> master static", meaning: "pin one by hand (rarely a good idea)" },
+      { line: "bridge fdb del <mac> dev <door> master", meaning: "forget one line" },
+      { line: "bridge fdb add <mac> dev <door> master static", meaning: "pin one by hand (rarely a good idea)" },
     ],
     // The hall in 4.1 once the pinned line is gone and kitchen has answered: asked with `bridge fdb show`.
     output: {

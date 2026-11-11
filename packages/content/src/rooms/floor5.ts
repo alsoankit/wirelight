@@ -15,7 +15,7 @@ export const REGION_3_ARRIVAL = [
   {
     id: "R3-ARRIVE-02",
     speaker: "You",
-    text: "Down in the halls, every door had a name. Up here, every house has an address too.",
+    text: "Down in the halls, every door had a name: its MAC address. Up here, every house is a machine, and it has an address too.",
   },
   {
     id: "R3-ARRIVE-03",
@@ -27,40 +27,49 @@ export const REGION_3_ARRIVAL = [
 export const whereNotWho: RoomText = {
   title: "A New Door",
   mission:
-    "Kitchen's door was replaced, so its door name changed, and your messages to the old name go nowhere. Reach kitchen another way.",
+    "Kitchen's door was replaced, so its MAC address changed and your messages to the old one go nowhere. Find a way to reach kitchen that doesn't change with its door.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
-    { text: "Kitchen isn't gone. Its door is new, but its house address is the same." },
     // Kitchen's house is locked in 5.1, so its own plate can't be read: the register is the place to look.
-    { text: "Read the register on the square's wall: it lists every house's address." },
+    { text: "Go to the square and read the register on its wall: it lists every house and its address." },
+    { text: "The `ping` command sends a message to an address and waits for an answer." },
     {
-      text: "A door has a name; a house has an address. The address stays when the door changes.",
+      text: "A door has a name (its MAC address); a house has an address. The house address stays the same when the door changes.",
       codex: "ip-address",
     },
     {
-      text: "Find kitchen's house address on the register, then ping that address.",
+      text: "Find kitchen's house address on the register, then ping that address from your machine.",
       codex: "ip-address",
     },
-    { text: "Ping kitchen at its house address: `ping -c 1 10.0.1.7`." },
+    { text: "From your machine: `ping -c 1 10.0.1.7`. Kitchen answers from its new door." },
   ],
   detectors: {
     "own-address": {
-      note: "That's your own address.",
+      note: "That's your own address. Kitchen's is on the register in the square.",
       tried: "You checked your own machine instead of the kitchen.",
     },
   },
   debrief: {
-    happened: "Kitchen's door changed, but its house address stayed the same. Ping reaches it at that IP address.",
+    happened:
+      "Kitchen's door was replaced, so its MAC address changed, but its house address stayed the same. That address is its IP address: it says where a machine is on the network, and it stays put when the hardware changes. `ping` sent a question to that address, and kitchen answered.",
     terms: [
-      { id: "ip-address", term: "IP address", meaning: "where a machine is: its house address, like 10.0.1.7" },
-      { id: "ping", term: "ping", meaning: "asking a house 'are you there?'" },
+      {
+        id: "ip-address",
+        term: "IP address",
+        meaning: "a machine's address on the network, like 10.0.1.7; it stays the same when the door changes",
+      },
+      {
+        id: "ping",
+        term: "ping",
+        meaning: "a command that asks the machine at an address 'are you there?' and waits for the answer",
+      },
     ],
   },
   questions: [
     {
-      q: "Why not just use names?",
-      a: "Names belong to doors, and doors get replaced. A house stays where it is.",
+      q: "Why not use door names?",
+      a: "A MAC address belongs to the door, and doors get replaced. The house address belongs to the machine's place on the network, so it stays.",
     },
     {
       q: "Can I use the new MAC address instead?",
@@ -68,7 +77,7 @@ export const whereNotWho: RoomText = {
     },
     {
       q: "What's that little question flying out first?",
-      a: "There's a way: asking the neighbours. You'll find it soon.",
+      a: "Your machine asking everyone on the street which door has address 10.0.1.7, so it knows which MAC address to put on the frame. Floor 6 explains it.",
     },
   ],
   fieldGuide: ["Houses and addresses", "Plates (now with addresses)"],
@@ -81,9 +90,12 @@ export const placeToLive: RoomText = {
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: ["Our house: 10.0.1.5/24."],
   hints: [
-    { text: "Your plate has no address on it." },
+    { text: "Read the plate on your door: its address line is empty." },
     { text: "Look at the note on the table in your room." },
-    { text: "A house needs its own address before it can send or receive.", codex: "ip-address" },
+    {
+      text: "A machine needs its own IP address before it can send or receive: every reply needs an address to come back to.",
+      codex: "ip-address",
+    },
     { text: "Write the address from the note in your plate's address slot, then ping kitchen." },
     {
       text: "Click the address slot and write `10.0.1.5/24` (`ip addr add 10.0.1.5/24 dev eth0`), then `ping -c 3 10.0.1.7`.",
@@ -92,17 +104,17 @@ export const placeToLive: RoomText = {
   detectors: {
     "ping-no-address": {
       // The same words as F5-NOTE-01 (the robot's line after this first, failed ping).
-      note: "A house with no address can't send messages, or get answers.",
+      note: "A machine with no IP address can't send messages, or get answers.",
       tried:
-        "You pinged before your house had an address: `Network is unreachable`. Nothing could leave without a return address.",
+        "You pinged before your machine had an address: `Network is unreachable`. Nothing could leave without a return address.",
     },
     "wrong-house": {
-      note: "That answer came from your own house. Whose address did you write?",
-      tried: "You gave your house kitchen's address, so your pings answered themselves.",
+      note: "That answer came from your own machine: the address you wrote is kitchen's. Yours is on the note.",
+      tried: "You gave your machine kitchen's address, so your pings answered themselves.",
     },
     "no-prefix": {
       note: "Copy the whole address from the note, the `/24` too.",
-      tried: "You wrote the address without its `/24`, and the street went out of reach.",
+      tried: "You wrote the address without its `/24`, so your machine had no way to reach anyone on the street.",
     },
     "ping-forever": {
       note: "It'll keep asking until you stop it. Ctrl+C.",
@@ -111,7 +123,7 @@ export const placeToLive: RoomText = {
   },
   debrief: {
     happened:
-      "Your door had no address, so you couldn't send anything to a house, or hear back. With an address of your own, you pinged kitchen: an echo request out, an echo reply back.",
+      "Your machine had no IP address, so it couldn't send anything or get a reply. Once it had one, you pinged kitchen: ping sent an echo request to 10.0.1.7, and kitchen sent an echo reply back to your address. Every message carries the sender's address, so the answer knows where to go.",
     terms: [
       {
         id: "echo-request-reply",
@@ -123,21 +135,24 @@ export const placeToLive: RoomText = {
   questions: [
     {
       q: "Why can't I ping without an address?",
-      a: "Who would the answer go back to? Every message needs a return address.",
+      a: "The answer would have nowhere to go. Every message carries a return address: yours.",
     },
     {
       q: "What's the `/24` on the note?",
-      a: "Part of how an address is written. The street sign explains it, further into town. For now, just copy it.",
+      a: "Part of how an address is written. Floor 7 explains it. For now, copy it as it is.",
     },
     { q: "Why does ping go on forever?", a: "It keeps going until you stop it. Ctrl+C tells it you've seen enough." },
   ],
   fieldGuide: ["Command book: `ping`", "Your address"],
-  voice: [{ id: "F5-NOTE-01", speaker: "You", text: "A house with no address can't send messages, or get answers." }],
+  voice: [
+    { id: "F5-NOTE-01", speaker: "You", text: "A machine with no IP address can't send messages, or get answers." },
+  ],
 };
 
 export const rollCall: RoomText = {
   title: "Roll Call",
-  mission: "A list on the wall names five houses. Check which of them answer you: each one's lamp lights when it does.",
+  mission:
+    "A list on the wall names five houses. Ping each one and find out which answer: a house's lamp lights when it replies.",
   access: {
     kitchen: HOUSE_LOCKED,
     library: HOUSE_LOCKED,
@@ -147,7 +162,7 @@ export const rollCall: RoomText = {
   },
   notes: ["Roll: 10.0.1.7, 10.0.1.10, 10.0.1.12, 10.0.1.16, 10.0.1.18."],
   hints: [
-    { text: "Before you can call on anyone, you need your own address back." },
+    { text: "Your machine has lost its address again. Read your plate first." },
     { text: "The slot's broken. Use the terminal instead." },
     { text: "`ip addr add` gives a door an address, the same as the slot did.", codex: "address-slot" },
     { text: "Give yourself `10.0.1.5/24`, then ping each house on the roll." },
@@ -157,13 +172,13 @@ export const rollCall: RoomText = {
   ],
   detectors: {
     "empty-house": {
-      note: "Nobody's home at that one. Was every house on the roll going to answer?",
-      tried: "You kept pinging bakery's house, but its door is dark.",
+      note: "No machine answers at that address. A list says who should be there, not who is switched on.",
+      tried: "You kept pinging bakery's house, but its door is switched off, so nothing can answer.",
     },
   },
   debrief: {
     happened:
-      "You gave your house its address with a terminal command, then called the roll. Four houses answered. One stayed silent: no reply means no machine answered at that address.",
+      "You gave your machine its address with a terminal command, then pinged every house on the list. Four answered. Bakery stayed silent because its door was switched off: no reply means nothing answered at that address, and on real networks that can be a machine that's off or a break on the way.",
     terms: [],
   },
   fieldGuide: ["Command book: `ip addr`"],
@@ -175,10 +190,10 @@ export const quietStreet: RoomText = {
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
-    { text: "Three things are wrong: one in your house, one in the square, and one in the route to kitchen." },
-    { text: "Ping a few houses. Who answers, and who doesn't?" },
+    { text: "Two things are wrong: one in your house, and one in the square, on the way to kitchen." },
+    { text: "Read your own plate. Then walk into the square and read the plate on each of its doors." },
     {
-      text: "A house needs an address; a door needs to be on; a letter needs the right address.",
+      text: "A machine needs an IP address, and every door on the way must be switched on (link up).",
       codex: "ip-address",
     },
     { text: "Give yourself an address, switch the square's door to kitchen on, then ping kitchen's address." },
@@ -188,8 +203,8 @@ export const quietStreet: RoomText = {
   ],
   detectors: {
     "wrong-house": {
-      note: "That answer came from your own house. Whose address did you write?",
-      tried: "You gave your house kitchen's address.",
+      note: "That answer came from your own machine: the address you wrote is kitchen's.",
+      tried: "You gave your machine kitchen's address.",
     },
     "no-prefix": {
       note: "Copy the whole address, the `/24` too.",
@@ -200,40 +215,40 @@ export const quietStreet: RoomText = {
       tried: "You let a ping run on and on.",
     },
     "wrong-door-name": {
-      note: "Doors have names. Which name does it have? Ask the machine for its doors.",
+      note: "That machine has no door with that name. `ip link` lists the doors it has.",
       tried: "You named a door that machine doesn't have.",
     },
     "ping-only-library": {
-      note: "Library hears you. So your address is fine. What's between you and kitchen?",
+      note: "Library answers, so your address is fine. Look at what's between you and kitchen: the square.",
       tried: "Library answered, and you changed your own address again, but yours was already fine.",
     },
   },
   debrief: {
     happened:
-      "Your house had no address, the square's door to kitchen was off, and the route to kitchen's house address was missing. Each one alone would keep the street quiet.",
+      "Your machine had no IP address, and the square's door to kitchen was switched off. Either one alone keeps kitchen silent. When nothing answers, check your own end first, then each step on the way.",
     terms: [],
   },
   voice: [
     {
       id: "F5-BOSS-01",
       speaker: "You",
-      text: "The busiest street in town, and nothing answers. Several things must be broken.",
+      text: "The busiest street in town, and nothing answers. More than one thing is broken.",
     },
   ],
 };
 
 export const floor5: FloorText = {
-  name: "Addresses",
+  name: "IP Addresses",
   memory: [
     {
       id: "F5-FM-01",
       title: "The problem",
-      text: "Memory restored. The halls knew every door by name. But doors were replaced, and machines moved, and every time, messages went astray.",
+      text: "Memory restored. The halls knew every door by its MAC address. But doors were replaced and machines moved, and each time, messages went nowhere.",
     },
     {
       id: "F5-FM-02",
       title: "What they built",
-      text: "So every house got an address. Not the door's name, the house's. Write to the house, and it doesn't matter which door it has this year.",
+      text: "So every machine got an IP address: an address for its place on the network, not for its door. Send to the IP address, and it doesn't matter which door the machine has this year.",
     },
     {
       id: "F5-FM-03",
@@ -245,7 +260,7 @@ export const floor5: FloorText = {
     {
       id: "F5-FM-04",
       title: "What's next",
-      text: "But how does a message with a house address find the right door? A little question goes out first. That part is still missing.",
+      text: "But a frame still needs a MAC address. How does a machine find the door that goes with an IP address? A small question goes out first. That's next.",
       shown: "the world map: Floor 6 appears in mist",
     },
   ],
@@ -253,6 +268,6 @@ export const floor5: FloorText = {
     page: 5,
     title: "Addresses",
     where: "on the square's notice board in 5.2",
-    text: "Log 3,318. Everyone up here has two names: one on the door, one on the house. I kept writing to doors and wondered why nothing arrived.",
+    text: "Log 3,318. Everyone up here has two addresses: a MAC address on the door, and an IP address for the house. I kept writing to old doors and wondered why nothing arrived.",
   },
 };

@@ -67,7 +67,10 @@ function Dungeon() {
         return (
           <section key={f.n}>
             <h3>
-              {f.n === 0 ? f.name : `${f.n} · ${f.name}`} <span className="panel-note">{regions[f.region]?.name}</span>
+              {f.n === 0 ? f.name : `${f.n} · ${f.name}`}{" "}
+              <span className="panel-note">
+                {regions[f.region]?.name} · {regions[f.region]?.topic}
+              </span>
             </h3>
             {mine.length === 0 && <p className="panel-note">{voice.menu.status.planned}</p>}
             <ul>

@@ -6,9 +6,9 @@ export const REGION_3_CARDS: Card[] = [
     id: "ip-address",
     floor: 5,
     title: "IP address",
-    text: "Where a machine lives: its house address in the town, like 10.0.1.7.",
+    text: "A machine's address on the network, like 10.0.1.7. In the town, it's the house's address.",
   },
-  { id: "register", floor: 5, title: "The register", text: "The list of every house on the street." },
+  { id: "register", floor: 5, title: "The register", text: "The list of every house on the street, and its address." },
   {
     id: "address-slot",
     floor: 5,
@@ -26,13 +26,13 @@ export const REGION_3_CARDS: Card[] = [
     id: "packet",
     floor: 6,
     title: "Packet",
-    text: "The letter inside the frame. It carries house addresses: who wrote it, and who it's for.",
+    text: "The message inside the frame. It carries IP addresses: who sent it, and who it's for.",
   },
   {
     id: "neighbour-ledger",
     floor: 6,
     title: "Neighbour ledger",
-    text: "Your house's list of which door name goes with which house address on your street.",
+    text: "Your machine's list of which MAC address goes with which IP address on your street (`ip neigh`).",
   },
   {
     id: "arp-question",

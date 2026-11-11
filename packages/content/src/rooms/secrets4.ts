@@ -9,8 +9,8 @@ import type { RoomText } from "./types";
 export const insideYourHomeRouter: RoomText = {
   title: "The Box at Home",
   mission:
-    "A small box at the foot of the spire works like the one in a home. Plug into it, and reach the world outside.",
-  access: { world: "Sealed. It answers anyone who can reach it, from outside." },
+    "This small box works like the router in a home. Your machine is plugged into it with no address: get one, and ping the world outside.",
+  access: { world: "You can't go in: the world is outside this network. It answers anyone who can reach it." },
   notes: [
     "Found this at the foot of the spire. It looks like the little boxes people keep at home, with the blinking lights. A whole network in one box.",
   ],
@@ -34,8 +34,8 @@ export const insideYourHomeRouter: RoomText = {
       tried: "You wrote your own address, when home hands them out (with directions out).",
     },
     "forward-at-your-house": {
-      note: "Your house isn't passing anyone's packets on. Which box stands between you and the world?",
-      tried: "You let your own house forward, when home is the router between the subnets.",
+      note: "Your machine isn't passing anyone's packets on. Home is the box between you and the world.",
+      tried: "You let your own machine forward, when home is the router between the subnets.",
     },
     "route-at-home": {
       note: "Home already has a door on both subnets, so it knows both. What isn't it allowed to do yet?",
@@ -44,7 +44,7 @@ export const insideYourHomeRouter: RoomText = {
   },
   debrief: {
     happened:
-      "Home was three things you already know, in one box. Its doors joined into one subnet, `br0`: a switch. On that subnet it handed you an address by DHCP, a lease that came with a default gateway, `{home}`. And once IP forwarding was on, it passed your ping to the world and the answer back: a router. The box on a shelf at home does exactly this, and most of them use the subnet `192.168.1.0/24`. Real ones do one more trick: the world never sees your house's address, because the box writes its own on everything going out and sorts the answers when they come back. Here, the world was simply told the way back to your subnet. That trick comes later, in the Frontier.",
+      "Home was three things you already know, in one box. Its doors joined into one subnet, `br0`: a switch. On that subnet it handed you an address by DHCP, a lease that came with a default gateway, `{home}`. And once IP forwarding was on, it passed your ping to the world and the answer back: a router. The box on a shelf at home does exactly this, and most of them use the subnet `192.168.1.0/24`. Real ones do one more trick: the world never sees your machine's address, because the box writes its own on everything going out and sorts the answers when they come back. Here, the world was told the way back to your subnet instead. That trick comes later, in the Frontier.",
     terms: [],
   },
   questions: [
@@ -52,7 +52,7 @@ export const insideYourHomeRouter: RoomText = {
     { q: "Who is the world?", a: "Everyone outside your door. Here, one machine plays them all." },
     {
       q: "How does the world find its way back?",
-      a: "Here, it was told. Real home boxes do something cleverer. You'll meet it further up.",
+      a: "Here, it was told. Real home boxes put their own outside address on everything going out, so replies come back to the box, which passes each one on. You'll meet that further up.",
     },
   ],
 };

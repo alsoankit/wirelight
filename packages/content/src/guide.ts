@@ -55,11 +55,11 @@ export const guide: GuideTopic[] = [
       marks: [
         { target: "door", label: "A door. A cable runs from here to another room." },
         { target: "plate", label: "The door's plate" },
-        { target: "keeper", label: "The keeper, who handles every message" },
+        { target: "keeper", label: "The keeper: the part of the machine that decides what to do with each message" },
       ],
     },
     body: [
-      "This palace is a computer network. Every room is a machine. Every door is where a cable plugs into that machine. Every corridor is a cable between two doors.",
+      "This palace is a computer network. Every room is a machine. Every door is one of that machine's network connections, where a cable plugs in. Every corridor is a cable between two doors, and the small lights moving along them are messages.",
       "The network has fallen into ruin. Rooms are cold and grey until they work again. Your job is to bring them back, one room at a time, using the same tools people use on real Linux machines.",
       "There's no score, no timer and no way to lose. Trying things is how you learn here.",
     ],
@@ -79,7 +79,7 @@ export const guide: GuideTopic[] = [
     },
     body: [
       "You see each room from above, with the front wall cut away so the whole room fits on screen. Every room of the same kind is laid out the same way, so you only have to learn it once.",
-      "Doors are archways in the back and left walls, and each one has a plate beside it. The keeper, a hooded figure with a kitchen, stands in the middle of the room.",
+      "Doors are archways in the back and left walls, and each one has a plate beside it. The keeper, a hooded figure, stands in the middle of the room: it stands for the machine itself, deciding what to do with each message.",
       "Your own machine is the observatory, the room you woke up in. Some rooms hold tools you meet later.",
     ],
   },
@@ -152,7 +152,7 @@ export const guide: GuideTopic[] = [
     },
     body: [
       "The Map shows the whole floor from above: every room, every corridor, and every message moving through it. Press [[G]] to open it from anywhere, or click the small map in the corner.",
-      "The palace tab shows the whole palace: the floors you've restored glowing, the next one in mist, and fog over everything further on.",
+      "The palace tab shows the whole palace: the floors you've restored glowing, the next one in mist, and fog over the ones you haven't reached yet.",
       "You can watch anything on the Map, but you can't change anything from it. To do something, go to the room where it belongs.",
     ],
   },
@@ -203,14 +203,15 @@ export const guide: GuideTopic[] = [
   {
     id: "stuck",
     title: "When you're stuck",
-    blurb: "Memory fragments and questions",
+    blurb: "Hints and questions",
     visual: {
       kind: "notes",
-      note: "Your message reached their door. They looked at it and decided it wasn't for them. Whose name did you write on it?",
-      caption: "A fragment reacting to something you tried",
+      note: "Your message reached their door, but they decided it wasn't for them. Check the name you wrote on it against the name on their plate.",
+      caption: "A hint reacting to something you tried",
     },
     body: [
-      "Most of your memory went when you shut down, and it comes back in fragments. The Fragments button in the top bar shows how many hints you've recalled out of five, and glows when a new one is ready. Some fragments react to what you just tried.",
+      "Hints come as memory fragments: most of your memory went when you shut down, and it comes back a piece at a time. The Hints button in the top bar shows how many of a room's five hints you've seen, and glows when a new one is ready.",
+      "The first hint says where to look. Each one after it is more exact, and the last one gives the full answer. Some hints react to what you just tried.",
       "Ask opens a few questions about what's in front of you, with plain answers. They explain, but never give the answer away.",
       "Getting something wrong costs nothing. Often it's the fastest way to see what's going on.",
     ],
@@ -228,21 +229,21 @@ export const guide: GuideTopic[] = [
   {
     id: "after-a-win",
     title: "After you restore a room",
-    blurb: "The debrief and memories",
+    blurb: "The debrief and the floor recap",
     body: [
       "When a room's network works again, the room lights up and the way on opens.",
       "Then the debrief: what happened, the new words you met (each with a plain meaning), and a kind line about each thing you tried along the way.",
-      "In the first regions you can also see why each room is built the way it is. After a floor's last room, your memory of the whole floor working comes back. Both play on the Map.",
+      "In the first regions you can also see why each room is built the way it is. After a floor's last room, a floor recap shows the whole floor working, one message at a time. Both play on the Map.",
     ],
   },
   {
     id: "menu",
     title: "The menu",
-    blurb: "The palace, your Memory, this guide and settings",
+    blurb: "Rooms, what you've learned, this guide and settings",
     body: [
       "Press [[M]] or click Menu to open it.",
-      "The palace tab lists every floor and room, with what you've cleared. You can play any cleared room again from here.",
-      "Memory keeps what you've learned: the things you know, the words, and the Command book.",
+      "The Rooms tab lists every floor and room, with what you've cleared. You can play any cleared room again from here.",
+      "The Learned tab keeps what you've learned: the things you know, the words, and the Command book.",
     ],
   },
   {
@@ -279,7 +280,7 @@ export const guide: GuideTopic[] = [
     from: "f1.two-rooms",
     body: [
       "Every door has a plate beside it. The plate shows the door's name, like eth0, and a light.",
-      "The light is a filled diamond when the cable behind the door is working, and a hollow ring when it isn't.",
+      "The light is a filled diamond when the cable behind the door is working, and a hollow diamond when it isn't.",
       "Click a plate to read it up close. In some rooms the plate also has a button that turns its door on or off. More lines appear on plates as you learn what they mean.",
     ],
   },
@@ -310,7 +311,7 @@ export const guide: GuideTopic[] = [
     },
     from: "f2.first-light",
     body: [
-      "The Frame builder makes the envelope a message travels in across a cable. Set who it's for and add a message, then send it.",
+      "The Frame builder lets you build a message by hand and send it down a cable. Set who it's for and write a message, then send it.",
       "The builder keeps what you wrote, so you can come back and change it.",
     ],
   },
@@ -347,8 +348,8 @@ export const guide: GuideTopic[] = [
     blurb: "Send the same frame until you stop it",
     from: "f2.wrong-name",
     body: [
-      "The Frame builder can send a frame every two seconds. Choose its destination and message, then select Keep sending.",
-      "Each repeat uses the same destination and message. Stop a send in the running list when you no longer need it. Several sends can run at once.",
+      "The Frame builder can send a frame every two seconds. Choose who it's for and the message, then select Keep sending.",
+      "Each repeat goes to the same place with the same message. Stop a send in the running list when you no longer need it. Several sends can run at once.",
     ],
   },
   {
@@ -364,7 +365,7 @@ export const guide: GuideTopic[] = [
   {
     id: "console",
     title: "The terminal",
-    blurb: "Speaking to a machine",
+    blurb: "Typing commands to a machine",
     visual: {
       kind: "console",
       caption: "After you send from the Frame builder, the terminal shows the command it ran.",
@@ -401,7 +402,7 @@ export const guide: GuideTopic[] = [
     blurb: "Rooms with many doors",
     from: "f3.many-doors",
     body: [
-      "Some rooms aren't anyone's home. They're halls: big rooms full of doors, each with its own corridor to another machine.",
+      "Some rooms aren't anyone's home. They're halls: big rooms full of doors, each with its own cable to another machine. In a real network, a hall like this is a switch.",
       "A hall has a keeper like any room, and a board on the wall.",
     ],
   },
@@ -411,7 +412,7 @@ export const guide: GuideTopic[] = [
     blurb: "Reading a hall's memory",
     from: "f3.many-doors",
     body: [
-      "The board on a hall's wall is its memory. Click it to read it. Each line is a door name the hall has seen, and which of its own doors it saw it behind.",
+      "The board on a hall's wall shows what the hall has learned. Click it to read it. Each line is a MAC address the hall has seen, and which of its own doors it came in through.",
       "Reading the board runs a real command. Later, when the board's glass is clouded and cracked, you can still read it from the terminal.",
     ],
   },
@@ -455,9 +456,9 @@ export const guide: GuideTopic[] = [
     blurb: "A machine's list of the houses near it",
     from: "f6.who-has-this-address",
     body: [
-      "Some machines keep a neighbour ledger on the wall. Each line is a house on this street, the door name that answered for it, and how sure the machine is about it.",
+      "Some machines keep a neighbour ledger on the wall. Each line is an IP address on this network, the MAC address that answered for it, and how sure the machine is about it.",
       "Click the ledger to read it. Reading it runs a real command you can also type.",
-      "Look out for a new shape of message here: a diamond, a question put to everyone on the street.",
+      "Look out for a new shape of message here: a diamond, a question sent to every machine on the network.",
     ],
   },
   {
@@ -485,10 +486,10 @@ export const guide: GuideTopic[] = [
   {
     id: "crossings",
     title: "Crossings",
-    blurb: "Rooms that join streets",
+    blurb: "Rooms that join two or more subnets",
     from: "f8.other-street",
     body: [
-      "A crossing is a room with doors onto more than one street. Each of its doors has its own plate and its own address.",
+      "A crossing is a room with doors onto more than one subnet (street). Each of its doors has its own plate and its own address.",
       "Like any keeper, a crossing's keeper tells you what it did with each message, and why. Ask it.",
     ],
   },
@@ -498,7 +499,7 @@ export const guide: GuideTopic[] = [
     blurb: "Which way a machine sends things",
     from: "f8.across-the-street",
     body: [
-      "A routing board hangs on the wall of machines that need one. Each line is a street, and which way to send things for it. The line marked default covers everywhere else.",
+      "A routing board hangs on the wall of machines that need one. Each line is a subnet, and which way to send packets for it. The line marked default covers everywhere else.",
       "Click the board to read it, and, where it isn't cracked, to add a line. Both run real commands you can also type. A cracked board can still be read, but won't take anything new.",
     ],
   },

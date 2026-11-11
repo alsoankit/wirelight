@@ -17,7 +17,7 @@ export const region2Arrival: { id: string; speaker: string; text: string }[] = [
   {
     id: "R2-ARRIVE-02",
     speaker: "You",
-    text: "These halls sort messages between many machines at once. Or they did.",
+    text: "These halls are switches: machines that pass messages between many other machines at once. Or they did.",
   },
   {
     id: "R2-ARRIVE-03",
@@ -31,16 +31,18 @@ export const region2Arrival: { id: string; speaker: string; text: string }[] = [
 const manyDoors: RoomText = {
   title: "Sort It by Hand",
   mission:
-    "Frames to forge pass through the hall, but the hall's keeper has stopped passing them on. Pass them on by hand at its desk until it takes over again.",
+    "This hall is a switch, and its keeper (the part that picks which door each frame leaves by) has stopped. Pass frames on by hand at its desk until the keeper takes over again.",
   notes: [],
   hints: [
     { text: "A frame is waiting at the desk. Read it." },
-    { text: "The desk has two jobs: remember, then send." },
     {
-      text: "Write down who it's from and where it came in. Then look up who it's to.",
+      text: "The desk has two buttons: Remember writes down where the sender is, and Send picks the door the frame leaves by.",
+    },
+    {
+      text: "A switch writes down each frame's From and the door it came in by. Then it looks up the frame's To on its board.",
       codex: "mac-board",
     },
-    { text: "If the board knows the to, send it out that door. If not, send it out every other door." },
+    { text: "If the board knows the To, send the frame out that door. If not, send it out every other door." },
     {
       text: "First frame: Remember, then Send out every other door. Forge's answer: Remember, then Send out eth0. Next frame: Send out eth3. The keeper will take over.",
     },
@@ -51,7 +53,7 @@ const manyDoors: RoomText = {
       tried: "You sent a frame back out of the door it came in by.",
     },
     "guess-a-door": {
-      note: "You didn't know where forge was yet. What can the keeper do when it doesn't know?",
+      note: "The board didn't know where forge was yet, so any one door is a guess. When the To is unknown, the frame goes out every other door.",
       tried: "You picked one door for a name the board didn't know yet.",
     },
     "flood-everything": {
@@ -59,19 +61,19 @@ const manyDoors: RoomText = {
       tried: "You sent a frame out of every other door when the board already knew its door.",
     },
     "forgot-to-remember": {
-      note: "Before it leaves, what can this frame teach the keeper?",
+      note: "Press Remember first: this frame's From tells the board which door its sender is behind.",
       tried: "You sent frames on without writing down who they were from.",
     },
   },
   debrief: {
     happened:
-      "You did a switch's job. You wrote down each frame's from and the door it came in by, that's the MAC table. When you didn't know where the to lived, you sent the frame out every other door: flooding. Once you knew, it went out one door only.",
+      "You did a switch's job. A switch writes down each frame's From address and the door it came in by: that list is its MAC table. When it doesn't know which door a frame's To is behind, it sends the frame out every other door: that's flooding. Once it knows, the frame goes out one door only, so other machines never see it.",
     terms: [
       { id: "mac-table", term: "MAC table", meaning: "a switch's list of which MAC address is behind which door" },
       {
         id: "flooding",
         term: "flooding",
-        meaning: "sending a frame out every other door when the switch doesn't know where its to lives",
+        meaning: "sending a frame out every other door when the switch doesn't know which door its To is behind",
       },
     ],
   },
@@ -80,18 +82,18 @@ const manyDoors: RoomText = {
       id: "F3-MEM-01",
       title: "The keeper",
       trigger: "on entering",
-      text: "Every room has a keeper, the machine that decides where messages go. This one's asleep, but its desk still works. I can do its job by hand.",
+      text: "Every machine has a keeper: the part of it that decides where each message goes next. This hall's keeper has stopped, but its desk still works. I can do its job by hand.",
       action: "press Remember on the waiting frame",
     },
   ],
   questions: [
     {
       q: "What is this hall?",
-      a: "A sorting hall: many doors, one keeper. Every frame comes in one door and leaves by another. Choosing which one is the clever part.",
+      a: "A switch: a machine with many doors that passes frames between them. Every frame comes in one door and leaves by another. Choosing which one is the switch's job.",
     },
     {
       q: "Why write down the from?",
-      a: "Whoever sent a frame must be behind the door it came in by. That's worth writing down.",
+      a: "Whoever sent a frame must be behind the door it came in by. Writing that down means the next frame for them can go straight to that door.",
     },
     {
       q: "What if the keeper doesn't know the to?",
@@ -99,7 +101,7 @@ const manyDoors: RoomText = {
     },
     {
       q: "Why not send everything everywhere?",
-      a: "Every machine would read every message in the hall. Slow, and nosy.",
+      a: "Then every machine would have to read every frame in the hall. That wastes time, and everyone sees everyone else's messages.",
     },
   ],
   building: {
@@ -112,7 +114,7 @@ const manyDoors: RoomText = {
     {
       id: "F3-KEEP-01",
       speaker: "You",
-      text: "It's awake. Its screen says: read the from, write it down. Read the to, look it up. Known: one door. Unknown: every other door.",
+      text: "It's working again. Its screen says: read the From, write it down. Read the To, look it up. Known: one door. Unknown: every other door.",
     },
   ],
 };
@@ -120,12 +122,12 @@ const manyDoors: RoomText = {
 const keepersMemory: RoomText = {
   title: "What the Hall Remembers",
   mission:
-    "Get the machine behind the hall's third door to answer you. You don't know its MAC address, and the hall's board can't be read.",
+    "Get gate, the machine behind the hall's door eth3, to answer you. You don't know its MAC address, and the hall's board is too clouded to read.",
   access: { pantry: SEALED, attic: SEALED, gate: SEALED },
   notes: ["The one behind the third door is waiting for a message."],
   hints: [
     { text: "The board can't be read, but the hall itself can tell you what's in its MAC table." },
-    { text: "Go into the hall's room and ask it from the terminal there." },
+    { text: "Go into the hall's room and open the terminal there: `bridge fdb show` lists its MAC table." },
     { text: "A switch only learns a name when that machine sends something.", codex: "switch" },
     { text: "Get gate to send something, then ask the hall which name is behind eth3, then write to that name." },
     {
@@ -134,41 +136,41 @@ const keepersMemory: RoomText = {
   ],
   detectors: {
     "expects-gate-listed": {
-      note: "Same list. What would make the keeper learn something new?",
+      note: "Same list as before. The hall only learns a MAC address when that machine sends a frame. Get gate to send something first.",
       tried: "You read the hall's MAC table again before anyone new had sent anything.",
     },
     guessing: {
-      note: "Guessing names could take forever. Is there a name that everyone listens to?",
+      note: "Guessing names could take forever. Send a broadcast instead: every machine hears it, and most answer.",
       tried: "You guessed names that no door has.",
     },
     "wrong-console": {
-      note: "Your machine isn't a switch. Whose memory do you want to read?",
+      note: "Your machine isn't a switch, so it has no MAC table. Run the command in the hall's terminal.",
       tried: "You asked your own machine for a switch's memory.",
     },
   },
   debrief: {
     happened:
-      "The hall's keeper only knows names it has seen as a frame's from. Gate had never sent anything, so it wasn't on the table. Your broadcast made gate answer, the keeper learned it from the source, and `bridge fdb show` told you its name.",
+      "A switch only knows MAC addresses it has seen as a frame's source address, and gate had never sent anything. Your broadcast made gate answer, and the hall learned gate's address and door from that answer: that's learning from the source. Then `bridge fdb show` told you its name. Real switches learn this way from every frame that passes through.",
     terms: [
       {
         id: "learning-from-the-source",
         term: "learning from the source",
-        meaning: "a switch learns where a machine is from the from of the frames it sends",
+        meaning: "a switch learns which door a machine is behind from the From of the frames it sends",
       },
     ],
   },
   questions: [
     {
       q: "Why isn't gate in the MAC table?",
-      a: "The keeper only writes down names it has seen. Has gate ever sent anything?",
+      a: "The hall only writes down names it has seen in a frame's From. Gate hasn't sent anything yet.",
     },
     {
       q: "How do I make gate send something?",
-      a: "Most machines answer a broadcast.",
+      a: "Send a broadcast. Most machines answer one.",
     },
     {
       q: "Why does Linux say bridge?",
-      a: "Another word for a switch. Same job, older name.",
+      a: "A bridge is another word for a switch: same job, older name. Linux calls its built-in switch a bridge.",
     },
   ],
   building: {
@@ -186,8 +188,12 @@ const findEveryone: RoomText = {
   access: { bakery: SEALED, larder: SEALED, chapel: SEALED },
   notes: [],
   hints: [
-    { text: "Three repeating sends, three doors, three MAC addresses you don't know yet." },
-    { text: "You've done this before, one name at a time." },
+    {
+      text: "Three repeating sends, three doors, three MAC addresses you don't know yet. The hall's MAC table can tell you all three.",
+    },
+    {
+      text: "Do what you did for gate: a broadcast from the Frame builder, then `bridge fdb show` in the hall's terminal.",
+    },
     {
       text: "The hall learns the name of every machine that sends something, and remembers its door.",
       codex: "mac-board",
@@ -212,11 +218,12 @@ const findEveryone: RoomText = {
 
 const busyHall: RoomText = {
   title: "The Busy Hall",
-  mission: "One machine on the hall never got your message, and it's still waiting. Find out why, and deliver it.",
+  mission:
+    "One machine on this hall, laundry, never got your message and is still waiting. Find out why, and get your message to it.",
   access: { pantry: SEALED, attic: SEALED, laundry: SEALED },
   notes: [],
   hints: [
-    { text: "One of the hall's doors is dark." },
+    { text: "One of the hall's doors is dark. Look at the lights on the hall's plates." },
     { text: "Its switch is broken. Use the hall's terminal." },
     { text: "A machine behind a dark door can't hear a broadcast, or answer one.", codex: "everyone-address" },
     {
@@ -228,29 +235,29 @@ const busyHall: RoomText = {
   ],
   detectors: {
     "expects-gate-listed": {
-      note: "Same list. What would make the keeper learn something new?",
+      note: "Same list as before. The hall only learns a MAC address when that machine sends a frame.",
       tried: "You read the hall's MAC table again before anyone new had sent anything.",
     },
     "wrong-console": {
-      note: "Your machine isn't a switch. Whose memory do you want to read?",
+      note: "Your machine isn't a switch, so it has no MAC table. Run the command in the hall's terminal.",
       tried: "You asked your own machine for a switch's memory.",
     },
     guessing: {
-      note: "Guessing names could take forever. Is there a name that everyone listens to?",
+      note: "Guessing names could take forever. Send a broadcast instead: every machine that can hear it answers.",
       tried: "You guessed names that no door has.",
     },
     "wrong-door-name": {
-      note: "Doors have names. Which name does yours have? Ask the machine for its doors.",
+      note: "The hall has no door by that name. Type `ip link` in the hall's terminal to see its doors.",
       tried: "You named a door the hall doesn't have.",
     },
     "broadcast-before-link": {
-      note: "Everyone answered… except whoever's behind the dark door.",
+      note: "Everyone answered except laundry: its door on the hall is down, so the broadcast never reached it.",
       tried: "You sent a broadcast while laundry's door was still switched off.",
     },
   },
   debrief: {
     happened:
-      "Laundry was behind a door that was switched off, so nothing reached it and it never spoke. Once the door was on, a broadcast made it answer, the hall learned its name from the source, and your letter could finally be delivered.",
+      "Laundry was behind one of the hall's doors that was switched off, so nothing reached it and it never sent anything. Once the door was up, a broadcast made laundry answer, the hall learned its MAC address from the source address, and your frame got through. A switch can only learn about machines whose frames reach it.",
     terms: [],
   },
   voice: [
@@ -263,7 +270,7 @@ const busyHall: RoomText = {
 };
 
 const floor3: FloorText = {
-  name: "The Switch",
+  name: "Switches",
   memory: [
     {
       id: "F3-FM-01",
@@ -278,14 +285,14 @@ const floor3: FloorText = {
     {
       id: "F3-FM-03",
       title: "Ride-along",
-      text: "Learn from the from. Send by the to.",
+      text: "Learn where senders are from the From. Pick the door from the To.",
       shown:
         "the camera rides a frame from the observatory into the hall. At the desk the keeper's lens reads the from (a line writes itself on the ledger) and the to (the ledger is searched, a line glows); a single chute opens and the frame drops out eth3 alone. Then a frame to an unknown name: the keeper hesitates, copies it, and the copies fan out every other door.",
     },
     {
       id: "F3-FM-04",
       title: "What's next",
-      text: "But a list can be wrong, and a line can be kept too long. Something went very wrong here once. That part is still missing.",
+      text: "But a list can be wrong, and a line can stay after it stops being true. Something went very wrong here once. That's the next floor.",
       shown: "the world map: the hall glows; Floor 4 still in mist",
     },
   ],
@@ -301,12 +308,13 @@ const floor3: FloorText = {
 
 const pinnedMemory: RoomText = {
   title: "Moved Out",
-  mission: "Kitchen was moved to a different door of the hall. Since then, nothing sent to it arrives.",
+  mission:
+    "Kitchen's cable was moved to a different door of the hall, and since then nothing sent to kitchen arrives. Find out why and get kitchen to answer again.",
   access: { alcove: "Nobody lives at the far end of this corridor any more. Its cable lies loose on the floor." },
   notes: [],
   hints: [
-    { text: "Follow a frame for kitchen. Which door does it leave the hall by?" },
-    { text: "Ask the hall what it remembers about kitchen." },
+    { text: "Follow a frame for kitchen and watch which door it leaves the hall by." },
+    { text: "In the hall's terminal, read its MAC table with `bridge fdb show` and find kitchen's line." },
     { text: "Most memories fade when a machine goes quiet. A pinned one never does.", codex: "pinned-memory" },
     { text: "Remove the wrong line, then let the hall learn again." },
     {
@@ -319,17 +327,17 @@ const pinnedMemory: RoomText = {
       tried: "You plugged in the old cable, but nobody lives at its far end now.",
     },
     "wait-for-fade": {
-      note: "Library's line faded. Kitchen's didn't. What's different about it?",
+      note: "Library's line faded, but kitchen's didn't. Compare the two lines in `bridge fdb show`: kitchen's has an extra word.",
       tried: "You waited for kitchen's line to fade, but a pinned line never does.",
     },
     "delete-wrong-line": {
-      note: "That one was right. Which line sends kitchen's frames to the wrong door?",
+      note: "That line was right. Find the line that sends kitchen's frames to the wrong door.",
       tried: "You removed library's line, which was right.",
     },
   },
   debrief: {
     happened:
-      "A switch forgets a machine after five minutes of silence, so its memory follows machines when they move. That's ageing. But kitchen's line had been pinned by hand, a static entry, so it never faded and kept pointing at the old door. You removed it, the hall flooded once, and learned the right door.",
+      "A switch forgets a machine after five minutes of silence, so its MAC table follows machines when they move. That's ageing. But kitchen's line had been pinned by hand, a static entry, so it never faded and kept pointing at the old door. You removed it, the hall flooded the next frame once, and learned the right door. On real networks, a forgotten static entry is a common cause of this exact fault.",
     terms: [
       { id: "ageing", term: "ageing", meaning: "a switch forgetting machines that have gone quiet" },
       {
@@ -387,13 +395,13 @@ const whoHasTheKey: RoomText = {
   ],
   detectors: {
     "only-hall-a": {
-      note: "Hall-a doesn't know everyone. One of its doors leads somewhere else.",
+      note: "Hall-a's MAC table only lists machines it has heard from. One of its doors leads to a second hall, with more machines behind it.",
       tried: "You searched hall-a's memory only, and guessed from there.",
     },
   },
   debrief: {
     happened:
-      "Your one broadcast reached every machine in both halls, because each switch flooded it on. Everything a broadcast can reach is called a broadcast domain.",
+      "Your one broadcast reached every machine in both halls, because each switch flooded it on to the next. Everything a broadcast can reach is called a broadcast domain. On a real network, that's every machine joined together by switches.",
     terms: [
       {
         id: "broadcast-domain",
@@ -427,7 +435,9 @@ const spareCable: RoomText = {
   notes: ["Left a spare cable between the halls, just in case. Two cables are safer than one. Surely."],
   hints: [
     { text: "Plug in the spare, then watch one broadcast. Where does it go after it crosses to the other hall?" },
-    { text: "Read a hall's MAC table, then read it again a few seconds later. Where is forge now?" },
+    {
+      text: "Read a hall's MAC table, then read it again a few seconds later, and compare which door forge is behind each time.",
+    },
     {
       text: "Two halls joined by two cables make a circle: each hall floods every broadcast on to the other, round and round.",
       codex: "loop",
@@ -449,7 +459,7 @@ const spareCable: RoomText = {
   },
   debrief: {
     happened:
-      "With the spare plugged in, the two halls were joined twice: a switching loop. Every broadcast crossed one cable and came back over the other, again and again, and the copies piled up: a broadcast storm. The boards kept moving names between doors, because copies came in by every door. You took one cable away, the copies drained, and forge's answer got through.",
+      "With the spare plugged in, the two halls were joined twice: a switching loop. Every broadcast crossed one cable and came back over the other, again and again, and the copies piled up: a broadcast storm. The MAC tables kept moving addresses from door to door, because the copies came in by both cables. You took one cable away, the copies drained, and forge's answer got through.",
     terms: [
       {
         id: "switching-loop",
@@ -470,7 +480,7 @@ const spareCable: RoomText = {
     },
     {
       q: "Why did the boards keep changing their minds?",
-      a: "A hall writes down the door a name came in by. The copies came in by both cables, one after another, so the line kept moving.",
+      a: "A hall writes down the door a frame came in by. The copies came in by both cables, one after another, so the line kept moving.",
     },
     {
       q: "So a spare cable is a bad idea?",
@@ -498,7 +508,9 @@ const storm: RoomText = {
       text: "Two switches joined twice make a loop: each floods every broadcast back to the other, forever.",
       codex: "loop",
     },
-    { text: "Break the loop by taking one of the two spans away, then check what hall-b remembers about laundry." },
+    {
+      text: "Break the loop by taking one of the two spans away, then read hall-b's MAC table and find laundry's line.",
+    },
     {
       text: "Unplug `span-2` (or `ip link set eth4 down` in hall-b). Then in hall-b, `bridge fdb del 02:00:00:00:00:13 dev eth2 master`. Write to laundry; it answers.",
     },
@@ -510,25 +522,25 @@ const storm: RoomText = {
       tried: "You plugged a span back in after taking it away, and the loop came back.",
     },
     "delete-wrong-line": {
-      note: "That one was right. Which line sends laundry's frames to the wrong door?",
+      note: "That line was right. Find the line that sends laundry's frames to the wrong door.",
       tried: "You removed a line in hall-b that wasn't laundry's.",
     },
     "only-hall-a": {
-      note: "Hall-a doesn't know everyone. One of its doors leads somewhere else.",
+      note: "Laundry isn't behind hall-a. Hall-a's door to the other hall leads to hall-b, where laundry is.",
       tried: "You searched hall-a's memory, but laundry lives behind hall-b.",
     },
     "more-cables": {
-      note: "More paths, more copies. What happens when a broadcast can go round and round?",
+      note: "More cables between the halls make more circles, and every circle adds more copies. The storm needs fewer cables, not more.",
       tried: "You plugged in a cable while the storm was running.",
     },
     "only-the-loop": {
-      note: "The storm is over. Is the hall's memory of laundry right?",
+      note: "The storm is over, but frames for laundry still go the wrong way. Read hall-b's MAC table and check laundry's line.",
       tried: "You stopped the storm, but hall-b's pinned line still sent laundry's frames to the wrong door.",
     },
   },
   debrief: {
     happened:
-      "Two spans between the same two halls made a switching loop. Every broadcast was flooded across one span and back across the other, again and again: the broadcast storm that drowned the Works. Removing one span stopped it. Then a pinned memory still pointed laundry to the wrong door, and you cleared it.",
+      "Two spans between the same two halls made a switching loop. Every broadcast was flooded across one span and back across the other, again and again: the broadcast storm that drowned the Works. Removing one span stopped it. Then a static entry in hall-b still pointed laundry to the wrong door, and you removed it.",
     terms: [],
   },
   voice: [
@@ -541,7 +553,7 @@ const storm: RoomText = {
 };
 
 const floor4: FloorText = {
-  name: "Memory and Loops",
+  name: "Switch Tables and Loops",
   memory: [
     {
       id: "F4-FM-01",
@@ -556,7 +568,7 @@ const floor4: FloorText = {
     {
       id: "F4-FM-03",
       title: "Ride-along",
-      text: "Every switch obeyed. That was the trouble.",
+      text: "Every switch did exactly its job. The loop was the trouble.",
       shown:
         "the camera rides a broadcast from hall-a across span into hall-b, which floods it back across span-2 into hall-a, which floods it across span again; the copies multiply around the ring while the ledgers flip lines between doors",
     },

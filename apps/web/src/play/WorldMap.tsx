@@ -93,6 +93,7 @@ export function WorldMapView({
           {Object.values(regions).map((r) => (
             <section key={r.n} className="world-region" data-state={regionState(r.n)}>
               <h4 className="world-region-name">{r.name}</h4>
+              <p className="world-region-topic">{r.topic}</p>
               <ul>
                 {Object.values(floors)
                   .filter((f) => f.region === r.n)

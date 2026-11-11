@@ -6,8 +6,9 @@ import type { RoomText } from "./types";
  */
 export const why48Bits: RoomText = {
   title: "Why 48 Bits?",
-  mission: "Behind a narrow door is a machine whose door name wasn't set by hand. Get it to answer you.",
-  access: { vault: "Sealed. It answers what's sent to it, by name." },
+  mission:
+    "Behind a narrow door is vault, a machine whose MAC address came from a factory instead of being set by hand. Learn its address and get it to answer you.",
+  access: { vault: "Sealed. You can't go in, but it answers frames sent to its MAC address." },
   notes: ["Found a door out here that nobody named by hand. Its name doesn't start with 02. A factory made this one."],
   hints: [
     {
@@ -25,7 +26,7 @@ export const why48Bits: RoomText = {
   ],
   detectors: {
     "guessed-02": {
-      note: "Every name you've met so far starts with 02. Who says this one does?",
+      note: "Every MAC address you've met so far starts with 02, but this door came from a factory. Send a broadcast and read who answers instead of guessing.",
       tried: "You guessed a name starting with 02, like every door you'd met; this one was made elsewhere.",
     },
   },

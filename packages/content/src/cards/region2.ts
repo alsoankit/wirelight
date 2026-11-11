@@ -8,12 +8,17 @@ export const REGION_2_CARDS: Card[] = [
     title: "Switch",
     text: "A machine with many doors that passes frames between them. It learns where everyone is.",
   },
-  { id: "mac-board", floor: 3, title: "MAC board", text: "The switch's memory: which name is behind which door." },
+  {
+    id: "mac-board",
+    floor: 3,
+    title: "MAC board",
+    text: "The switch's memory: which MAC address is behind which door.",
+  },
   {
     id: "keepers-desk",
     floor: 3,
     title: "Keeper's desk",
-    text: "Where each frame waits while the keeper decides which door it leaves by.",
+    text: "Where each frame waits while the keeper (the switch's sorting logic) decides which door it leaves by.",
   },
   {
     id: "clouded-board",
@@ -27,12 +32,12 @@ export const REGION_2_CARDS: Card[] = [
     title: "Pinned memory",
     text: "A line someone wrote into the switch's memory by hand. It never fades, even when it's wrong.",
   },
-  { id: "span", floor: 4, title: "Span", text: "A cable between two switches. Frames cross it like any other door." },
+  { id: "span", floor: 4, title: "Span", text: "A cable between two switches. Frames cross it like any other cable." },
   {
     id: "loop",
     floor: 4,
     title: "Loop",
-    text: "A circle of cables between switches. A broadcast that goes in never comes out.",
+    text: "A circle of cables between switches. A broadcast sent into it goes round and round and never stops.",
   },
   {
     id: "peacekeeper",

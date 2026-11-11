@@ -34,7 +34,7 @@ export const commandMemories: Record<string, CommandMemory> = {
       "A command is a short sentence for the machine. First the tool, then what you're asking about, then what to do, then which one, then how.",
     anatomy: [
       { word: "ip", role: "tool", meaning: "the tool for network settings" },
-      { word: "link", role: "about what", meaning: "doors and their links" },
+      { word: "link", role: "about what", meaning: "network interfaces (doors) and their links" },
       { word: "set", role: "do what", meaning: "change something" },
       { word: "eth0", role: "which one", meaning: "this door" },
       { word: "up", role: "how", meaning: "switched on. Not yet, that's your job." },

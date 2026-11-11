@@ -19,28 +19,28 @@ export function keeperSays(d: Decision, reason?: DropReason, name?: (mac: string
     if (d.decision === "forward" && r.route)
       return r.route.via
         ? `That packet is for ${ip}. My board says ${r.route.dst} goes via ${r.route.via}, out of door ${r.route.dev}, so I sent it there.`
-        : `That packet is for ${ip}. My board says ${r.route.dst} is the street behind door ${r.route.dev}, so I sent it there.`;
+        : `That packet is for ${ip}. My board says ${r.route.dst} is the subnet right behind door ${r.route.dev}, so I sent it there.`;
     if (reason === "forwarding-disabled")
-      return `That packet is for ${ip}, not me. I'm not allowed to pass things on to other streets, so I let it go.`;
+      return `That packet is for ${ip}, not me. I'm not allowed to pass packets on to other subnets, so I threw it away.`;
     if (reason === "ttl-expired")
-      return `That packet is for ${ip}, but its countdown ran out here, so it went no further. I told whoever sent it.`;
-    return `That packet is for ${ip}. My board has no line for it, so I had nowhere to send it. I told whoever sent it.`;
+      return `That packet is for ${ip}, but its countdown ran out here, so I threw it away and told the sender.`;
+    return `That packet is for ${ip}. My board has no line for it, so I had nowhere to send it. I threw it away and told the sender.`;
   }
   if (r.fdb !== undefined) {
     // A switch.
     if (d.decision === "deliver")
-      return `That frame was for ${r.dst}, this hall's own door name, so the hall took it in.`;
+      return `That frame was for ${r.dst}, this hall's own MAC address, so the hall took it in.`;
     if (d.decision === "flood")
       return r.dst === "ff:ff:ff:ff:ff:ff"
         ? `That frame was for everyone, so I sent it out of every other door: ${d.egress.join(", ")}.`
-        : `That frame was for ${r.dst}. I didn't know which door that name is behind, so I sent it out of every other door: ${d.egress.join(", ")}.`;
+        : `That frame was for ${r.dst}. My board has no line for that MAC address yet, so I sent it out of every other door: ${d.egress.join(", ")}.`;
     const line = r.fdb
       ? `My board says ${r.fdb.mac} is behind ${r.fdb.port}${r.fdb.static ? " (pinned)" : ""}`
       : "My board knew it";
     if (d.decision === "forward" && reason === "port-blocked")
-      return `That frame was for ${r.dst}. ${line}, but that door is held shut to keep the halls from going round in circles, so it went no further.`;
+      return `That frame was for ${r.dst}. ${line}, but that door is held shut so frames can't go round in a loop, so I threw it away.`;
     if (d.decision === "forward") return `That frame was for ${r.dst}. ${line}, so I sent it there.`;
-    return `That frame was for ${r.dst}. ${line}, the door it came in by, so it didn't need to go anywhere.`;
+    return `That frame was for ${r.dst}. ${line}, the door it came in by, so it was already where it needed to be. I didn't send it anywhere.`;
   }
   // A computer's door.
   if (d.decision === "deliver")
@@ -69,7 +69,7 @@ export const voice = {
   workbench: {
     name: "Frame builder",
     title: "Build a frame",
-    about: "Write who it's for, then seal it and send it down the cable.",
+    about: "Write who it's for and what it says, then send it down the cable.",
     to: "To",
     door: "Out of door",
     message: "Message",
@@ -78,15 +78,15 @@ export const voice = {
     running: "Running sends",
     stop: "Stop",
     broadcast: "Send to everyone",
-    pick: "Pick a door you've met",
-    noneKnown: "No doors met yet. Read a plate, or wait for an answer.",
-    refused: "A frame needs a name to go to.",
+    pick: "Pick a door name you've seen",
+    noneKnown: "No door names seen yet. Read a plate, or wait for an answer to arrive.",
+    refused: "A frame needs someone to go to. Fill in To.",
   },
   /** A switch's MAC board (CORE-27): reading it runs `bridge fdb show`. */
   board: {
     name: "MAC board",
-    title: "The hall's memory",
-    about: "Each line: a door name the hall has seen, and the door it was seen behind.",
+    title: "What this hall has learned",
+    about: "Each line: a MAC address the hall has seen, and which of its own doors it came in through.",
     clouded: "This board is too damaged to read. Read it from the terminal instead.",
     close: "Close",
   },
@@ -94,13 +94,14 @@ export const voice = {
   ledger: {
     name: "Neighbour ledger",
     title: "The neighbour ledger",
-    about: "Each line: a house on this street, the door name that answered for it, and how sure the machine is.",
+    about:
+      "Each line: an IP address on this network, the MAC address that answered for it, and how sure the machine is.",
   },
   /** A machine's routing board (CORE-27, 8.2): reading runs `ip route show`; adding a line, `ip route add`. */
   routes: {
     name: "Routing board",
     title: "The routing board",
-    about: 'Each line: a street, and which way to send things for it. "default" is everywhere else.',
+    about: 'Each line: a subnet, and which way to send packets for it. "default" covers everywhere else.',
     via: "via",
     door: "door",
     addDefault: "Add a line: everywhere else, via",
@@ -113,7 +114,7 @@ export const voice = {
     /** Region 4's desk is the keeper's desk. */
     lecternName: "Keeper's desk",
     title: "The keeper's desk",
-    asleep: "The keeper has forgotten its job. Messages wait here until you do it.",
+    asleep: "The keeper has forgotten its job, so messages wait here. Do its job by hand, one step at a time.",
     empty: "Nothing is waiting.",
     frame: "A frame from {from} to {to}, in at {door}.",
     packet: "A packet from {from} to {to}.",
@@ -125,14 +126,14 @@ export const voice = {
     wrap: "Wrap it in a frame to",
     forward: "Take one off its countdown and send it in a new frame to",
     go: "Send",
-    awake: "The keeper remembers its job now.",
+    awake: "The keeper does this job by itself now.",
     close: "Close",
     /** The router's desk (8.5): the keeper remembers every step, but isn't allowed to pass anything along. */
     lectern: {
       title: "The keeper's desk",
       asleep:
-        "The keeper isn't allowed to pass anything along, so packets for other streets wait here. You can do its job by hand.",
-      awake: "The keeper is allowed again: it passes every packet along itself.",
+        "The keeper isn't allowed to pass packets on, so packets for other subnets wait here. You can do its job by hand.",
+      awake: "The keeper is allowed to pass packets on again, and does it by itself.",
     },
     /** The frame or packet the next step acts on (the first waiting). */
     now: "this one",
@@ -252,7 +253,7 @@ export const voice = {
     switchedOff: "Switched off: nothing can cross this door.",
     switchOn: "Switch the door on",
     switchOff: "Switch the door off",
-    switchBroken: "This switch is broken. Use the terminal instead: press ` to open it.",
+    switchBroken: "This on/off button is broken. Use the terminal instead: press ` to open it.",
     unplug: "Pull the cable out",
     address: "House address",
     /** A crossing's door (a router: more than one door, on different streets) has an address per door. */
@@ -290,7 +291,7 @@ export const voice = {
   lines: { next: "Next", done: "Close" },
   /** A command memory (0041), shown over the dimmed room. */
   commandMemory: {
-    title: "Command memory: {command}",
+    title: "How to use {command}",
     roles: "How it's built",
     forms: "Common forms",
     output: "Reading what it says",
@@ -309,7 +310,7 @@ export const voice = {
     thisFloor: "This floor",
     world: "The palace",
     close: "Close",
-    states: { restored: "restored", here: "you are here", open: "open", mist: "in the mist", fog: "under fog" },
+    states: { restored: "restored", here: "you are here", open: "open", mist: "next", fog: "not reached yet" },
   },
   /** Replay (CORE-23): a message's whole journey again, hop by hop, with each keeper's decision. */
   replay: {
@@ -324,7 +325,7 @@ export const voice = {
   },
   /** Floor memories on the Map (0036, 0037): back in time, chaptered, voiced, always captioned. */
   memory: {
-    floor: "Memory restored",
+    floor: "Floor recap",
     building: "Why it's built this way",
     farewell: "Floor restored",
     chapter: "{n} of {total}",
@@ -336,8 +337,8 @@ export const voice = {
   },
   /** A ride-along (0036): one message followed through the floor, its headers at every hop. */
   ride: {
-    remembering: "Remembering…",
-    faint: "This memory is still too faint to ride.",
+    remembering: "Loading the replay…",
+    faint: "This replay isn't available yet.",
     hop: "{from} → {to}",
     step: "Hop {n} of {total}",
     pause: "Pause",
@@ -359,7 +360,7 @@ export const voice = {
     changed: "new",
     was: "was {value}",
     change: {
-      crossing: "A crossing: a new envelope, the same letter, the countdown one less.",
+      crossing: "A router: a new frame around the same packet, its countdown one less.",
       passed: "Passed on just as it was.",
       turn: "The answer sets off home.",
     },
@@ -375,7 +376,7 @@ export const voice = {
     play: "Play",
     speed: "Speed",
     reset: "Reset room",
-    notes: "Fragments",
+    notes: "Hints",
     ask: "Ask",
     menu: "Menu",
     /** The top bar, for screen readers. */
@@ -387,16 +388,16 @@ export const voice = {
   },
   /** The robot's notes (HELP-08..10): its notes in the room, reactions, hints. */
   notes: {
-    title: "Memory fragments",
+    title: "Hints",
     /** Under the title: what the fragments are (0112). */
-    about: "Bits of what you knew before you shut down. Each one is a hint.",
-    hint: "Fragment {n} of 5",
-    nextHint: "Recall the next fragment",
-    waiting: "The next fragment hasn't come back yet. Look around, try something.",
+    about: "Your memory comes back in fragments, and each fragment is a hint about what to do next.",
+    hint: "Hint {n} of 5",
+    nextHint: "Show the next hint",
+    waiting: "The next hint isn't ready yet. Look around or try something first.",
     /** Under the hint button once the room is won: no more hints are needed here. */
-    solved: "This room is restored. No more fragments needed here.",
-    allRead: "That's every fragment.",
-    codex: "In your Memory: {card}",
+    solved: "This room is restored. You don't need any more hints here.",
+    allRead: "That's every hint for this room.",
+    codex: "Also in the menu, under Learned: {card}",
     memories: "Tips",
     replay: "Play again",
   },
@@ -407,7 +408,7 @@ export const voice = {
   /** After the win (HELP-13). */
   after: {
     building: "Why it's built this way",
-    floorMemory: "Memory restored",
+    floorMemory: "Floor recap",
     next: "Continue",
     nextRoom: "Next: {room}",
     end: "That's the end of the first release. Thank you for playing.",
@@ -418,7 +419,7 @@ export const voice = {
     sections: "Menu sections",
     back: "Back to the topics",
     here: "you are here",
-    tabs: { dungeon: "The palace", codex: "Memory", guide: "Guide", settings: "Settings" },
+    tabs: { dungeon: "Rooms", codex: "Learned", guide: "Guide", settings: "Settings" },
     status: {
       cleared: "cleared",
       next: "next",
@@ -508,7 +509,7 @@ export const voice = {
   },
   /** The first release's ending card (END1): what "What's next" says. */
   ending: {
-    next: "Below the cathedral, the roads become a maze: the Impossible Stair. It's coming later.",
+    next: "Next comes the Impossible Stair: many routers, and finding the path a message takes through them. It's coming later.",
   },
   send: "Send",
   /** UI-06: before the gift of the voice, a click shows the command it ran under this caption. */

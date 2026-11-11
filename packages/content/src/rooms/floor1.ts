@@ -4,32 +4,44 @@ import type { FloorText, RoomText } from "./types";
 
 export const twoRooms: RoomText = {
   title: "First Contact",
-  mission: "Messages keep arriving at your door. Follow the cable back and find out which machine is sending them.",
+  mission:
+    "Messages keep arriving at your door, where your machine connects to its cable. Follow the corridor (the cable) to the machine sending them, and read the plate by its door.",
   notes: [],
   hints: [
     { text: "Each moving light is a message. Follow one back along the corridor to where it starts." },
-    { text: "Doors lead to corridors, and corridors lead to other rooms." },
-    { text: "Every door has a plate that tells you whose door it is.", codex: "door" },
+    {
+      text: "Walk out through your doorway. The corridor beyond it is the cable, and the room at its far end is another machine.",
+    },
+    {
+      text: "Each door is one of a machine's network connections, and the plate beside it shows the door's name.",
+      codex: "door",
+    },
     { text: "Walk the corridor into the other room and read the plate on its door." },
     { text: "Click your doorway, walk to the far end, enter kitchen's room, and click the plate beside its door." },
   ],
   detectors: {
     "staying-put": {
-      note: "Your plate tells you about your door. What about the one at the other end?",
+      note: "Your plate only tells you about your own door. The messages come from the door at the other end of the corridor.",
       tried: "You read your own plate several times, but the messages came from the other end.",
     },
   },
   debrief: {
     happened:
-      "The messages came from kitchen, down the cable, through your door. Every machine has at least one door, with a name like eth0. That door is where its cable plugs in.",
-    terms: [{ id: "interface", term: "interface", meaning: "a machine's network door, with a name like eth0" }],
+      "The messages came from kitchen, along the cable, in through your door. On a real network that door is called a network interface: the place where a machine's cable plugs in. Every machine has at least one, and each has a name, like eth0.",
+    terms: [
+      {
+        id: "interface",
+        term: "interface",
+        meaning: "a machine's connection to the network (a door here), with a name like eth0",
+      },
+    ],
   },
   memories: [
     {
       id: "F1-MEM-01",
       title: "Doors and plates",
       trigger: "on entering",
-      text: "Every door has a plate beside it, with the door's name on it. Mine says eth0. The light is filled, so the cable behind it works. I'll read the plate.",
+      text: "This door is where my machine connects to its cable. The plate beside it shows the door's name: eth0. The light is filled, so the cable works. I'll read the plate.",
       action: "click your own plate",
     },
     {
@@ -58,11 +70,12 @@ export const twoRooms: RoomText = {
 
 export const looseCable: RoomText = {
   title: "Unplugged",
-  mission: "Messages from kitchen have stopped arriving, and the corridor to it has gone dark. Find out what broke.",
+  mission:
+    "Messages from kitchen have stopped arriving, and the corridor (the cable) to it has gone dark. Find out what broke and get kitchen's messages through again.",
   notes: [],
   hints: [
-    { text: "Look at your door's light, then at the corridor." },
-    { text: "A cable has two ends. Look at the one by your door." },
+    { text: "Look at the light on your door's plate, then at the corridor where it meets your door." },
+    { text: "A cable has two ends, one at each door. Look at the end by your door." },
     { text: "A link only works when its cable is plugged in at both ends.", codex: "link-light" },
     { text: "Find the loose end on the floor by your door and plug it back in." },
     {
@@ -71,13 +84,13 @@ export const looseCable: RoomText = {
   ],
   detectors: {
     "blaming-kitchen": {
-      note: "Kitchen's light is out too. Is it kitchen, or something between you?",
+      note: "Kitchen's light is out too. When the lights at both ends go dark together, look at the cable between them.",
       tried: "You looked at kitchen's door, but the trouble was the cable between you.",
     },
   },
   debrief: {
     happened:
-      "The cable had come out of your door, so nothing could cross. Plugged back in, the link came up: both lights turned on, and messages flowed again.",
+      "The cable had come out of your door, so nothing could cross. Plugged in at both ends, it makes a link: a working connection between two doors. Real computers have a link light beside the cable socket too, and checking it is the first thing to do when a connection stops working.",
     terms: [
       { id: "link", term: "link", meaning: "a working connection between two doors through a cable" },
       { id: "link-light", term: "link light", meaning: "the light on a door that shows whether its link is working" },
@@ -109,7 +122,8 @@ export const looseCable: RoomText = {
 
 export const bothEnds: RoomText = {
   title: "Switched Off",
-  mission: "The cable is plugged in at both ends, but nothing gets through.",
+  mission:
+    "The cable is plugged in at both ends, but kitchen's messages still don't get through. Find what's stopping them and fix it.",
   notes: [],
   hints: [
     { text: "Both lights are dark, but the cable is plugged in at both ends. Look at the doors themselves." },
@@ -128,7 +142,7 @@ export const bothEnds: RoomText = {
   },
   debrief: {
     happened:
-      "Kitchen's door was switched off. A link is only up when the cable is plugged in and both doors are on. You switched it on, and the messages came back.",
+      "Kitchen's door was switched off. A link is up only when the cable is plugged in and both doors (interfaces) are switched on; if either is off, the link is down and carries nothing. On a real Linux machine, `ip link set eth0 up` switches an interface on, and that's what the switch on the plate runs.",
     terms: [
       {
         id: "link-up-down",
@@ -157,7 +171,7 @@ export const bothEnds: RoomText = {
   ],
   building: {
     id: "F1-BLD-03",
-    text: "Every door has a switch, so a machine can rest a door without unplugging anything. Someone switched this one off and never switched it back on.",
+    text: "Every door has a switch, so a door can be turned off without unplugging anything. Someone switched this one off and never switched it back on.",
     shown: "switches set into plates; one left off, gathering dust",
   },
   fieldGuide: ["Doors and plates"],
@@ -178,7 +192,7 @@ export const darkCorridor: RoomText = {
   ],
   detectors: {
     "blaming-kitchen": {
-      note: "Kitchen's light is out too. Is it kitchen, or something between you?",
+      note: "Kitchen's light is out too. When the lights at both ends go dark together, check every door and both cable ends.",
       tried: "You looked at kitchen's door while the cable was still out.",
     },
     replugging: {
@@ -186,13 +200,13 @@ export const darkCorridor: RoomText = {
       tried: "You unplugged and replugged a cable end that was already in.",
     },
     "one-fix-only": {
-      note: "One thing's fixed. Look again: both doors, both ends.",
+      note: "One thing's fixed, but the link is still down. Check both doors and both cable ends again.",
       tried: "You fixed one thing and waited, but more than one thing was wrong.",
     },
   },
   debrief: {
     happened:
-      "Three things were wrong at once: your door, kitchen's door and the cable's far end. A link only works when all of them are right. You checked everything.",
+      "Three things were wrong at once: your interface was off, kitchen's interface was off, and the cable was out at kitchen's end. A link only comes up when the cable is plugged in at both ends and both interfaces are on. Checking each of those in turn is how real network faults get found.",
     terms: [],
   },
   voice: [
@@ -205,7 +219,7 @@ export const darkCorridor: RoomText = {
 };
 
 export const floor1: FloorText = {
-  name: "The Wire",
+  name: "Cables and Links",
   memory: [
     {
       id: "F1-FM-01",
@@ -215,7 +229,7 @@ export const floor1: FloorText = {
     {
       id: "F1-FM-02",
       title: "What they built",
-      text: "So a cable was laid, door to door. A door at each end, each with a name. A light to show the cable works. A switch to rest a door.",
+      text: "So a cable was laid, door to door. A door at each end, each with a name. A light to show the cable works. A switch to turn a door off and on.",
     },
     {
       id: "F1-FM-03",
@@ -227,7 +241,7 @@ export const floor1: FloorText = {
     {
       id: "F1-FM-04",
       title: "What's next",
-      text: "But a cable only carries. It doesn't know who a message is for. The rest of that memory is still missing.",
+      text: "But a cable only carries messages. It doesn't know who a message is for. That's the next floor.",
     },
   ],
   journal: {

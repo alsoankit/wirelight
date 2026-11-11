@@ -27,13 +27,13 @@ export const REGION_1_CARDS: Card[] = [
     id: "door",
     floor: 1,
     title: "Door",
-    text: "Each door is where a cable plugs into this machine. A machine can have one door or many.",
+    text: "Each door is one of this machine's network connections: where a cable plugs in. A machine can have one door or many.",
   },
   {
     id: "plate",
     floor: 1,
     title: "Plate",
-    text: "The plate by a door shows its name and a light that's on when the cable is working.",
+    text: "The plate by a door shows the door's name and a light that's on when the cable is working.",
   },
   {
     id: "link-light",
@@ -65,7 +65,12 @@ export const REGION_1_CARDS: Card[] = [
     title: "MAC address",
     text: "Every door has a name like 02:00:00:00:00:07. It's written on the plate, and it's how frames find the right door.",
   },
-  { id: "workbench", floor: 2, title: "Frame builder", text: "A carved stone stand for building and sending frames." },
+  {
+    id: "workbench",
+    floor: 2,
+    title: "Frame builder",
+    text: "A stone table where you build frames by hand and send them.",
+  },
   {
     id: "repeat-send",
     floor: 2,

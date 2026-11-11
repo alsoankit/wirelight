@@ -37,9 +37,9 @@ describe("the keeper's why", () => {
     ).toBe(true);
   });
 
-  it("a router forwards by its routing board, and says why it let something go", () => {
+  it("a router forwards by its routing board, and says why it threw something away", () => {
     const said = answers("f8.across-the-street", "crossing");
-    expect(said.some((t) => /My board says 10\.0\.2\.0\/24 is the street behind door eth1/.test(t))).toBe(true);
+    expect(said.some((t) => /My board says 10\.0\.2\.0\/24 is the subnet right behind door eth1/.test(t))).toBe(true);
     // Before the loop is mended, a ping goes round and round until its countdown runs out.
     const steps = [{ device: "observatory", line: "ping -c 1 10.0.4.7", waitMs: 20_000 }];
     // It dies at whichever of the two routers it reaches with nothing left.
@@ -63,7 +63,7 @@ describe("the keeper's why", () => {
       },
     };
     expect(keeperSays(d, "port-blocked")).toBe(
-      "That frame was for 02:00:00:00:00:13. My board says 02:00:00:00:00:13 is behind eth4, but that door is held shut to keep the halls from going round in circles, so it went no further.",
+      "That frame was for 02:00:00:00:00:13. My board says 02:00:00:00:00:13 is behind eth4, but that door is held shut so frames can't go round in a loop, so I threw it away.",
     );
   });
 });

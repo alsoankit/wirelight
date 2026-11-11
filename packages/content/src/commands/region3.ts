@@ -58,7 +58,7 @@ export const REGION_3_COMMANDS: Record<string, CommandMemory> = {
       {
         word: "10.0.1.5/24",
         role: "which one",
-        meaning: "this address. The `/24` is part of how an address is written; the street sign explains it later.",
+        meaning: "this address. The `/24` is part of how an address is written; you'll learn what it means later.",
       },
       { word: "dev eth0", role: "where", meaning: "on this door" },
     ],
@@ -95,7 +95,7 @@ export const REGION_3_COMMANDS: Record<string, CommandMemory> = {
     intro: "The network tool again, this time about your neighbours.",
     anatomy: [
       { word: "ip", role: "tool", meaning: "the network tool" },
-      { word: "neigh", role: "about what", meaning: "neighbours: the ledger of house address → door name" },
+      { word: "neigh", role: "about what", meaning: "neighbours: the ledger of IP address → MAC address" },
     ],
     forms: [
       { line: "ip neigh", meaning: "show the ledger" },
@@ -120,9 +120,9 @@ export const REGION_3_COMMANDS: Record<string, CommandMemory> = {
     id: "CMD-07",
     command: "dhclient",
     room: "f7.ask-for-an-address",
-    intro: "Not every address has to be written by hand. You can ask the town for one.",
+    intro: "Not every address has to be written by hand. You can ask the network for one.",
     anatomy: [
-      { word: "dhclient", role: "tool", meaning: "ask the town's registry for an address" },
+      { word: "dhclient", role: "tool", meaning: "ask the registry, the machine that hands out addresses, for one" },
       { word: "-v", role: "how", meaning: "tell me every step" },
       { word: "eth0", role: "which one", meaning: "for this door" },
     ],

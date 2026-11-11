@@ -13,7 +13,7 @@ export const insideTheEnvelope: RoomText = {
     // The Scanner is the button at the bottom left (it replaced Captures), not an object on the table.
     { text: "A new tool is online: the Scanner, at the bottom left. Open it." },
     { text: "Catch one of kitchen's sealed letters with the Scanner." },
-    { text: "A frame can carry another envelope inside it: a packet.", codex: "packet" },
+    { text: "A frame can carry another message inside it, with addresses of its own: a packet.", codex: "packet" },
     { text: "Open a catch, then open what's inside the frame, then what's inside that." },
     {
       text: "Catch a kitchen announcement on the Scanner and open it all the way down, to the message inside.",
@@ -27,10 +27,18 @@ export const insideTheEnvelope: RoomText = {
   },
   debrief: {
     happened:
-      "The sealed letter was a packet, inside a frame. The frame gets it across one cable, door to door, using MAC addresses; the packet carries the IP addresses: who wrote it and who it's for. Putting one inside the other is called encapsulation.",
+      "The sealed letter was a packet, inside a frame. The frame gets it across one cable, door to door, using MAC addresses; the packet carries the IP addresses: who wrote it and who it's for. Putting one inside the other is called encapsulation, and every message on a real network is built this way.",
     terms: [
-      { id: "packet", term: "packet", meaning: "the letter inside a frame, with house (IP) addresses" },
-      { id: "encapsulation", term: "encapsulation", meaning: "putting one envelope inside another" },
+      {
+        id: "packet",
+        term: "packet",
+        meaning: "a message with IP addresses (who sent it and who it's for), carried inside a frame",
+      },
+      {
+        id: "encapsulation",
+        term: "encapsulation",
+        meaning: "putting one message inside another: the packet inside the frame",
+      },
     ],
   },
   memories: [
@@ -49,7 +57,7 @@ export const insideTheEnvelope: RoomText = {
     },
     {
       q: "Why does the packet say `.255`?",
-      a: "That's the whole street at once. Everyone on it. Like the everyone name, but for houses.",
+      a: "`10.0.1.255` means everyone on this street at once: a broadcast address for houses, like `ff:ff:ff:ff:ff:ff` for doors.",
     },
     { q: "Has this always been inside?", a: "Every one of them, since the halls. You couldn't open it yet." },
   ],
@@ -66,12 +74,14 @@ export const insideTheEnvelope: RoomText = {
 export const whoHasThisAddress: RoomText = {
   title: "Who Has This Address?",
   mission:
-    "Your machine has stopped addressing its own messages. A ping for kitchen is waiting on the desk: address it and send it by hand.",
+    "Your machine's keeper has stopped wrapping packets in frames, so a ping for kitchen is stuck on your desk. Wrap it and send it by hand.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
-    { text: "The packet on your desk needs a frame around it." },
-    { text: "A frame needs a MAC address. Do you know kitchen's?" },
+    { text: "Look at the desk in your room: the packet there needs a frame around it before it can leave." },
+    {
+      text: "A frame needs kitchen's MAC address. Read the neighbour ledger first: it lists the ones your machine knows.",
+    },
     {
       text: "When a house doesn't know a neighbour's door, it asks everyone: 'Who has this address?'",
       codex: "arp-question",
@@ -85,34 +95,39 @@ export const whoHasThisAddress: RoomText = {
   ],
   detectors: {
     "wrap-with-ip": {
-      note: "A frame is door to door. Whose door is 10.0.1.7?",
+      note: "A frame needs a MAC address, and 10.0.1.7 is an IP address. Find out which door has it.",
       tried: "You tried to wrap a frame to an IP address, but a frame needs a MAC address.",
     },
     "wrap-to-everyone": {
-      note: "A broadcast reaches kitchen… and every other machine too. Is there a way to learn kitchen's own MAC address?",
+      note: "A broadcast frame reaches kitchen, but every other machine too. Ask first, so you learn kitchen's own MAC address.",
       tried: "You wrapped the packet in a broadcast frame instead of a frame to kitchen's MAC address.",
     },
     "ask-again": {
-      note: "It's already written down. Look first.",
+      note: "Kitchen's MAC address is already in the ledger. Look there first.",
       tried: "You asked the street for an address your ledger already had.",
     },
   },
   debrief: {
     happened:
-      "To send a packet to a house, your machine needs that house's door name for the frame. It asks the whole street, 'Who has 10.0.1.7?' The owner answers, and the answer goes in the neighbour ledger. That's ARP, and it's the little question you've seen before every first ping.",
+      "To send a packet, your machine needs the MAC address of the machine it's for, to put on the frame. So it broadcasts 'Who has 10.0.1.7?', the owner replies with its MAC address, and the answer is saved in the ARP table (the neighbour ledger on screen, `ip neigh`). That's ARP, the small question you've seen before every first ping, and real machines do it before talking to any neighbour for the first time.",
     terms: [
-      { id: "arp", term: "ARP", meaning: "asking everyone 'who has this address?' to learn the door name" },
+      {
+        id: "arp",
+        term: "ARP",
+        meaning: "a broadcast asking 'who has this IP address?'; the owner replies with its MAC address",
+      },
       {
         id: "neighbour-ledger",
-        term: "neighbour ledger",
-        meaning: "the list of house address → door name your machine has learned (`ip neigh`)",
+        term: "ARP table",
+        meaning:
+          "your machine's list of IP addresses and the MAC address that goes with each (`ip neigh`); on screen, the neighbour ledger",
       },
     ],
   },
   questions: [
     {
-      q: "Why not just remember everyone's door?",
-      a: "They do: that's the neighbour ledger. But doors change, so its lines go stale, and the machine asks again.",
+      q: "Why not remember everyone's door?",
+      a: "It does: that's the ARP table. But doors change, so its lines go stale after a while, and the machine asks again.",
     },
     {
       q: "Why does everyone hear the question?",
@@ -140,9 +155,12 @@ export const twoOfMe: RoomText = {
   access: { forge: HOUSE_LOCKED },
   notes: ["Register: kitchen 10.0.1.7 · library 10.0.1.12 · forge 10.0.1.10."],
   hints: [
-    { text: "Look at who each answer is *from*." },
+    { text: "Ping kitchen a few times and catch the replies with the Scanner. Look at who each one is *from*." },
     { text: "Your Scanner shows the MAC address on every reply. So does your neighbour ledger (the ARP table)." },
-    { text: "Two houses can't share one address: the street can't tell them apart.", codex: "two-answers" },
+    {
+      text: "Two machines can't share one IP address: ARP gets two answers, and the ARP table can keep only one.",
+      codex: "two-answers",
+    },
     { text: "Find which MAC address isn't kitchen's, find its machine, and give it its own IP address." },
     {
       text: "Some replies come from `02:00:00:00:00:17` (kitchen), some from `…:0c` (library). In library's room: `ip addr del 10.0.1.7/24 dev eth0`, then `ip addr add 10.0.1.12/24 dev eth0`.",
@@ -150,7 +168,7 @@ export const twoOfMe: RoomText = {
   ],
   detectors: {
     "flush-and-hope": {
-      note: "The ARP table learns it again, and maybe wrong again. Why are two doors answering?",
+      note: "Clearing the ARP table doesn't help: it learns again from whichever door answers. Find out why two doors answer.",
       tried: "You cleared your ARP table more than once, but it kept learning from two doors.",
     },
     "change-my-address": {
@@ -158,7 +176,7 @@ export const twoOfMe: RoomText = {
       tried: "You changed your own address, but yours wasn't the problem.",
     },
     "delete-kitchen": {
-      note: "Kitchen was the right one. Who else claims `.7`?",
+      note: "Kitchen is the right owner of `.7`. Find the other machine that claims it.",
       tried: "You took kitchen's address away, but kitchen was the rightful owner.",
     },
   },
@@ -169,13 +187,16 @@ export const twoOfMe: RoomText = {
       {
         id: "duplicate-address",
         term: "duplicate address",
-        meaning: "two machines with the same IP address; the street can't tell them apart",
+        meaning: "two machines given the same IP address; the others can't tell which one to send to",
       },
     ],
   },
   questions: [
-    { q: "Who is answering for kitchen?", a: "Ask the Scanner. Every answer carries the door it came from." },
-    { q: "Can two houses share an address?", a: "Two houses, one number? Nobody would know where to deliver." },
+    { q: "Who is answering for kitchen?", a: "Check the Scanner. Every reply carries the MAC address it came from." },
+    {
+      q: "Can two houses share an address?",
+      a: "No. With two machines on one IP address, nobody knows which one to deliver to, and replies come from either.",
+    },
   ],
 };
 
@@ -185,10 +206,10 @@ export const mixedUpLetters: RoomText = {
   access: { library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: ["Register: kitchen 10.0.1.7 · forge 10.0.1.10 · library 10.0.1.12 · chapel 10.0.1.18."],
   hints: [
-    { text: "Two houses, two different problems." },
+    { text: "Kitchen and forge each have a different problem. Start with your ARP table." },
     { text: "Read your ARP table. Read the MAC address on every reply." },
     {
-      text: "A pinned ARP entry never gets checked again; two machines with one IP address confuse everyone.",
+      text: "A pinned (PERMANENT) line in the ARP table is never checked again; and a duplicate address confuses everyone.",
       codex: "neighbour-ledger",
     },
     { text: "Cross out the wrong pinned line; give the imposter its own address." },
@@ -198,7 +219,7 @@ export const mixedUpLetters: RoomText = {
   ],
   detectors: {
     "flush-and-hope": {
-      note: "The ARP table learns it again, and maybe wrong again. Why are two doors answering?",
+      note: "Clearing the ARP table doesn't help: it learns again from whichever door answers. Find out why two doors answer.",
       tried: "You cleared your ARP table more than once.",
     },
     "change-my-address": {
@@ -206,17 +227,17 @@ export const mixedUpLetters: RoomText = {
       tried: "You changed your own address, but yours wasn't the problem.",
     },
     "delete-kitchen": {
-      note: "Kitchen was the right one. Who else is answering for someone else?",
+      note: "Kitchen is the right owner of its address. Find the machine that's answering for another house.",
       tried: "You took kitchen's address away, but kitchen was the rightful owner.",
     },
     "permanent-again": {
-      note: "Most lines go stale and get checked. This one says PERMANENT.",
+      note: "Most lines go stale and get checked again. This one says PERMANENT: it never goes stale.",
       tried: "You waited for kitchen's line to go stale, but a pinned line never does.",
     },
   },
   debrief: {
     happened:
-      "Your ARP table had a pinned entry for kitchen's old door, so your packets went to a door that no longer exists. And chapel was claiming forge's IP address. You removed the pinned entry and gave chapel its own address.",
+      "Your ARP table had a pinned entry for kitchen's old door, so your packets went to a door that no longer exists. And chapel was claiming forge's IP address. You removed the pinned entry and gave chapel its own address. Both happen on real networks: a fixed entry nobody updated, and two machines set to the same address.",
     terms: [],
   },
   voice: [
@@ -229,29 +250,29 @@ export const mixedUpLetters: RoomText = {
 };
 
 export const floor6: FloorText = {
-  name: "Envelopes",
+  name: "Packets and ARP",
   memory: [
     {
       id: "F6-FM-01",
       title: "The problem",
-      text: "Memory restored. Houses had addresses, but the halls only understood door names. A house letter couldn't travel on its own.",
+      text: "Memory restored. Machines had IP addresses, but cables and switches only understand MAC addresses. A packet couldn't travel on its own.",
     },
     {
       id: "F6-FM-02",
       title: "What they built",
-      text: "So the house letter was folded inside a door letter. And when a neighbour's door was unknown, the machine asked the whole street and wrote the answer in a ledger.",
+      text: "So the packet was put inside a frame. And when a neighbour's MAC address was unknown, the machine asked the whole street with ARP and wrote the answer in its ARP table.",
     },
     {
       id: "F6-FM-03",
       title: "Ride-along",
-      text: "The frame for the road. The packet for the house.",
+      text: "The frame for the cable. The packet for the machine.",
       shown:
         "the camera starts inside the observatory's keeper: a packet to 10.0.1.7; the ledger is searched; a question flies out; the answer is written; the packet is folded into a frame (the camera watches the frame close around it); out through the door, through the square; at kitchen's door the frame is opened and dropped; the packet goes in",
     },
     {
       id: "F6-FM-04",
       title: "What's next",
-      text: "But how does a house know which addresses are its neighbours? Street signs. Nearly there.",
+      text: "But how does a machine know which addresses are on its own street, and which are further away? That's next.",
       shown: "the world map: Floor 7 in mist",
     },
   ],

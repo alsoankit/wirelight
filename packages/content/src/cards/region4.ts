@@ -2,12 +2,12 @@ import type { Card } from "./types";
 
 /** Region 4's discovery cards (floors/floor-8.md, floor-9.md), word for word. */
 export const REGION_4_CARDS: Card[] = [
-  // Floor 8 · Crossings
+  // Floor 8 · Routers
   {
     id: "router",
     floor: 8,
     title: "Router",
-    text: "A machine with doors on more than one street, that passes packets from one street to another.",
+    text: "A machine with doors on more than one subnet, that passes packets from one subnet to another.",
   },
   {
     id: "crossing-keeper",
@@ -19,19 +19,19 @@ export const REGION_4_CARDS: Card[] = [
     id: "routing-board",
     floor: 8,
     title: "Routing board",
-    text: "Every machine's list of which way to send packets, street by street.",
+    text: "Every machine's list of which way to send packets, subnet by subnet.",
   },
   {
     id: "default-gateway",
     floor: 8,
     title: "Default gateway",
-    text: "Where your house sends anything that isn't for its own street.",
+    text: "Where your machine sends anything that isn't for its own subnet.",
   },
   {
     id: "specific-route",
     floor: 8,
     title: "Specific route",
-    text: "A line for one particular street: 'for the bell tower, go via arch'.",
+    text: "A line for one particular subnet: 'for the bell tower, go via arch'.",
   },
   {
     id: "capture",
@@ -53,7 +53,7 @@ export const REGION_4_CARDS: Card[] = [
     title: "Keeper's desk",
     text: "Where packets wait for the keeper to decide which way they go.",
   },
-  // Floor 9 · The Journey
+  // Floor 9 · Routing Across Networks
   {
     id: "tracer",
     floor: 9,
@@ -70,7 +70,7 @@ export const REGION_4_CARDS: Card[] = [
     id: "hop",
     floor: 9,
     title: "Hop",
-    text: "One step of the journey: from one machine to the next across one street.",
+    text: "One step of a packet's journey: from one machine to the next, across one subnet.",
   },
   {
     id: "ttl",

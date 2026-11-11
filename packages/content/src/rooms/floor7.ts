@@ -5,7 +5,8 @@ import type { FloorText, RoomText } from "./types";
 
 export const sameStreet: RoomText = {
   title: "Moved House",
-  mission: "Your machine got a new address, and now nobody on the square can hear you. Find out why.",
+  mission:
+    "Your machine got a new address, and now nobody on the square can hear you. Find out why, and get kitchen to answer again.",
   access: { kitchen: HOUSE_LOCKED, library: HOUSE_LOCKED, forge: HOUSE_LOCKED },
   notes: [],
   hints: [
@@ -27,11 +28,11 @@ export const sameStreet: RoomText = {
       tried: "You moved onto the right street, but with a different `/` from everyone else's.",
     },
     "take-lanterns-house": {
-      note: "That's kitchen's house. Two houses, one address doesn't work.",
+      note: "That's kitchen's address. Two machines can't share one: that's a duplicate address.",
       tried: "You took kitchen's address for your own house.",
     },
     "ping-the-lane": {
-      note: "That's your own street, the lane. Who lives on kitchen's?",
+      note: "That address is on the lane, your machine's current street. Kitchen lives on the square's street.",
       tried: "You pinged houses on the lane, your old street, instead of the square's.",
     },
   },
@@ -41,7 +42,12 @@ export const sameStreet: RoomText = {
     happened:
       "Your address was on street `10.0.2`, and kitchen's on `10.0.1`. A machine talks directly only to its own street, its subnet. The `/24`, the prefix length, says the first three numbers are the street (the network part) and the last is the house (the host part). Moving onto the square's street put you next door to kitchen again.",
     terms: [
-      { id: "subnet", term: "subnet", meaning: "a street: all the addresses that share the same network part" },
+      {
+        id: "subnet",
+        term: "subnet",
+        meaning:
+          "a group of addresses that share the same network part, like `10.0.1.x`; machines on one subnet talk directly (a street in the town)",
+      },
       {
         id: "prefix-length",
         term: "prefix length",
@@ -53,7 +59,7 @@ export const sameStreet: RoomText = {
   questions: [
     {
       q: "Why doesn't my machine even try?",
-      a: "It only talks directly to its own street. For anywhere else, it needs directions. And it has none, yet.",
+      a: "It only talks directly to machines on its own street. To reach any other street it has to be told a way there, and it hasn't been yet. That comes in the cathedral.",
     },
     {
       q: "What does `/24` count?",
@@ -77,7 +83,7 @@ export const sameStreet: RoomText = {
 export const askForAnAddress: RoomText = {
   title: "Ask for an Address",
   mission:
-    "You need an address on the square, but you don't know which ones are free. The town has a registry that hands them out.",
+    "You need an address on the square, but you don't know which ones are free. Get one from the registry, the machine that hands them out, then ping kitchen.",
   access: {
     kitchen: HOUSE_LOCKED,
     library: HOUSE_LOCKED,
@@ -86,34 +92,46 @@ export const askForAnAddress: RoomText = {
   },
   notes: ["Don't guess numbers. Ask the registry."],
   hints: [
-    { text: "Don't guess. Someone keeps track of free addresses." },
-    { text: "The registry hands them out, if you ask." },
-    { text: "DHCP: call out, get an offer, accept it, get a lease.", codex: "registry" },
+    { text: "Don't guess a number: the registry on the square keeps track of which addresses are free." },
+    { text: "`dhclient` followed by a door name asks the network for an address on that door." },
+    {
+      text: "DHCP: your machine calls out to everyone, the registry offers an address, your machine asks for it, and the registry confirms it as a lease.",
+      codex: "registry",
+    },
     { text: "Ask the registry for an address with the command that does it, then ping kitchen." },
     { text: "`dhclient -v eth0`, then `ping -c 3 10.0.1.7`." },
   ],
   detectors: {
     "guess-a-number": {
-      note: "That one's taken. The DHCP server (the registry) knows which are free.",
+      note: "That one's taken. The registry knows which addresses are free: ask it.",
       tried: "You guessed a number that was already someone's house.",
     },
     "dhclient-wrong-door": {
-      note: "Doors have names. Which name does yours have? Ask the machine for its doors.",
+      note: "Your machine has no door with that name. `ip link` lists the doors it has.",
       tried: "You asked for an address on a door this machine doesn't have.",
     },
   },
   debrief: {
     happened:
-      "You didn't know which addresses were free, so you asked. Your machine sent a broadcast, the registry offered an address, you asked for it, and it confirmed: that's DHCP. The address is a lease, a loan that gets renewed.",
+      "You didn't know which addresses were free, so you asked. Your machine broadcast a request, the registry (a DHCP server) offered an address, your machine asked for it, and the registry confirmed it. That's DHCP, and it's how almost every phone and laptop gets its address. The address is a lease: on loan for a while, and renewed before it runs out.",
     terms: [
-      { id: "dhcp", term: "DHCP", meaning: "asking the network for an address instead of writing one yourself" },
-      { id: "lease", term: "lease", meaning: "an address on loan for a while" },
+      {
+        id: "dhcp",
+        term: "DHCP",
+        meaning:
+          "how a machine asks the network for an address instead of having one written in by hand; a DHCP server (here, the registry) hands it out",
+      },
+      {
+        id: "lease",
+        term: "lease",
+        meaning: "an address on loan for a set time; the machine renews it before it runs out",
+      },
     ],
   },
   questions: [
     {
       q: "How do I call out without an address?",
-      a: "You send a broadcast, from no address at all. The registry is used to it.",
+      a: "Your machine sends a broadcast from `0.0.0.0`, which means 'no address yet'. The registry expects that.",
     },
     {
       q: "Why only a loan?",
@@ -121,7 +139,7 @@ export const askForAnAddress: RoomText = {
     },
     {
       q: "What else does the registry give?",
-      a: "Directions out of the subnet (the street), if there are any. You'll want those further up.",
+      a: "Often the way out of the subnet (the street) too, if there is one. You'll need that in the cathedral.",
     },
   ],
   fieldGuide: ["Getting an address", "Command book: `dhclient`"],
@@ -156,7 +174,7 @@ export const census: RoomText = {
       tried: "You gave an address a different `/` from everyone else's.",
     },
     "flush-and-hope": {
-      note: "The ARP table learns it again, and maybe wrong again. Why are two doors answering?",
+      note: "Clearing the ARP table doesn't help: it learns again from whichever door answers. Find out why two doors answer.",
       tried: "You cleared your ARP table more than once.",
     },
     "change-my-address": {
@@ -164,13 +182,13 @@ export const census: RoomText = {
       tried: "You wrote your own address instead of asking DHCP.",
     },
     "census-skip": {
-      note: "Four on the census board. Who's missing, and which subnet are they on?",
+      note: "Those four have already answered. Find the one that hasn't, and check which subnet it's on.",
       tried: "You called the four who'd already answered again.",
     },
   },
   debrief: {
     happened:
-      "Cellar was on the wrong subnet, chapel was using an address that belonged to the DHCP server's pool, and you had no address at all. You moved cellar onto the square's subnet, gave chapel its own address, and asked DHCP for yours. Every house answered the census.",
+      "Cellar was on the wrong subnet, chapel was using an address from the DHCP server's pool (the addresses it lends out), and you had no address at all. You moved cellar onto the square's subnet, gave chapel its own address, and asked DHCP for yours. These are the everyday address problems on real networks: the wrong subnet, an address clash, and no address.",
     terms: [],
   },
   voice: [
@@ -183,17 +201,17 @@ export const census: RoomText = {
 };
 
 export const floor7: FloorText = {
-  name: "Neighbourhoods",
+  name: "Subnets and DHCP",
   memory: [
     {
       id: "F7-FM-01",
       title: "The problem",
-      text: "Memory restored. The town kept growing. If every house asked the whole town every question, nothing else would get through.",
+      text: "Memory restored. The town kept growing. If every machine broadcast its questions to the whole town, nothing else would get through.",
     },
     {
       id: "F7-FM-02",
       title: "What they built",
-      text: "So the town was split into streets. A house talks directly only to its own street, and its street sign says where the street ends. And because machines kept guessing numbers and taking each other's, the registry opened.",
+      text: "So the town was split into subnets. A machine talks directly only to its own subnet, and the prefix length says where the subnet ends. And because machines kept guessing addresses and taking each other's, the registry started handing them out with DHCP.",
     },
     {
       id: "F7-FM-03",
@@ -205,7 +223,7 @@ export const floor7: FloorText = {
     {
       id: "F7-FM-04",
       title: "What's next",
-      text: "Other streets need someone at the crossing who knows the way. The crossings are further up, in the cathedral.",
+      text: "To reach another subnet, a machine needs help from a machine that stands on both. Those are further up, in the cathedral.",
       shown: "the world map: the Lantern Town fully lit; the Cathedral of Crossings rising through mist above",
     },
   ],

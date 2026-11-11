@@ -4,7 +4,8 @@ import type { FloorText, RoomText } from "./types";
 
 export const firstLight: RoomText = {
   title: "Write Your Own",
-  mission: "There's no Send button this time. Write a message to kitchen yourself, on the table, and get an answer.",
+  mission:
+    "There's no Send button this time. Write a message to kitchen yourself on the stone table, send it, and get kitchen to answer.",
   notes: [],
   hints: [
     { text: "The table's first slot, To, needs the name of the door you're writing to." },
@@ -17,24 +18,28 @@ export const firstLight: RoomText = {
   ],
   detectors: {
     "own-name": {
-      note: "That's the name on your own door. Who did you want to hear you?",
+      note: "That's your own door's name. A frame goes to the door whose name is in To, so this one didn't go to kitchen.",
       tried: "You sent a frame to your own door's name, so it went nowhere.",
     },
     "no-name": {
-      note: "Every frame needs the name of a door. Where are names written?",
+      note: "A frame can't go anywhere without a door's name in To. Every door's name is written on its plate.",
       tried: "You tried to send without a name in the To slot.",
     },
   },
   debrief: {
     happened:
-      "Your message travelled in a frame, an envelope addressed with the name of kitchen's door. That name is its MAC address. Kitchen saw its own name on the frame and answered.",
+      "Your message travelled in a frame, an envelope addressed with the name of kitchen's door. That name is its MAC address. Kitchen saw its own address on the frame and answered. On a real network every message crosses a cable inside a frame, and every network interface has its own MAC address.",
     terms: [
       {
         id: "frame",
         term: "frame",
         meaning: "the envelope a message travels in across a cable: to, from and the message",
       },
-      { id: "mac-address", term: "MAC address", meaning: "the name of one door, like 02:00:00:00:00:07" },
+      {
+        id: "mac-address",
+        term: "MAC address",
+        meaning: "the address of one network interface (door), like 02:00:00:00:00:07",
+      },
     ],
   },
   memories: [
@@ -57,7 +62,7 @@ export const firstLight: RoomText = {
     },
     {
       q: "Why did the frame come back to me?",
-      a: "You wrote your own door's name. It went nowhere at all.",
+      a: "You wrote your own door's name in To, so it was never going to kitchen.",
       after: "own-name",
     },
   ],
@@ -71,12 +76,18 @@ export const firstLight: RoomText = {
 
 export const wrongName: RoomText = {
   title: "Wrong Address",
-  mission: "Your machine keeps sending frames to kitchen, but kitchen never answers. Find out why.",
+  mission:
+    "Your machine keeps sending frames to kitchen, but kitchen never answers. Find out why and get kitchen to answer.",
   notes: [],
   hints: [
-    { text: "Look at kitchen's door. Something is piling up there." },
-    { text: "You can catch one of those messages and look inside." },
-    { text: "A door takes in only frames that carry its own name as the to.", codex: "ignored-mark" },
+    {
+      text: "Go to kitchen's door and look at the marks piling up there: one for each frame that arrived and went no further.",
+    },
+    { text: "Catch one of the repeating frames on its way and open it to read its To." },
+    {
+      text: "A door takes in only frames whose To is its own MAC address. It ignores all the others.",
+      codex: "ignored-mark",
+    },
     {
       text: "Catch one of the repeated frames, compare its To with kitchen's plate, then start a repeat with the right address.",
     },
@@ -86,22 +97,22 @@ export const wrongName: RoomText = {
   ],
   detectors: {
     "link-blame": {
-      note: "The corridor is lit. Messages are getting there. What happens when they arrive?",
+      note: "The corridor is lit, so the link works and the frames do reach kitchen. The trouble is what kitchen does with them when they arrive.",
       tried: "You switched a door or replugged the cable, but the link was working.",
     },
     "send-to-self": {
-      note: "Now the repeated frame is coming back to you. Which door should take it?",
+      note: "Now the repeating frame is addressed to your own door. It needs kitchen's MAC address in To.",
       tried: "You sent to your own MAC address (your door's name).",
     },
   },
   debrief: {
     happened:
-      "The repeated frame went to a name no door had. Kitchen only takes frames with its own name as the destination, so it ignored them. With the right name in To, kitchen answered.",
+      "The repeating frame was addressed to `02:00:00:00:00:08`, a MAC address no door has. A network interface only takes frames whose destination address is its own MAC address, and drops the rest without answering. With kitchen's address in To, kitchen took the frame and answered.",
     terms: [
       {
         id: "destination-address",
         term: "destination address",
-        meaning: "the to on a frame: the name of the door it's for",
+        meaning: "the To on a frame: the MAC address of the door it's for",
       },
     ],
   },
@@ -126,7 +137,7 @@ export const wrongName: RoomText = {
       q: "What are those marks at kitchen's door?",
       a: "Messages that got there and went no further. Kitchen decided they weren't meant for it.",
     },
-    { q: "Is kitchen ignoring us?", a: "A door only takes what has its own name on it." },
+    { q: "Is kitchen ignoring us?", a: "Only those frames. A door only takes frames that have its own name in To." },
     {
       q: "Why does kitchen talk to everyone?",
       a: "That one is written to everyone. All doors listen to that name.",
@@ -143,7 +154,8 @@ export const wrongName: RoomText = {
 
 export const whoAreYou: RoomText = {
   title: "Who Are You?",
-  mission: "Your room has a second door now, to a machine you can't enter. Get it to answer you.",
+  mission:
+    "Your machine has a second door now, eth1, leading to library, a machine you can't enter. Find out library's MAC address and get it to answer you.",
   access: { library: "Sealed. You can't go in, but anything you send can." },
   notes: ["Found a room I couldn't get into. Didn't know its name. So I called out to everyone."],
   hints: [
@@ -162,21 +174,21 @@ export const whoAreYou: RoomText = {
   ],
   detectors: {
     guessing: {
-      note: "Guessing names could take forever. Is there a name that everyone listens to?",
+      note: "Guessing names could take forever. One address reaches every door at once: `ff:ff:ff:ff:ff:ff`.",
       tried: "You guessed names that no door has.",
     },
     "wrong-door": {
-      note: "Kitchen answered. But the sealed room is behind your other door.",
+      note: "Kitchen answered, because eth0 leads to kitchen. Library is behind your other door, eth1.",
       tried: "You sent out of eth0, toward kitchen, but library is behind eth1.",
     },
     "stopped-at-hello": {
-      note: "Library answered you. Who was that answer from?",
+      note: "Library answered. The From on its answer is library's MAC address: send your next frame to that.",
       tried: "Library told you who it was, and you waited a while before speaking to it by name.",
     },
   },
   debrief: {
     happened:
-      "You didn't know library's MAC address, so you called to everyone with the broadcast address. Library answered, and every answer carries the MAC address of the door that sent it: its source. Then you could write to library directly.",
+      "You didn't know library's MAC address, so you called to everyone with the broadcast address. Library answered, and every frame carries the MAC address of the door that sent it: its source address. Then you could write to library directly. Real machines find each other this way all the time.",
     terms: [
       { id: "broadcast", term: "broadcast", meaning: "a frame for everyone, sent to ff:ff:ff:ff:ff:ff" },
       { id: "source-address", term: "source address", meaning: "the from on a frame: who sent it" },
@@ -192,8 +204,8 @@ export const whoAreYou: RoomText = {
       a: "The MAC address of the door that sent it. Every answer carries the address of whoever answered.",
     },
     {
-      q: "Why won't library give me the key?",
-      a: "It told you its name. Try writing to it by name.",
+      q: "Library answered. Why isn't that enough?",
+      a: "It only answered a call to everyone. Now write to it by name, using the From on its answer.",
       after: "broadcast-sent",
     },
   ],
@@ -207,11 +219,12 @@ export const whoAreYou: RoomText = {
 
 export const lightsOut: RoomText = {
   title: "A Broken Switch",
-  mission: "Your door has gone dark, and its switch is broken. You'll need the terminal.",
+  mission:
+    "Your door eth0 is down and its switch is broken, so kitchen's messages can't get through. Use the terminal to get them through again.",
   notes: [],
   hints: [
     { text: "The switch is broken. Open the terminal: press ` (the key above Tab)." },
-    { text: "In the terminal, ask the machine about its doors." },
+    { text: "In the terminal, ask the machine to list its doors (its interfaces) and whether each one is on." },
     { text: "`ip link` lists every door and whether it's switched on.", codex: "console" },
     { text: "Look for your door's state in the list, then tell the machine to switch that door on." },
     {
@@ -220,11 +233,11 @@ export const lightsOut: RoomText = {
   ],
   detectors: {
     "wrong-door-name": {
-      note: "Doors have names. Which name does yours have? Ask the machine for its doors.",
+      note: "This machine has no door by that name. Type `ip link` to see the names of its doors.",
       tried: "You named a door this machine doesn't have.",
     },
     "down-not-up": {
-      note: "It was already off. Which word switches it on?",
+      note: "`down` switches a door off, and this one was already off. You need the opposite word.",
       tried: "You told the door to switch off, but it was already off.",
     },
     "keeps-clicking": {
@@ -234,7 +247,7 @@ export const lightsOut: RoomText = {
   },
   debrief: {
     happened:
-      "Your door was switched off and its switch was broken. You asked the machine about its doors with `ip link`, saw `state DOWN`, and switched it on with `ip link set eth0 up`. It's the same thing the switch used to do.",
+      "Your door was switched off and its switch was broken. You listed the machine's interfaces with `ip link`, saw `state DOWN`, and switched eth0 on with `ip link set eth0 up`. That's the same command the switch used to run, and it's how network engineers do it on real Linux machines.",
     terms: [],
   },
   memories: [
@@ -255,7 +268,10 @@ export const lightsOut: RoomText = {
       q: "What is a terminal?",
       a: "A text window for giving a machine commands. You type a command and press Enter; the machine runs it and prints the result. Every Linux computer has one, and network engineers use it every day.",
     },
-    { q: "What does state DOWN mean?", a: "Switched off. You knew that already, when you could still use the switch." },
+    {
+      q: "What does state DOWN mean?",
+      a: "The door is switched off, so its link carries nothing. It's the same as the switch on the plate being off.",
+    },
   ],
   building: {
     id: "F2-BLD-04",
@@ -282,11 +298,12 @@ export const lightsOut: RoomText = {
 
 export const silentLine: RoomText = {
   title: "Nobody Answers",
-  mission: "A machine behind your second door keeps calling, and nobody ever answers it. Answer it.",
+  mission:
+    "Cellar, a machine behind your second door, keeps calling out, and nobody ever answers. Get a message through to cellar so it answers you.",
   access: { cellar: "Sealed. You can't go in, but anything you send can." },
   notes: [],
   hints: [
-    { text: "Three things stand between you and cellar. Start with your doors." },
+    { text: "Three things stand between you and cellar. Start with your doors: look at eth1's light." },
     { text: "One of your doors is off, and its switch is broken. Use the terminal." },
     {
       text: "Once the door works, you need cellar's name: from a broadcast, or from the from on something cellar sends.",
@@ -299,23 +316,23 @@ export const silentLine: RoomText = {
   ],
   detectors: {
     "wrong-door-name": {
-      note: "Doors have names. Which name does yours have? Ask the machine for its doors.",
+      note: "This machine has no door by that name. Type `ip link` to see the names of its doors.",
       tried: "You named a door this machine doesn't have.",
     },
     guessing: {
-      note: "Guessing names could take forever. Is there a name that everyone listens to?",
+      note: "Guessing names could take forever. Send a broadcast instead, or read the From on a frame cellar sends.",
       tried: "You guessed names that no door has.",
     },
     "wrong-door": {
-      note: "Kitchen answered. But cellar is behind your other door.",
+      note: "Kitchen answered, because eth0 leads to kitchen. Cellar is behind your other door, eth1.",
       tried: "You called out of eth0, toward kitchen, but cellar is behind eth1.",
     },
     "send-to-self": {
-      note: "Now the repeated frame is coming back to you. Which door should take it?",
+      note: "Now the repeating frame is addressed to your own door. It needs cellar's MAC address in To.",
       tried: "You sent to your own MAC address (your door's name).",
     },
     "link-blame": {
-      note: "Your door is on and the corridor works. What address should the frame use?",
+      note: "Your door is on and the link works. What's left is the address on your frame: it needs cellar's MAC address.",
       tried: "You switched a working door off and on again.",
     },
     "fix-moths-calls": {
@@ -325,7 +342,7 @@ export const silentLine: RoomText = {
   },
   debrief: {
     happened:
-      "Three things kept cellar unheard: your door was off, the frame had no destination, and you didn't know cellar's name. You switched the door on with a terminal command, learned cellar's name from what it sent, and used that name in To. A link, a frame, two names: that's everything the old halls were built on.",
+      "Three things kept cellar unheard: your door was off, the frame had no destination, and you didn't know cellar's name. You switched the door on with a terminal command, learned cellar's name from what it sent, and used that name in To. A working link, frames, and a MAC address for each interface: every wired network is built on those.",
     terms: [],
   },
   voice: [
@@ -338,7 +355,7 @@ export const silentLine: RoomText = {
 };
 
 export const floor2: FloorText = {
-  name: "Names on the Wire",
+  name: "Frames and MAC Addresses",
   memory: [
     {
       id: "F2-FM-01",
@@ -353,7 +370,7 @@ export const floor2: FloorText = {
     {
       id: "F2-FM-03",
       title: "Ride-along",
-      text: "A door reads the to. Its own name, or everyone's: it takes it. Anything else: it lets it fall.",
+      text: "A door reads the To. If it's the door's own name, or the name for everyone, it takes the frame in. Anything else, it drops.",
       shown:
         "a frame built in the Frame builder rides through eth0 to kitchen's door, which reads the To address and lets it in; a broadcast reaches two doors and both take it in; a third frame, for someone else, stops at a door and fades",
     },

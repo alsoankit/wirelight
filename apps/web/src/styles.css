@@ -358,6 +358,13 @@ html:has(.landing) {
   color: #e9dcc5;
 }
 
+/* What the region teaches (0128), under its name. */
+.loading-topic {
+  margin: -12px 0 18px;
+  color: #b9ad9c;
+  font: 14px / 1.3 var(--sans);
+}
+
 .loading-bar {
   height: 4px;
   border-radius: 2px;

@@ -598,6 +598,13 @@ section.map.memory::after {
   color: #f3e9dc;
 }
 
+/* What the region teaches (0128), small and plain under its name. */
+.world-region-topic {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #c4b8a6;
+}
+
 .world-region[data-state="fog"] .world-region-name,
 .world-region[data-state="mist"] .world-region-name {
   color: #b3a897;

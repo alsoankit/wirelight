@@ -33,12 +33,12 @@ export const region4Arrival: { speaker: string; lines: Line[] } = {
     {
       id: "R4-ARRIVE-02",
       speaker: "You",
-      text: "This is where the streets meet: the crossings. Or where they used to.",
+      text: "This is where the streets meet. The machines here stand on two streets at once and pass messages between them. Or they used to.",
     },
     {
       id: "R4-ARRIVE-03",
       speaker: "You",
-      text: "If streets can't reach each other, the whole palace is just islands. Let's open the way.",
+      text: "If streets can't reach each other, each one is an island. I want messages to get across.",
     },
   ],
 };
@@ -59,7 +59,7 @@ export const firstReleaseEnding: {
     },
   ],
   card: {
-    text: "You've restored the first four regions of the palace.",
+    text: "You've restored the first four regions of the palace: cables, switches, IP addresses and routing.",
     continue: "Continue exploring",
     next: "What's next",
   },

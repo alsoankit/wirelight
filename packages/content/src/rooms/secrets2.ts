@@ -11,15 +11,17 @@ export const peacekeeper: RoomText = {
     "The halls are joined by two cables again, and the copies are back. Make the halls handle the second cable safely, then unplug the one in use and let the spare take over.",
   access: { pantry: SEALED, attic: SEALED, forge: SEALED, chapel: SEALED, laundry: SEALED },
   notes: [
-    "Found it in the old plans. The halls can keep the peace themselves: they talk, and hold one door shut so nothing goes round. The switch for it is on each hall's br0, and it's off.",
+    "Found it in the old plans: the spanning tree. The halls talk to each other and hold one door shut, so frames can't go round in a circle. Each hall turns it on for its br0, and right now it's off in both.",
   ],
   hints: [
-    { text: "Each hall has a peacekeeper, switched off. It lives on br0, the part of the hall that joins its doors." },
+    {
+      text: "Each hall has a peacekeeper (the spanning tree), and it's off. It's a setting on br0, the bridge inside the hall that joins its doors.",
+    },
     {
       text: "Switch it on in both halls with `ip link set br0 type bridge stp_state 1`, then ask a hall about its doors: `bridge link show`.",
     },
     {
-      text: "Halls that keep the peace hold one door of every circle shut, and open it only when the other way breaks.",
+      text: "With the spanning tree on, switches hold one door of every circle shut, and open it only when the other path breaks.",
       codex: "peacekeeper",
     },
     {
@@ -31,15 +33,15 @@ export const peacekeeper: RoomText = {
   ],
   detectors: {
     "cut-before-peace": {
-      note: "That stops the storm, but only by taking a cable away. Can the halls keep both, and stay calm?",
+      note: "That stops the storm, but only by taking a cable away. Turn the spanning tree on in both halls first, so they can keep both cables safely.",
       tried: "You pulled a span before the halls were keeping the peace.",
     },
     "peace-in-one-hall": {
-      note: "One hall is keeping the peace on its own. Peace takes both: does the other hall know?",
+      note: "Only one hall has the spanning tree on. Both halls need it, so they can talk to each other and agree which door to hold shut.",
       tried: "You switched the peacekeeper on in one hall only.",
     },
     "cut-the-held-one": {
-      note: "That span's door was already held shut. Which span is carrying the frames?",
+      note: "That span's door was already blocking, so it carried nothing. Unplug the span that's carrying the frames.",
       tried: "You pulled the span the halls were holding shut, instead of the one in use.",
     },
   },

@@ -15,7 +15,7 @@ export const REGION_4_COMMANDS: Record<string, CommandMemory> = {
       { word: "route", role: "about what", meaning: "the routing board: which way to send" },
       { word: "add", role: "do what", meaning: "add a line" },
       { word: "default", role: "which one", meaning: "for anywhere not listed" },
-      { word: "via 10.0.1.1", role: "how", meaning: "hand it to this router door" },
+      { word: "via 10.0.1.1", role: "how", meaning: "hand it to the router door at this address" },
     ],
     forms: [
       { line: "ip route", meaning: "show the board" },
@@ -103,7 +103,7 @@ export const REGION_4_COMMANDS: Record<string, CommandMemory> = {
       marks: [{ match: "net.ipv4.ip_forward = 0", meaning: "not allowed; after the change, net.ipv4.ip_forward = 1" }],
       dimmed: "",
     },
-    action: { say: "Ask crossing.", type: "sysctl net.ipv4.ip_forward" },
+    action: { say: "Read this setting on crossing.", type: "sysctl net.ipv4.ip_forward" },
   },
   "CMD-11": {
     id: "CMD-11",
@@ -119,8 +119,8 @@ export const REGION_4_COMMANDS: Record<string, CommandMemory> = {
     ],
     forms: [
       { line: "ping -t 64 …", meaning: "the usual countdown" },
-      { line: "ping -t 1 …", meaning: "dies at the first crossing" },
-      { line: "ping -t 2 …", meaning: "dies at the second" },
+      { line: "ping -t 1 …", meaning: "stops at the first router" },
+      { line: "ping -t 2 …", meaning: "stops at the second router" },
     ],
     output: {
       text: [

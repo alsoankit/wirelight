@@ -18,12 +18,12 @@ Four regions, ten floors (counting the Prologue) and 40 rooms, plus a secret roo
 
 | Region | Part of the palace | Floors | What you learn |
 |---|---|---|---|
-| **1 · The Overgrown Halls** | the outer gardens | Prologue, The Wire, Names on the Wire | cables, links, interfaces, MAC addresses, broadcast |
-| **2 · The Sorting Works** | the works inside the walls | The Switch, Memory and Loops | switches, the MAC table, loops and spanning tree |
-| **3 · The Lantern Town** | the town on the terraces | Addresses, Envelopes, Neighbourhoods | IP addresses, ping, packets, ARP, subnets, DHCP |
-| **4 · The Cathedral of Crossings** | the cathedral on the high terrace | Crossings, The Journey | routers, routes, the return path, TTL, routing loops |
+| **1 · The Overgrown Halls** | the outer gardens | Prologue, Cables and Links, Frames and MAC Addresses | cables, links, interfaces, MAC addresses, broadcast |
+| **2 · The Sorting Works** | the works inside the walls | Switches, Switch Tables and Loops | switches, the MAC table, loops and spanning tree |
+| **3 · The Lantern Town** | the town on the terraces | IP Addresses, Packets and ARP, Subnets and DHCP | IP addresses, ping, packets, ARP, subnets, DHCP |
+| **4 · The Cathedral of Crossings** | the cathedral on the high terrace | Routers, Routing Across Networks | routers, routes, the return path, TTL, routing loops |
 
-More regions are planned, climbing on to the top of the hill: ports and connections, names (DNS), the web, and the edges of the network.
+More regions are planned, climbing on to the top of the hill: many routers and finding the path (`traceroute`), ports and connections, names (DNS) and the web, and the edges of the network.
 
 **How a room plays:** read the mission (what's wrong, and what to achieve); look around; act by clicking (every click runs a real command, shown in the terminal) or by typing in the terminal once it's online; watch the messages move; and when the room works again, the debrief says what happened and names the new words. Each room has a keeper, the machine that handles its messages: ask it, and its log tells you exactly what it did. A machine's role (switch, router, DHCP server) joins its name once a room has taught it.
 
@@ -48,7 +48,7 @@ Only assets that allow commercial use and redistribution are used: CC0, CC BY, M
 
 - **3D art:** Quaternius' modular ruins, nature, village, props and turret packs, and SigilsVault's Modular Cathedral Kit (all CC0), restyled per region; statues and decoration from museum and artist scans (CC0 and CC BY).
 - **Sound:** Kenney's audio packs (CC0); other effects and ambience synthesised for Wirelight with FFmpeg.
-- **Music:** calm, human-made tracks from OpenGameArt (CC0 and CC BY), being added now.
+- **Music:** ethereal ambient tracks by Tsorthan Grove (CC BY 4.0) and an ending by Eliot Corley (CC BY 3.0), from OpenGameArt.
 - **Fonts:** Inter, JetBrains Mono and Cinzel (SIL Open Font License).
 - **Libraries:** React, three.js, React Three Fiber, drei, Zustand, xterm.js, Comlink, Vite, Biome, Vitest, Playwright and others, each under its own MIT or Apache-2.0 licence.
 
@@ -80,7 +80,7 @@ http://localhost:5173/play?room=prologue&autoplay=1&until=game&speed=1&pace=1
 **Play-through checks:** `node tools/shots/play/region1.mjs http://localhost:5173/play` (and `region2` to `region4`) plays every room of a region in Chrome, as a player would, and reports each win. Set `CHROME` to a Chrome binary to play on the GPU; without it, Playwright's own Chromium plays, drawing in software.
 
 ## Status
-All 40 first-release rooms and the four secret rooms are playable from start to finish, with baked light, ambience and sound effects. Next: music, voices, and playtests with real beginners.
+All 40 first-release rooms and the four secret rooms are playable from start to finish, with baked light, music, ambience and sound effects. Next: voices, and playtests with real beginners.
 
 ## How it was made
 Wirelight is made by **Ankit Kumar**, who designed the game, wrote its design and directs every decision.

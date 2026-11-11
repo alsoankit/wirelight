@@ -3,6 +3,8 @@
  * Plain modern voice (D2). The tour explains the game, never a networking idea (P-9).
  */
 
+import { regions } from "./floors";
+
 /** The landing page (ONB-01..04, 0010, 0044). It says plainly that Wirelight teaches networking. */
 export const landing = {
   name: "Wirelight",
@@ -27,7 +29,7 @@ export const landing = {
     steps: [
       {
         title: "A network in ruins",
-        body: "You're a repair robot, waking up inside a ruined palace, the Palace of a Thousand Doors. It is really a computer network: rooms are machines, doors are where cables plug in, and corridors are the cables.",
+        body: "You're a repair robot, waking up inside a ruined palace, the Palace of a Thousand Doors. It is really a computer network: rooms are machines, doors are their network connections where cables plug in, and corridors are the cables.",
       },
       {
         title: "Watch the messages",
@@ -44,15 +46,18 @@ export const landing = {
     intro: "Each part of the palace teaches one part of how networks work, from the very beginning.",
     regions: [
       {
-        name: "The Overgrown Halls",
-        body: "Machines, cables and messages. How a message finds the right machine on a wire.",
+        name: regions[1]?.name ?? "",
+        body: "Cables, network interfaces and MAC addresses: how machines are joined, and how a message finds the right one.",
       },
-      { name: "The Sorting Works", body: "Switches: how many machines share one network, and what goes wrong." },
-      { name: "The Lantern Town", body: "IP addresses, ping, and how machines get their addresses." },
-      { name: "The Cathedral of Crossings", body: "Routers: how messages cross from one network to another." },
+      { name: regions[2]?.name ?? "", body: "Switches: how many machines share one network, and what goes wrong." },
+      {
+        name: regions[3]?.name ?? "",
+        body: "IP addresses, subnets and DHCP: how machines find each other by address, and how they get one.",
+      },
+      { name: regions[4]?.name ?? "", body: "Routers and routing: how messages cross from one network to another." },
       {
         name: "And further in",
-        body: "Ports, connections, names and the web, and the edges of the network. More floors are on the way.",
+        body: "Many routers and finding the path, ports and connections, names and the web, and the edges of the network. More floors are on the way.",
       },
     ],
   },
@@ -90,8 +95,8 @@ export const tour = {
       target: "plate",
     },
     {
-      title: "Memory fragments",
-      body: "Most of your memory went when you shut down. This room, the observatory, is where you woke up. When you're stuck, recall a memory fragment: each one is a hint.",
+      title: "Hints",
+      body: "When you're stuck, open Hints. Most of your memory went when you shut down, and it comes back in fragments: each one is a hint about what to do next. The last one gives the full answer.",
       target: "notes",
     },
     {
